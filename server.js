@@ -31,7 +31,8 @@ if (fs.existsSync(envPath)) {
 // משתני סביבה
 // ================================
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const OPENAI_API_KEY =
+  process.env.OPENAI_API_KEY;
 
 const WHATSAPP_ACCESS_TOKEN =
   process.env.WHATSAPP_ACCESS_TOKEN;
@@ -49,11 +50,16 @@ const WHATSAPP_PHONE_NUMBER_ID =
 const server = http.createServer(async (req, res) => {
 
   // CORS
-  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Access-Control-Allow-Origin",
+    "*"
+  );
+
   res.setHeader(
     "Access-Control-Allow-Methods",
     "GET, POST, OPTIONS"
   );
+
   res.setHeader(
     "Access-Control-Allow-Headers",
     "Content-Type"
@@ -93,6 +99,55 @@ const server = http.createServer(async (req, res) => {
   }
 
   // ================================
+  // BRAIN TEST PAGE
+  // ================================
+
+  if (
+    url.pathname === "/brain-test" &&
+    req.method === "GET"
+  ) {
+    const filePath =
+      path.join(
+        __dirname,
+        "brain-test.html"
+      );
+
+    fs.readFile(
+      filePath,
+      "utf8",
+      (error, html) => {
+
+        if (error) {
+          console.error(
+            "BRAIN TEST PAGE ERROR:",
+            error
+          );
+
+          res.writeHead(500, {
+            "Content-Type":
+              "text/plain; charset=utf-8"
+          });
+
+          res.end(
+            "Brain Test page not found"
+          );
+
+          return;
+        }
+
+        res.writeHead(200, {
+          "Content-Type":
+            "text/html; charset=utf-8"
+        });
+
+        res.end(html);
+      }
+    );
+
+    return;
+  }
+
+  // ================================
   // WHATSAPP WEBHOOK - VERIFY
   // ================================
 
@@ -104,10 +159,14 @@ const server = http.createServer(async (req, res) => {
       url.searchParams.get("hub.mode");
 
     const token =
-      url.searchParams.get("hub.verify_token");
+      url.searchParams.get(
+        "hub.verify_token"
+      );
 
     const challenge =
-      url.searchParams.get("hub.challenge");
+      url.searchParams.get(
+        "hub.challenge"
+      );
 
     if (
       mode === "subscribe" &&
@@ -141,13 +200,18 @@ const server = http.createServer(async (req, res) => {
     });
 
     req.on("end", async () => {
+
       try {
         const data =
           JSON.parse(body || "{}");
 
         console.log(
           "WHATSAPP WEBHOOK:",
-          JSON.stringify(data, null, 2)
+          JSON.stringify(
+            data,
+            null,
+            2
+          )
         );
 
         const message =
@@ -167,11 +231,21 @@ const server = http.createServer(async (req, res) => {
           return;
         }
 
-        const from = message.from;
-        const text = message.text?.body || "";
+        const from =
+          message.from;
 
-        console.log("לקוח:", from);
-        console.log("הודעה:", text);
+        const text =
+          message.text?.body || "";
+
+        console.log(
+          "לקוח:",
+          from
+        );
+
+        console.log(
+          "הודעה:",
+          text
+        );
 
         // ================================
         // CASA VERONA BRAIN
@@ -219,6 +293,7 @@ const server = http.createServer(async (req, res) => {
         res.end("EVENT_RECEIVED");
 
       } catch (error) {
+
         console.error(
           "WHATSAPP WEBHOOK ERROR:",
           error
@@ -247,6 +322,7 @@ const server = http.createServer(async (req, res) => {
     });
 
     req.on("end", async () => {
+
       try {
         const data =
           JSON.parse(body || "{}");
@@ -255,6 +331,7 @@ const server = http.createServer(async (req, res) => {
           data.message || "";
 
         if (!message.trim()) {
+
           res.writeHead(400, {
             "Content-Type":
               "application/json; charset=utf-8"
@@ -262,7 +339,8 @@ const server = http.createServer(async (req, res) => {
 
           res.end(JSON.stringify({
             success: false,
-            error: "חסרה הודעת לקוח"
+            error:
+              "חסרה הודעת לקוח"
           }));
 
           return;
@@ -282,6 +360,7 @@ const server = http.createServer(async (req, res) => {
         }));
 
       } catch (error) {
+
         console.error(
           "BRAIN ERROR:",
           error
@@ -294,7 +373,8 @@ const server = http.createServer(async (req, res) => {
 
         res.end(JSON.stringify({
           success: false,
-          error: "Brain analysis failed"
+          error:
+            "Brain analysis failed"
         }));
       }
     });
@@ -311,7 +391,9 @@ const server = http.createServer(async (req, res) => {
     req.method === "GET"
   ) {
     const message =
-      url.searchParams.get("message") || "";
+      url.searchParams.get(
+        "message"
+      ) || "";
 
     await runAI(
       message,
@@ -337,6 +419,7 @@ const server = http.createServer(async (req, res) => {
     });
 
     req.on("end", async () => {
+
       try {
         const data =
           JSON.parse(body || "{}");
@@ -345,23 +428,32 @@ const server = http.createServer(async (req, res) => {
           data.message || "";
 
         const businessData = {
+
           leads:
-            Array.isArray(data.leads)
+            Array.isArray(
+              data.leads
+            )
               ? data.leads
               : [],
 
           products:
-            Array.isArray(data.products)
+            Array.isArray(
+              data.products
+            )
               ? data.products
               : [],
 
           sales:
-            Array.isArray(data.sales)
+            Array.isArray(
+              data.sales
+            )
               ? data.sales
               : [],
 
           orders:
-            Array.isArray(data.orders)
+            Array.isArray(
+              data.orders
+            )
               ? data.orders
               : []
         };
@@ -373,6 +465,7 @@ const server = http.createServer(async (req, res) => {
         );
 
       } catch (error) {
+
         console.error(
           "POST ERROR:",
           error
@@ -453,7 +546,8 @@ ${message}
 
 intent:
 מה הלקוח רוצה כרגע.
-לדוגמה:
+
+אפשרויות לדוגמה:
 PRICE
 PRODUCT_INFO
 DELIVERY
@@ -492,6 +586,7 @@ buying_signal:
 
 objection:
 ההתנגדות המרכזית של הלקוח.
+
 לדוגמה:
 PRICE
 TRUST
@@ -551,6 +646,7 @@ summary:
     await response.json();
 
   if (!response.ok) {
+
     console.error(
       "BRAIN OPENAI ERROR:",
       data
@@ -569,17 +665,29 @@ summary:
     !text &&
     Array.isArray(data.output)
   ) {
-    for (const item of data.output) {
-      if (!Array.isArray(item.content))
-        continue;
 
-      for (const content of item.content) {
+    for (const item of data.output) {
+
+      if (
+        !Array.isArray(
+          item.content
+        )
+      ) {
+        continue;
+      }
+
+      for (
+        const content
+        of item.content
+      ) {
+
         if (
           content.type ===
             "output_text" &&
           content.text
         ) {
-          text += content.text;
+          text +=
+            content.text;
         }
       }
     }
@@ -587,14 +695,24 @@ summary:
 
   const cleaned =
     text
-      .replace(/```json/gi, "")
-      .replace(/```/g, "")
+      .replace(
+        /```json/gi,
+        ""
+      )
+      .replace(
+        /```/g,
+        ""
+      )
       .trim();
 
   try {
-    return JSON.parse(cleaned);
+
+    return JSON.parse(
+      cleaned
+    );
 
   } catch (error) {
+
     console.error(
       "BRAIN JSON ERROR:",
       cleaned
@@ -632,7 +750,6 @@ async function getAIAnswer(
   }
 
   const input = `
-
 אתה מנוע המכירות וה-AI של Casa Verona.
 
 Casa Verona היא חברת ריהוט פרימיום.
@@ -700,6 +817,7 @@ ${message}
     await response.json();
 
   if (!response.ok) {
+
     console.error(
       "OPENAI ERROR:",
       data
@@ -718,17 +836,32 @@ ${message}
     !answer &&
     Array.isArray(data.output)
   ) {
-    for (const item of data.output) {
-      if (!Array.isArray(item.content))
-        continue;
 
-      for (const content of item.content) {
+    for (
+      const item
+      of data.output
+    ) {
+
+      if (
+        !Array.isArray(
+          item.content
+        )
+      ) {
+        continue;
+      }
+
+      for (
+        const content
+        of item.content
+      ) {
+
         if (
           content.type ===
             "output_text" &&
           content.text
         ) {
-          answer += content.text;
+          answer +=
+            content.text;
         }
       }
     }
@@ -751,6 +884,7 @@ async function runAI(
 ) {
 
   try {
+
     const answer =
       await getAIAnswer(
         message,
@@ -768,6 +902,7 @@ async function runAI(
     }));
 
   } catch (error) {
+
     console.error(
       "AI SERVER ERROR:",
       error
@@ -799,6 +934,7 @@ async function sendWhatsAppMessage(
     !WHATSAPP_ACCESS_TOKEN ||
     !WHATSAPP_PHONE_NUMBER_ID
   ) {
+
     throw new Error(
       "WhatsApp environment variables חסרים"
     );
@@ -837,6 +973,7 @@ async function sendWhatsAppMessage(
     await response.json();
 
   if (!response.ok) {
+
     console.error(
       "WHATSAPP SEND ERROR:",
       data
@@ -864,6 +1001,7 @@ const PORT =
 server.listen(
   PORT,
   () => {
+
     console.log(
       `Casa Verona AI Engine running on port ${PORT}`
     );
