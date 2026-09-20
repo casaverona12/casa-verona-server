@@ -37,7 +37,7 @@ const WHATSAPP_ACCESS_TOKEN =
   process.env.WHATSAPP_ACCESS_TOKEN;
 
 const WHATSAPP_VERIFY_TOKEN =
-  process.env.WHATSAPP_VERIFY_TOKEN || "casa_verona_2026";
+  process.env.WHATSAPP_VERIFY_TOKEN;
 
 const WHATSAPP_PHONE_NUMBER_ID =
   process.env.WHATSAPP_PHONE_NUMBER_ID;
@@ -59,7 +59,6 @@ const server = http.createServer(async (req, res) => {
     "Content-Type"
   );
 
-  // OPTIONS
   if (req.method === "OPTIONS") {
     res.writeHead(204);
     res.end();
@@ -72,126 +71,6 @@ const server = http.createServer(async (req, res) => {
   );
 
   // ================================
-  // PRIVACY POLICY
-  // ================================
-
-  if (
-    url.pathname === "/privacy" &&
-    req.method === "GET"
-  ) {
-
-    res.writeHead(200, {
-      "Content-Type": "text/html; charset=utf-8"
-    });
-
-    res.end(`
-<!DOCTYPE html>
-<html lang="he" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>מדיניות פרטיות | Casa Verona</title>
-</head>
-
-<body style="
-  font-family: Arial, sans-serif;
-  max-width: 850px;
-  margin: 40px auto;
-  padding: 20px;
-  line-height: 1.8;
-  color: #222;
-">
-
-  <h1>מדיניות פרטיות – Casa Verona</h1>
-
-  <p>
-    Casa Verona מכבדת את פרטיות המשתמשים והלקוחות שלה
-    ופועלת לשמירה על המידע הנמסר לה במסגרת השימוש בשירותיה.
-  </p>
-
-  <h2>מידע שאנו עשויים לקבל</h2>
-
-  <p>
-    כאשר לקוח יוצר איתנו קשר, אנו עשויים לקבל מידע כגון שם,
-    מספר טלפון, תוכן הודעות ופרטים נוספים שהלקוח בוחר למסור לנו.
-  </p>
-
-  <h2>שימוש במידע</h2>
-
-  <p>
-    המידע עשוי לשמש לצורך מתן שירות, מענה לפניות,
-    טיפול בהזמנות, התאמת מוצרים, יצירת קשר עם הלקוח
-    ושיפור השירות וחוויית הלקוח.
-  </p>
-
-  <h2>WhatsApp</h2>
-
-  <p>
-    כאשר לקוחות מתקשרים עם Casa Verona באמצעות WhatsApp,
-    מידע הקשור לשיחה עשוי להיות מעובד לצורך מתן מענה,
-    שירות וטיפול בפניית הלקוח.
-  </p>
-
-  <h2>מערכות אוטומטיות</h2>
-
-  <p>
-    Casa Verona עשויה להשתמש במערכות טכנולוגיות ואוטומטיות
-    לצורך ניהול פניות, שיפור זמני המענה ומתן שירות ללקוחות.
-  </p>
-
-  <h2>שמירת מידע</h2>
-
-  <p>
-    אנו שומרים מידע רק ככל שנדרש לצורך פעילות העסק,
-    מתן השירות, טיפול בפניות ובהזמנות ועמידה בדרישות הדין החלות.
-  </p>
-
-  <h2>שיתוף מידע</h2>
-
-  <p>
-    Casa Verona אינה מוכרת מידע אישי של לקוחות.
-    מידע עשוי להיות מעובד באמצעות ספקי שירות וטכנולוגיה
-    הנדרשים להפעלת השירותים והמערכות של העסק.
-  </p>
-
-  <h2>אבטחת מידע</h2>
-
-  <p>
-    אנו נוקטים באמצעים סבירים לצורך הגנה על המידע
-    הנמצא במערכות המשמשות את Casa Verona.
-  </p>
-
-  <h2>בקשות בנוגע למידע</h2>
-
-  <p>
-    ניתן לפנות אל Casa Verona בנוגע לשאלות או בקשות
-    הקשורות למידע אישי באמצעות ערוצי הקשר הרשמיים של העסק.
-  </p>
-
-  <h2>שינויים במדיניות</h2>
-
-  <p>
-    Casa Verona רשאית לעדכן מדיניות פרטיות זו מעת לעת.
-    הגרסה המעודכנת תפורסם בעמוד זה.
-  </p>
-
-  <h2>יצירת קשר</h2>
-
-  <p>
-    לשאלות בנוגע למדיניות פרטיות זו ניתן ליצור קשר
-    עם Casa Verona באמצעות ערוצי הקשר הרשמיים של העסק.
-  </p>
-
-  <p><strong>עודכן לאחרונה: ספטמבר 2026</strong></p>
-
-</body>
-</html>
-    `);
-
-    return;
-  }
-
-  // ================================
   // בדיקת שרת
   // ================================
 
@@ -199,7 +78,6 @@ const server = http.createServer(async (req, res) => {
     url.pathname === "/" &&
     req.method === "GET"
   ) {
-
     res.writeHead(200, {
       "Content-Type":
         "application/json; charset=utf-8"
@@ -208,7 +86,7 @@ const server = http.createServer(async (req, res) => {
     res.end(JSON.stringify({
       success: true,
       message:
-        "Casa Verona AI Engine + WhatsApp עובד!"
+        "Casa Verona AI Engine + Brain + WhatsApp עובד!"
     }));
 
     return;
@@ -222,7 +100,6 @@ const server = http.createServer(async (req, res) => {
     url.pathname === "/webhook" &&
     req.method === "GET"
   ) {
-
     const mode =
       url.searchParams.get("hub.mode");
 
@@ -232,32 +109,20 @@ const server = http.createServer(async (req, res) => {
     const challenge =
       url.searchParams.get("hub.challenge");
 
-    console.log("WEBHOOK VERIFY:", {
-      mode,
-      tokenReceived: !!token,
-      challengeReceived: !!challenge
-    });
-
     if (
       mode === "subscribe" &&
       token === WHATSAPP_VERIFY_TOKEN
     ) {
-
       res.writeHead(200, {
         "Content-Type": "text/plain"
       });
 
       res.end(challenge);
-
       return;
     }
 
-    res.writeHead(403, {
-      "Content-Type": "text/plain"
-    });
-
+    res.writeHead(403);
     res.end("Forbidden");
-
     return;
   }
 
@@ -269,7 +134,6 @@ const server = http.createServer(async (req, res) => {
     url.pathname === "/webhook" &&
     req.method === "POST"
   ) {
-
     let body = "";
 
     req.on("data", chunk => {
@@ -277,9 +141,7 @@ const server = http.createServer(async (req, res) => {
     });
 
     req.on("end", async () => {
-
       try {
-
         const data =
           JSON.parse(body || "{}");
 
@@ -294,40 +156,41 @@ const server = http.createServer(async (req, res) => {
             ?.value?.messages?.[0];
 
         if (!message) {
-
           res.writeHead(200);
           res.end("EVENT_RECEIVED");
-
           return;
         }
 
-        // רק הודעות טקסט
         if (message.type !== "text") {
-
           res.writeHead(200);
           res.end("EVENT_RECEIVED");
-
           return;
         }
 
-        const from =
-          message.from;
+        const from = message.from;
+        const text = message.text?.body || "";
 
-        const text =
-          message.text?.body || "";
+        console.log("לקוח:", from);
+        console.log("הודעה:", text);
+
+        // ================================
+        // CASA VERONA BRAIN
+        // ================================
+
+        const leadAnalysis =
+          await analyzeLead(text);
 
         console.log(
-          "לקוח:",
-          from
-        );
-
-        console.log(
-          "הודעה:",
-          text
+          "CASA VERONA BRAIN:",
+          JSON.stringify(
+            leadAnalysis,
+            null,
+            2
+          )
         );
 
         // ================================
-        // AI
+        // AI SALES AGENT
         // ================================
 
         const answer =
@@ -337,7 +200,9 @@ const server = http.createServer(async (req, res) => {
               leads: [],
               products: [],
               sales: [],
-              orders: []
+              orders: [],
+              currentLeadAnalysis:
+                leadAnalysis
             }
           );
 
@@ -354,7 +219,6 @@ const server = http.createServer(async (req, res) => {
         res.end("EVENT_RECEIVED");
 
       } catch (error) {
-
         console.error(
           "WHATSAPP WEBHOOK ERROR:",
           error
@@ -369,6 +233,76 @@ const server = http.createServer(async (req, res) => {
   }
 
   // ================================
+  // BRAIN - POST
+  // ================================
+
+  if (
+    url.pathname === "/brain" &&
+    req.method === "POST"
+  ) {
+    let body = "";
+
+    req.on("data", chunk => {
+      body += chunk;
+    });
+
+    req.on("end", async () => {
+      try {
+        const data =
+          JSON.parse(body || "{}");
+
+        const message =
+          data.message || "";
+
+        if (!message.trim()) {
+          res.writeHead(400, {
+            "Content-Type":
+              "application/json; charset=utf-8"
+          });
+
+          res.end(JSON.stringify({
+            success: false,
+            error: "חסרה הודעת לקוח"
+          }));
+
+          return;
+        }
+
+        const analysis =
+          await analyzeLead(message);
+
+        res.writeHead(200, {
+          "Content-Type":
+            "application/json; charset=utf-8"
+        });
+
+        res.end(JSON.stringify({
+          success: true,
+          analysis
+        }));
+
+      } catch (error) {
+        console.error(
+          "BRAIN ERROR:",
+          error
+        );
+
+        res.writeHead(500, {
+          "Content-Type":
+            "application/json; charset=utf-8"
+        });
+
+        res.end(JSON.stringify({
+          success: false,
+          error: "Brain analysis failed"
+        }));
+      }
+    });
+
+    return;
+  }
+
+  // ================================
   // AI - GET
   // ================================
 
@@ -376,7 +310,6 @@ const server = http.createServer(async (req, res) => {
     url.pathname === "/ai" &&
     req.method === "GET"
   ) {
-
     const message =
       url.searchParams.get("message") || "";
 
@@ -397,7 +330,6 @@ const server = http.createServer(async (req, res) => {
     url.pathname === "/ai" &&
     req.method === "POST"
   ) {
-
     let body = "";
 
     req.on("data", chunk => {
@@ -405,9 +337,7 @@ const server = http.createServer(async (req, res) => {
     });
 
     req.on("end", async () => {
-
       try {
-
         const data =
           JSON.parse(body || "{}");
 
@@ -443,7 +373,6 @@ const server = http.createServer(async (req, res) => {
         );
 
       } catch (error) {
-
         console.error(
           "POST ERROR:",
           error
@@ -481,6 +410,213 @@ const server = http.createServer(async (req, res) => {
 });
 
 // ================================
+// CASA VERONA BRAIN
+// ================================
+
+async function analyzeLead(message) {
+
+  if (!OPENAI_API_KEY) {
+    throw new Error(
+      "OPENAI_API_KEY חסר"
+    );
+  }
+
+  const input = `
+אתה Casa Verona Brain.
+
+אתה המוח שמנתח לידים עבור חברת
+Casa Verona - חברת ריהוט פרימיום.
+
+המטרה שלך היא להבין את מצב הלקוח
+ולעזור למערכת המכירות לדעת מה לעשות איתו.
+
+נתח את הודעת הלקוח והחזר JSON בלבד.
+
+הודעת הלקוח:
+${message}
+
+החזר בדיוק במבנה הבא:
+
+{
+  "intent": "",
+  "product": "",
+  "budget": null,
+  "temperature": "COLD",
+  "buying_signal": 0,
+  "objection": "",
+  "next_action": "",
+  "needs_human": false,
+  "summary": ""
+}
+
+כללים:
+
+intent:
+מה הלקוח רוצה כרגע.
+לדוגמה:
+PRICE
+PRODUCT_INFO
+DELIVERY
+CUSTOMIZATION
+ORDER
+PAYMENT
+AVAILABILITY
+GENERAL
+
+product:
+איזה מוצר או סוג ריהוט מעניין אותו.
+אם לא ידוע החזר "unknown".
+
+budget:
+רק אם הלקוח כתב תקציב מפורש.
+אחרת null.
+
+temperature:
+
+COLD =
+התעניינות כללית ללא סימן רכישה משמעותי.
+
+WARM =
+שואל על מחיר, מוצר, צבע, בד,
+מידות, התאמה אישית או משלוח.
+
+HOT =
+רוצה להזמין, לשלם, לסגור,
+לקבל פרטי תשלום או להתקדם לעסקה.
+
+buying_signal:
+מספר שלם בין 0 ל-100.
+
+0 = כמעט ללא כוונת רכישה.
+100 = מוכן מאוד להתקדם לעסקה.
+
+objection:
+ההתנגדות המרכזית של הלקוח.
+לדוגמה:
+PRICE
+TRUST
+DELIVERY
+SIZE
+QUALITY
+PAYMENT
+TIME
+UNCERTAINTY
+
+אם אין התנגדות ברורה החזר "".
+
+next_action:
+הפעולה האחת הטובה ביותר
+שאיש המכירות או ה-AI צריכים לבצע עכשיו.
+
+needs_human:
+true רק אם לדעתך איש מכירות אנושי
+צריך להיכנס לשיחה עכשיו.
+
+summary:
+סיכום קצר מאוד בעברית
+של מצב הליד.
+
+חשוב:
+
+אל תמציא מידע.
+אל תמציא תקציב.
+אל תמציא מוצר.
+אל תכתוב markdown.
+אל תוסיף הסברים מחוץ ל-JSON.
+החזר JSON תקין בלבד.
+`;
+
+  const response =
+    await fetch(
+      "https://api.openai.com/v1/responses",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+
+          "Authorization":
+            `Bearer ${OPENAI_API_KEY}`
+        },
+
+        body: JSON.stringify({
+          model: "gpt-5.6-luna",
+          input
+        })
+      }
+    );
+
+  const data =
+    await response.json();
+
+  if (!response.ok) {
+    console.error(
+      "BRAIN OPENAI ERROR:",
+      data
+    );
+
+    throw new Error(
+      data.error?.message ||
+      "OpenAI Brain error"
+    );
+  }
+
+  let text =
+    data.output_text || "";
+
+  if (
+    !text &&
+    Array.isArray(data.output)
+  ) {
+    for (const item of data.output) {
+      if (!Array.isArray(item.content))
+        continue;
+
+      for (const content of item.content) {
+        if (
+          content.type ===
+            "output_text" &&
+          content.text
+        ) {
+          text += content.text;
+        }
+      }
+    }
+  }
+
+  const cleaned =
+    text
+      .replace(/```json/gi, "")
+      .replace(/```/g, "")
+      .trim();
+
+  try {
+    return JSON.parse(cleaned);
+
+  } catch (error) {
+    console.error(
+      "BRAIN JSON ERROR:",
+      cleaned
+    );
+
+    return {
+      intent: "UNKNOWN",
+      product: "unknown",
+      budget: null,
+      temperature: "COLD",
+      buying_signal: 0,
+      objection: "",
+      next_action:
+        "בדיקה ידנית של הליד",
+      needs_human: false,
+      summary:
+        "לא ניתן היה לנתח את הליד."
+    };
+  }
+}
+
+// ================================
 // AI ANSWER
 // ================================
 
@@ -516,10 +652,15 @@ Casa Verona היא חברת ריהוט פרימיום.
 6. אל תישמע כמו רובוט.
 7. תשובות קצרות וברורות.
 8. אל תשלח הודעות ארוכות מדי.
-9. כאשר הלקוח מתעניין במוצר, נסה לקדם אותו לשלב הבא.
+9. כאשר הלקוח מתעניין במוצר,
+נסה לקדם אותו לשלב הבא.
 10. אל תבטיח דבר שאינו נמצא בנתונים.
+11. השתמש בניתוח הליד כדי להבין
+כיצד נכון לקדם את השיחה.
+12. אל תחשוף ללקוח ציוני ליד,
+temperature או מידע פנימי של המערכת.
 
-נתוני העסק:
+נתוני העסק והליד:
 
 ${JSON.stringify(
   businessData,
@@ -559,7 +700,6 @@ ${message}
     await response.json();
 
   if (!response.ok) {
-
     console.error(
       "OPENAI ERROR:",
       data
@@ -578,27 +718,17 @@ ${message}
     !answer &&
     Array.isArray(data.output)
   ) {
+    for (const item of data.output) {
+      if (!Array.isArray(item.content))
+        continue;
 
-    for (
-      const item of data.output
-    ) {
-
-      if (
-        !Array.isArray(item.content)
-      ) continue;
-
-      for (
-        const content of item.content
-      ) {
-
+      for (const content of item.content) {
         if (
           content.type ===
             "output_text" &&
           content.text
         ) {
-
-          answer +=
-            content.text;
+          answer += content.text;
         }
       }
     }
@@ -621,7 +751,6 @@ async function runAI(
 ) {
 
   try {
-
     const answer =
       await getAIAnswer(
         message,
@@ -639,7 +768,6 @@ async function runAI(
     }));
 
   } catch (error) {
-
     console.error(
       "AI SERVER ERROR:",
       error
@@ -671,7 +799,6 @@ async function sendWhatsAppMessage(
     !WHATSAPP_ACCESS_TOKEN ||
     !WHATSAPP_PHONE_NUMBER_ID
   ) {
-
     throw new Error(
       "WhatsApp environment variables חסרים"
     );
@@ -710,7 +837,6 @@ async function sendWhatsAppMessage(
     await response.json();
 
   if (!response.ok) {
-
     console.error(
       "WHATSAPP SEND ERROR:",
       data
@@ -738,10 +864,8 @@ const PORT =
 server.listen(
   PORT,
   () => {
-
     console.log(
       `Casa Verona AI Engine running on port ${PORT}`
     );
-
   }
 );
