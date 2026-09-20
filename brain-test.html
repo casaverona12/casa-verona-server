@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Casa Verona Brain</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #0b0b0b;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 30px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 850px;
+    }
+
+    .logo {
+      text-align: center;
+      font-size: 38px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .gold {
+      color: #d6b36a;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #999;
+      margin-bottom: 35px;
+    }
+
+    .card {
+      background: #151515;
+      border: 1px solid #292929;
+      border-radius: 20px;
+      padding: 25px;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 12px;
+      font-weight: bold;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 140px;
+      resize: vertical;
+      background: #0d0d0d;
+      color: white;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 15px;
+      font-size: 17px;
+      outline: none;
+    }
+
+    textarea:focus {
+      border-color: #d6b36a;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 15px;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      background: #d6b36a;
+      color: #111;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .loading {
+      text-align: center;
+      color: #d6b36a;
+      font-size: 18px;
+      padding: 20px;
+    }
+
+    .temperature {
+      font-size: 30px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .row {
+      padding: 13px 0;
+      border-bottom: 1px solid #292929;
+    }
+
+    .row:last-child {
+      border-bottom: none;
+    }
+
+    .label {
+      color: #888;
+      font-size: 13px;
+      margin-bottom: 5px;
+    }
+
+    .value {
+      font-size: 18px;
+    }
+
+    .score {
+      font-size: 38px;
+      font-weight: bold;
+      color: #d6b36a;
+    }
+
+    .error {
+      color: #ff6961;
+      padding: 15px 0;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="logo">
+    CASA <span class="gold">VERONA</span>
+  </div>
+
+  <div class="subtitle">
+    AI SALES BRAIN — Lead Intelligence
+  </div>
+
+  <div class="card">
+
+    <label>
+      💬 הודעת הלקוח
+    </label>
+
+    <textarea
+      id="message"
+      placeholder="לדוגמה: היי, ראיתי את הסלון שלכם. מה המחיר והאם אפשר להזמין בצבע שמנת?"
+    ></textarea>
+
+    <button
+      id="analyzeButton"
+      onclick="analyzeLead()"
+    >
+      🧠 נתח את הליד
+    </button>
+
+  </div>
+
+  <div
+    id="loading"
+    class="card loading hidden"
+  >
+    Casa Verona Brain מנתח את הלקוח...
+  </div>
+
+  <div
+    id="error"
+    class="card error hidden"
+  ></div>
+
+  <div
+    id="result"
+    class="card hidden"
+  >
+
+    <div
+      id="temperature"
+      class="temperature"
+    ></div>
+
+    <div class="row">
+      <div class="label">
+        ציון כוונת רכישה
+      </div>
+
+      <div
+        id="buyingSignal"
+        class="score"
+      ></div>
+    </div>
+
+    <div class="row">
+      <div class="label">
+        כוונת הלקוח
+      </div>
+
+      <div
+        id="intent"
+        class="value"
+      ></div>
+    </div>
+
+    <div class="row">
+      <div class="label">
+        מוצר
+      </div>
+
+      <div
+        id="product"
+        class="value"
+      ></div>
+    </div>
+
+    <div class="row">
+      <div class="label">
+        תקציב
+      </div>
+
+      <div
+        id="budget"
+        class="value"
+      ></div>
+    </div>
+
+    <div class="row">
+      <div class="label">
+        התנגדות מרכזית
+      </div>
+
+      <div
+        id="objection"
+        class="value"
+      ></div>
+    </div>
+
+    <div class="row">
+      <div class="label">
+        🎯 הפעולה הבאה
+      </div>
+
+      <div
+        id="nextAction"
+        class="value"
+      ></div>
+    </div>
+
+    <div class="row">
+      <div class="label">
+        צריך איש מכירות?
+      </div>
+
+      <div
+        id="needsHuman"
+        class="value"
+      ></div>
+    </div>
+
+    <div class="row">
+      <div class="label">
+        סיכום AI
+      </div>
+
+      <div
+        id="summary"
+        class="value"
+      ></div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+const API_URL =
+  "https://casa-verona-server.onrender.com/brain";
+
+async function analyzeLead() {
+
+  const message =
+    document
+      .getElementById("message")
+      .value
+      .trim();
+
+  const button =
+    document.getElementById(
+      "analyzeButton"
+    );
+
+  const loading =
+    document.getElementById(
+      "loading"
+    );
+
+  const result =
+    document.getElementById(
+      "result"
+    );
+
+  const errorBox =
+    document.getElementById(
+      "error"
+    );
+
+  if (!message) {
+    alert("תכתוב קודם הודעת לקוח");
+    return;
+  }
+
+  button.disabled = true;
+
+  loading.classList.remove(
+    "hidden"
+  );
+
+  result.classList.add(
+    "hidden"
+  );
+
+  errorBox.classList.add(
+    "hidden"
+  );
+
+  try {
+
+    const response =
+      await fetch(
+        API_URL,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body: JSON.stringify({
+            message
+          })
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if (
+      !response.ok ||
+      !data.success
+    ) {
+      throw new Error(
+        data.error ||
+        "שגיאה בניתוח הליד"
+      );
+    }
+
+    const analysis =
+      data.analysis;
+
+    document.getElementById(
+      "temperature"
+    ).textContent =
+      getTemperature(
+        analysis.temperature
+      );
+
+    document.getElementById(
+      "buyingSignal"
+    ).textContent =
+      `${analysis.buying_signal ?? 0}/100`;
+
+    document.getElementById(
+      "intent"
+    ).textContent =
+      analysis.intent ||
+      "לא ידוע";
+
+    document.getElementById(
+      "product"
+    ).textContent =
+      analysis.product ||
+      "לא ידוע";
+
+    document.getElementById(
+      "budget"
+    ).textContent =
+      analysis.budget !== null &&
+      analysis.budget !== undefined
+        ? `₪${Number(
+            analysis.budget
+          ).toLocaleString()}`
+        : "לא צוין";
+
+    document.getElementById(
+      "objection"
+    ).textContent =
+      analysis.objection ||
+      "אין התנגדות ברורה";
+
+    document.getElementById(
+      "nextAction"
+    ).textContent =
+      analysis.next_action ||
+      "לא הוגדרה פעולה";
+
+    document.getElementById(
+      "needsHuman"
+    ).textContent =
+      analysis.needs_human
+        ? "כן — להעביר לאיש מכירות 🔥"
+        : "לא — ה-AI יכול להמשיך";
+
+    document.getElementById(
+      "summary"
+    ).textContent =
+      analysis.summary ||
+      "אין סיכום";
+
+    result.classList.remove(
+      "hidden"
+    );
+
+  } catch (error) {
+
+    console.error(error);
+
+    errorBox.textContent =
+      "❌ " + error.message;
+
+    errorBox.classList.remove(
+      "hidden"
+    );
+
+  } finally {
+
+    loading.classList.add(
+      "hidden"
+    );
+
+    button.disabled = false;
+  }
+}
+
+function getTemperature(
+  temperature
+) {
+
+  switch (
+    String(
+      temperature || ""
+    ).toUpperCase()
+  ) {
+
+    case "HOT":
+      return "🔥 HOT — ליד חם";
+
+    case "WARM":
+      return "🟠 WARM — ליד מתחמם";
+
+    case "COLD":
+      return "❄️ COLD — ליד קר";
+
+    default:
+      return "⚪ מצב לא ידוע";
+  }
+}
+
+</script>
+
+</body>
+</html>
