@@ -37,7 +37,7 @@ const WHATSAPP_ACCESS_TOKEN =
   process.env.WHATSAPP_ACCESS_TOKEN;
 
 const WHATSAPP_VERIFY_TOKEN =
-  process.env.WHATSAPP_VERIFY_TOKEN;
+  process.env.WHATSAPP_VERIFY_TOKEN || "casa_verona_2026";
 
 const WHATSAPP_PHONE_NUMBER_ID =
   process.env.WHATSAPP_PHONE_NUMBER_ID;
@@ -112,6 +112,12 @@ const server = http.createServer(async (req, res) => {
     const challenge =
       url.searchParams.get("hub.challenge");
 
+    console.log("WEBHOOK VERIFY:", {
+      mode,
+      tokenReceived: !!token,
+      challengeReceived: !!challenge
+    });
+
     if (
       mode === "subscribe" &&
       token === WHATSAPP_VERIFY_TOKEN
@@ -126,7 +132,10 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
-    res.writeHead(403);
+    res.writeHead(403, {
+      "Content-Type": "text/plain"
+    });
+
     res.end("Forbidden");
 
     return;
@@ -172,7 +181,7 @@ const server = http.createServer(async (req, res) => {
           return;
         }
 
-        // אנחנו מטפלים כרגע רק בהודעות טקסט
+        // רק הודעות טקסט
         if (message.type !== "text") {
 
           res.writeHead(200);
