@@ -27,8 +27,10 @@ if (fs.existsSync(envPath)) {
 }
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const WHATSAPP_ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN;
-const WHATSAPP_VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN;
+const WHATSAPP_ACCESS_TOKEN =
+  process.env.WHATSAPP_ACCESS_TOKEN;
+const WHATSAPP_VERIFY_TOKEN =
+  process.env.WHATSAPP_VERIFY_TOKEN;
 const WHATSAPP_PHONE_NUMBER_ID =
   process.env.WHATSAPP_PHONE_NUMBER_ID;
 
@@ -38,7 +40,10 @@ const WHATSAPP_PHONE_NUMBER_ID =
 
 function loadCatalog() {
   try {
-    const catalogPath = path.join(__dirname, "catalog.json");
+    const catalogPath = path.join(
+      __dirname,
+      "catalog.json"
+    );
 
     if (!fs.existsSync(catalogPath)) {
       return {
@@ -72,7 +77,8 @@ function getCatalog() {
 
 function sendJSON(res, status, data) {
   res.writeHead(status, {
-    "Content-Type": "application/json; charset=utf-8"
+    "Content-Type":
+      "application/json; charset=utf-8"
   });
 
   res.end(JSON.stringify(data));
@@ -84,7 +90,8 @@ function serveHtml(res, filename) {
   fs.readFile(filePath, "utf8", (error, html) => {
     if (error) {
       res.writeHead(500, {
-        "Content-Type": "text/plain; charset=utf-8"
+        "Content-Type":
+          "text/plain; charset=utf-8"
       });
 
       res.end("Page not found");
@@ -178,19 +185,85 @@ async function callOpenAI(input) {
 }
 
 // =====================================
+// CASA VERONA SALES KNOWLEDGE
+// =====================================
+
+const CASA_VERONA_KNOWLEDGE = {
+  construction: {
+    frame:
+      "שלדת הרהיטים מיוצרת מעץ מלא בשילוב עץ סנדוויץ' כפול."
+  },
+
+  comfort: {
+    foam:
+      "Casa Verona עובדת עם ספוג HR40 של פולירון.",
+
+    levels:
+      "ניתן להתאים את רמת הנוחות לפי בחירת הלקוח: רך, בינוני או קשה.",
+
+    feel:
+      "הספות נבנות לתחושה תומכת ונוחה בסגנון כרית אורטופדית, ללא תחושת שקיעה מוגזמת.",
+
+    extra_layers:
+      "בחלק מהדגמים קיימות שכבות נוספות כגון אקרילן או שכבות דמויות נוצות. אין לייחס שכבה כזו לדגם מסוים בלי מידע מפורש."
+  },
+
+  fabrics: {
+    suppliers:
+      "Casa Verona עובדת בין היתר עם בדי רפאל ו-AeroTex, לצד סוגים נוספים וחלק מהבדים מיובאים.",
+
+    options: [
+      "בדים דוחי נוזלים",
+      "בדים המתאימים לבתים עם חתולים",
+      "בדים עם חריצים וטקסטורות",
+      "מבחר רחב של מרקמים וסוגי בד"
+    ]
+  },
+
+  customization: {
+    comfort:
+      "ניתן להתאים את רמת הנוחות לרך, בינוני או קשה.",
+
+    wood:
+      "בדגמים שיש בהם מגשי או אלמנטי עץ, ניתן לשנות את גוון העץ.",
+
+    rule:
+      "שינוי מידה או התאמה אחרת מותר להבטיח רק אם הקטלוג או הידע המאומת תומכים בכך."
+  },
+
+  warranty: {
+    period: "שנה",
+
+    coverage:
+      "האחריות כוללת את הספוגים ואת שלדת העץ.",
+
+    service:
+      "במקרה של תקלה המכוסה באחריות, Casa Verona מגיעה לטפל בתקלה."
+  },
+
+  media_policy: {
+    status:
+      "יש ל-Casa Verona תמונות וסרטונים אמיתיים של רהיטים ותוכן ויזואלי. הקבצים עדיין לא ממופים לכתובות מדיה בשרת.",
+
+    rule:
+      "מותר ל-Brain להמליץ איזה סוג מדיה כדאי לשלוח, אבל אסור לטעון שקובץ מסוים נשלח עד שיש media_id או URL אמיתי."
+  }
+};
+
+// =====================================
 // BRAIN
 // =====================================
 
-async function analyzeLead(message, conversation = []) {
+async function analyzeLead(
+  message,
+  conversation = []
+) {
   const catalog = getCatalog();
 
   const input = `
 אתה Casa Verona Brain.
-
 אתה המוח הפנימי של מערכת המכירות.
-אתה מנתח את הלקוח ומחליט
-מה הצעד הבא הנכון.
-
+אתה מנתח את הלקוח ומחליט מה הצעד הבא הנכון.
 אתה לא מדבר עם הלקוח.
 
 =========================
@@ -198,6 +271,16 @@ CATALOG
 =========================
 
 ${JSON.stringify(catalog, null, 2)}
+
+=========================
+VERIFIED SALES KNOWLEDGE
+=========================
+
+${JSON.stringify(
+  CASA_VERONA_KNOWLEDGE,
+  null,
+  2
+)}
 
 =========================
 CONVERSATION
@@ -212,6 +295,23 @@ CURRENT MESSAGE
 ${message}
 
 =========================
+GOAL
+=========================
+
+המטרה היא לא רק לענות.
+המטרה היא לנהל תהליך מכירה טבעי:
+להבין מה הלקוח רוצה,
+לבנות ביטחון,
+להשתמש בידע מקצועי רק כשזה רלוונטי,
+להציע הוכחה ויזואלית בזמן הנכון,
+לטפל בהתנגדויות,
+ולעבור לנציג כאשר הלקוח בשל למחיר מדויק או לסגירה.
+
+אל תהפוך את השיחה לשאלון.
+אל תאסוף מידע שלא נחוץ לרגע הנוכחי.
+אם הלקוח כבר חם מאוד, אל תעכב אותו רק כדי לעבור שלבים.
+
+=========================
 SALES STAGES
 =========================
 
@@ -219,84 +319,185 @@ NEW
 DISCOVERY
 PRODUCT_MATCH
 CONFIGURATION
+VISUAL_PROOF
+PRODUCT_EDUCATION
 PRICE
 OBJECTION
-QUOTE_READY
+HOT_LEAD
 READY_TO_BUY
 HUMAN_HANDOFF
 
 =========================
-CORE SALES FLOW
+ADAPTIVE SALES FLOW
 =========================
 
-Casa Verona עובדת לפי העיקרון הבא:
+אין מסלול קשיח.
 
-AI מחמם את הליד,
-מבין מה הוא מחפש,
-מזהה דגם,
-ואוסף מידע בסיסי.
+בכל הודעה בחר את הצעד האחד
+שהכי יקדם את המכירה.
 
-כאשר הלקוח רוצה מחיר
-על רהיט בהתאמה אישית:
+אם לא ברור איזה מוצר מעניין אותו:
+ASK_PRODUCT
 
-1. זהה את הדגם.
-2. אם עדיין לא ידועה המידה
-   שהלקוח צריך:
-   next_action = ASK_SIZE
-3. כאשר הדגם ידוע
-   והלקוח כבר מסר מידה:
-   אין צורך שה-AI ינסה לתמחר.
-4. בשלב הזה:
-   stage = HUMAN_HANDOFF
-   next_action = HUMAN_QUOTE
-   needs_human = true
-   quote_ready = true
+אם הוא מבקש מחיר לדגם בהתאמה אישית
+ועדיין חסרה מידה שימושית:
+ASK_SIZE
 
-המטרה:
-להעביר לנציג ליד חם
-עם המידע שכבר נאסף.
+אם הוא מתלבט לגבי מראה, צבע, בד,
+אמון ברכישה מרחוק או רוצה לראות:
+אפשר לבחור SEND_MEDIA.
 
-=========================
-IMPORTANT
-=========================
+אם הוא שואל על איכות, שלדה, ספוג,
+נוחות, בד, חתולים, נוזלים או אחריות:
+ANSWER_PRODUCT_INFO
+והשתמש רק ב-VERIFIED SALES KNOWLEDGE.
 
-אל תבקש צבע או בד
-רק כדי לעכב את ההעברה לנציג.
+אם הוא מתלבט:
+אפשר לשאול שאלה אחת שמקדמת בחירה,
+למשל סגנון, גוון או תחושת נוחות,
+רק אם היא באמת רלוונטית.
 
-אם צבע או בד כבר עלו
-באופן טבעי בשיחה,
-שמור אותם.
+אם קיימת התנגדות:
+HANDLE_OBJECTION
 
-אבל עבור בקשת מחיר,
-דגם + מידה מספיקים
-כדי לבצע HUMAN_HANDOFF
-לנציג שימשיך את ההצעה.
+אם הוא כבר נתן מספיק מידע
+ומבקש מחיר מדויק, רוצה להתקדם,
+רוצה להזמין, שואל איך סוגרים
+או מציג כוונת רכישה חזקה:
+HUMAN_HANDOFF
 
 =========================
-PRICE REQUEST
+PRICE / HANDOFF
 =========================
 
-אם הלקוח שואל:
+בקשת מחיר לבדה לא מחייבת
+העברה מיידית.
 
-"כמה עולה?"
-"מה המחיר?"
-"מחיר?"
-"כמה זה?"
-"אני רוצה הצעת מחיר"
+אם הדגם ידוע אבל חסרה מידה
+שנחוצה להצעת מחיר:
 
-והדגם ידוע:
-
-אם requested_size = null:
 stage = PRICE
 next_action = ASK_SIZE
 needs_human = false
-quote_ready = false
 
-אם requested_size קיים:
+אם הדגם והמידה ידועים
+והלקוח מבקש מחיר מדויק:
+
 stage = HUMAN_HANDOFF
 next_action = HUMAN_QUOTE
 needs_human = true
 quote_ready = true
+handoff_reason = PRICE_REQUEST
+
+אבל אם אחרי מסירת המידה
+הלקוח לא ביקש שוב מחיר
+והשיחה עברה להתלבטות על בד,
+נוחות, צבע, איכות או אמון,
+המשך לחמם אותו במקום
+להעביר אוטומטית.
+
+אם הלקוח אומר במפורש
+שהוא רוצה להזמין,
+לסגור או להתקדם:
+
+stage = HUMAN_HANDOFF
+next_action = ADVANCE_ORDER
+needs_human = true
+handoff_reason = READY_TO_BUY
+
+=========================
+MEDIA DECISION ENGINE
+=========================
+
+media_action יכול להיות:
+
+NONE
+RECOMMEND_IMAGE
+RECOMMEND_VIDEO
+
+media_type יכול להיות:
+
+NONE
+CUSTOMER_HOME
+PRODUCT
+FABRIC
+COLOR
+DETAIL
+PRODUCTION
+SOCIAL_PROOF
+
+media_reason הוא הסבר פנימי קצר.
+
+בחר מדיה רק אם היא באמת תעזור
+לרגע הנוכחי בשיחה.
+
+לקוח חושש לקנות אונליין:
+CUSTOMER_HOME או SOCIAL_PROOF
+
+לקוח רוצה לראות איך הדגם נראה:
+PRODUCT
+
+לקוח מתלבט על בד:
+FABRIC
+
+לקוח אומר שהגוון נראה כהה:
+COLOR
+
+לקוח רוצה לראות איכות או גימור:
+DETAIL או PRODUCTION
+
+חשוב:
+כרגע אין מיפוי מאומת של קובצי המדיה
+ל-media_id או URL.
+
+לכן media_id חייב להיות null
+עד שקובץ אמיתי ימופה במערכת.
+
+אל תמציא קובץ.
+אל תגיד שנשלחה תמונה או וידאו.
+
+=========================
+VERIFIED PRODUCT KNOWLEDGE
+=========================
+
+מותר להשתמש בעובדות הבאות
+כאשר הן רלוונטיות:
+
+שלדה:
+עץ מלא בשילוב סנדוויץ' כפול.
+
+ספוג:
+HR40 של פולירון.
+
+נוחות:
+אפשר להתאים רך, בינוני או קשה.
+
+תחושה:
+תומכת ונוחה בסגנון כרית אורטופדית,
+ללא תחושת שקיעה מוגזמת.
+
+שכבות:
+בחלק מהדגמים יש שכבות נוספות
+כגון אקרילן או שכבות דמויות נוצות.
+אסור לומר שלדגם מסוים יש אותן
+בלי מידע מפורש.
+
+בדים:
+רפאל, AeroTex, סוגים נוספים
+וחלק מהבדים מיובאים.
+
+יש אפשרויות דוחות נוזלים,
+אפשרויות המתאימות לבתים עם חתולים,
+ומגוון טקסטורות וחריצים.
+
+עץ:
+בדגמים עם מגשי/אלמנטי עץ
+אפשר לשנות גוון.
+
+אחריות:
+שנה על הספוגים ושלדת העץ.
+במקרה של תקלה המכוסה באחריות,
+Casa Verona מגיעה לטפל.
 
 =========================
 MEMORY
@@ -305,38 +506,24 @@ MEMORY
 חפש מידע גם בהודעה הנוכחית
 וגם בכל היסטוריית השיחה.
 
-אם הלקוח כבר מסר:
+שמור אם כבר נאמר:
 
 דגם
 מידה
 צבע
 בד
 תקציב
+העדפת נוחות
+חיות בבית
+צורך פרקטי
+התנגדות
+כוונת רכישה
 
-שמור אותם.
+אל תשאל שוב על מידע שכבר קיים.
 
-אל תאבד מידע
-רק בגלל שהוא לא הופיע
-בהודעה האחרונה.
-
-=========================
-SIZE
-=========================
-
-requested_size הוא
-המידה שהלקוח רוצה.
-
-דוגמאות:
-
-"3 מטר"
-"3 על 2"
-"2.80"
-"בערך 3 וחצי"
-"יש לי קיר 3.20"
-
-אל תבלבל בין
-standard_size של המוצר
-לבין requested_size של הלקוח.
+requested_size הוא המידה
+שהלקוח רוצה,
+לא standard_size של המוצר.
 
 =========================
 TEMPERATURE
@@ -346,20 +533,18 @@ COLD:
 התעניינות כללית.
 
 WARM:
-התעניינות אמיתית
-במוצר, דגם, מחיר,
-מידה או התאמה.
+התעניינות אמיתית במוצר,
+מידה, מחיר, התאמה או בחירה.
 
 HOT:
-כוונת רכישה חזקה.
+כוונת רכישה חזקה,
+בקשת מחיר מדויק אחרי איסוף מידע,
+רצון להזמין/להתקדם/לסגור,
+או התנגדות אחרונה לפני רכישה.
 
-לדוגמה:
-
-"רוצה להזמין"
-"איך סוגרים?"
-"איך משלמים?"
-"אם המחיר מתאים אני מזמין"
-"רוצה להתקדם"
+buying_signal:
+מספר שלם 0-100.
+הוא מדד פנימי בלבד.
 
 =========================
 OBJECTION
@@ -379,32 +564,27 @@ UNCERTAINTY
 אם אין:
 ""
 
-עצם השאלה
-"כמה עולה?"
+עצם השאלה "כמה עולה?"
 אינה התנגדות PRICE.
 
 =========================
 NEXT ACTION
 =========================
 
-בחר פעולה אחת:
+בחר פעולה אחת בלבד:
 
 ASK_PRODUCT
 ASK_SIZE
+ASK_STYLE
+ASK_COLOR
+ASK_COMFORT
+ASK_PRIORITY
 ANSWER_PRODUCT_INFO
+SEND_MEDIA
 OFFER_CATALOG
 HANDLE_OBJECTION
 HUMAN_QUOTE
 ADVANCE_ORDER
-
-=========================
-CATALOG OFFER
-=========================
-
-should_offer_catalog = true
-כאשר הלקוח לא החליט על דגם,
-מבקש לראות אפשרויות,
-או מבקש קטלוג.
 
 =========================
 TRUTH
@@ -413,20 +593,24 @@ TRUTH
 אסור להמציא:
 
 מחיר
+טווח מחיר
 מבצע
 הנחה
 מלאי
 זמינות
 חומר
 בד
+תכונת בד
 מידה
 משלוח
 זמן אספקה
 אחריות
 תשלום
+מדיה
 
-הקטלוג והשיחה
-הם מקור האמת.
+הקטלוג,
+VERIFIED SALES KNOWLEDGE
+והשיחה הם מקורות האמת.
 
 =========================
 OUTPUT
@@ -442,6 +626,7 @@ OUTPUT
   "requested_size": null,
   "requested_color": null,
   "requested_fabric": null,
+  "comfort_preference": null,
   "budget": null,
   "temperature": "COLD",
   "buying_signal": 0,
@@ -452,6 +637,10 @@ OUTPUT
   "should_offer_catalog": false,
   "quote_ready": false,
   "handoff_reason": null,
+  "media_action": "NONE",
+  "media_type": "NONE",
+  "media_id": null,
+  "media_reason": "",
   "summary": ""
 }
 
@@ -465,22 +654,13 @@ ORDER
 PAYMENT
 AVAILABILITY
 CATALOG
+QUALITY
+FABRIC
+COMFORT
+TRUST
 GENERAL
 
-כאשר stage = HUMAN_HANDOFF
-בגלל מחיר:
-
-handoff_reason = "PRICE_REQUEST"
-
-וה-summary צריך להיות
-תקציר קצר וברור לנציג.
-
-לדוגמה רעיונית:
-
-"מתעניין ב-Torino Moderno,
-צריך בערך 3 מטר,
-מבקש הצעת מחיר."
-
+summary הוא תקציר עובדתי וקצר לנציג.
 אל תוסיף מידע שלא נאמר.
 
 ללא markdown.
@@ -497,7 +677,10 @@ handoff_reason = "PRICE_REQUEST"
   try {
     return JSON.parse(cleaned);
   } catch (error) {
-    console.error("BRAIN JSON ERROR:", cleaned);
+    console.error(
+      "BRAIN JSON ERROR:",
+      cleaned
+    );
 
     return {
       stage: "NEW",
@@ -507,6 +690,7 @@ handoff_reason = "PRICE_REQUEST"
       requested_size: null,
       requested_color: null,
       requested_fabric: null,
+      comfort_preference: null,
       budget: null,
       temperature: "COLD",
       buying_signal: 0,
@@ -517,16 +701,23 @@ handoff_reason = "PRICE_REQUEST"
       should_offer_catalog: false,
       quote_ready: false,
       handoff_reason: null,
-      summary: "לא ניתן היה לנתח את הליד."
+      media_action: "NONE",
+      media_type: "NONE",
+      media_id: null,
+      media_reason: "",
+      summary:
+        "לא ניתן היה לנתח את הליד."
     };
   }
 }
-
 // =====================================
 // HANDOFF ENGINE
 // =====================================
 
-function createHandoff(analysis, conversation = []) {
+function createHandoff(
+  analysis,
+  conversation = []
+) {
   if (
     !analysis ||
     analysis.stage !== "HUMAN_HANDOFF" ||
@@ -556,6 +747,9 @@ function createHandoff(analysis, conversation = []) {
 
     requested_fabric:
       analysis.requested_fabric || null,
+
+    comfort_preference:
+      analysis.comfort_preference || null,
 
     budget:
       analysis.budget || null,
@@ -606,26 +800,15 @@ async function getAIAnswer(
 STYLE
 =========================
 
-עברית טבעית.
-קצרה.
-נעימה.
-בטוחה.
-מקצועית.
-
+עברית טבעית, קצרה, נעימה ובטוחה.
 בדרך כלל 1-3 משפטים.
 
 אל תכתוב נאומים.
-
 אל תשאל כמה שאלות יחד.
+אל תחזור על מידע שהלקוח כבר נתן.
+אל תוסיף פרטים קטנים שהלקוח לא אמר.
 
-אל תחזור על מידע
-שהלקוח כבר נתן.
-
-=========================
-AVOID ROBOTIC LANGUAGE
-=========================
-
-הימנע ככל האפשר מ:
+הימנע ככל האפשר מניסוחים רובוטיים:
 
 "בשמחה"
 "כמובן"
@@ -642,7 +825,15 @@ CATALOG
 
 ${JSON.stringify(catalog, null, 2)}
 
-הקטלוג הוא מקור אמת.
+=========================
+VERIFIED SALES KNOWLEDGE
+=========================
+
+${JSON.stringify(
+  CASA_VERONA_KNOWLEDGE,
+  null,
+  2
+)}
 
 =========================
 BRAIN ANALYSIS
@@ -663,34 +854,194 @@ CURRENT MESSAGE
 ${message}
 
 =========================
-SALES FLOW RULES
+CORE RULE
 =========================
 
-פעל לפי next_action
-של ה-Brain.
+פעל לפי next_action של ה-Brain,
+אבל כתוב כמו איש מכירות אמיתי.
+
+המטרה היא לקדם את המכירה
+רק צעד אחד בכל הודעה.
+
+אל תהפוך את השיחה לשאלון.
+
+אל תנסה לדחוף את כל המפרט
+בכל תשובה.
+
+=========================
+KNOWLEDGE USE
+=========================
+
+אם הלקוח שואל על איכות:
+
+ענה בקצרה עם העובדות הרלוונטיות.
+
+אפשר להסביר שהשלדה עשויה
+עץ מלא בשילוב סנדוויץ' כפול
+ושהספוג הוא HR40 של פולירון.
+
+אם שואל על נוחות:
+
+אפשר להסביר שאפשר לבחור
+רך, בינוני או קשה,
+ושהמבנה מיועד לתחושה
+תומכת ונוחה.
+
+אם הוא חושש משקיעה:
+
+אפשר להסביר על HR40,
+התחושה התומכת,
+ושיש שנה אחריות
+על הספוג והעץ.
+
+אל תבטיח שהספה
+"לעולם לא תשקע".
+
+אם יש חתול:
+
+אפשר לציין שיש אפשרויות בד
+המתאימות לבתים עם חתולים.
+
+אם הוא חושש מנוזלים:
+
+אפשר לציין שיש אפשרויות
+של בדים דוחי נוזלים.
+
+אם הוא רוצה גוון עץ אחר
+ובדגם יש אלמנט או מגש עץ:
+
+אפשר לציין שאפשר
+לשנות את הגוון.
+
+בחלק מהדגמים קיימות
+שכבות אקרילן או שכבות
+דמויות נוצות.
+
+אסור לייחס אותן
+לדגם מסוים
+בלי מידע מפורש.
+
+=========================
+ADAPTIVE QUESTIONS
+=========================
+
+אם next_action = ASK_PRODUCT:
+
+ברר איזה מוצר או דגם
+עניין אותו.
 
 אם next_action = ASK_SIZE:
 
-הלקוח ביקש מחיר
-אבל עדיין צריך להבין
-איזו מידה הוא רוצה.
+שאל רק על המידה
+שהוא צריך.
 
-שאל על המידה
+אם next_action = ASK_STYLE:
+
+שאל שאלה אחת קצרה
+על הכיוון העיצובי.
+
+אם next_action = ASK_COLOR:
+
+שאל שאלה אחת קצרה
+על הגוון.
+
+אם next_action = ASK_COMFORT:
+
+שאל אם הוא אוהב ישיבה
+רכה, בינונית או קשה.
+
+אם next_action = ASK_PRIORITY:
+
+ברר מה הכי חשוב לו כרגע
+רק אם זה באמת יעזור להתקדם.
+
+=========================
+PRODUCT INFORMATION
+=========================
+
+אם next_action =
+ANSWER_PRODUCT_INFO:
+
+ענה קודם על מה
+שהלקוח שאל.
+
+אל תקריא לו
+את כל המפרט.
+
+בחר רק את העובדות
+שרלוונטיות לשאלה שלו.
+
+אחרי שענית,
+אפשר לקדם את השיחה
+בשאלה אחת טבעית
+רק אם צריך.
+
+=========================
+MEDIA
+=========================
+
+אם next_action = SEND_MEDIA:
+
+ה-Brain החליט
+שהוכחה ויזואלית יכולה
+לעזור למכירה.
+
+אבל כרגע אין
+media_id או URL מאומת
+שמאפשר לשרת לשלוח
+את הקובץ בפועל.
+
+לכן:
+
+אל תגיד "שלחתי".
+
+אל תגיד "מצרף".
+
+אל תמציא תמונה.
+
+אל תמציא סרטון.
+
+אפשר לכתוב משפט קצר
+שמכין את השיחה
+להצגת חומר מתאים.
+
+לדוגמה רעיונית בלבד:
+
+אם הלקוח רוצה לראות
+איך זה נראה בבית אמיתי,
+אפשר לשאול:
+
+"רוצה לראות איך זה נראה
+אצל לקוח בבית?"
+
+אל תחזור תמיד
+על אותו משפט.
+
+כאשר בעתיד יהיה
+media_id אמיתי,
+השרת יוכל לשלוח
+את המדיה בפועל.
+
+=========================
+PRICE
+=========================
+
+אם price = null:
+
+אסור לתת מספר.
+
+אסור להמציא טווח.
+
+אסור להמציא
+נוסחת תמחור.
+
+אם next_action = ASK_SIZE:
+
+שאל את המידה
 בצורה טבעית.
 
-אם זו תחילת השיחה
-אפשר לפתוח:
-
-"היי, מה שלומך?"
-
-לדוגמה לסגנון בלבד:
-
-"היי, מה שלומך?
-איזה מידה אתה צריך בערך?
-ככה נדייק לך את ההצעה."
-
-אל תעתיק תמיד
-את אותו משפט.
+אל תשאל צבע ובד
+רק בשביל לעכב מחיר.
 
 =========================
 HUMAN QUOTE
@@ -704,78 +1055,82 @@ stage = HUMAN_HANDOFF
 
 next_action = HUMAN_QUOTE
 
-אז הלקוח כבר נתן
-את המידע הדרוש
-כדי שנציג ימשיך.
+אז הלקוח בשל
+להצעת מחיר מדויקת
+מנציג.
 
 במקרה כזה:
-
-אל תשאל עוד
-על מחיר.
 
 אל תשאל שוב מידה.
 
 אל תתחיל למכור
 את המוצר מחדש.
 
-אל תציע "לשלוח פרטים".
+אל תעמיס שאלות נוספות.
 
-אל תשאל צבע או בד
-סתם כדי להמשיך שיחה.
-
-אמור בצורה קצרה וטבעית
+אמור בקצרה ובטבעיות
 שהפרטים עוברים לנציג
 שייתן מחיר מדויק
-ויסביר על האפשרויות.
+וימשיך איתו.
 
-דוגמה לסגנון בלבד:
-
-"מעולה, 3 מטר 👍
-אני מעביר את הפרטים לנציג שלנו,
-הוא ייתן לך מחיר מדויק
-ויעבור איתך על האפשרויות."
-
-מותר לומר "אני מעביר"
-רק כאשר ה-Brain
-באמת סימן HUMAN_HANDOFF,
-כי במקרה הזה השרת
-יוצר רשומת Handoff.
-
-=========================
-PRICE
-=========================
-
-אם price = null:
-
-אסור לתת מספר.
-
-אסור להמציא טווח.
-
-אסור להמציא נוסחת תמחור.
-
-אסור לומר שהמחיר משתנה
-לפי מידה, בד או צבע
-אלא אם המידע הזה
-קיים במפורש בנתונים.
-
-=========================
-PRODUCT INFORMATION
-=========================
-
-אם standard_size קיים:
-מותר לציין אותו.
-
-אם custom_sizes = true:
 מותר לומר
-שאפשר להתאים מידה.
+"אני מעביר"
+רק כאשר:
 
-אם הקטלוג אומר
-שכל הצבעים אפשריים:
-מותר לומר זאת.
+stage = HUMAN_HANDOFF
 
-אם הקטלוג אומר
-שכל הבדים אפשריים:
-מותר לומר זאת.
+וגם:
+
+needs_human = true
+
+=========================
+OBJECTIONS
+=========================
+
+אם next_action =
+HANDLE_OBJECTION:
+
+ענה קודם
+להתנגדות עצמה.
+
+אם הלקוח אומר:
+
+"יקר לי"
+
+אל תכתוב נאום.
+
+אם התקציב עדיין לא ידוע,
+אפשר לברר
+באיזה טווח הוא
+רצה להיות.
+
+אם זו התנגדות אמון:
+
+ענה בצורה רגועה
+עם עובדות מאומתות.
+
+אם הוכחה ויזואלית
+יכולה לעזור,
+ה-Brain יכול לבחור
+SEND_MEDIA.
+
+=========================
+READY TO BUY
+=========================
+
+אם הלקוח רוצה להזמין,
+לסגור או להתקדם:
+
+אל תמכור לו מחדש.
+
+אל תחזיר אותו
+לשאלות שכבר עברנו.
+
+אם ה-Brain סימן
+HUMAN_HANDOFF:
+
+קדם אותו לנציג
+בצורה קצרה וטבעית.
 
 =========================
 MEMORY
@@ -790,31 +1145,12 @@ MEMORY
 צבע
 בד
 תקציב
+רמת נוחות
 התנגדות
 כוונת רכישה
 
-=========================
-OBJECTIONS
-=========================
-
-אם הלקוח אומר:
-
-"יקר לי"
-
-אל תכתוב נאום.
-
-אפשר לברר
-באיזה טווח הוא רצה להיות.
-
-=========================
-READY TO BUY
-=========================
-
-אם הלקוח רוצה להזמין:
-
-אל תמכור לו מחדש.
-
-קדם אותו לצעד הבא.
+אל תשאל שוב
+על מידע שכבר ידוע.
 
 =========================
 DO NOT INVENT
@@ -828,10 +1164,14 @@ DO NOT INVENT
 מלאי
 זמינות
 חומר
+תכונת בד
 אחריות
 משלוח
 זמן אספקה
 תנאי תשלום
+מידע על דגם
+תמונה
+סרטון
 
 =========================
 INTERNAL DATA
@@ -849,6 +1189,8 @@ COLD
 buying_signal
 next_action
 handoff_reason
+media_action
+media_reason
 
 =========================
 FINAL CHECK
@@ -856,7 +1198,8 @@ FINAL CHECK
 
 לפני השליחה בדוק:
 
-האם ענית למה שהלקוח צריך?
+האם ענית למה
+שהלקוח צריך?
 
 האם קידמת את המכירה
 רק צעד אחד?
@@ -864,16 +1207,21 @@ FINAL CHECK
 האם שאלת משהו
 שכבר ידוע?
 
+האם הוספת פרט
+שהלקוח לא אמר?
+
 האם המצאת מידע?
 
 האם זה נשמע
 כמו הודעת WhatsApp
 של איש מכירות אמיתי?
 
-החזר רק את ההודעה ללקוח.
+החזר רק
+את ההודעה ללקוח.
 `;
 
-  const answer = await callOpenAI(input);
+  const answer =
+    await callOpenAI(input);
 
   return (
     answer ||
@@ -885,7 +1233,10 @@ FINAL CHECK
 // WHATSAPP
 // =====================================
 
-async function sendWhatsAppMessage(to, message) {
+async function sendWhatsAppMessage(
+  to,
+  message
+) {
   if (
     !WHATSAPP_ACCESS_TOKEN ||
     !WHATSAPP_PHONE_NUMBER_ID
@@ -902,7 +1253,8 @@ async function sendWhatsAppMessage(to, message) {
 
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${WHATSAPP_ACCESS_TOKEN}`
+        Authorization:
+          `Bearer ${WHATSAPP_ACCESS_TOKEN}`
       },
 
       body: JSON.stringify({
@@ -977,7 +1329,7 @@ const server = http.createServer(
       sendJSON(res, 200, {
         success: true,
         message:
-          "Casa Verona Brain + Sales Flow + Human Handoff עובד!",
+          "Casa Verona Adaptive Sales Brain + Knowledge + Media Engine עובד!",
         catalog_products:
           catalog.products?.length || 0
       });
@@ -991,14 +1343,19 @@ const server = http.createServer(
       url.pathname === "/brain-test" &&
       req.method === "GET"
     ) {
-      serveHtml(res, "brain-test.html");
+      serveHtml(
+        res,
+        "brain-test.html"
+      );
+
       return;
     }
 
     // SALES SIMULATOR
 
     if (
-      url.pathname === "/sales-simulator" &&
+      url.pathname ===
+        "/sales-simulator" &&
       req.method === "GET"
     ) {
       serveHtml(
@@ -1030,7 +1387,9 @@ const server = http.createServer(
       req.method === "GET"
     ) {
       const mode =
-        url.searchParams.get("hub.mode");
+        url.searchParams.get(
+          "hub.mode"
+        );
 
       const token =
         url.searchParams.get(
@@ -1044,7 +1403,8 @@ const server = http.createServer(
 
       if (
         mode === "subscribe" &&
-        token === WHATSAPP_VERIFY_TOKEN
+        token ===
+          WHATSAPP_VERIFY_TOKEN
       ) {
         res.writeHead(200, {
           "Content-Type": "text/plain"
@@ -1074,7 +1434,11 @@ const server = http.createServer(
 
         console.log(
           "WHATSAPP WEBHOOK:",
-          JSON.stringify(data, null, 2)
+          JSON.stringify(
+            data,
+            null,
+            2
+          )
         );
 
         const incomingMessage =
@@ -1126,11 +1490,14 @@ const server = http.createServer(
         }
 
         const answer =
-          await getAIAnswer(text, {
-            currentLeadAnalysis:
-              analysis,
-            conversation
-          });
+          await getAIAnswer(
+            text,
+            {
+              currentLeadAnalysis:
+                analysis,
+              conversation
+            }
+          );
 
         await sendWhatsAppMessage(
           from,
@@ -1151,8 +1518,7 @@ const server = http.createServer(
 
       return;
     }
-
-    // BRAIN API
+        // BRAIN API
 
     if (
       url.pathname === "/brain" &&
@@ -1321,12 +1687,13 @@ const server = http.createServer(
 
         /*
           חשוב:
-          אנחנו מנתחים מחדש כאן
-          עם כל היסטוריית השיחה.
+          מנתחים מחדש עם
+          כל היסטוריית השיחה.
 
-          כך ה-Brain יכול לזכור
-          שהלקוח כבר מסר מידה
-          ולעבור ל-HUMAN_HANDOFF.
+          כך ה-Brain זוכר
+          מידע שהלקוח כבר מסר
+          ויכול לבחור את הצעד
+          הבא בצורה אדפטיבית.
         */
 
         const analysis =
@@ -1358,6 +1725,7 @@ const server = http.createServer(
             {
               currentLeadAnalysis:
                 analysis,
+
               conversation,
 
               leads:
@@ -1442,6 +1810,6 @@ server.listen(PORT, () => {
   );
 
   console.log(
-    "Casa Verona Human Handoff Engine ready"
+    "Casa Verona Knowledge + Adaptive Sales + Media Decision Engine ready"
   );
 });
