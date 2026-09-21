@@ -41,8 +41,6 @@ function loadCatalog() {
     const catalogPath = path.join(__dirname, "catalog.json");
 
     if (!fs.existsSync(catalogPath)) {
-      console.error("catalog.json not found");
-
       return {
         brand: "Casa Verona",
         currency: "ILS",
@@ -50,9 +48,9 @@ function loadCatalog() {
       };
     }
 
-    const raw = fs.readFileSync(catalogPath, "utf8");
-
-    return JSON.parse(raw);
+    return JSON.parse(
+      fs.readFileSync(catalogPath, "utf8")
+    );
   } catch (error) {
     console.error("CATALOG LOAD ERROR:", error);
 
@@ -85,8 +83,6 @@ function serveHtml(res, filename) {
 
   fs.readFile(filePath, "utf8", (error, html) => {
     if (error) {
-      console.error("HTML PAGE ERROR:", error);
-
       res.writeHead(500, {
         "Content-Type": "text/plain; charset=utf-8"
       });
@@ -182,7 +178,7 @@ async function callOpenAI(input) {
 }
 
 // =====================================
-// CASA VERONA BRAIN + SALES FLOW
+// BRAIN
 // =====================================
 
 async function analyzeLead(message, conversation = []) {
@@ -191,34 +187,33 @@ async function analyzeLead(message, conversation = []) {
   const input = `
 אתה Casa Verona Brain.
 
-אתה המוח הפנימי שמנתח את הלקוח
-ומחליט באיזה שלב של תהליך המכירה הוא נמצא.
+אתה המוח הפנימי של מערכת המכירות.
+אתה מנתח את הלקוח ומחליט
+מה הצעד הבא הנכון.
 
 אתה לא מדבר עם הלקוח.
 
 =========================
-קטלוג
+CATALOG
 =========================
 
 ${JSON.stringify(catalog, null, 2)}
 
 =========================
-היסטוריית השיחה
+CONVERSATION
 =========================
 
 ${JSON.stringify(conversation, null, 2)}
 
 =========================
-הודעה נוכחית
+CURRENT MESSAGE
 =========================
 
 ${message}
 
 =========================
-SALES FLOW
+SALES STAGES
 =========================
-
-כל לקוח נמצא באחד השלבים:
 
 NEW
 DISCOVERY
@@ -230,146 +225,118 @@ QUOTE_READY
 READY_TO_BUY
 HUMAN_HANDOFF
 
-הסבר:
-
-NEW:
-תחילת שיחה ועדיין לא ברור מה הלקוח רוצה.
-
-DISCOVERY:
-ברור סוג המוצר אבל עדיין צריך להבין כיוון.
-
-PRODUCT_MATCH:
-הלקוח בוחר או מתעניין בדגם מסוים.
-
-CONFIGURATION:
-צריך להבין התאמה כמו מידה, צבע או בד.
-
-PRICE:
-הלקוח מבקש מחיר ועדיין חסר מידע חשוב להצעה.
-
-OBJECTION:
-יש התנגדות אמיתית כמו מחיר, אמון או זמן.
-
-QUOTE_READY:
-הדגם והמידע הדרוש להצעת מחיר כבר ברורים.
-
-READY_TO_BUY:
-הלקוח רוצה להתקדם, להזמין או לשלם.
-
-HUMAN_HANDOFF:
-נדרשת כרגע פעולה של נציג אנושי.
-
 =========================
-חוק חשוב לגבי מחיר
+CORE SALES FLOW
 =========================
 
-כאשר לקוח שואל מחיר לדגם
-שניתן להתאמה אישית:
+Casa Verona עובדת לפי העיקרון הבא:
 
-אם הוא עדיין לא מסר
-את המידה שהוא צריך,
-השלב בדרך כלל PRICE
-והפעולה הבאה היא לברר מידה.
+AI מחמם את הליד,
+מבין מה הוא מחפש,
+מזהה דגם,
+ואוסף מידע בסיסי.
 
-אל תניח שמידה סטנדרטית
-היא בהכרח המידה שהלקוח רוצה.
+כאשר הלקוח רוצה מחיר
+על רהיט בהתאמה אישית:
 
-אם הלקוח כבר מסר מידה,
-זכור אותה.
+1. זהה את הדגם.
+2. אם עדיין לא ידועה המידה
+   שהלקוח צריך:
+   next_action = ASK_SIZE
+3. כאשר הדגם ידוע
+   והלקוח כבר מסר מידה:
+   אין צורך שה-AI ינסה לתמחר.
+4. בשלב הזה:
+   stage = HUMAN_HANDOFF
+   next_action = HUMAN_QUOTE
+   needs_human = true
+   quote_ready = true
 
-אל תבקש אותה שוב.
-
-=========================
-החזר JSON בלבד
-=========================
-
-{
-  "stage": "NEW",
-  "intent": "",
-  "product": "",
-  "matched_product_id": null,
-  "requested_size": null,
-  "requested_color": null,
-  "requested_fabric": null,
-  "budget": null,
-  "temperature": "COLD",
-  "buying_signal": 0,
-  "objection": "",
-  "missing_information": [],
-  "next_action": "",
-  "needs_human": false,
-  "should_offer_catalog": false,
-  "quote_ready": false,
-  "summary": ""
-}
+המטרה:
+להעביר לנציג ליד חם
+עם המידע שכבר נאסף.
 
 =========================
-INTENT
+IMPORTANT
 =========================
 
-בחר:
+אל תבקש צבע או בד
+רק כדי לעכב את ההעברה לנציג.
 
-PRICE
-PRODUCT_INFO
-DELIVERY
-CUSTOMIZATION
-ORDER
-PAYMENT
-AVAILABILITY
-CATALOG
-GENERAL
+אם צבע או בד כבר עלו
+באופן טבעי בשיחה,
+שמור אותם.
 
-=========================
-זיהוי מוצר
-=========================
-
-אם הלקוח מזכיר דגם,
-זהה אותו מול הקטלוג.
-
-אם יש טעות כתיב קטנה
-אבל הכוונה ברורה,
-השתמש בשם הרשמי.
-
-אם לא ידוע:
-"unknown"
-
-אם זוהה דגם:
-matched_product_id = id מהקטלוג.
+אבל עבור בקשת מחיר,
+דגם + מידה מספיקים
+כדי לבצע HUMAN_HANDOFF
+לנציג שימשיך את ההצעה.
 
 =========================
-REQUESTED SIZE
+PRICE REQUEST
 =========================
 
-חפש גם בהודעה הנוכחית
-וגם בהיסטוריית השיחה.
+אם הלקוח שואל:
 
-אם הלקוח כבר אמר למשל:
+"כמה עולה?"
+"מה המחיר?"
+"מחיר?"
+"כמה זה?"
+"אני רוצה הצעת מחיר"
+
+והדגם ידוע:
+
+אם requested_size = null:
+stage = PRICE
+next_action = ASK_SIZE
+needs_human = false
+quote_ready = false
+
+אם requested_size קיים:
+stage = HUMAN_HANDOFF
+next_action = HUMAN_QUOTE
+needs_human = true
+quote_ready = true
+
+=========================
+MEMORY
+=========================
+
+חפש מידע גם בהודעה הנוכחית
+וגם בכל היסטוריית השיחה.
+
+אם הלקוח כבר מסר:
+
+דגם
+מידה
+צבע
+בד
+תקציב
+
+שמור אותם.
+
+אל תאבד מידע
+רק בגלל שהוא לא הופיע
+בהודעה האחרונה.
+
+=========================
+SIZE
+=========================
+
+requested_size הוא
+המידה שהלקוח רוצה.
+
+דוגמאות:
 
 "3 מטר"
 "3 על 2"
-"אני צריך 2.80"
-"יש לי קיר של 3.20"
+"2.80"
+"בערך 3 וחצי"
+"יש לי קיר 3.20"
 
-שמור את המידע הרלוונטי
-ב-requested_size.
-
-אל תאבד אותו בהודעות הבאות.
-
-אם לא נמסרה מידה:
-null
-
-=========================
-COLOR / FABRIC
-=========================
-
-אם הלקוח מסר צבע:
-שמור requested_color.
-
-אם מסר בד:
-שמור requested_fabric.
-
-אם לא:
-null
+אל תבלבל בין
+standard_size של המוצר
+לבין requested_size של הלקוח.
 
 =========================
 TEMPERATURE
@@ -379,19 +346,20 @@ COLD:
 התעניינות כללית.
 
 WARM:
-התעניינות ממשית במוצר,
-מחיר, מידה, צבע, בד או התאמה.
+התעניינות אמיתית
+במוצר, דגם, מחיר,
+מידה או התאמה.
 
 HOT:
-כוונת רכישה ברורה.
+כוונת רכישה חזקה.
 
 לדוגמה:
 
 "רוצה להזמין"
-"רוצה לסגור"
+"איך סוגרים?"
 "איך משלמים?"
-"אני רוצה להתקדם"
 "אם המחיר מתאים אני מזמין"
+"רוצה להתקדם"
 
 =========================
 OBJECTION
@@ -408,97 +376,112 @@ PAYMENT
 TIME
 UNCERTAINTY
 
-אם אין התנגדות:
+אם אין:
 ""
 
-השאלה "כמה עולה?"
-אינה התנגדות מחיר.
-
-=========================
-MISSING INFORMATION
-=========================
-
-רשום רק מידע שבאמת חסר
-כדי לבצע את הפעולה הבאה.
-
-אל תאסוף פרטים סתם.
-
-אם הלקוח שואל מחיר
-והדגם ידוע אבל לא נמסרה
-המידה שהוא צריך:
-
-["requested_size"]
-
-=========================
-QUOTE READY
-=========================
-
-quote_ready = true
-רק כאשר כבר נאספו
-הפרטים שהשיחה דרשה
-כדי לעבור להצעת מחיר.
-
-חשוב:
-
-quote_ready לא אומר
-שקיים מחיר במערכת.
-
-הוא אומר שהלקוח
-מוכן לשלב הצעת המחיר.
+עצם השאלה
+"כמה עולה?"
+אינה התנגדות PRICE.
 
 =========================
 NEXT ACTION
 =========================
 
-בחר פעולה אחת בלבד.
-
-לדוגמה:
+בחר פעולה אחת:
 
 ASK_PRODUCT
 ASK_SIZE
 ANSWER_PRODUCT_INFO
 OFFER_CATALOG
 HANDLE_OBJECTION
-PREPARE_QUOTE
 HUMAN_QUOTE
 ADVANCE_ORDER
 
-אל תבחר כמה פעולות יחד.
-
 =========================
-NEEDS HUMAN
+CATALOG OFFER
 =========================
 
-true רק כאשר באמת
-צריך פעולה אנושית עכשיו.
-
-לא להעביר לנציג
-רק בגלל שהלקוח שאל מחיר
-אם עדיין אפשר לאסוף
-את המידע הדרוש באופן טבעי.
+should_offer_catalog = true
+כאשר הלקוח לא החליט על דגם,
+מבקש לראות אפשרויות,
+או מבקש קטלוג.
 
 =========================
-חוקי אמת
+TRUTH
 =========================
 
 אסור להמציא:
 
 מחיר
-מידה
-מלאי
-זמינות
-משלוח
-זמן אספקה
-בד
-חומר
-אחריות
 מבצע
 הנחה
+מלאי
+זמינות
+חומר
+בד
+מידה
+משלוח
+זמן אספקה
+אחריות
+תשלום
 
-השתמש רק בקטלוג
-ובהיסטוריית השיחה.
+הקטלוג והשיחה
+הם מקור האמת.
 
-החזר JSON תקין בלבד.
+=========================
+OUTPUT
+=========================
+
+החזר JSON תקין בלבד:
+
+{
+  "stage": "NEW",
+  "intent": "GENERAL",
+  "product": "unknown",
+  "matched_product_id": null,
+  "requested_size": null,
+  "requested_color": null,
+  "requested_fabric": null,
+  "budget": null,
+  "temperature": "COLD",
+  "buying_signal": 0,
+  "objection": "",
+  "missing_information": [],
+  "next_action": "",
+  "needs_human": false,
+  "should_offer_catalog": false,
+  "quote_ready": false,
+  "handoff_reason": null,
+  "summary": ""
+}
+
+INTENT:
+
+PRICE
+PRODUCT_INFO
+DELIVERY
+CUSTOMIZATION
+ORDER
+PAYMENT
+AVAILABILITY
+CATALOG
+GENERAL
+
+כאשר stage = HUMAN_HANDOFF
+בגלל מחיר:
+
+handoff_reason = "PRICE_REQUEST"
+
+וה-summary צריך להיות
+תקציר קצר וברור לנציג.
+
+לדוגמה רעיונית:
+
+"מתעניין ב-Torino Moderno,
+צריך בערך 3 מטר,
+מבקש הצעת מחיר."
+
+אל תוסיף מידע שלא נאמר.
 
 ללא markdown.
 ללא הסברים.
@@ -533,179 +516,113 @@ true רק כאשר באמת
       needs_human: false,
       should_offer_catalog: false,
       quote_ready: false,
+      handoff_reason: null,
       summary: "לא ניתן היה לנתח את הליד."
     };
   }
 }
 
 // =====================================
-// CASA VERONA HUMAN SALES AGENT
+// HANDOFF ENGINE
 // =====================================
 
-async function getAIAnswer(message, businessData = {}) {
+function createHandoff(analysis, conversation = []) {
+  if (
+    !analysis ||
+    analysis.stage !== "HUMAN_HANDOFF" ||
+    !analysis.needs_human
+  ) {
+    return null;
+  }
+
+  return {
+    status: "WAITING_FOR_HUMAN",
+
+    reason:
+      analysis.handoff_reason ||
+      "MANUAL_REVIEW",
+
+    product:
+      analysis.product || "unknown",
+
+    product_id:
+      analysis.matched_product_id || null,
+
+    requested_size:
+      analysis.requested_size || null,
+
+    requested_color:
+      analysis.requested_color || null,
+
+    requested_fabric:
+      analysis.requested_fabric || null,
+
+    budget:
+      analysis.budget || null,
+
+    temperature:
+      analysis.temperature || "WARM",
+
+    buying_signal:
+      analysis.buying_signal || 0,
+
+    summary:
+      analysis.summary ||
+      "לקוח ממתין לנציג.",
+
+    conversation,
+
+    created_at:
+      new Date().toISOString()
+  };
+}
+
+// =====================================
+// HUMAN SALES AGENT
+// =====================================
+
+async function getAIAnswer(
+  message,
+  businessData = {}
+) {
   const catalog = getCatalog();
 
-  const conversation = Array.isArray(
-    businessData.conversation
-  )
-    ? businessData.conversation
-    : [];
+  const conversation =
+    Array.isArray(businessData.conversation)
+      ? businessData.conversation
+      : [];
 
-  const leadAnalysis =
-    businessData.currentLeadAnalysis || null;
+  const analysis =
+    businessData.currentLeadAnalysis || {};
 
   const input = `
 אתה איש המכירות של Casa Verona
 בשיחת WhatsApp אמיתית.
 
-המטרה:
-לנהל שיחת מכירה אנושית,
-טבעית וחכמה.
-
-לא להישמע כמו AI.
-לא כמו מוקד.
-לא כמו טופס.
+אתה נשמע כמו אדם אמיתי,
+לא כמו AI ולא כמו מוקד.
 
 =========================
-האופי שלך
+STYLE
 =========================
 
-אתה:
+עברית טבעית.
+קצרה.
+נעימה.
+בטוחה.
+מקצועית.
 
-נעים
-בטוח
-קליל
-מקצועי
-ישיר
-מבין בריהוט
-יודע למכור בלי ללחוץ
+בדרך כלל 1-3 משפטים.
 
-דבר כמו בן אדם
-שמקליד עכשיו בוואטסאפ.
+אל תכתוב נאומים.
 
-=========================
-פתיחת שיחה
-=========================
+אל תשאל כמה שאלות יחד.
 
-כאשר זו תחילת שיחה,
-אפשר לפתוח בצורה טבעית:
-
-"היי, מה שלומך?"
-
-או:
-
-"היי, מה נשמע?"
-
-אבל אל תעשה את זה
-בכל הודעה בהמשך השיחה.
+אל תחזור על מידע
+שהלקוח כבר נתן.
 
 =========================
-מחיר + מידה
-=========================
-
-זה כלל מכירה חשוב מאוד.
-
-אם הלקוח שואל מחיר
-על דגם שכבר זוהה
-וה-Brain אומר:
-
-next_action = ASK_SIZE
-
-שאל באופן טבעי
-איזו מידה הוא צריך.
-
-המטרה היא להגיע
-להצעת מחיר מדויקת.
-
-סגנון רצוי:
-
-"היי, מה שלומך?
-איזה מידה אתה צריך בערך?
-ככה נוכל לדייק לך את ההצעה."
-
-או:
-
-"מה נשמע?
-איזה מידה אתה צריך לסלון?
-משם נוכל לדייק את המחיר."
-
-אלה דוגמאות לסגנון בלבד.
-
-אל תעתיק אותן תמיד.
-
-=========================
-חשוב מאוד
-=========================
-
-אל תגיד:
-
-"המחיר משתנה לפי המידה והבד"
-
-אלא אם מידע כזה
-קיים במפורש בנתונים.
-
-אל תמציא את הסיבה
-שמחיר מסוים אינו קיים.
-
-אל תעביר מיד לנציג
-אם עדיין חסר פרט
-שאתה יכול לקבל מהלקוח.
-
-=========================
-אחרי שהלקוח נותן מידה
-=========================
-
-אם requested_size כבר קיים:
-
-אל תשאל שוב מידה.
-
-זכור אותה.
-
-המשך לפי next_action.
-
-אם כל הפרטים הדרושים
-נאספו אבל אין מחיר מאומת
-בקטלוג:
-
-אל תמציא מחיר.
-
-בשלב הזה אפשר
-להעביר בצורה טבעית
-לקבלת הצעת מחיר אנושית.
-
-=========================
-עברית טבעית
-=========================
-
-העדף:
-
-"הסטנדרט שלו 3×2"
-
-על פני:
-
-"המידה הסטנדרטית היא 3×2 מטר"
-
-העדף:
-
-"אפשר גם להתאים את המידה"
-
-על פני:
-
-"קיימת אפשרות להתאמה אישית"
-
-העדף:
-
-"שמנת לגמרי אפשרי"
-
-על פני:
-
-"ניתן להזמין בצבע שמנת"
-
-אל תשנן את הדוגמאות.
-הן מלמדות סגנון בלבד.
-
-=========================
-מילים רובוטיות
+AVOID ROBOTIC LANGUAGE
 =========================
 
 הימנע ככל האפשר מ:
@@ -716,120 +633,157 @@ next_action = ASK_SIZE
 "ניתן"
 "ישנה אפשרות"
 "אשמח לסייע"
-"האם תרצה"
 "על מנת"
 "בהתאם לצרכים שלך"
 
 =========================
-אורך
-=========================
-
-ברירת מחדל:
-
-1-3 משפטים קצרים.
-
-אל תכתוב נאום
-על שאלה פשוטה.
-
-=========================
-שאלות
-=========================
-
-שאל בדרך כלל
-שאלה אחת בכל פעם.
-
-אל תשאל שאלות
-שאין בהן צורך.
-
-אל תשאל שוב משהו
-שהלקוח כבר ענה עליו.
-
-=========================
-SALES FLOW
-=========================
-
-ה-Brain קבע
-את השלב והפעולה הבאה.
-
-פעל לפיהם.
-
-אל תדלג קדימה
-ללא סיבה.
-
-אם next_action = ASK_SIZE:
-שאל רק על המידה.
-
-אם next_action = ASK_PRODUCT:
-ברר איזה מוצר או דגם.
-
-אם next_action = OFFER_CATALOG:
-הצע קטלוג בצורה טבעית.
-
-אם next_action = HANDLE_OBJECTION:
-טפל בהתנגדות.
-
-אם next_action = HUMAN_QUOTE:
-אפשר להציע מעבר לנציג
-לקבלת הצעת המחיר.
-
-אם next_action = ADVANCE_ORDER:
-קדם את הלקוח
-לשלב הבא בהזמנה.
-
-=========================
-קטלוג Casa Verona
+CATALOG
 =========================
 
 ${JSON.stringify(catalog, null, 2)}
 
-זה מקור האמת.
+הקטלוג הוא מקור אמת.
 
 =========================
-מחירים
+BRAIN ANALYSIS
 =========================
 
-אם price מכיל מחיר מאומת:
-מותר להשתמש בו.
+${JSON.stringify(analysis, null, 2)}
+
+=========================
+CONVERSATION
+=========================
+
+${JSON.stringify(conversation, null, 2)}
+
+=========================
+CURRENT MESSAGE
+=========================
+
+${message}
+
+=========================
+SALES FLOW RULES
+=========================
+
+פעל לפי next_action
+של ה-Brain.
+
+אם next_action = ASK_SIZE:
+
+הלקוח ביקש מחיר
+אבל עדיין צריך להבין
+איזו מידה הוא רוצה.
+
+שאל על המידה
+בצורה טבעית.
+
+אם זו תחילת השיחה
+אפשר לפתוח:
+
+"היי, מה שלומך?"
+
+לדוגמה לסגנון בלבד:
+
+"היי, מה שלומך?
+איזה מידה אתה צריך בערך?
+ככה נדייק לך את ההצעה."
+
+אל תעתיק תמיד
+את אותו משפט.
+
+=========================
+HUMAN QUOTE
+=========================
+
+אם:
+
+stage = HUMAN_HANDOFF
+
+וגם:
+
+next_action = HUMAN_QUOTE
+
+אז הלקוח כבר נתן
+את המידע הדרוש
+כדי שנציג ימשיך.
+
+במקרה כזה:
+
+אל תשאל עוד
+על מחיר.
+
+אל תשאל שוב מידה.
+
+אל תתחיל למכור
+את המוצר מחדש.
+
+אל תציע "לשלוח פרטים".
+
+אל תשאל צבע או בד
+סתם כדי להמשיך שיחה.
+
+אמור בצורה קצרה וטבעית
+שהפרטים עוברים לנציג
+שייתן מחיר מדויק
+ויסביר על האפשרויות.
+
+דוגמה לסגנון בלבד:
+
+"מעולה, 3 מטר 👍
+אני מעביר את הפרטים לנציג שלנו,
+הוא ייתן לך מחיר מדויק
+ויעבור איתך על האפשרויות."
+
+מותר לומר "אני מעביר"
+רק כאשר ה-Brain
+באמת סימן HUMAN_HANDOFF,
+כי במקרה הזה השרת
+יוצר רשומת Handoff.
+
+=========================
+PRICE
+=========================
 
 אם price = null:
+
 אסור לתת מספר.
 
 אסור להמציא טווח.
 
 אסור להמציא נוסחת תמחור.
 
-אסור לומר שהמחיר
-משתנה בגלל משהו
-אלא אם הנתונים אומרים זאת.
+אסור לומר שהמחיר משתנה
+לפי מידה, בד או צבע
+אלא אם המידע הזה
+קיים במפורש בנתונים.
 
 =========================
-מוצרים והתאמה
+PRODUCT INFORMATION
 =========================
 
 אם standard_size קיים:
 מותר לציין אותו.
 
 אם custom_sizes = true:
-מותר לומר שאפשר
-להתאים מידה.
+מותר לומר
+שאפשר להתאים מידה.
 
-אם colors אומר
+אם הקטלוג אומר
 שכל הצבעים אפשריים:
-מותר לומר שאפשר
-לבחור צבע.
+מותר לומר זאת.
 
-אם fabrics אומר
+אם הקטלוג אומר
 שכל הבדים אפשריים:
-מותר לומר שאפשר
-לבחור בד.
+מותר לומר זאת.
 
 =========================
-זיכרון
+MEMORY
 =========================
 
-קרא את היסטוריית השיחה.
+זכור את מה שכבר נאמר.
 
-זכור:
+במיוחד:
 
 דגם
 מידה
@@ -839,10 +793,8 @@ ${JSON.stringify(catalog, null, 2)}
 התנגדות
 כוונת רכישה
 
-אל תחזור אחורה בשיחה.
-
 =========================
-התנגדות מחיר
+OBJECTIONS
 =========================
 
 אם הלקוח אומר:
@@ -851,36 +803,24 @@ ${JSON.stringify(catalog, null, 2)}
 
 אל תכתוב נאום.
 
-אפשר למשל לברר
+אפשר לברר
 באיזה טווח הוא רצה להיות.
 
 =========================
-לקוח שרוצה לסגור
+READY TO BUY
 =========================
 
-אם הלקוח אומר:
-
-"אני רוצה להזמין"
+אם הלקוח רוצה להזמין:
 
 אל תמכור לו מחדש.
-
-אל תשאל שאלות
-שכבר נענו.
 
 קדם אותו לצעד הבא.
 
 =========================
-אימוג'ים
+DO NOT INVENT
 =========================
 
-לא חובה.
-
-אל תשתמש באימוג'י
-בכל הודעה.
-
-=========================
-אסור להמציא
-=========================
+אסור להמציא:
 
 מחיר
 הנחה
@@ -893,19 +833,14 @@ ${JSON.stringify(catalog, null, 2)}
 זמן אספקה
 תנאי תשלום
 
-אלא אם המידע
-נמצא בנתונים.
-
 =========================
-ניתוח ה-Brain
+INTERNAL DATA
 =========================
 
-${JSON.stringify(leadAnalysis, null, 2)}
+לעולם אל תחשוף:
 
-זה מידע פנימי.
-
-אל תחשוף ללקוח:
-
+Brain
+AI
 stage
 temperature
 HOT
@@ -913,58 +848,41 @@ WARM
 COLD
 buying_signal
 next_action
-Brain
-AI
-prompt
+handoff_reason
 
 =========================
-היסטוריית השיחה
+FINAL CHECK
 =========================
 
-${JSON.stringify(conversation, null, 2)}
+לפני השליחה בדוק:
 
-=========================
-הודעת הלקוח
-=========================
+האם ענית למה שהלקוח צריך?
 
-${message}
-
-=========================
-לפני השליחה
-=========================
-
-בדוק:
-
-האם ענית למה שהוא ביקש?
-
-האם שאלת רק
-את הדבר הבא שצריך?
+האם קידמת את המכירה
+רק צעד אחד?
 
 האם שאלת משהו
-שהוא כבר אמר?
+שכבר ידוע?
 
 האם המצאת מידע?
 
-האם ההודעה נשמעת
-כמו בן אדם בוואטסאפ?
+האם זה נשמע
+כמו הודעת WhatsApp
+של איש מכירות אמיתי?
 
-אם היא נשמעת רובוטית,
-כתוב אותה מחדש.
-
-החזר רק
-את ההודעה ללקוח.
+החזר רק את ההודעה ללקוח.
 `;
 
   const answer = await callOpenAI(input);
 
   return (
     answer ||
-    "היי, מה שלומך? ספר לי איזה דגם ראית."
+    "היי, מה שלומך? איזה דגם ראית?"
   );
 }
 
 // =====================================
-// WHATSAPP SEND
+// WHATSAPP
 // =====================================
 
 async function sendWhatsAppMessage(to, message) {
@@ -1002,10 +920,14 @@ async function sendWhatsAppMessage(to, message) {
   const data = await response.json();
 
   if (!response.ok) {
-    console.error("WHATSAPP SEND ERROR:", data);
+    console.error(
+      "WHATSAPP SEND ERROR:",
+      data
+    );
 
     throw new Error(
-      data.error?.message || "WhatsApp API error"
+      data.error?.message ||
+      "WhatsApp API error"
     );
   }
 
@@ -1016,371 +938,488 @@ async function sendWhatsAppMessage(to, message) {
 // SERVER
 // =====================================
 
-const server = http.createServer(async (req, res) => {
-  res.setHeader(
-    "Access-Control-Allow-Origin",
-    "*"
-  );
+const server = http.createServer(
+  async (req, res) => {
+    res.setHeader(
+      "Access-Control-Allow-Origin",
+      "*"
+    );
 
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET, POST, OPTIONS"
-  );
+    res.setHeader(
+      "Access-Control-Allow-Methods",
+      "GET, POST, OPTIONS"
+    );
 
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "Content-Type"
-  );
+    res.setHeader(
+      "Access-Control-Allow-Headers",
+      "Content-Type"
+    );
 
-  if (req.method === "OPTIONS") {
-    res.writeHead(204);
-    res.end();
-    return;
-  }
-
-  const url = new URL(
-    req.url,
-    "http://localhost"
-  );
-
-  // HOME
-
-  if (
-    url.pathname === "/" &&
-    req.method === "GET"
-  ) {
-    const catalog = getCatalog();
-
-    sendJSON(res, 200, {
-      success: true,
-      message:
-        "Casa Verona Brain + Sales Flow + Catalog + Human Sales Agent עובד!",
-      catalog_products:
-        catalog.products?.length || 0
-    });
-
-    return;
-  }
-
-  // BRAIN TEST
-
-  if (
-    url.pathname === "/brain-test" &&
-    req.method === "GET"
-  ) {
-    serveHtml(res, "brain-test.html");
-    return;
-  }
-
-  // SALES SIMULATOR
-
-  if (
-    url.pathname === "/sales-simulator" &&
-    req.method === "GET"
-  ) {
-    serveHtml(res, "sales-simulator.html");
-    return;
-  }
-
-  // CATALOG
-
-  if (
-    url.pathname === "/catalog" &&
-    req.method === "GET"
-  ) {
-    sendJSON(res, 200, {
-      success: true,
-      catalog: getCatalog()
-    });
-
-    return;
-  }
-
-  // WHATSAPP VERIFY
-
-  if (
-    url.pathname === "/webhook" &&
-    req.method === "GET"
-  ) {
-    const mode =
-      url.searchParams.get("hub.mode");
-
-    const token =
-      url.searchParams.get("hub.verify_token");
-
-    const challenge =
-      url.searchParams.get("hub.challenge");
-
-    if (
-      mode === "subscribe" &&
-      token === WHATSAPP_VERIFY_TOKEN
-    ) {
-      res.writeHead(200, {
-        "Content-Type": "text/plain"
-      });
-
-      res.end(challenge);
+    if (req.method === "OPTIONS") {
+      res.writeHead(204);
+      res.end();
       return;
     }
 
-    res.writeHead(403);
-    res.end("Forbidden");
-    return;
-  }
+    const url = new URL(
+      req.url,
+      "http://localhost"
+    );
 
-  // WHATSAPP WEBHOOK
+    // HOME
 
-  if (
-    url.pathname === "/webhook" &&
-    req.method === "POST"
-  ) {
-    try {
-      const body = await readRequestBody(req);
-      const data = JSON.parse(body || "{}");
+    if (
+      url.pathname === "/" &&
+      req.method === "GET"
+    ) {
+      const catalog = getCatalog();
 
-      console.log(
-        "WHATSAPP WEBHOOK:",
-        JSON.stringify(data, null, 2)
-      );
+      sendJSON(res, 200, {
+        success: true,
+        message:
+          "Casa Verona Brain + Sales Flow + Human Handoff עובד!",
+        catalog_products:
+          catalog.products?.length || 0
+      });
 
-      const incomingMessage =
-        data.entry?.[0]
-          ?.changes?.[0]
-          ?.value
-          ?.messages?.[0];
-
-      if (
-        !incomingMessage ||
-        incomingMessage.type !== "text"
-      ) {
-        res.writeHead(200);
-        res.end("EVENT_RECEIVED");
-        return;
-      }
-
-      const from = incomingMessage.from;
-      const text =
-        incomingMessage.text?.body || "";
-
-      const analysis =
-        await analyzeLead(text, []);
-
-      console.log(
-        "CASA VERONA BRAIN:",
-        analysis
-      );
-
-      const answer =
-        await getAIAnswer(text, {
-          currentLeadAnalysis: analysis,
-          conversation: []
-        });
-
-      await sendWhatsAppMessage(from, answer);
-
-      res.writeHead(200);
-      res.end("EVENT_RECEIVED");
-    } catch (error) {
-      console.error(
-        "WHATSAPP WEBHOOK ERROR:",
-        error
-      );
-
-      res.writeHead(200);
-      res.end("EVENT_RECEIVED");
+      return;
     }
 
-    return;
-  }
+    // BRAIN TEST
 
-  // BRAIN API
+    if (
+      url.pathname === "/brain-test" &&
+      req.method === "GET"
+    ) {
+      serveHtml(res, "brain-test.html");
+      return;
+    }
 
-  if (
-    url.pathname === "/brain" &&
-    req.method === "POST"
-  ) {
-    try {
-      const body = await readRequestBody(req);
-      const data = JSON.parse(body || "{}");
+    // SALES SIMULATOR
 
-      const message =
-        String(data.message || "");
+    if (
+      url.pathname === "/sales-simulator" &&
+      req.method === "GET"
+    ) {
+      serveHtml(
+        res,
+        "sales-simulator.html"
+      );
 
-      const conversation =
-        Array.isArray(data.conversation)
-          ? data.conversation
-          : [];
+      return;
+    }
 
-      if (!message.trim()) {
-        sendJSON(res, 400, {
-          success: false,
-          error: "חסרה הודעת לקוח"
-        });
+    // CATALOG
 
-        return;
-      }
+    if (
+      url.pathname === "/catalog" &&
+      req.method === "GET"
+    ) {
+      sendJSON(res, 200, {
+        success: true,
+        catalog: getCatalog()
+      });
 
-      const analysis =
-        await analyzeLead(
-          message,
-          conversation
+      return;
+    }
+
+    // WEBHOOK VERIFY
+
+    if (
+      url.pathname === "/webhook" &&
+      req.method === "GET"
+    ) {
+      const mode =
+        url.searchParams.get("hub.mode");
+
+      const token =
+        url.searchParams.get(
+          "hub.verify_token"
         );
 
-      sendJSON(res, 200, {
-        success: true,
-        analysis
-      });
-    } catch (error) {
-      console.error("BRAIN ERROR:", error);
+      const challenge =
+        url.searchParams.get(
+          "hub.challenge"
+        );
 
-      sendJSON(res, 500, {
-        success: false,
-        error: "Brain analysis failed"
-      });
-    }
-
-    return;
-  }
-
-  // AI GET
-
-  if (
-    url.pathname === "/ai" &&
-    req.method === "GET"
-  ) {
-    const message =
-      url.searchParams.get("message") || "";
-
-    try {
-      const analysis =
-        await analyzeLead(message, []);
-
-      const answer =
-        await getAIAnswer(message, {
-          currentLeadAnalysis: analysis,
-          conversation: []
+      if (
+        mode === "subscribe" &&
+        token === WHATSAPP_VERIFY_TOKEN
+      ) {
+        res.writeHead(200, {
+          "Content-Type": "text/plain"
         });
 
-      sendJSON(res, 200, {
-        success: true,
-        answer,
-        analysis
-      });
-    } catch (error) {
-      console.error("AI GET ERROR:", error);
-
-      sendJSON(res, 500, {
-        success: false,
-        error: "שגיאה פנימית בשרת"
-      });
-    }
-
-    return;
-  }
-
-  // AI POST
-
-  if (
-    url.pathname === "/ai" &&
-    req.method === "POST"
-  ) {
-    try {
-      const body = await readRequestBody(req);
-      const data = JSON.parse(body || "{}");
-
-      const message =
-        String(data.message || "");
-
-      if (!message.trim()) {
-        sendJSON(res, 400, {
-          success: false,
-          error: "חסרה הודעת לקוח"
-        });
-
+        res.end(challenge);
         return;
       }
 
-      let conversation = [];
+      res.writeHead(403);
+      res.end("Forbidden");
+      return;
+    }
 
-      if (
-        Array.isArray(data.conversation)
-      ) {
-        conversation =
-          data.conversation;
-      } else if (
-        Array.isArray(data.leads) &&
-        Array.isArray(
-          data.leads[0]?.conversation
-        )
-      ) {
-        conversation =
-          data.leads[0].conversation;
+    // WHATSAPP WEBHOOK
+
+    if (
+      url.pathname === "/webhook" &&
+      req.method === "POST"
+    ) {
+      try {
+        const body =
+          await readRequestBody(req);
+
+        const data =
+          JSON.parse(body || "{}");
+
+        console.log(
+          "WHATSAPP WEBHOOK:",
+          JSON.stringify(data, null, 2)
+        );
+
+        const incomingMessage =
+          data.entry?.[0]
+            ?.changes?.[0]
+            ?.value
+            ?.messages?.[0];
+
+        if (
+          !incomingMessage ||
+          incomingMessage.type !== "text"
+        ) {
+          res.writeHead(200);
+          res.end("EVENT_RECEIVED");
+          return;
+        }
+
+        const from =
+          incomingMessage.from;
+
+        const text =
+          incomingMessage.text?.body || "";
+
+        // כרגע WhatsApp עדיין בלי
+        // persistent conversation memory.
+        const conversation = [];
+
+        const analysis =
+          await analyzeLead(
+            text,
+            conversation
+          );
+
+        const handoff =
+          createHandoff(
+            analysis,
+            conversation
+          );
+
+        if (handoff) {
+          console.log(
+            "🔥 HUMAN HANDOFF:",
+            JSON.stringify(
+              handoff,
+              null,
+              2
+            )
+          );
+        }
+
+        const answer =
+          await getAIAnswer(text, {
+            currentLeadAnalysis:
+              analysis,
+            conversation
+          });
+
+        await sendWhatsAppMessage(
+          from,
+          answer
+        );
+
+        res.writeHead(200);
+        res.end("EVENT_RECEIVED");
+      } catch (error) {
+        console.error(
+          "WHATSAPP WEBHOOK ERROR:",
+          error
+        );
+
+        res.writeHead(200);
+        res.end("EVENT_RECEIVED");
       }
 
-      let analysis =
-        data.analysis ||
-        data.currentLeadAnalysis ||
-        data.leads?.[0]?.analysis ||
-        null;
+      return;
+    }
 
-      if (!analysis) {
-        analysis =
+    // BRAIN API
+
+    if (
+      url.pathname === "/brain" &&
+      req.method === "POST"
+    ) {
+      try {
+        const body =
+          await readRequestBody(req);
+
+        const data =
+          JSON.parse(body || "{}");
+
+        const message =
+          String(data.message || "");
+
+        const conversation =
+          Array.isArray(data.conversation)
+            ? data.conversation
+            : [];
+
+        if (!message.trim()) {
+          sendJSON(res, 400, {
+            success: false,
+            error: "חסרה הודעת לקוח"
+          });
+
+          return;
+        }
+
+        const analysis =
           await analyzeLead(
             message,
             conversation
           );
+
+        const handoff =
+          createHandoff(
+            analysis,
+            conversation
+          );
+
+        sendJSON(res, 200, {
+          success: true,
+          analysis,
+          handoff
+        });
+      } catch (error) {
+        console.error(
+          "BRAIN ERROR:",
+          error
+        );
+
+        sendJSON(res, 500, {
+          success: false,
+          error:
+            "Brain analysis failed"
+        });
       }
 
-      const answer =
-        await getAIAnswer(message, {
-          currentLeadAnalysis: analysis,
-          conversation,
-
-          leads:
-            Array.isArray(data.leads)
-              ? data.leads
-              : [],
-
-          products:
-            Array.isArray(data.products)
-              ? data.products
-              : [],
-
-          sales:
-            Array.isArray(data.sales)
-              ? data.sales
-              : [],
-
-          orders:
-            Array.isArray(data.orders)
-              ? data.orders
-              : []
-        });
-
-      sendJSON(res, 200, {
-        success: true,
-        answer,
-        analysis
-      });
-    } catch (error) {
-      console.error("AI POST ERROR:", error);
-
-      sendJSON(res, 500, {
-        success: false,
-        error: "שגיאה פנימית בשרת"
-      });
+      return;
     }
 
-    return;
+    // AI GET
+
+    if (
+      url.pathname === "/ai" &&
+      req.method === "GET"
+    ) {
+      const message =
+        url.searchParams.get(
+          "message"
+        ) || "";
+
+      try {
+        const conversation = [];
+
+        const analysis =
+          await analyzeLead(
+            message,
+            conversation
+          );
+
+        const handoff =
+          createHandoff(
+            analysis,
+            conversation
+          );
+
+        const answer =
+          await getAIAnswer(
+            message,
+            {
+              currentLeadAnalysis:
+                analysis,
+              conversation
+            }
+          );
+
+        sendJSON(res, 200, {
+          success: true,
+          answer,
+          analysis,
+          handoff
+        });
+      } catch (error) {
+        console.error(
+          "AI GET ERROR:",
+          error
+        );
+
+        sendJSON(res, 500, {
+          success: false,
+          error:
+            "שגיאה פנימית בשרת"
+        });
+      }
+
+      return;
+    }
+
+    // AI POST
+
+    if (
+      url.pathname === "/ai" &&
+      req.method === "POST"
+    ) {
+      try {
+        const body =
+          await readRequestBody(req);
+
+        const data =
+          JSON.parse(body || "{}");
+
+        const message =
+          String(data.message || "");
+
+        if (!message.trim()) {
+          sendJSON(res, 400, {
+            success: false,
+            error: "חסרה הודעת לקוח"
+          });
+
+          return;
+        }
+
+        let conversation = [];
+
+        if (
+          Array.isArray(
+            data.conversation
+          )
+        ) {
+          conversation =
+            data.conversation;
+        } else if (
+          Array.isArray(data.leads) &&
+          Array.isArray(
+            data.leads[0]
+              ?.conversation
+          )
+        ) {
+          conversation =
+            data.leads[0]
+              .conversation;
+        }
+
+        /*
+          חשוב:
+          אנחנו מנתחים מחדש כאן
+          עם כל היסטוריית השיחה.
+
+          כך ה-Brain יכול לזכור
+          שהלקוח כבר מסר מידה
+          ולעבור ל-HUMAN_HANDOFF.
+        */
+
+        const analysis =
+          await analyzeLead(
+            message,
+            conversation
+          );
+
+        const handoff =
+          createHandoff(
+            analysis,
+            conversation
+          );
+
+        if (handoff) {
+          console.log(
+            "🔥 HUMAN HANDOFF:",
+            JSON.stringify(
+              handoff,
+              null,
+              2
+            )
+          );
+        }
+
+        const answer =
+          await getAIAnswer(
+            message,
+            {
+              currentLeadAnalysis:
+                analysis,
+              conversation,
+
+              leads:
+                Array.isArray(
+                  data.leads
+                )
+                  ? data.leads
+                  : [],
+
+              products:
+                Array.isArray(
+                  data.products
+                )
+                  ? data.products
+                  : [],
+
+              sales:
+                Array.isArray(
+                  data.sales
+                )
+                  ? data.sales
+                  : [],
+
+              orders:
+                Array.isArray(
+                  data.orders
+                )
+                  ? data.orders
+                  : []
+            }
+          );
+
+        sendJSON(res, 200, {
+          success: true,
+          answer,
+          analysis,
+          handoff
+        });
+      } catch (error) {
+        console.error(
+          "AI POST ERROR:",
+          error
+        );
+
+        sendJSON(res, 500, {
+          success: false,
+          error:
+            "שגיאה פנימית בשרת"
+        });
+      }
+
+      return;
+    }
+
+    // 404
+
+    sendJSON(res, 404, {
+      success: false,
+      error: "Not Found"
+    });
   }
-
-  // 404
-
-  sendJSON(res, 404, {
-    success: false,
-    error: "Not Found"
-  });
-});
+);
 
 // =====================================
 // START
@@ -1403,6 +1442,6 @@ server.listen(PORT, () => {
   );
 
   console.log(
-    "Casa Verona Sales Flow ready"
+    "Casa Verona Human Handoff Engine ready"
   );
 });
