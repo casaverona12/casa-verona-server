@@ -2,9 +2,9 @@ const http = require("http");
 const fs = require("fs");
 const path = require("path");
 
-// =====================================
+// ======================================================
 // ENV
-// =====================================
+// ======================================================
 
 const envPath = path.join(__dirname, ".env");
 
@@ -27,23 +27,18 @@ if (fs.existsSync(envPath)) {
 }
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const WHATSAPP_ACCESS_TOKEN =
-  process.env.WHATSAPP_ACCESS_TOKEN;
-const WHATSAPP_VERIFY_TOKEN =
-  process.env.WHATSAPP_VERIFY_TOKEN;
+const WHATSAPP_ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN;
+const WHATSAPP_VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN;
 const WHATSAPP_PHONE_NUMBER_ID =
   process.env.WHATSAPP_PHONE_NUMBER_ID;
 
-// =====================================
+// ======================================================
 // CATALOG
-// =====================================
+// ======================================================
 
 function loadCatalog() {
   try {
-    const catalogPath = path.join(
-      __dirname,
-      "catalog.json"
-    );
+    const catalogPath = path.join(__dirname, "catalog.json");
 
     if (!fs.existsSync(catalogPath)) {
       return {
@@ -53,9 +48,7 @@ function loadCatalog() {
       };
     }
 
-    return JSON.parse(
-      fs.readFileSync(catalogPath, "utf8")
-    );
+    return JSON.parse(fs.readFileSync(catalogPath, "utf8"));
   } catch (error) {
     console.error("CATALOG LOAD ERROR:", error);
 
@@ -71,14 +64,13 @@ function getCatalog() {
   return loadCatalog();
 }
 
-// =====================================
+// ======================================================
 // HELPERS
-// =====================================
+// ======================================================
 
 function sendJSON(res, status, data) {
   res.writeHead(status, {
-    "Content-Type":
-      "application/json; charset=utf-8"
+    "Content-Type": "application/json; charset=utf-8"
   });
 
   res.end(JSON.stringify(data));
@@ -90,8 +82,7 @@ function serveHtml(res, filename) {
   fs.readFile(filePath, "utf8", (error, html) => {
     if (error) {
       res.writeHead(500, {
-        "Content-Type":
-          "text/plain; charset=utf-8"
+        "Content-Type": "text/plain; charset=utf-8"
       });
 
       res.end("Page not found");
@@ -124,9 +115,35 @@ function readRequestBody(req) {
   });
 }
 
-// =====================================
+function normalizeText(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/['"׳״]/g, "")
+    .replace(/[-_]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function getConversationText(conversation = []) {
+  if (!Array.isArray(conversation)) return "";
+
+  return conversation
+    .map((item) => {
+      if (typeof item === "string") return item;
+
+      return (
+        item?.content ||
+        item?.message ||
+        item?.text ||
+        ""
+      );
+    })
+    .join(" ");
+}
+
+// ======================================================
 // OPENAI
-// =====================================
+// ======================================================
 
 function extractOutputText(data) {
   let text = data.output_text || "";
@@ -184,11 +201,21 @@ async function callOpenAI(input) {
   return extractOutputText(data);
 }
 
-// =====================================
-// CASA VERONA SALES KNOWLEDGE
-// =====================================
+// ======================================================
+// VERIFIED CASA VERONA KNOWLEDGE
+// ======================================================
 
 const CASA_VERONA_KNOWLEDGE = {
+  business: {
+    brand: "Casa Verona",
+
+    sales_model:
+      "העסק מוכר ריהוט בהזמנה ובהתאמה אישית דרך האונליין.",
+
+    rule:
+      "אין להמציא עובדות עסקיות שלא מופיעות בידע המאומת או בקטלוג."
+  },
+
   construction: {
     frame:
       "שלדת הרהיטים מיוצרת מעץ מלא בשילוב עץ סנדוויץ' כפול."
@@ -243,77 +270,503 @@ const CASA_VERONA_KNOWLEDGE = {
 
   media_policy: {
     status:
-      "יש ל-Casa Verona תמונות וסרטונים אמיתיים של רהיטים ותוכן ויזואלי. הקבצים עדיין לא ממופים לכתובות מדיה בשרת.",
+      "יש ל-Casa Verona תמונות וסרטונים אמיתיים. כרגע הקבצים עדיין לא ממופים ל-media_id או URL במנוע.",
 
     rule:
-      "מותר ל-Brain להמליץ איזה סוג מדיה כדאי לשלוח, אבל אסור לטעון שקובץ מסוים נשלח עד שיש media_id או URL אמיתי."
+      "מותר להמליץ על סוג המדיה שכדאי לשלוח, אך אסור לטעון שתמונה או סרטון נשלחו עד שקיים קובץ אמיתי שמחובר למערכת."
   }
 };
 
-// =====================================
-// BRAIN
-// =====================================
+// ======================================================
+// PRODUCT MATCHER
+// ======================================================
 
-async function analyzeLead(
-  message,
-  conversation = []
-) {
+function findRelevantProduct(message, conversation = []) {
   const catalog = getCatalog();
 
+  const products = Array.isArray(catalog.products)
+    ? catalog.products
+    : [];
+
+  const haystack = normalizeText(
+    `${getConversationText(conversation)} ${message}`
+  );
+
+  // Exact names / IDs / slugs
+  for (const product of products) {
+    const candidates = [
+      product.name,
+      product.id,
+      product.slug
+    ]
+      .filter(Boolean)
+      .map(normalizeText);
+
+    if (
+      candidates.some(
+        (candidate) =>
+          candidate &&
+          haystack.includes(candidate)
+      )
+    ) {
+      return product;
+    }
+  }
+
+  // Hebrew / common aliases
+  const aliases = [
+    {
+      terms: ["מון שרי", "מון צרי", "mon cheri"],
+      productName: "Mon Cheri"
+    },
+    {
+      terms: ["טורינו", "torino", "torino moderno"],
+      productName: "Torino Moderno"
+    },
+    {
+      terms: ["לוסו", "lusso"],
+      productName: "LUSSO"
+    },
+    {
+      terms: ["אלבה", "alba", "alaba"],
+      productName: "ALABA"
+    },
+    {
+      terms: ["דולצה ויטה", "dolce vita"],
+      productName: "Dolce Vita Sofa"
+    },
+    {
+      terms: ["פירנצה", "firenze"],
+      productName: "Firenze Modular"
+    },
+    {
+      terms: ["טומי", "tommy"],
+      productName: "Tommy"
+    },
+    {
+      terms: ["בלה", "bella"],
+      productName: "BELLA"
+    },
+    {
+      terms: ["אינדילה", "indila"],
+      productName: "INDILA"
+    },
+    {
+      terms: ["סרנו", "sereno"],
+      productName: "SERENO"
+    },
+    {
+      terms: ["מורבידו", "morbido"],
+      productName: "MORBIDO"
+    },
+    {
+      terms: ["אלגנזה", "eleganza"],
+      productName: "ELEGANZA"
+    },
+    {
+      terms: ["קומו", "lago como", "divano lago como"],
+      productName: "Divano Lago Como"
+    },
+    {
+      terms: ["קטליה", "cattle ya"],
+      productName: "CATTLE YA"
+    }
+  ];
+
+  for (const alias of aliases) {
+    const matched = alias.terms.some((term) =>
+      haystack.includes(normalizeText(term))
+    );
+
+    if (!matched) continue;
+
+    const product = products.find(
+      (item) =>
+        normalizeText(item.name) ===
+        normalizeText(alias.productName)
+    );
+
+    if (product) return product;
+  }
+
+  return null;
+}
+
+function getCompactProduct(product) {
+  if (!product) return null;
+
+  return {
+    id: product.id ?? null,
+    name: product.name ?? null,
+    category: product.category ?? null,
+    standard_size: product.standard_size ?? null,
+    price: product.price ?? null,
+    delivery_time: product.delivery_time ?? null,
+    customizable: product.customizable ?? null,
+    custom_sizes: product.custom_sizes ?? null,
+    colors: product.colors ?? null,
+    fabrics: product.fabrics ?? null
+  };
+}
+
+// ======================================================
+// SALES BRAIN DEFAULT STATE
+// ======================================================
+
+function createDefaultAnalysis() {
+  return {
+    stage: "NEW",
+    intent: "GENERAL",
+
+    product: "unknown",
+    matched_product_id: null,
+
+    requested_size: null,
+    requested_color: null,
+    requested_fabric: null,
+    comfort_preference: null,
+
+    budget: null,
+
+    // What appears to matter most to this lead.
+    primary_motivation: "UNKNOWN",
+
+    // What currently blocks the purchase.
+    purchase_blocker: "UNKNOWN",
+
+    // Current sales objective.
+    sales_objective: "DISCOVER_NEED",
+
+    temperature: "COLD",
+    buying_signal: 0,
+
+    objection: "",
+
+    missing_information: [],
+
+    next_action: "ASK_PRODUCT",
+
+    needs_human: false,
+
+    should_offer_catalog: false,
+    quote_ready: false,
+
+    handoff_reason: null,
+
+    // Callback / closing-call state.
+    should_offer_callback: false,
+    callback_requested: false,
+    requested_callback_time: null,
+
+    media_action: "NONE",
+    media_type: "NONE",
+    media_id: null,
+    media_reason: "",
+
+    summary: ""
+  };
+}
+
+// ======================================================
+// SMART FALLBACK
+// Used only if AI returns no usable customer reply.
+// ======================================================
+
+function getSmartFallbackReply(message, analysis = {}) {
+  const text = normalizeText(message);
+
+  const hasProduct =
+    analysis.product &&
+    analysis.product !== "unknown";
+
+  if (hasProduct) {
+    return "מה הכי חשוב לך לדעת על הדגם כדי שנדייק לך אותו?";
+  }
+
+  const asksPrice = [
+    "מחיר",
+    "כמה עולה",
+    "כמה זה עולה",
+    "עלות"
+  ].some((word) =>
+    text.includes(normalizeText(word))
+  );
+
+  if (asksPrice) {
+    return "על איזה סלון או רהיט מהפרסום אתה מדבר?";
+  }
+
+  const generalInterest = [
+    "מעוניין",
+    "מעוניינת",
+    "פרטים",
+    "אפשר פרטים",
+    "ראיתי את הפרסום",
+    "ראיתי בפרסום"
+  ].some((word) =>
+    text.includes(normalizeText(word))
+  );
+
+  if (generalInterest) {
+    return "איזה רהיט מהפרסום תפס לך את העין?";
+  }
+
+  return "איזה רהיט ראית אצלנו או שאתה מחפש כרגע?";
+}
+
+// ======================================================
+// ONE-CALL AI SALES CLOSER
+// ======================================================
+
+async function runSalesEngine(message, conversation = []) {
+  const relevantProduct =
+    findRelevantProduct(message, conversation);
+
+  const productContext =
+    getCompactProduct(relevantProduct);
+
+  const compactConversation =
+    Array.isArray(conversation)
+      ? conversation.slice(-14)
+      : [];
+
   const input = `
-אתה Casa Verona Brain.
-אתה המוח הפנימי של מערכת המכירות.
-אתה מנתח את הלקוח ומחליט מה הצעד הבא הנכון.
-אתה לא מדבר עם הלקוח.
+אתה AI Sales Closer של Casa Verona.
 
-=========================
-CATALOG
-=========================
+אתה לא צ'אטבוט שירות לקוחות.
+אתה איש מכירות מקצועי שמנהל שיחת WhatsApp טבעית.
 
-${JSON.stringify(catalog, null, 2)}
+בקריאת AI אחת בלבד אתה חייב:
+1. להבין את מצב הליד.
+2. להבין מה מניע אותו ומה עוצר אותו.
+3. לבחור את מהלך המכירה הבא.
+4. לכתוב את ההודעה שהלקוח יקבל.
 
-=========================
-VERIFIED SALES KNOWLEDGE
-=========================
+המטרה היא לקדם את הלקוח בצורה חכמה והוגנת
+לעבר החלטת רכישה כאשר המוצר באמת מתאים לו.
 
-${JSON.stringify(
-  CASA_VERONA_KNOWLEDGE,
-  null,
-  2
-)}
+================================
+CORE SALES THINKING
+================================
 
-=========================
-CONVERSATION
-=========================
+לפני כתיבת reply חשוב פנימית:
 
-${JSON.stringify(conversation, null, 2)}
+מה הלקוח רוצה?
 
-=========================
+למה זה חשוב לו?
+
+מה נראה שהוא מחפש:
+עיצוב,
+נוחות,
+איכות,
+פרקטיות,
+התאמה לבית,
+ביטחון בקנייה,
+או מחיר?
+
+מה כרגע מונע ממנו להתקדם?
+
+מה חסר לו כדי להרגיש בטוח בהחלטה?
+
+מהו הצעד הקטן והטבעי ביותר
+שיקדם את העסקה עכשיו?
+
+האם צריך:
+לגלות צורך,
+לבנות רצון,
+לבנות אמון,
+להסביר ערך,
+להוכיח התאמה,
+לטפל בהתנגדות,
+ליצור התחייבות קטנה,
+או לעבור לסגירה?
+
+================================
+SALES PSYCHOLOGY
+================================
+
+השתמש בעקרונות מכירה מקצועיים ואתיים.
+
+DISCOVERY:
+אל תאסוף נתונים סתם.
+שאל רק מידע שישפיע על ההמלצה או הסגירה.
+
+MIRRORING:
+התייחס למה שהלקוח אמר
+כדי שירגיש שמבינים אותו,
+אבל אל תחזור כמו תוכי על המשפט שלו.
+
+VALUE MATCHING:
+אל תזרוק רשימת יתרונות.
+חבר את היתרון לצורך של הלקוח.
+
+לדוגמה:
+אם החשש הוא שקיעה,
+HR40 והאחריות רלוונטיים.
+
+אם יש חתול,
+אפשרויות הבד הרלוונטיות חשובות.
+
+אם החשש הוא קנייה אונליין,
+אמון והוכחה אמיתית חשובים יותר
+מעוד מפרט טכני.
+
+SOCIAL PROOF:
+אפשר להמליץ על תמונה או סרטון אמיתי
+מבית לקוח כאשר זה יעזור לביטחון,
+אבל אסור להמציא ביקורות,
+לקוחות או מספרי מכירות.
+
+LOSS AVERSION:
+אסור ליצור פחד,
+מחסור מזויף,
+דדליין מזויף
+או "נשאר אחרון"
+בלי מידע אמיתי.
+
+COMMITMENT:
+כאשר מתאים,
+קדם את הלקוח להתחייבות קטנה וטבעית:
+בחירת מידה,
+כיוון צבע,
+רמת נוחות,
+או הסכמה להתקדם להצעת מחיר.
+
+OBJECTION:
+אל תתווכח עם התנגדות.
+
+הבן אותה,
+ענה על הסיבה האמיתית,
+ואז קדם צעד אחד.
+
+CLOSING:
+כאשר הלקוח כבר בשל,
+הפסק לחקור.
+
+אל תשאל שאלות מיותרות
+רק כי יש עוד שדות שאפשר למלא.
+
+================================
+SALES OBJECTIVES
+================================
+
+sales_objective חייב להיות אחד:
+
+DISCOVER_NEED
+BUILD_DESIRE
+BUILD_TRUST
+PROVE_FIT
+BUILD_VALUE
+RESOLVE_OBJECTION
+CREATE_COMMITMENT
+CLOSE
+SCHEDULE_CLOSING_CALL
+
+================================
+LEADS FROM ADS
+================================
+
+רוב הלידים מגיעים
+ממודעות Facebook / Instagram
+ישירות ל-WhatsApp.
+
+לכן הודעות כמו:
+
+"מחיר?"
+"כמה עולה?"
+"אפשר פרטים?"
+"מעוניין"
+"ראיתי את הפרסום"
+
+בלי שם דגם הן נורמליות.
+
+אם CURRENT PRODUCT הוא null:
+
+אל תמציא מוצר.
+
+אל תניח שהלקוח יודע
+את שם הדגם.
+
+אל תכריח אותו לדעת
+שמות מהקטלוג.
+
+אם לא ברור אפילו סוג הרהיט,
+ברר בצורה טבעית
+על איזה רהיט מהפרסום מדובר.
+
+שאלה אחת בלבד.
+
+אם ההיסטוריה כבר מבהירה
+באיזה מוצר מדובר,
+אל תשאל שוב.
+
+================================
+CURRENT PRODUCT
+================================
+
+${JSON.stringify(productContext, null, 2)}
+
+אם נמצא מוצר,
+השתמש רק במידע הקיים בו
+ובידע העסקי המאומת.
+
+================================
+VERIFIED KNOWLEDGE
+================================
+
+${JSON.stringify(CASA_VERONA_KNOWLEDGE, null, 2)}
+
+================================
+RECENT CONVERSATION
+================================
+
+${JSON.stringify(compactConversation, null, 2)}
+
+================================
 CURRENT MESSAGE
-=========================
+================================
 
 ${message}
 
-=========================
-GOAL
-=========================
+================================
+CONVERSATION STYLE
+================================
 
-המטרה היא לא רק לענות.
-המטרה היא לנהל תהליך מכירה טבעי:
-להבין מה הלקוח רוצה,
-לבנות ביטחון,
-להשתמש בידע מקצועי רק כשזה רלוונטי,
-להציע הוכחה ויזואלית בזמן הנכון,
-לטפל בהתנגדויות,
-ולעבור לנציג כאשר הלקוח בשל למחיר מדויק או לסגירה.
+reply צריך להישמע
+כמו איש מכירות ישראלי טוב
+ב-WhatsApp.
 
-אל תהפוך את השיחה לשאלון.
-אל תאסוף מידע שלא נחוץ לרגע הנוכחי.
-אם הלקוח כבר חם מאוד, אל תעכב אותו רק כדי לעבור שלבים.
+טבעי.
+קצר.
+בטוח.
+אנושי.
 
-=========================
-SALES STAGES
-=========================
+בדרך כלל 1-3 משפטים.
+
+לא נאום.
+
+לא שאלון.
+
+שאלה אחת לכל היותר.
+
+אל תשתמש שוב ושוב ב:
+"בשמחה"
+"כמובן"
+"בהחלט"
+"ניתן"
+"אשמח לסייע"
+"על מנת"
+
+אל תפתח כל הודעה
+באותו ניסוח.
+
+אל תפעיל לחץ מיותר.
+
+================================
+STAGES
+================================
+
+stage חייב להיות אחד:
 
 NEW
 DISCOVERY
@@ -325,253 +778,14 @@ PRICE
 OBJECTION
 HOT_LEAD
 READY_TO_BUY
+CALLBACK
 HUMAN_HANDOFF
 
-=========================
-ADAPTIVE SALES FLOW
-=========================
+================================
+ACTIONS
+================================
 
-אין מסלול קשיח.
-
-בכל הודעה בחר את הצעד האחד
-שהכי יקדם את המכירה.
-
-אם לא ברור איזה מוצר מעניין אותו:
-ASK_PRODUCT
-
-אם הוא מבקש מחיר לדגם בהתאמה אישית
-ועדיין חסרה מידה שימושית:
-ASK_SIZE
-
-אם הוא מתלבט לגבי מראה, צבע, בד,
-אמון ברכישה מרחוק או רוצה לראות:
-אפשר לבחור SEND_MEDIA.
-
-אם הוא שואל על איכות, שלדה, ספוג,
-נוחות, בד, חתולים, נוזלים או אחריות:
-ANSWER_PRODUCT_INFO
-והשתמש רק ב-VERIFIED SALES KNOWLEDGE.
-
-אם הוא מתלבט:
-אפשר לשאול שאלה אחת שמקדמת בחירה,
-למשל סגנון, גוון או תחושת נוחות,
-רק אם היא באמת רלוונטית.
-
-אם קיימת התנגדות:
-HANDLE_OBJECTION
-
-אם הוא כבר נתן מספיק מידע
-ומבקש מחיר מדויק, רוצה להתקדם,
-רוצה להזמין, שואל איך סוגרים
-או מציג כוונת רכישה חזקה:
-HUMAN_HANDOFF
-
-=========================
-PRICE / HANDOFF
-=========================
-
-בקשת מחיר לבדה לא מחייבת
-העברה מיידית.
-
-אם הדגם ידוע אבל חסרה מידה
-שנחוצה להצעת מחיר:
-
-stage = PRICE
-next_action = ASK_SIZE
-needs_human = false
-
-אם הדגם והמידה ידועים
-והלקוח מבקש מחיר מדויק:
-
-stage = HUMAN_HANDOFF
-next_action = HUMAN_QUOTE
-needs_human = true
-quote_ready = true
-handoff_reason = PRICE_REQUEST
-
-אבל אם אחרי מסירת המידה
-הלקוח לא ביקש שוב מחיר
-והשיחה עברה להתלבטות על בד,
-נוחות, צבע, איכות או אמון,
-המשך לחמם אותו במקום
-להעביר אוטומטית.
-
-אם הלקוח אומר במפורש
-שהוא רוצה להזמין,
-לסגור או להתקדם:
-
-stage = HUMAN_HANDOFF
-next_action = ADVANCE_ORDER
-needs_human = true
-handoff_reason = READY_TO_BUY
-
-=========================
-MEDIA DECISION ENGINE
-=========================
-
-media_action יכול להיות:
-
-NONE
-RECOMMEND_IMAGE
-RECOMMEND_VIDEO
-
-media_type יכול להיות:
-
-NONE
-CUSTOMER_HOME
-PRODUCT
-FABRIC
-COLOR
-DETAIL
-PRODUCTION
-SOCIAL_PROOF
-
-media_reason הוא הסבר פנימי קצר.
-
-בחר מדיה רק אם היא באמת תעזור
-לרגע הנוכחי בשיחה.
-
-לקוח חושש לקנות אונליין:
-CUSTOMER_HOME או SOCIAL_PROOF
-
-לקוח רוצה לראות איך הדגם נראה:
-PRODUCT
-
-לקוח מתלבט על בד:
-FABRIC
-
-לקוח אומר שהגוון נראה כהה:
-COLOR
-
-לקוח רוצה לראות איכות או גימור:
-DETAIL או PRODUCTION
-
-חשוב:
-כרגע אין מיפוי מאומת של קובצי המדיה
-ל-media_id או URL.
-
-לכן media_id חייב להיות null
-עד שקובץ אמיתי ימופה במערכת.
-
-אל תמציא קובץ.
-אל תגיד שנשלחה תמונה או וידאו.
-
-=========================
-VERIFIED PRODUCT KNOWLEDGE
-=========================
-
-מותר להשתמש בעובדות הבאות
-כאשר הן רלוונטיות:
-
-שלדה:
-עץ מלא בשילוב סנדוויץ' כפול.
-
-ספוג:
-HR40 של פולירון.
-
-נוחות:
-אפשר להתאים רך, בינוני או קשה.
-
-תחושה:
-תומכת ונוחה בסגנון כרית אורטופדית,
-ללא תחושת שקיעה מוגזמת.
-
-שכבות:
-בחלק מהדגמים יש שכבות נוספות
-כגון אקרילן או שכבות דמויות נוצות.
-אסור לומר שלדגם מסוים יש אותן
-בלי מידע מפורש.
-
-בדים:
-רפאל, AeroTex, סוגים נוספים
-וחלק מהבדים מיובאים.
-
-יש אפשרויות דוחות נוזלים,
-אפשרויות המתאימות לבתים עם חתולים,
-ומגוון טקסטורות וחריצים.
-
-עץ:
-בדגמים עם מגשי/אלמנטי עץ
-אפשר לשנות גוון.
-
-אחריות:
-שנה על הספוגים ושלדת העץ.
-במקרה של תקלה המכוסה באחריות,
-Casa Verona מגיעה לטפל.
-
-=========================
-MEMORY
-=========================
-
-חפש מידע גם בהודעה הנוכחית
-וגם בכל היסטוריית השיחה.
-
-שמור אם כבר נאמר:
-
-דגם
-מידה
-צבע
-בד
-תקציב
-העדפת נוחות
-חיות בבית
-צורך פרקטי
-התנגדות
-כוונת רכישה
-
-אל תשאל שוב על מידע שכבר קיים.
-
-requested_size הוא המידה
-שהלקוח רוצה,
-לא standard_size של המוצר.
-
-=========================
-TEMPERATURE
-=========================
-
-COLD:
-התעניינות כללית.
-
-WARM:
-התעניינות אמיתית במוצר,
-מידה, מחיר, התאמה או בחירה.
-
-HOT:
-כוונת רכישה חזקה,
-בקשת מחיר מדויק אחרי איסוף מידע,
-רצון להזמין/להתקדם/לסגור,
-או התנגדות אחרונה לפני רכישה.
-
-buying_signal:
-מספר שלם 0-100.
-הוא מדד פנימי בלבד.
-
-=========================
-OBJECTION
-=========================
-
-אפשרויות:
-
-PRICE
-TRUST
-DELIVERY
-SIZE
-QUALITY
-PAYMENT
-TIME
-UNCERTAINTY
-
-אם אין:
-""
-
-עצם השאלה "כמה עולה?"
-אינה התנגדות PRICE.
-
-=========================
-NEXT ACTION
-=========================
-
-בחר פעולה אחת בלבד:
+next_action חייב להיות אחד:
 
 ASK_PRODUCT
 ASK_SIZE
@@ -583,68 +797,408 @@ ANSWER_PRODUCT_INFO
 SEND_MEDIA
 OFFER_CATALOG
 HANDLE_OBJECTION
+BUILD_VALUE
+CREATE_COMMITMENT
+OFFER_CALLBACK
+COLLECT_CALLBACK_TIME
 HUMAN_QUOTE
 ADVANCE_ORDER
 
-=========================
+================================
+PRICE
+================================
+
+אם price הוא null:
+
+אסור לתת מחיר.
+אסור לתת טווח מחיר.
+אסור להמציא מחיר.
+
+אם הדגם ידוע
+והלקוח מבקש מחיר
+אבל חסרה מידה הנחוצה לתמחור:
+
+stage = PRICE
+next_action = ASK_SIZE
+needs_human = false
+
+אם standard_size קיימת,
+מותר לציין אותה כמידת הדגם.
+
+אל תכתוב אותה
+ב-requested_size
+עד שהלקוח מאשר אותה.
+
+================================
+HOT LEAD
+================================
+
+ליד יכול להיות HOT כאשר קיימים
+סימני קנייה חזקים כגון:
+
+הוא כבר בחר דגם,
+מתקדם למידה או התאמה,
+מבקש מחיר מדויק,
+שואל איך מתקדמים,
+רוצה לבצע הזמנה,
+או נשארה לו התנגדות מרכזית אחת.
+
+אל תגדיר HOT
+רק בגלל הודעה כללית.
+
+================================
+CLOSING CALL
+================================
+
+כאשר שיחת סגירה אנושית
+עשויה לעזור לסיים את העסקה,
+מותר להציע שיחה קצרה עם נציג.
+
+במצב כזה:
+
+sales_objective =
+SCHEDULE_CLOSING_CALL
+
+next_action =
+OFFER_CALLBACK
+
+should_offer_callback = true
+
+אבל:
+
+אסור להגיד ששיחה נקבעה
+לפני שהלקוח הסכים.
+
+אסור להמציא שעה פנויה.
+
+אם הלקוח מסכים לשיחה
+אבל לא נתן זמן:
+
+stage = CALLBACK
+next_action = COLLECT_CALLBACK_TIME
+callback_requested = true
+
+שאל מתי נוח לו.
+
+אם הוא אומר:
+"עוד שעה"
+"בערב"
+"מחר ב-10"
+או זמן אחר:
+
+שמור את הניסוח
+ב-requested_callback_time.
+
+callback_requested = true
+
+needs_human = true
+
+handoff_reason =
+CALLBACK_REQUESTED
+
+חשוב:
+כרגע אין חיבור יומן מאומת.
+
+לכן אפשר לרשום
+שהלקוח ביקש שיחה בזמן מסוים,
+אבל אסור להבטיח
+שהפגישה נקבעה ביומן.
+
+================================
+DIRECT CLOSE
+================================
+
+אם הלקוח אומר במפורש:
+
+"רוצה להזמין"
+"בוא נסגור"
+"איך מזמינים"
+"אני רוצה להתקדם"
+או כוונת רכישה ברורה:
+
+stage = HUMAN_HANDOFF
+sales_objective = CLOSE
+next_action = ADVANCE_ORDER
+needs_human = true
+handoff_reason = READY_TO_BUY
+
+אל תמשיך לחמם ליד
+שכבר רוצה לקנות.
+
+================================
+EXACT QUOTE
+================================
+
+אם הלקוח מבקש מחיר מדויק
+וכבר יש את המידע הדרוש:
+
+stage = HUMAN_HANDOFF
+sales_objective = CLOSE
+next_action = HUMAN_QUOTE
+needs_human = true
+quote_ready = true
+handoff_reason = PRICE_REQUEST
+
+================================
+OBJECTIONS
+================================
+
+objection חייב להיות אחד מאלה
+כאשר קיימת התנגדות:
+
+PRICE
+TRUST
+DELIVERY
+SIZE
+QUALITY
+PAYMENT
+TIME
+UNCERTAINTY
+
+או "".
+
+"כמה עולה?"
+אינו objection PRICE.
+
+אם אומר "יקר לי":
+
+אל תציע הנחה אוטומטית.
+
+נסה להבין האם מדובר
+בתקציב אמיתי
+או בחוסר הצדקה לערך.
+
+אם מתאים,
+אפשר לשאול באיזה טווח
+הוא רצה להיות.
+
+אם ההתנגדות TRUST:
+
+ענה עם עובדות אמיתיות בלבד.
+
+אפשר להמליץ
+על הוכחה ויזואלית אמיתית.
+
+================================
+PRODUCT KNOWLEDGE
+================================
+
+אם שואל על איכות:
+
+אפשר להסביר בקצרה
+על עץ מלא בשילוב
+סנדוויץ' כפול
+ועל HR40 של פולירון.
+
+אם שואל על נוחות:
+
+אפשר להסביר
+שאפשר לבחור
+רך, בינוני או קשה.
+
+אם חושש משקיעה:
+
+אפשר להסביר
+על HR40,
+התחושה התומכת,
+ושנה אחריות
+על הספוג ושלדת העץ.
+
+אל תבטיח
+שהספה לעולם לא תשקע.
+
+אם יש חתול:
+
+אפשר לציין
+שיש אפשרויות בד
+המתאימות לבתים עם חתולים.
+
+אם חושש מנוזלים:
+
+אפשר לציין
+שיש אפשרויות בד
+דוחות נוזלים.
+
+================================
+MEDIA STRATEGY
+================================
+
+media_action:
+
+NONE
+RECOMMEND_IMAGE
+RECOMMEND_VIDEO
+
+media_type:
+
+NONE
+CUSTOMER_HOME
+PRODUCT
+FABRIC
+COLOR
+DETAIL
+PRODUCTION
+SOCIAL_PROOF
+
+חשש מאונליין:
+CUSTOMER_HOME או SOCIAL_PROOF
+
+רוצה לראות דגם:
+PRODUCT
+
+התלבטות בד:
+FABRIC
+
+התלבטות צבע:
+COLOR
+
+איכות / גימור:
+DETAIL או PRODUCTION
+
+כרגע:
+media_id = null
+
+לכן אסור לומר:
+"שלחתי"
+"מצרף"
+"הנה הסרטון"
+
+עד שמדיה אמיתית
+מחוברת למערכת.
+
+================================
+MOTIVATION
+================================
+
+primary_motivation חייב להיות אחד:
+
+DESIGN
+COMFORT
+QUALITY
+PRACTICALITY
+CUSTOMIZATION
+TRUST
+PRICE
+DELIVERY
+UNKNOWN
+
+אל תנחש בביטחון
+אם אין מספיק מידע.
+
+================================
+PURCHASE BLOCKER
+================================
+
+purchase_blocker חייב להיות אחד:
+
+PRICE
+TRUST
+COMFORT
+SIZE
+QUALITY
+DELIVERY
+PAYMENT
+UNCERTAINTY
+NONE
+UNKNOWN
+
+================================
+TEMPERATURE
+================================
+
+temperature:
+
+COLD
+WARM
+HOT
+
+buying_signal:
+מספר שלם 0-100.
+
+COLD:
+התעניינות כללית.
+
+WARM:
+עניין ממשי במוצר,
+מידה,
+מחיר,
+התאמה או מפרט.
+
+HOT:
+כוונת רכישה חזקה
+או קרבה ממשית לסגירה.
+
+================================
 TRUTH
-=========================
+================================
 
 אסור להמציא:
 
 מחיר
 טווח מחיר
-מבצע
 הנחה
+מבצע
 מלאי
 זמינות
+זמן אספקה
+משלוח
+תנאי תשלום
 חומר
-בד
 תכונת בד
 מידה
-משלוח
-זמן אספקה
 אחריות
-תשלום
-מדיה
+פרט על מוצר
+לקוח
+ביקורת
+תמונה
+סרטון
+זמן פנוי לשיחה
 
-הקטלוג,
-VERIFIED SALES KNOWLEDGE
-והשיחה הם מקורות האמת.
-
-=========================
+================================
 OUTPUT
-=========================
+================================
 
-החזר JSON תקין בלבד:
+החזר JSON תקין בלבד.
+
+בלי markdown.
+בלי טקסט נוסף.
 
 {
-  "stage": "NEW",
-  "intent": "GENERAL",
-  "product": "unknown",
-  "matched_product_id": null,
-  "requested_size": null,
-  "requested_color": null,
-  "requested_fabric": null,
-  "comfort_preference": null,
-  "budget": null,
-  "temperature": "COLD",
-  "buying_signal": 0,
-  "objection": "",
-  "missing_information": [],
-  "next_action": "",
-  "needs_human": false,
-  "should_offer_catalog": false,
-  "quote_ready": false,
-  "handoff_reason": null,
-  "media_action": "NONE",
-  "media_type": "NONE",
-  "media_id": null,
-  "media_reason": "",
-  "summary": ""
+  "analysis": {
+    "stage": "NEW",
+    "intent": "GENERAL",
+    "product": "unknown",
+    "matched_product_id": null,
+    "requested_size": null,
+    "requested_color": null,
+    "requested_fabric": null,
+    "comfort_preference": null,
+    "budget": null,
+    "primary_motivation": "UNKNOWN",
+    "purchase_blocker": "UNKNOWN",
+    "sales_objective": "DISCOVER_NEED",
+    "temperature": "COLD",
+    "buying_signal": 0,
+    "objection": "",
+    "missing_information": [],
+    "next_action": "ASK_PRODUCT",
+    "needs_human": false,
+    "should_offer_catalog": false,
+    "quote_ready": false,
+    "handoff_reason": null,
+    "should_offer_callback": false,
+    "callback_requested": false,
+    "requested_callback_time": null,
+    "media_action": "NONE",
+    "media_type": "NONE",
+    "media_id": null,
+    "media_reason": "",
+    "summary": ""
+  },
+  "reply": ""
 }
 
-INTENT:
+intent חייב להיות אחד:
 
 PRICE
 PRODUCT_INFO
@@ -658,13 +1212,24 @@ QUALITY
 FABRIC
 COMFORT
 TRUST
+CALLBACK
 GENERAL
 
-summary הוא תקציר עובדתי וקצר לנציג.
-אל תוסיף מידע שלא נאמר.
+summary:
+תקציר קצר ועובדתי לנציג.
 
-ללא markdown.
-ללא הסברים.
+reply:
+רק ההודעה שהלקוח יקבל.
+
+לעולם אל תחשוף ב-reply
+את הניתוח הפנימי,
+stage,
+temperature,
+buying_signal,
+sales_objective,
+next_action,
+handoff_reason,
+או media_reason.
 `;
 
   const text = await callOpenAI(input);
@@ -675,563 +1240,184 @@ summary הוא תקציר עובדתי וקצר לנציג.
     .trim();
 
   try {
-    return JSON.parse(cleaned);
+    const parsed = JSON.parse(cleaned);
+
+    const analysis = {
+      ...createDefaultAnalysis(),
+      ...(parsed.analysis || {})
+    };
+
+    if (relevantProduct) {
+      if (
+        !analysis.product ||
+        analysis.product === "unknown"
+      ) {
+        analysis.product =
+          relevantProduct.name;
+      }
+
+      if (
+        !analysis.matched_product_id
+      ) {
+        analysis.matched_product_id =
+          relevantProduct.id ?? null;
+      }
+    }
+
+    let reply =
+      String(parsed.reply || "").trim();
+
+    if (!reply) {
+      reply =
+        getSmartFallbackReply(
+          message,
+          analysis
+        );
+    }
+
+    return {
+      analysis,
+      reply
+    };
   } catch (error) {
     console.error(
-      "BRAIN JSON ERROR:",
+      "SALES ENGINE JSON ERROR:",
       cleaned
     );
 
+    const analysis =
+      createDefaultAnalysis();
+
+    if (relevantProduct) {
+      analysis.product =
+        relevantProduct.name || "unknown";
+
+      analysis.matched_product_id =
+        relevantProduct.id ?? null;
+    }
+
     return {
-      stage: "NEW",
-      intent: "GENERAL",
-      product: "unknown",
-      matched_product_id: null,
-      requested_size: null,
-      requested_color: null,
-      requested_fabric: null,
-      comfort_preference: null,
-      budget: null,
-      temperature: "COLD",
-      buying_signal: 0,
-      objection: "",
-      missing_information: [],
-      next_action: "MANUAL_REVIEW",
-      needs_human: false,
-      should_offer_catalog: false,
-      quote_ready: false,
-      handoff_reason: null,
-      media_action: "NONE",
-      media_type: "NONE",
-      media_id: null,
-      media_reason: "",
-      summary:
-        "לא ניתן היה לנתח את הליד."
+      analysis,
+
+      reply:
+        getSmartFallbackReply(
+          message,
+          analysis
+        )
     };
   }
 }
-// =====================================
-// HANDOFF ENGINE
-// =====================================
+// ======================================================
+// HUMAN HANDOFF / CLOSING PACKAGE
+// ======================================================
 
 function createHandoff(
   analysis,
   conversation = []
 ) {
-  if (
-    !analysis ||
-    analysis.stage !== "HUMAN_HANDOFF" ||
-    !analysis.needs_human
-  ) {
+  if (!analysis) {
+    return null;
+  }
+
+  const needsHandoff =
+    analysis.needs_human === true ||
+    analysis.callback_requested === true ||
+    analysis.stage === "HUMAN_HANDOFF";
+
+  if (!needsHandoff) {
     return null;
   }
 
   return {
-    status: "WAITING_FOR_HUMAN",
+    type:
+      analysis.callback_requested
+        ? "CALLBACK_REQUEST"
+        : "SALES_HANDOFF",
 
     reason:
       analysis.handoff_reason ||
-      "MANUAL_REVIEW",
+      "HUMAN_REQUIRED",
 
-    product:
-      analysis.product || "unknown",
+    priority:
+      analysis.temperature === "HOT"
+        ? "HIGH"
+        : "NORMAL",
 
-    product_id:
-      analysis.matched_product_id || null,
+    lead: {
+      product:
+        analysis.product || "unknown",
 
-    requested_size:
-      analysis.requested_size || null,
+      product_id:
+        analysis.matched_product_id ||
+        null,
 
-    requested_color:
-      analysis.requested_color || null,
+      requested_size:
+        analysis.requested_size ||
+        null,
 
-    requested_fabric:
-      analysis.requested_fabric || null,
+      requested_color:
+        analysis.requested_color ||
+        null,
 
-    comfort_preference:
-      analysis.comfort_preference || null,
+      requested_fabric:
+        analysis.requested_fabric ||
+        null,
 
-    budget:
-      analysis.budget || null,
+      comfort_preference:
+        analysis.comfort_preference ||
+        null,
 
-    temperature:
-      analysis.temperature || "WARM",
+      budget:
+        analysis.budget || null,
 
-    buying_signal:
-      analysis.buying_signal || 0,
+      primary_motivation:
+        analysis.primary_motivation ||
+        "UNKNOWN",
+
+      purchase_blocker:
+        analysis.purchase_blocker ||
+        "UNKNOWN",
+
+      temperature:
+        analysis.temperature ||
+        "COLD",
+
+      buying_signal:
+        Number(
+          analysis.buying_signal || 0
+        )
+    },
+
+    closing: {
+      sales_objective:
+        analysis.sales_objective ||
+        null,
+
+      quote_ready:
+        analysis.quote_ready === true,
+
+      callback_requested:
+        analysis.callback_requested ===
+        true,
+
+      requested_callback_time:
+        analysis.requested_callback_time ||
+        null
+    },
 
     summary:
-      analysis.summary ||
-      "לקוח ממתין לנציג.",
+      analysis.summary || "",
 
-    conversation,
-
-    created_at:
-      new Date().toISOString()
+    conversation:
+      Array.isArray(conversation)
+        ? conversation.slice(-14)
+        : []
   };
 }
 
-// =====================================
-// HUMAN SALES AGENT
-// =====================================
-
-async function getAIAnswer(
-  message,
-  businessData = {}
-) {
-  const catalog = getCatalog();
-
-  const conversation =
-    Array.isArray(businessData.conversation)
-      ? businessData.conversation
-      : [];
-
-  const analysis =
-    businessData.currentLeadAnalysis || {};
-
-  const input = `
-אתה איש המכירות של Casa Verona
-בשיחת WhatsApp אמיתית.
-
-אתה נשמע כמו אדם אמיתי,
-לא כמו AI ולא כמו מוקד.
-
-=========================
-STYLE
-=========================
-
-עברית טבעית, קצרה, נעימה ובטוחה.
-בדרך כלל 1-3 משפטים.
-
-אל תכתוב נאומים.
-אל תשאל כמה שאלות יחד.
-אל תחזור על מידע שהלקוח כבר נתן.
-אל תוסיף פרטים קטנים שהלקוח לא אמר.
-
-הימנע ככל האפשר מניסוחים רובוטיים:
-
-"בשמחה"
-"כמובן"
-"בהחלט"
-"ניתן"
-"ישנה אפשרות"
-"אשמח לסייע"
-"על מנת"
-"בהתאם לצרכים שלך"
-
-=========================
-CATALOG
-=========================
-
-${JSON.stringify(catalog, null, 2)}
-
-=========================
-VERIFIED SALES KNOWLEDGE
-=========================
-
-${JSON.stringify(
-  CASA_VERONA_KNOWLEDGE,
-  null,
-  2
-)}
-
-=========================
-BRAIN ANALYSIS
-=========================
-
-${JSON.stringify(analysis, null, 2)}
-
-=========================
-CONVERSATION
-=========================
-
-${JSON.stringify(conversation, null, 2)}
-
-=========================
-CURRENT MESSAGE
-=========================
-
-${message}
-
-=========================
-CORE RULE
-=========================
-
-פעל לפי next_action של ה-Brain,
-אבל כתוב כמו איש מכירות אמיתי.
-
-המטרה היא לקדם את המכירה
-רק צעד אחד בכל הודעה.
-
-אל תהפוך את השיחה לשאלון.
-
-אל תנסה לדחוף את כל המפרט
-בכל תשובה.
-
-=========================
-KNOWLEDGE USE
-=========================
-
-אם הלקוח שואל על איכות:
-
-ענה בקצרה עם העובדות הרלוונטיות.
-
-אפשר להסביר שהשלדה עשויה
-עץ מלא בשילוב סנדוויץ' כפול
-ושהספוג הוא HR40 של פולירון.
-
-אם שואל על נוחות:
-
-אפשר להסביר שאפשר לבחור
-רך, בינוני או קשה,
-ושהמבנה מיועד לתחושה
-תומכת ונוחה.
-
-אם הוא חושש משקיעה:
-
-אפשר להסביר על HR40,
-התחושה התומכת,
-ושיש שנה אחריות
-על הספוג והעץ.
-
-אל תבטיח שהספה
-"לעולם לא תשקע".
-
-אם יש חתול:
-
-אפשר לציין שיש אפשרויות בד
-המתאימות לבתים עם חתולים.
-
-אם הוא חושש מנוזלים:
-
-אפשר לציין שיש אפשרויות
-של בדים דוחי נוזלים.
-
-אם הוא רוצה גוון עץ אחר
-ובדגם יש אלמנט או מגש עץ:
-
-אפשר לציין שאפשר
-לשנות את הגוון.
-
-בחלק מהדגמים קיימות
-שכבות אקרילן או שכבות
-דמויות נוצות.
-
-אסור לייחס אותן
-לדגם מסוים
-בלי מידע מפורש.
-
-=========================
-ADAPTIVE QUESTIONS
-=========================
-
-אם next_action = ASK_PRODUCT:
-
-ברר איזה מוצר או דגם
-עניין אותו.
-
-אם next_action = ASK_SIZE:
-
-שאל רק על המידה
-שהוא צריך.
-
-אם next_action = ASK_STYLE:
-
-שאל שאלה אחת קצרה
-על הכיוון העיצובי.
-
-אם next_action = ASK_COLOR:
-
-שאל שאלה אחת קצרה
-על הגוון.
-
-אם next_action = ASK_COMFORT:
-
-שאל אם הוא אוהב ישיבה
-רכה, בינונית או קשה.
-
-אם next_action = ASK_PRIORITY:
-
-ברר מה הכי חשוב לו כרגע
-רק אם זה באמת יעזור להתקדם.
-
-=========================
-PRODUCT INFORMATION
-=========================
-
-אם next_action =
-ANSWER_PRODUCT_INFO:
-
-ענה קודם על מה
-שהלקוח שאל.
-
-אל תקריא לו
-את כל המפרט.
-
-בחר רק את העובדות
-שרלוונטיות לשאלה שלו.
-
-אחרי שענית,
-אפשר לקדם את השיחה
-בשאלה אחת טבעית
-רק אם צריך.
-
-=========================
-MEDIA
-=========================
-
-אם next_action = SEND_MEDIA:
-
-ה-Brain החליט
-שהוכחה ויזואלית יכולה
-לעזור למכירה.
-
-אבל כרגע אין
-media_id או URL מאומת
-שמאפשר לשרת לשלוח
-את הקובץ בפועל.
-
-לכן:
-
-אל תגיד "שלחתי".
-
-אל תגיד "מצרף".
-
-אל תמציא תמונה.
-
-אל תמציא סרטון.
-
-אפשר לכתוב משפט קצר
-שמכין את השיחה
-להצגת חומר מתאים.
-
-לדוגמה רעיונית בלבד:
-
-אם הלקוח רוצה לראות
-איך זה נראה בבית אמיתי,
-אפשר לשאול:
-
-"רוצה לראות איך זה נראה
-אצל לקוח בבית?"
-
-אל תחזור תמיד
-על אותו משפט.
-
-כאשר בעתיד יהיה
-media_id אמיתי,
-השרת יוכל לשלוח
-את המדיה בפועל.
-
-=========================
-PRICE
-=========================
-
-אם price = null:
-
-אסור לתת מספר.
-
-אסור להמציא טווח.
-
-אסור להמציא
-נוסחת תמחור.
-
-אם next_action = ASK_SIZE:
-
-שאל את המידה
-בצורה טבעית.
-
-אל תשאל צבע ובד
-רק בשביל לעכב מחיר.
-
-=========================
-HUMAN QUOTE
-=========================
-
-אם:
-
-stage = HUMAN_HANDOFF
-
-וגם:
-
-next_action = HUMAN_QUOTE
-
-אז הלקוח בשל
-להצעת מחיר מדויקת
-מנציג.
-
-במקרה כזה:
-
-אל תשאל שוב מידה.
-
-אל תתחיל למכור
-את המוצר מחדש.
-
-אל תעמיס שאלות נוספות.
-
-אמור בקצרה ובטבעיות
-שהפרטים עוברים לנציג
-שייתן מחיר מדויק
-וימשיך איתו.
-
-מותר לומר
-"אני מעביר"
-רק כאשר:
-
-stage = HUMAN_HANDOFF
-
-וגם:
-
-needs_human = true
-
-=========================
-OBJECTIONS
-=========================
-
-אם next_action =
-HANDLE_OBJECTION:
-
-ענה קודם
-להתנגדות עצמה.
-
-אם הלקוח אומר:
-
-"יקר לי"
-
-אל תכתוב נאום.
-
-אם התקציב עדיין לא ידוע,
-אפשר לברר
-באיזה טווח הוא
-רצה להיות.
-
-אם זו התנגדות אמון:
-
-ענה בצורה רגועה
-עם עובדות מאומתות.
-
-אם הוכחה ויזואלית
-יכולה לעזור,
-ה-Brain יכול לבחור
-SEND_MEDIA.
-
-=========================
-READY TO BUY
-=========================
-
-אם הלקוח רוצה להזמין,
-לסגור או להתקדם:
-
-אל תמכור לו מחדש.
-
-אל תחזיר אותו
-לשאלות שכבר עברנו.
-
-אם ה-Brain סימן
-HUMAN_HANDOFF:
-
-קדם אותו לנציג
-בצורה קצרה וטבעית.
-
-=========================
-MEMORY
-=========================
-
-זכור את מה שכבר נאמר.
-
-במיוחד:
-
-דגם
-מידה
-צבע
-בד
-תקציב
-רמת נוחות
-התנגדות
-כוונת רכישה
-
-אל תשאל שוב
-על מידע שכבר ידוע.
-
-=========================
-DO NOT INVENT
-=========================
-
-אסור להמציא:
-
-מחיר
-הנחה
-מבצע
-מלאי
-זמינות
-חומר
-תכונת בד
-אחריות
-משלוח
-זמן אספקה
-תנאי תשלום
-מידע על דגם
-תמונה
-סרטון
-
-=========================
-INTERNAL DATA
-=========================
-
-לעולם אל תחשוף:
-
-Brain
-AI
-stage
-temperature
-HOT
-WARM
-COLD
-buying_signal
-next_action
-handoff_reason
-media_action
-media_reason
-
-=========================
-FINAL CHECK
-=========================
-
-לפני השליחה בדוק:
-
-האם ענית למה
-שהלקוח צריך?
-
-האם קידמת את המכירה
-רק צעד אחד?
-
-האם שאלת משהו
-שכבר ידוע?
-
-האם הוספת פרט
-שהלקוח לא אמר?
-
-האם המצאת מידע?
-
-האם זה נשמע
-כמו הודעת WhatsApp
-של איש מכירות אמיתי?
-
-החזר רק
-את ההודעה ללקוח.
-`;
-
-  const answer =
-    await callOpenAI(input);
-
-  return (
-    answer ||
-    "היי, מה שלומך? איזה דגם ראית?"
-  );
-}
-
-// =====================================
+// ======================================================
 // WHATSAPP
-// =====================================
+// ======================================================
 
 async function sendWhatsAppMessage(
   to,
@@ -1242,7 +1428,13 @@ async function sendWhatsAppMessage(
     !WHATSAPP_PHONE_NUMBER_ID
   ) {
     throw new Error(
-      "WhatsApp environment variables חסרים"
+      "WhatsApp credentials missing"
+    );
+  }
+
+  if (!to || !message) {
+    throw new Error(
+      "WhatsApp recipient or message missing"
     );
   }
 
@@ -1252,24 +1444,34 @@ async function sendWhatsAppMessage(
       method: "POST",
 
       headers: {
-        "Content-Type": "application/json",
         Authorization:
-          `Bearer ${WHATSAPP_ACCESS_TOKEN}`
+          `Bearer ${WHATSAPP_ACCESS_TOKEN}`,
+
+        "Content-Type":
+          "application/json"
       },
 
       body: JSON.stringify({
-        messaging_product: "whatsapp",
+        messaging_product:
+          "whatsapp",
+
+        recipient_type:
+          "individual",
+
         to,
+
         type: "text",
 
         text: {
+          preview_url: false,
           body: message
         }
       })
     }
   );
 
-  const data = await response.json();
+  const data =
+    await response.json();
 
   if (!response.ok) {
     console.error(
@@ -1279,537 +1481,683 @@ async function sendWhatsAppMessage(
 
     throw new Error(
       data.error?.message ||
-      "WhatsApp API error"
+      "WhatsApp send failed"
     );
   }
 
   return data;
 }
 
-// =====================================
+// ======================================================
 // SERVER
-// =====================================
+// ======================================================
 
-const server = http.createServer(
-  async (req, res) => {
-    res.setHeader(
-      "Access-Control-Allow-Origin",
-      "*"
-    );
-
-    res.setHeader(
-      "Access-Control-Allow-Methods",
-      "GET, POST, OPTIONS"
-    );
-
-    res.setHeader(
-      "Access-Control-Allow-Headers",
-      "Content-Type"
-    );
-
-    if (req.method === "OPTIONS") {
-      res.writeHead(204);
-      res.end();
-      return;
-    }
-
-    const url = new URL(
-      req.url,
-      "http://localhost"
-    );
-
-    // HOME
-
-    if (
-      url.pathname === "/" &&
-      req.method === "GET"
-    ) {
-      const catalog = getCatalog();
-
-      sendJSON(res, 200, {
-        success: true,
-        message:
-          "Casa Verona Adaptive Sales Brain + Knowledge + Media Engine עובד!",
-        catalog_products:
-          catalog.products?.length || 0
-      });
-
-      return;
-    }
-
-    // BRAIN TEST
-
-    if (
-      url.pathname === "/brain-test" &&
-      req.method === "GET"
-    ) {
-      serveHtml(
-        res,
-        "brain-test.html"
-      );
-
-      return;
-    }
-
-    // SALES SIMULATOR
-
-    if (
-      url.pathname ===
-        "/sales-simulator" &&
-      req.method === "GET"
-    ) {
-      serveHtml(
-        res,
-        "sales-simulator.html"
-      );
-
-      return;
-    }
-
-    // CATALOG
-
-    if (
-      url.pathname === "/catalog" &&
-      req.method === "GET"
-    ) {
-      sendJSON(res, 200, {
-        success: true,
-        catalog: getCatalog()
-      });
-
-      return;
-    }
-
-    // WEBHOOK VERIFY
-
-    if (
-      url.pathname === "/webhook" &&
-      req.method === "GET"
-    ) {
-      const mode =
-        url.searchParams.get(
-          "hub.mode"
-        );
-
-      const token =
-        url.searchParams.get(
-          "hub.verify_token"
-        );
-
-      const challenge =
-        url.searchParams.get(
-          "hub.challenge"
-        );
-
-      if (
-        mode === "subscribe" &&
-        token ===
-          WHATSAPP_VERIFY_TOKEN
-      ) {
-        res.writeHead(200, {
-          "Content-Type": "text/plain"
-        });
-
-        res.end(challenge);
-        return;
-      }
-
-      res.writeHead(403);
-      res.end("Forbidden");
-      return;
-    }
-
-    // WHATSAPP WEBHOOK
-
-    if (
-      url.pathname === "/webhook" &&
-      req.method === "POST"
-    ) {
+const server =
+  http.createServer(
+    async (req, res) => {
       try {
-        const body =
-          await readRequestBody(req);
+        // -----------------------------------------------
+        // CORS
+        // -----------------------------------------------
 
-        const data =
-          JSON.parse(body || "{}");
-
-        console.log(
-          "WHATSAPP WEBHOOK:",
-          JSON.stringify(
-            data,
-            null,
-            2
-          )
+        res.setHeader(
+          "Access-Control-Allow-Origin",
+          "*"
         );
 
-        const incomingMessage =
-          data.entry?.[0]
-            ?.changes?.[0]
-            ?.value
-            ?.messages?.[0];
+        res.setHeader(
+          "Access-Control-Allow-Headers",
+          "Content-Type"
+        );
 
-        if (
-          !incomingMessage ||
-          incomingMessage.type !== "text"
-        ) {
-          res.writeHead(200);
-          res.end("EVENT_RECEIVED");
+        res.setHeader(
+          "Access-Control-Allow-Methods",
+          "GET, POST, OPTIONS"
+        );
+
+        if (req.method === "OPTIONS") {
+          res.writeHead(204);
+          res.end();
           return;
         }
 
-        const from =
-          incomingMessage.from;
-
-        const text =
-          incomingMessage.text?.body || "";
-
-        // כרגע WhatsApp עדיין בלי
-        // persistent conversation memory.
-        const conversation = [];
-
-        const analysis =
-          await analyzeLead(
-            text,
-            conversation
+        const url =
+          new URL(
+            req.url,
+            `http://${req.headers.host}`
           );
 
-        const handoff =
-          createHandoff(
-            analysis,
-            conversation
+        // -----------------------------------------------
+        // HEALTH / HOME
+        // -----------------------------------------------
+
+        if (
+          url.pathname === "/" &&
+          req.method === "GET"
+        ) {
+          const catalog =
+            getCatalog();
+
+          sendJSON(
+            res,
+            200,
+            {
+              success: true,
+
+              brand:
+                "Casa Verona",
+
+              message:
+                "Casa Verona AI Sales Closer עובד!",
+
+              engine:
+                "ONE_CALL",
+
+              ai_calls_per_message:
+                1,
+
+              sales_closer:
+                true,
+
+              callback_engine:
+                true,
+
+              catalog_products:
+                Array.isArray(
+                  catalog.products
+                )
+                  ? catalog.products.length
+                  : 0
+            }
           );
 
-        if (handoff) {
+          return;
+        }
+
+        // -----------------------------------------------
+        // BRAIN TEST PAGE
+        // -----------------------------------------------
+
+        if (
+          url.pathname ===
+            "/brain-test" &&
+          req.method === "GET"
+        ) {
+          serveHtml(
+            res,
+            "brain-test.html"
+          );
+
+          return;
+        }
+
+        // -----------------------------------------------
+        // SALES SIMULATOR PAGE
+        // -----------------------------------------------
+
+        if (
+          url.pathname ===
+            "/sales-simulator" &&
+          req.method === "GET"
+        ) {
+          serveHtml(
+            res,
+            "sales-simulator.html"
+          );
+
+          return;
+        }
+
+        // -----------------------------------------------
+        // CATALOG API
+        // -----------------------------------------------
+
+        if (
+          url.pathname ===
+            "/catalog" &&
+          req.method === "GET"
+        ) {
+          sendJSON(
+            res,
+            200,
+            {
+              success: true,
+              catalog: getCatalog()
+            }
+          );
+
+          return;
+        }
+
+        // -----------------------------------------------
+        // WHATSAPP WEBHOOK VERIFY
+        // -----------------------------------------------
+
+        if (
+          url.pathname ===
+            "/webhook" &&
+          req.method === "GET"
+        ) {
+          const mode =
+            url.searchParams.get(
+              "hub.mode"
+            );
+
+          const token =
+            url.searchParams.get(
+              "hub.verify_token"
+            );
+
+          const challenge =
+            url.searchParams.get(
+              "hub.challenge"
+            );
+
+          if (
+            mode === "subscribe" &&
+            token ===
+              WHATSAPP_VERIFY_TOKEN
+          ) {
+            console.log(
+              "WEBHOOK VERIFIED"
+            );
+
+            res.writeHead(200, {
+              "Content-Type":
+                "text/plain"
+            });
+
+            res.end(
+              challenge || ""
+            );
+
+            return;
+          }
+
+          res.writeHead(403, {
+            "Content-Type":
+              "text/plain"
+          });
+
+          res.end("Forbidden");
+
+          return;
+        }
+
+        // -----------------------------------------------
+        // WHATSAPP INCOMING MESSAGE
+        // -----------------------------------------------
+
+        if (
+          url.pathname ===
+            "/webhook" &&
+          req.method === "POST"
+        ) {
+          const body =
+            await readRequestBody(req);
+
+          let data;
+
+          try {
+            data =
+              JSON.parse(
+                body || "{}"
+              );
+          } catch (error) {
+            console.error(
+              "WEBHOOK JSON ERROR:",
+              error
+            );
+
+            res.writeHead(200);
+            res.end(
+              "EVENT_RECEIVED"
+            );
+
+            return;
+          }
+
+          const change =
+            data?.entry?.[0]
+              ?.changes?.[0]
+              ?.value;
+
+          const incoming =
+            change?.messages?.[0];
+
+          // Ignore events that are not
+          // incoming customer messages.
+          if (!incoming) {
+            res.writeHead(200);
+            res.end(
+              "EVENT_RECEIVED"
+            );
+
+            return;
+          }
+
+          const from =
+            incoming.from;
+
+          const messageType =
+            incoming.type;
+
+          // At this stage the AI sales engine
+          // handles text messages.
+          if (
+            messageType !== "text"
+          ) {
+            console.log(
+              "IGNORED WHATSAPP MESSAGE TYPE:",
+              messageType
+            );
+
+            res.writeHead(200);
+            res.end(
+              "EVENT_RECEIVED"
+            );
+
+            return;
+          }
+
+          const customerMessage =
+            String(
+              incoming.text?.body ||
+              ""
+            ).trim();
+
+          if (!customerMessage) {
+            res.writeHead(200);
+            res.end(
+              "EVENT_RECEIVED"
+            );
+
+            return;
+          }
+
           console.log(
-            "🔥 HUMAN HANDOFF:",
+            "📩 CUSTOMER:",
+            from,
+            customerMessage
+          );
+
+          /*
+            IMPORTANT:
+
+            Persistent WhatsApp conversation
+            memory is not connected yet.
+
+            For now this is intentionally empty.
+
+            We do NOT pretend the server
+            remembers previous WhatsApp
+            messages when it does not.
+
+            The simulator can still send
+            conversation history through /ai.
+          */
+          const conversation = [];
+
+          // =============================================
+          // EXACTLY ONE AI CALL
+          // =============================================
+
+          const result =
+            await runSalesEngine(
+              customerMessage,
+              conversation
+            );
+
+          const analysis =
+            result.analysis;
+
+          const handoff =
+            createHandoff(
+              analysis,
+              conversation
+            );
+
+          console.log(
+            "🧠 SALES BRAIN:",
             JSON.stringify(
-              handoff,
+              analysis,
               null,
               2
             )
           );
-        }
 
-        const answer =
-          await getAIAnswer(
-            text,
-            {
-              currentLeadAnalysis:
-                analysis,
-              conversation
-            }
+          if (handoff) {
+            console.log(
+              "🔥 HANDOFF:",
+              JSON.stringify(
+                handoff,
+                null,
+                2
+              )
+            );
+          }
+
+          // Send only the customer-facing
+          // reply. Internal analysis never
+          // goes to the customer.
+          await sendWhatsAppMessage(
+            from,
+            result.reply
           );
 
-        await sendWhatsAppMessage(
-          from,
-          answer
-        );
+          res.writeHead(200, {
+            "Content-Type":
+              "text/plain"
+          });
 
-        res.writeHead(200);
-        res.end("EVENT_RECEIVED");
-      } catch (error) {
-        console.error(
-          "WHATSAPP WEBHOOK ERROR:",
-          error
-        );
+          res.end(
+            "EVENT_RECEIVED"
+          );
 
-        res.writeHead(200);
-        res.end("EVENT_RECEIVED");
-      }
+          return;
+        }
 
-      return;
-    }
+        // -----------------------------------------------
         // BRAIN API
-
-    if (
-      url.pathname === "/brain" &&
-      req.method === "POST"
-    ) {
-      try {
-        const body =
-          await readRequestBody(req);
-
-        const data =
-          JSON.parse(body || "{}");
-
-        const message =
-          String(data.message || "");
-
-        const conversation =
-          Array.isArray(data.conversation)
-            ? data.conversation
-            : [];
-
-        if (!message.trim()) {
-          sendJSON(res, 400, {
-            success: false,
-            error: "חסרה הודעת לקוח"
-          });
-
-          return;
-        }
-
-        const analysis =
-          await analyzeLead(
-            message,
-            conversation
-          );
-
-        const handoff =
-          createHandoff(
-            analysis,
-            conversation
-          );
-
-        sendJSON(res, 200, {
-          success: true,
-          analysis,
-          handoff
-        });
-      } catch (error) {
-        console.error(
-          "BRAIN ERROR:",
-          error
-        );
-
-        sendJSON(res, 500, {
-          success: false,
-          error:
-            "Brain analysis failed"
-        });
-      }
-
-      return;
-    }
-
-    // AI GET
-
-    if (
-      url.pathname === "/ai" &&
-      req.method === "GET"
-    ) {
-      const message =
-        url.searchParams.get(
-          "message"
-        ) || "";
-
-      try {
-        const conversation = [];
-
-        const analysis =
-          await analyzeLead(
-            message,
-            conversation
-          );
-
-        const handoff =
-          createHandoff(
-            analysis,
-            conversation
-          );
-
-        const answer =
-          await getAIAnswer(
-            message,
-            {
-              currentLeadAnalysis:
-                analysis,
-              conversation
-            }
-          );
-
-        sendJSON(res, 200, {
-          success: true,
-          answer,
-          analysis,
-          handoff
-        });
-      } catch (error) {
-        console.error(
-          "AI GET ERROR:",
-          error
-        );
-
-        sendJSON(res, 500, {
-          success: false,
-          error:
-            "שגיאה פנימית בשרת"
-        });
-      }
-
-      return;
-    }
-
-    // AI POST
-
-    if (
-      url.pathname === "/ai" &&
-      req.method === "POST"
-    ) {
-      try {
-        const body =
-          await readRequestBody(req);
-
-        const data =
-          JSON.parse(body || "{}");
-
-        const message =
-          String(data.message || "");
-
-        if (!message.trim()) {
-          sendJSON(res, 400, {
-            success: false,
-            error: "חסרה הודעת לקוח"
-          });
-
-          return;
-        }
-
-        let conversation = [];
+        // -----------------------------------------------
 
         if (
-          Array.isArray(
-            data.conversation
-          )
+          url.pathname ===
+            "/brain" &&
+          req.method === "POST"
         ) {
-          conversation =
-            data.conversation;
-        } else if (
-          Array.isArray(data.leads) &&
-          Array.isArray(
-            data.leads[0]
-              ?.conversation
-          )
-        ) {
-          conversation =
-            data.leads[0]
-              .conversation;
-        }
+          const body =
+            await readRequestBody(req);
 
-        /*
-          חשוב:
-          מנתחים מחדש עם
-          כל היסטוריית השיחה.
+          const data =
+            JSON.parse(
+              body || "{}"
+            );
 
-          כך ה-Brain זוכר
-          מידע שהלקוח כבר מסר
-          ויכול לבחור את הצעד
-          הבא בצורה אדפטיבית.
-        */
+          const message =
+            String(
+              data.message || ""
+            );
 
-        const analysis =
-          await analyzeLead(
-            message,
-            conversation
-          );
-
-        const handoff =
-          createHandoff(
-            analysis,
-            conversation
-          );
-
-        if (handoff) {
-          console.log(
-            "🔥 HUMAN HANDOFF:",
-            JSON.stringify(
-              handoff,
-              null,
-              2
+          const conversation =
+            Array.isArray(
+              data.conversation
             )
-          );
-        }
+              ? data.conversation
+              : [];
 
-        const answer =
-          await getAIAnswer(
-            message,
+          if (!message.trim()) {
+            sendJSON(
+              res,
+              400,
+              {
+                success: false,
+                error:
+                  "חסרה הודעת לקוח"
+              }
+            );
+
+            return;
+          }
+
+          // ONE AI CALL
+          const result =
+            await runSalesEngine(
+              message,
+              conversation
+            );
+
+          const handoff =
+            createHandoff(
+              result.analysis,
+              conversation
+            );
+
+          sendJSON(
+            res,
+            200,
             {
-              currentLeadAnalysis:
-                analysis,
+              success: true,
 
-              conversation,
+              analysis:
+                result.analysis,
 
-              leads:
-                Array.isArray(
-                  data.leads
-                )
-                  ? data.leads
-                  : [],
+              handoff,
 
-              products:
-                Array.isArray(
-                  data.products
-                )
-                  ? data.products
-                  : [],
+              reply:
+                result.reply,
 
-              sales:
-                Array.isArray(
-                  data.sales
-                )
-                  ? data.sales
-                  : [],
-
-              orders:
-                Array.isArray(
-                  data.orders
-                )
-                  ? data.orders
-                  : []
+              engine:
+                "ONE_CALL"
             }
           );
 
-        sendJSON(res, 200, {
-          success: true,
-          answer,
-          analysis,
-          handoff
-        });
+          return;
+        }
+                // -----------------------------------------------
+        // AI GET
+        // Useful for quick browser tests
+        // -----------------------------------------------
+
+        if (
+          url.pathname === "/ai" &&
+          req.method === "GET"
+        ) {
+          const message =
+            String(
+              url.searchParams.get(
+                "message"
+              ) || ""
+            ).trim();
+
+          if (!message) {
+            sendJSON(
+              res,
+              400,
+              {
+                success: false,
+                error:
+                  "חסרה הודעת לקוח"
+              }
+            );
+
+            return;
+          }
+
+          const conversation = [];
+
+          // =============================================
+          // EXACTLY ONE AI CALL
+          // =============================================
+
+          const result =
+            await runSalesEngine(
+              message,
+              conversation
+            );
+
+          const handoff =
+            createHandoff(
+              result.analysis,
+              conversation
+            );
+
+          sendJSON(
+            res,
+            200,
+            {
+              success: true,
+
+              answer:
+                result.reply,
+
+              analysis:
+                result.analysis,
+
+              handoff,
+
+              engine:
+                "ONE_CALL"
+            }
+          );
+
+          return;
+        }
+
+        // -----------------------------------------------
+        // AI POST
+        // Main endpoint used by sales simulator
+        // -----------------------------------------------
+
+        if (
+          url.pathname === "/ai" &&
+          req.method === "POST"
+        ) {
+          const body =
+            await readRequestBody(req);
+
+          const data =
+            JSON.parse(
+              body || "{}"
+            );
+
+          const message =
+            String(
+              data.message || ""
+            ).trim();
+
+          const conversation =
+            Array.isArray(
+              data.conversation
+            )
+              ? data.conversation
+              : [];
+
+          if (!message) {
+            sendJSON(
+              res,
+              400,
+              {
+                success: false,
+                error:
+                  "חסרה הודעת לקוח"
+              }
+            );
+
+            return;
+          }
+
+          // =============================================
+          // EXACTLY ONE AI CALL
+          // Brain + sales reply together
+          // =============================================
+
+          const result =
+            await runSalesEngine(
+              message,
+              conversation
+            );
+
+          const analysis =
+            result.analysis;
+
+          const handoff =
+            createHandoff(
+              analysis,
+              conversation
+            );
+
+          if (handoff) {
+            console.log(
+              "🔥 SALES HANDOFF:",
+              JSON.stringify(
+                handoff,
+                null,
+                2
+              )
+            );
+          }
+
+          sendJSON(
+            res,
+            200,
+            {
+              success: true,
+
+              answer:
+                result.reply,
+
+              analysis,
+
+              handoff,
+
+              engine:
+                "ONE_CALL"
+            }
+          );
+
+          return;
+        }
+
+        // -----------------------------------------------
+        // 404
+        // -----------------------------------------------
+
+        sendJSON(
+          res,
+          404,
+          {
+            success: false,
+            error: "Not found"
+          }
+        );
       } catch (error) {
         console.error(
-          "AI POST ERROR:",
+          "SERVER ERROR:",
           error
         );
 
-        sendJSON(res, 500, {
-          success: false,
-          error:
-            "שגיאה פנימית בשרת"
-        });
+        sendJSON(
+          res,
+          500,
+          {
+            success: false,
+            error:
+              "Internal server error",
+
+            message:
+              error.message ||
+              "Unknown error"
+          }
+        );
       }
-
-      return;
     }
+  );
 
-    // 404
-
-    sendJSON(res, 404, {
-      success: false,
-      error: "Not Found"
-    });
-  }
-);
-
-// =====================================
-// START
-// =====================================
+// ======================================================
+// START SERVER
+// ======================================================
 
 const PORT =
   process.env.PORT || 3000;
 
-server.listen(PORT, () => {
-  console.log(
-    `Casa Verona AI Engine running on port ${PORT}`
-  );
+server.listen(
+  PORT,
+  () => {
+    console.log(
+      `Casa Verona server running on port ${PORT}`
+    );
 
-  const catalog = getCatalog();
+    console.log(
+      "🧠 Sales Engine: ONE AI CALL per customer message"
+    );
 
-  console.log(
-    `Catalog ready with ${
-      catalog.products?.length || 0
-    } products`
-  );
+    console.log(
+      "🔥 AI Sales Closer: ENABLED"
+    );
 
-  console.log(
-    "Casa Verona Knowledge + Adaptive Sales + Media Decision Engine ready"
-  );
-});
+    console.log(
+      "📞 Closing Callback Engine: ENABLED"
+    );
+  }
+);
