@@ -2039,13 +2039,49 @@ const server =
           return;
         }
 
-        const url =
+       const url =
           new URL(
             req.url,
             `http://${req.headers.host}`
           );
 
-        
+        // -----------------------------------------------
+// CASA VERONA OS DASHBOARD
+// -----------------------------------------------
+
+if (
+  req.method === "GET" &&
+  (url.pathname === "/dashboard" ||
+   url.pathname === "/dashboard/")
+) {
+  try {
+    const dashboardPath =
+      require("path").join(__dirname, "dashboard.html");
+
+    const dashboard =
+      require("fs").readFileSync(
+        dashboardPath,
+        "utf8"
+      );
+
+    res.writeHead(200, {
+      "Content-Type": "text/html; charset=utf-8"
+    });
+
+    res.end(dashboard);
+  } catch (error) {
+    console.error("DASHBOARD ERROR:", error);
+
+    res.writeHead(500, {
+      "Content-Type": "text/plain; charset=utf-8"
+    });
+
+    res.end("Dashboard could not be loaded");
+  }
+
+  return;
+}
+
         // -----------------------------------------------
 // API - LEADS
 // -----------------------------------------------
