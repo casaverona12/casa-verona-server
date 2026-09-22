@@ -2018,7 +2018,62 @@ if (
 
   return;
 }
-        
+
+        // -----------------------------------------------
+// MEMORY TEST
+// -----------------------------------------------
+
+if (
+  url.pathname === "/memory-test" &&
+  req.method === "GET"
+) {
+  if (!supabase) {
+    sendJSON(res, 503, {
+      success: false,
+      error: "Supabase not configured"
+    });
+    return;
+  }
+
+  const phone =
+    String(
+      url.searchParams.get("phone") || ""
+    ).trim();
+
+  if (!phone) {
+    sendJSON(res, 400, {
+      success: false,
+      error: "Missing phone"
+    });
+    return;
+  }
+
+  const lead =
+    await getOrCreateLead(phone);
+
+  const conversation =
+    await loadConversation(
+      lead.id,
+      14
+    );
+
+  sendJSON(res, 200, {
+    success: true,
+    lead: {
+      id: lead.id,
+      phone: lead.phone,
+      stage: lead.stage,
+      temperature: lead.temperature,
+      product_interest:
+        lead.product_interest
+    },
+    conversation,
+    messages_count:
+      conversation.length
+  });
+
+  return;
+}
         // -----------------------------------------------
         // CATALOG API
         // -----------------------------------------------
