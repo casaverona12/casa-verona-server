@@ -2023,9 +2023,6 @@ if (
 // MEMORY TEST
 // -----------------------------------------------
 if (
-  url.pathname === "/memory-test/save" &&
-  req.method === "GET"
-) {
   const phone =
     String(
       url.searchParams.get("phone") || ""
