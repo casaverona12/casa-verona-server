@@ -2152,6 +2152,7 @@ if (
 let ordersQuery =
   db
   
+  
   .from("orders")
     .select(`
       id,
@@ -2304,7 +2305,7 @@ const {
   error: currentProductionError
 } = await db
   .from("production_orders")
-  .select("id, order_id, status")
+  .select("id, order_id, status, assigned_worker_id")
   .eq("id", productionId)
   .single();
 
@@ -2312,7 +2313,14 @@ if (currentProductionError || !currentProduction) {
   res.writeHead(404, {
     "Content-Type": "application/json; charset=utf-8"
   });
-
+  
+if (
+  auth.profile.role === USER_ROLES.FACTORY_WORKER &&
+  currentProduction.assigned_worker_id !== auth.user.id
+) {
+  sendForbidden(res);
+  return;
+}
   res.end(
     JSON.stringify({
       success: false,
