@@ -2286,43 +2286,88 @@ if (
 
   const db = requireSupabase();
 
-  const { data, error } =
-    await db
-      .from("production_orders")
-      .update({
-        status: body.status,
-        updated_at: new Date().toISOString()
-      })
-      .eq("id", productionId)
-      .select(`
-        id,
-        order_id,
-        status,
-        created_at,
-        updated_at
-      `)
-      .single();
+// Get the current status before changing it
+const {
+  data: currentProduction,
+  error: currentProductionError
+} = await db
+  .from("production_orders")
+  .select("id, order_id, status")
+  .eq("id", productionId)
+  .single();
 
-  if (error) {
-    throw new Error(
-      `SUPABASE UPDATE PRODUCTION ERROR: ${error.message}`
-    );
-  }
-
-  res.writeHead(200, {
+if (currentProductionError || !currentProduction) {
+  res.writeHead(404, {
     "Content-Type": "application/json; charset=utf-8"
   });
 
   res.end(
     JSON.stringify({
-      success: true,
-      production_order: data
+      success: false,
+      error: "PRODUCTION_ORDER_NOT_FOUND"
     })
   );
 
   return;
 }
 
+const oldStatus = currentProduction.status;
+
+// Update production status
+const { data, error } =
+  await db
+    .from("production_orders")
+    .update({
+      status: body.status,
+      updated_at: new Date().toISOString()
+    })
+    .eq("id", productionId)
+    .select(`
+      id,
+      order_id,
+      status,
+      created_at,
+      updated_at
+    `)
+    .single();
+
+if (error) {
+  throw new Error(
+    `SUPABASE UPDATE PRODUCTION ERROR: ${error.message}`
+  );
+}
+
+// Save activity: who changed what and when
+const { error: activityError } =
+  await db
+    .from("production_activity")
+    .insert({
+      production_order_id: productionId,
+      user_id: auth.user.id,
+      action: "STATUS_CHANGED",
+      old_status: oldStatus,
+      new_status: body.status
+    });
+
+if (activityError) {
+  throw new Error(
+    `SUPABASE PRODUCTION ACTIVITY ERROR: ${activityError.message}`
+  );
+}
+
+res.writeHead(200, {
+  "Content-Type": "application/json; charset=utf-8"
+});
+
+res.end(
+  JSON.stringify({
+    success: true,
+    production_order: data
+  })
+);
+
+return;
+}
 // -----------------------------------------------
 // API - CREATE ORDER
 // -----------------------------------------------
