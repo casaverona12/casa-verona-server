@@ -2206,6 +2206,123 @@ if (
   return;
 }
 
+// =====================================================
+// FACTORY API — UPDATE PRODUCTION STATUS
+// =====================================================
+
+if (
+  req.method === "PATCH" &&
+  url.pathname.startsWith("/api/factory/production/")
+) {
+  const auth = await requireAuth(req, res, [
+    USER_ROLES.FACTORY_OWNER,
+    USER_ROLES.FACTORY_WORKER,
+    USER_ROLES.ADMIN
+  ]);
+
+  if (!auth) {
+    return;
+  }
+
+  const productionId =
+    url.pathname.split("/").filter(Boolean).pop();
+
+  if (!productionId) {
+    res.writeHead(400, {
+      "Content-Type": "application/json; charset=utf-8"
+    });
+
+    res.end(
+      JSON.stringify({
+        success: false,
+        error: "MISSING_PRODUCTION_ID"
+      })
+    );
+
+    return;
+  }
+
+  const bodyText = await readRequestBody(req);
+
+  let body;
+
+  try {
+    body = JSON.parse(bodyText || "{}");
+  } catch {
+    res.writeHead(400, {
+      "Content-Type": "application/json; charset=utf-8"
+    });
+
+    res.end(
+      JSON.stringify({
+        success: false,
+        error: "INVALID_JSON"
+      })
+    );
+
+    return;
+  }
+
+  const allowedStatuses = [
+    "WAITING",
+    "IN_PROGRESS",
+    "READY"
+  ];
+
+  if (!allowedStatuses.includes(body.status)) {
+    res.writeHead(400, {
+      "Content-Type": "application/json; charset=utf-8"
+    });
+
+    res.end(
+      JSON.stringify({
+        success: false,
+        error: "INVALID_PRODUCTION_STATUS"
+      })
+    );
+
+    return;
+  }
+
+  const db = requireSupabase();
+
+  const { data, error } =
+    await db
+      .from("production_orders")
+      .update({
+        status: body.status,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", productionId)
+      .select(`
+        id,
+        order_id,
+        status,
+        created_at,
+        updated_at
+      `)
+      .single();
+
+  if (error) {
+    throw new Error(
+      `SUPABASE UPDATE PRODUCTION ERROR: ${error.message}`
+    );
+  }
+
+  res.writeHead(200, {
+    "Content-Type": "application/json; charset=utf-8"
+  });
+
+  res.end(
+    JSON.stringify({
+      success: true,
+      production_order: data
+    })
+  );
+
+  return;
+}
+
 // -----------------------------------------------
 // API - CREATE ORDER
 // -----------------------------------------------
