@@ -2368,6 +2368,167 @@ res.end(
 
 return;
 }
+
+// =====================================================
+// FACTORY API — ASSIGN WORKER
+// Only FACTORY_OWNER / ADMIN
+// =====================================================
+
+if (
+  req.method === "PATCH" &&
+  url.pathname.startsWith("/api/factory/assign-worker/")
+) {
+  const auth = await requireAuth(req, res, [
+    USER_ROLES.FACTORY_OWNER,
+    USER_ROLES.ADMIN
+  ]);
+
+  if (!auth) {
+    return;
+  }
+
+  const productionId =
+    url.pathname.split("/").filter(Boolean).pop();
+
+  if (!productionId) {
+    res.writeHead(400, {
+      "Content-Type": "application/json; charset=utf-8"
+    });
+
+    res.end(
+      JSON.stringify({
+        success: false,
+        error: "MISSING_PRODUCTION_ID"
+      })
+    );
+
+    return;
+  }
+
+  const bodyText = await readRequestBody(req);
+
+  let body;
+
+  try {
+    body = JSON.parse(bodyText || "{}");
+  } catch {
+    res.writeHead(400, {
+      "Content-Type": "application/json; charset=utf-8"
+    });
+
+    res.end(
+      JSON.stringify({
+        success: false,
+        error: "INVALID_JSON"
+      })
+    );
+
+    return;
+  }
+
+  if (!body.worker_id) {
+    res.writeHead(400, {
+      "Content-Type": "application/json; charset=utf-8"
+    });
+
+    res.end(
+      JSON.stringify({
+        success: false,
+        error: "MISSING_WORKER_ID"
+      })
+    );
+
+    return;
+  }
+
+  const db = requireSupabase();
+
+  // Make sure the selected user is an active factory worker
+  const { data: worker, error: workerError } =
+    await db
+      .from("user_profiles")
+      .select("id, full_name, role, language, is_active")
+      .eq("id", body.worker_id)
+      .single();
+
+  if (
+    workerError ||
+    !worker ||
+    worker.role !== USER_ROLES.FACTORY_WORKER ||
+    worker.is_active !== true
+  ) {
+    res.writeHead(400, {
+      "Content-Type": "application/json; charset=utf-8"
+    });
+
+    res.end(
+      JSON.stringify({
+        success: false,
+        error: "INVALID_FACTORY_WORKER"
+      })
+    );
+
+    return;
+  }
+
+  // Assign worker to production order
+  const { data: productionOrder, error } =
+    await db
+      .from("production_orders")
+      .update({
+        assigned_worker_id: worker.id,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", productionId)
+      .select(`
+        id,
+        order_id,
+        status,
+        assigned_worker_id,
+        updated_at
+      `)
+      .single();
+
+  if (error) {
+    throw new Error(
+      `SUPABASE ASSIGN WORKER ERROR: ${error.message}`
+    );
+  }
+
+  // Record the assignment in the activity log
+  const { error: activityError } =
+    await db
+      .from("production_activity")
+      .insert({
+        production_order_id: productionId,
+        user_id: auth.user.id,
+        action: "WORKER_ASSIGNED"
+      });
+
+  if (activityError) {
+    throw new Error(
+      `SUPABASE PRODUCTION ACTIVITY ERROR: ${activityError.message}`
+    );
+  }
+
+  res.writeHead(200, {
+    "Content-Type": "application/json; charset=utf-8"
+  });
+
+  res.end(
+    JSON.stringify({
+      success: true,
+      production_order: productionOrder,
+      assigned_worker: {
+        id: worker.id,
+        full_name: worker.full_name,
+        language: worker.language
+      }
+    })
+  );
+
+  return;
+}
 // -----------------------------------------------
 // API - CREATE ORDER
 // -----------------------------------------------
