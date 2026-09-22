@@ -1,7 +1,7 @@
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
-
+const { createClient } = require("@supabase/supabase-js");
 // ======================================================
 // ENV
 // ======================================================
@@ -31,7 +31,22 @@ const WHATSAPP_ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN;
 const WHATSAPP_VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN;
 const WHATSAPP_PHONE_NUMBER_ID =
   process.env.WHATSAPP_PHONE_NUMBER_ID;
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY;
 
+const supabase =
+  SUPABASE_URL && SUPABASE_SECRET_KEY
+    ? createClient(
+        SUPABASE_URL,
+        SUPABASE_SECRET_KEY,
+        {
+          auth: {
+            persistSession: false,
+            autoRefreshToken: false
+          }
+        }
+      )
+    : null;
 // ======================================================
 // CATALOG
 // ======================================================
@@ -145,6 +160,347 @@ function getConversationText(conversation = []) {
 // OPENAI
 // ======================================================
 
+// ======================================================
+// SUPABASE MEMORY
+// ======================================================
+
+function requireSupabase() {
+  if (!supabase) {
+    throw new Error("Supabase is not configured");
+  }
+
+  return supabase;
+}
+
+async function getOrCreateLead(phone) {
+  const db = requireSupabase();
+
+  const { data: existingLead, error: findError } =
+    await db
+      .from("leads")
+      .select("*")
+      .eq("phone", phone)
+      .maybeSingle();
+
+  if (findError) {
+    throw new Error(
+      `SUPABASE FIND LEAD ERROR: ${findError.message}`
+    );
+  }
+
+  if (existingLead) {
+    return existingLead;
+  }
+
+  const { data: newLead, error: insertError } =
+    await db
+      .from("leads")
+      .insert({
+        phone,
+        source: "whatsapp",
+        last_message_at: new Date().toISOString()
+      })
+      .select("*")
+      .single();
+
+  if (insertError) {
+    throw new Error(
+      `SUPABASE CREATE LEAD ERROR: ${insertError.message}`
+    );
+  }
+
+  return newLead;
+}
+
+async function saveMessage({
+  leadId,
+  direction,
+  sender,
+  content,
+  whatsappMessageId = null
+}) {
+  const db = requireSupabase();
+
+  const row = {
+    lead_id: leadId,
+    direction,
+    sender,
+    message_type: "text",
+    content
+  };
+
+  if (whatsappMessageId) {
+    row.whatsapp_message_id = whatsappMessageId;
+  }
+
+  const { data, error } =
+    await db
+      .from("messages")
+      .insert(row)
+      .select("*")
+      .single();
+
+  if (error) {
+    if (
+      error.code === "23505" &&
+      whatsappMessageId
+    ) {
+      return null;
+    }
+
+    throw new Error(
+      `SUPABASE SAVE MESSAGE ERROR: ${error.message}`
+    );
+  }
+
+  return data;
+}
+
+async function loadConversation(leadId, limit = 14) {
+  const db = requireSupabase();
+
+  const { data, error } =
+    await db
+      .from("messages")
+      .select(
+        "direction, sender, content, created_at"
+      )
+      .eq("lead_id", leadId)
+      .order("created_at", {
+        ascending: false
+      })
+      .limit(limit);
+
+  if (error) {
+    throw new Error(
+      `SUPABASE LOAD CONVERSATION ERROR: ${error.message}`
+    );
+  }
+
+  return (data || [])
+    .reverse()
+    .map((item) => ({
+      role:
+        item.sender === "CUSTOMER"
+          ? "customer"
+          : "assistant",
+
+      content: item.content,
+
+      created_at: item.created_at
+    }));
+}
+
+async function updateLeadFromAnalysis(
+  leadId,
+  analysis
+) {
+  const db = requireSupabase();
+
+  const updates = {
+    stage: analysis.stage,
+    temperature: analysis.temperature,
+    intent: analysis.intent,
+    needs_human:
+      analysis.needs_human === true,
+    quote_ready:
+      analysis.quote_ready === true,
+    summary: analysis.summary || null,
+    last_message_at:
+      new Date().toISOString()
+  };
+
+  if (
+    analysis.product &&
+    analysis.product !== "unknown"
+  ) {
+    updates.product_interest =
+      analysis.product;
+  }
+
+  if (analysis.matched_product_id) {
+    updates.product_id =
+      analysis.matched_product_id;
+  }
+
+  if (analysis.requested_size) {
+    updates.requested_size =
+      analysis.requested_size;
+  }
+
+  if (analysis.requested_color) {
+    updates.requested_color =
+      analysis.requested_color;
+  }
+
+  if (analysis.requested_fabric) {
+    updates.requested_fabric =
+      analysis.requested_fabric;
+  }
+
+  if (analysis.comfort_preference) {
+    updates.comfort_preference =
+      analysis.comfort_preference;
+  }
+
+  if (analysis.budget) {
+    updates.budget =
+      analysis.budget;
+  }
+
+  if (
+    analysis.primary_motivation &&
+    analysis.primary_motivation !== "UNKNOWN"
+  ) {
+    updates.primary_motivation =
+      analysis.primary_motivation;
+  }
+
+  if (
+    analysis.purchase_blocker &&
+    analysis.purchase_blocker !== "UNKNOWN"
+  ) {
+    updates.purchase_blocker =
+      analysis.purchase_blocker;
+  }
+
+  const { error } =
+    await db
+      .from("leads")
+      .update(updates)
+      .eq("id", leadId);
+
+  if (error) {
+    throw new Error(
+      `SUPABASE UPDATE LEAD ERROR: ${error.message}`
+    );
+  }
+}
+
+async function saveAIState(
+  leadId,
+  analysis
+) {
+  const db = requireSupabase();
+
+  const { error } =
+    await db
+      .from("lead_ai_state")
+      .upsert(
+        {
+          lead_id: leadId,
+
+          stage:
+            analysis.stage || null,
+
+          intent:
+            analysis.intent || null,
+
+          sales_objective:
+            analysis.sales_objective || null,
+
+          next_action:
+            analysis.next_action || null,
+
+          buying_signal:
+            String(
+              analysis.buying_signal ?? 0
+            ),
+
+          objection:
+            analysis.objection || null,
+
+          missing_information:
+            JSON.stringify(
+              analysis.missing_information || []
+            ),
+
+          needs_human:
+            analysis.needs_human === true,
+
+          should_offer_catalog:
+            analysis.should_offer_catalog === true,
+
+          quote_ready:
+            analysis.quote_ready === true,
+
+          handoff_reason:
+            analysis.handoff_reason || null,
+
+          should_offer_callback:
+            analysis.should_offer_callback === true,
+
+          callback_requested:
+            analysis.callback_requested === true,
+
+          requested_callback_time:
+            analysis.requested_callback_time ||
+            null,
+
+          media_action:
+            analysis.media_action || null,
+
+          media_type:
+            analysis.media_type || null,
+
+          media_id:
+            analysis.media_id || null,
+
+          media_reason:
+            analysis.media_reason || null,
+
+          summary:
+            analysis.summary || null,
+
+          updated_at:
+            new Date().toISOString()
+        },
+        {
+          onConflict: "lead_id"
+        }
+      );
+
+  if (error) {
+    throw new Error(
+      `SUPABASE SAVE AI STATE ERROR: ${error.message}`
+    );
+  }
+}
+
+async function saveCallbackRequest(
+  leadId,
+  analysis
+) {
+  if (
+    analysis.callback_requested !== true
+  ) {
+    return;
+  }
+
+  const db = requireSupabase();
+
+  const { error } =
+    await db
+      .from("callback_requests")
+      .insert({
+        lead_id: leadId,
+
+        requested_time_text:
+          analysis.requested_callback_time ||
+          null,
+
+        status: "REQUESTED",
+
+        notes:
+          analysis.summary || null
+      });
+
+  if (error) {
+    throw new Error(
+      `SUPABASE CALLBACK ERROR: ${error.message}`
+    );
+  }
+}
 function extractOutputText(data) {
   let text = data.output_text || "";
 
@@ -1609,6 +1965,60 @@ const server =
         }
 
         // -----------------------------------------------
+// DATABASE HEALTH
+// -----------------------------------------------
+
+if (
+  url.pathname === "/db-health" &&
+  req.method === "GET"
+) {
+  if (!supabase) {
+    sendJSON(
+      res,
+      500,
+      {
+        success: false,
+        database: "not_configured"
+      }
+    );
+
+    return;
+  }
+
+  const { error } =
+    await supabase
+      .from("leads")
+      .select("id")
+      .limit(1);
+
+  if (error) {
+    sendJSON(
+      res,
+      500,
+      {
+        success: false,
+        database: "connection_failed",
+        message: error.message
+      }
+    );
+
+    return;
+  }
+
+  sendJSON(
+    res,
+    200,
+    {
+      success: true,
+      database: "connected",
+      memory: true
+    }
+  );
+
+  return;
+}
+        
+        // -----------------------------------------------
         // CATALOG API
         // -----------------------------------------------
 
@@ -1796,8 +2206,11 @@ const server =
             The simulator can still send
             conversation history through /ai.
           */
-          const conversation = [];
+          const lead = await getOrCreateLead(from);
 
+const conversation =
+  await loadConversation(lead.id, 14);
+          
           // =============================================
           // EXACTLY ONE AI CALL
           // =============================================
@@ -1810,6 +2223,29 @@ const server =
 
           const analysis =
             result.analysis;
+          
+          await saveMessage({
+  leadId: lead.id,
+  direction: "INCOMING",
+  sender: "CUSTOMER",
+  content: customerMessage,
+  whatsappMessageId: incoming.id || null
+});
+
+await updateLeadFromAnalysis(
+  lead.id,
+  analysis
+);
+
+await saveAIState(
+  lead.id,
+  analysis
+);
+
+await saveCallbackRequest(
+  lead.id,
+  analysis
+);
 
           const handoff =
             createHandoff(
@@ -1845,6 +2281,12 @@ const server =
             result.reply
           );
 
+          await saveMessage({
+  leadId: lead.id,
+  direction: "OUTGOING",
+  sender: "AI",
+  content: result.reply
+});
           res.writeHead(200, {
             "Content-Type":
               "text/plain"
