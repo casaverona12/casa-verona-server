@@ -1906,6 +1906,7 @@ const server =
   http.createServer(
     async (req, res) => {
       try {
+        
         // -----------------------------------------------
         // CORS
         // -----------------------------------------------
@@ -1936,6 +1937,47 @@ const server =
             req.url,
             `http://${req.headers.host}`
           );
+
+        
+        // -----------------------------------------------
+// API - LEADS
+// -----------------------------------------------
+
+if (
+  req.method === "GET" &&
+  url.pathname === "/api/leads"
+) {
+  const db = requireSupabase();
+
+  const { data, error } =
+    await db
+      .from("leads")
+      .select("*")
+      .order("last_message_at", {
+        ascending: false,
+        nullsFirst: false
+      });
+
+  if (error) {
+    throw new Error(
+      `SUPABASE LOAD LEADS ERROR: ${error.message}`
+    );
+  }
+
+  res.writeHead(200, {
+    "Content-Type": "application/json; charset=utf-8"
+  });
+
+  res.end(
+    JSON.stringify({
+      success: true,
+      count: data?.length || 0,
+      leads: data || []
+    })
+  );
+
+  return;
+}
 
         // -----------------------------------------------
         // HEALTH / HOME
