@@ -1901,6 +1901,113 @@ async function sendWhatsAppMessage(
 // ======================================================
 // SERVER
 // ======================================================
+// =====================================================
+// CASA VERONA OS — AUTH & ROLES
+// =====================================================
+
+const USER_ROLES = {
+  ADMIN: "ADMIN",
+  FACTORY_OWNER: "FACTORY_OWNER",
+  FACTORY_WORKER: "FACTORY_WORKER",
+  SALES: "SALES"
+};
+
+async function getAuthenticatedUser(req) {
+  const db = requireSupabase();
+
+  const authHeader = req.headers.authorization || "";
+
+  if (!authHeader.startsWith("Bearer ")) {
+    return null;
+  }
+
+  const token = authHeader.slice(7).trim();
+
+  if (!token) {
+    return null;
+  }
+
+  const {
+    data: { user },
+    error: authError
+  } = await db.auth.getUser(token);
+
+  if (authError || !user) {
+    return null;
+  }
+
+  const { data: profile, error: profileError } =
+    await db
+      .from("user_profiles")
+      .select(`
+        id,
+        full_name,
+        phone,
+        role,
+        language,
+        is_active
+      `)
+      .eq("id", user.id)
+      .single();
+
+  if (
+    profileError ||
+    !profile ||
+    profile.is_active !== true
+  ) {
+    return null;
+  }
+
+  return {
+    user,
+    profile
+  };
+}
+
+function sendUnauthorized(res) {
+  res.writeHead(401, {
+    "Content-Type": "application/json; charset=utf-8"
+  });
+
+  res.end(
+    JSON.stringify({
+      success: false,
+      error: "UNAUTHORIZED"
+    })
+  );
+}
+
+function sendForbidden(res) {
+  res.writeHead(403, {
+    "Content-Type": "application/json; charset=utf-8"
+  });
+
+  res.end(
+    JSON.stringify({
+      success: false,
+      error: "FORBIDDEN"
+    })
+  );
+}
+
+async function requireAuth(req, res, allowedRoles = []) {
+  const auth = await getAuthenticatedUser(req);
+
+  if (!auth) {
+    sendUnauthorized(res);
+    return null;
+  }
+
+  if (
+    allowedRoles.length > 0 &&
+    !allowedRoles.includes(auth.profile.role)
+  ) {
+    sendForbidden(res);
+    return null;
+  }
+
+  return auth;
+}
 
 const server =
   http.createServer(
@@ -2271,6 +2378,40 @@ res.end(
         // -----------------------------------------------
 // DATABASE HEALTH
 // -----------------------------------------------
+// =====================================================
+// AUTH TEST — CURRENT USER
+// =====================================================
+
+if (
+  req.method === "GET" &&
+  url.pathname === "/api/auth/me"
+) {
+  const auth = await requireAuth(req, res);
+
+  if (!auth) {
+    return;
+  }
+
+  res.writeHead(200, {
+    "Content-Type": "application/json; charset=utf-8"
+  });
+
+  res.end(
+    JSON.stringify({
+      success: true,
+      user: {
+        id: auth.user.id,
+        email: auth.user.email,
+        full_name: auth.profile.full_name,
+        phone: auth.profile.phone,
+        role: auth.profile.role,
+        language: auth.profile.language
+      }
+    })
+  );
+
+  return;
+}
 
 if (
   url.pathname === "/db-health" &&
