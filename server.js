@@ -2149,41 +2149,53 @@ if (
 
   const db = requireSupabase();
 
-  const { data, error } =
-    await db
-      .from("orders")
-      .select(`
+let ordersQuery =
+  db
+  
+  .from("orders")
+    .select(`
+      id,
+      order_number,
+      product_name,
+      product_id,
+      dimensions,
+      width,
+      depth,
+      chaise_length,
+      chaise_side,
+      fabric_type,
+      fabric_company,
+      fabric_collection,
+      fabric_code,
+      color,
+      comfort,
+      production_notes,
+      special_requests,
+      target_delivery_date,
+      reference_image_url,
+      model_image_url,
+      status,
+      production_orders!inner (
         id,
-        order_number,
-        product_name,
-        product_id,
-        dimensions,
-        width,
-        depth,
-        chaise_length,
-        chaise_side,
-        fabric_type,
-        fabric_company,
-        fabric_collection,
-        fabric_code,
-        color,
-        comfort,
-        production_notes,
-        special_requests,
-        target_delivery_date,
-        reference_image_url,
-        model_image_url,
         status,
-        production_orders (
-          id,
-          status,
-          created_at,
-          updated_at
-        )
-      `)
-      .order("created_at", {
-        ascending: false
-      });
+        assigned_worker_id,
+        created_at,
+        updated_at
+      )
+    `);
+
+// Regular factory workers can only see work assigned to them
+if (auth.profile.role === USER_ROLES.FACTORY_WORKER) {
+  ordersQuery = ordersQuery.eq(
+    "production_orders.assigned_worker_id",
+    auth.user.id
+  );
+}
+
+const { data, error } =
+  await ordersQuery.order("created_at", {
+    ascending: false
+  });
 
   if (error) {
     throw new Error(
