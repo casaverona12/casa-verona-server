@@ -2022,51 +2022,7 @@ if (
         // -----------------------------------------------
 // MEMORY TEST
 // -----------------------------------------------
-if (
-  const phone =
-    String(
-      url.searchParams.get("phone") || ""
-    ).trim();
 
-  const message =
-    String(
-      url.searchParams.get("message") || ""
-    ).trim();
-
-  if (!phone || !message) {
-    sendJSON(res, 400, {
-      success: false,
-      error: "Missing phone or message"
-    });
-    return;
-  }
-
-  const lead =
-    await getOrCreateLead(phone);
-
-  await saveMessage({
-    leadId: lead.id,
-    direction: "INCOMING",
-    sender: "CUSTOMER",
-    content: message
-  });
-
-  const conversation =
-    await loadConversation(
-      lead.id,
-      14
-    );
-
-  sendJSON(res, 200, {
-    success: true,
-    saved: true,
-    conversation,
-    messages_count:
-      conversation.length
-  });
-
-  return;
-}
 if (
   url.pathname === "/memory-test" &&
   req.method === "GET"
@@ -2291,25 +2247,34 @@ if (
             customerMessage
           );
 
-          /*
-            IMPORTANT:
-
-            Persistent WhatsApp conversation
-            memory is not connected yet.
-
-            For now this is intentionally empty.
-
-            We do NOT pretend the server
-            remembers previous WhatsApp
-            messages when it does not.
-
-            The simulator can still send
-            conversation history through /ai.
-          */
+         
           const lead = await getOrCreateLead(from);
+          
+      const savedIncomingMessage =
+  await saveMessage({
+    leadId: lead.id,
+    direction: "INCOMING",
+    sender: "CUSTOMER",
+    content: customerMessage,
+    whatsappMessageId: incoming.id || null
+  });
+
+if (!savedIncomingMessage) {
+  console.log(
+    "♻️ DUPLICATE WHATSAPP MESSAGE:",
+    incoming.id
+  );
+
+  res.writeHead(200);
+  res.end("EVENT_RECEIVED");
+  return;
+}
+
+const fullConversation =
+  await loadConversation(lead.id, 15);
 
 const conversation =
-  await loadConversation(lead.id, 14);
+  fullConversation.slice(0, -1);
           
           // =============================================
           // EXACTLY ONE AI CALL
@@ -2324,13 +2289,7 @@ const conversation =
           const analysis =
             result.analysis;
           
-          await saveMessage({
-  leadId: lead.id,
-  direction: "INCOMING",
-  sender: "CUSTOMER",
-  content: customerMessage,
-  whatsappMessageId: incoming.id || null
-});
+          
 
 await updateLeadFromAnalysis(
   lead.id,
@@ -2376,16 +2335,21 @@ await saveCallbackRequest(
           // Send only the customer-facing
           // reply. Internal analysis never
           // goes to the customer.
-          await sendWhatsAppMessage(
-            from,
-            result.reply
-          );
+          const whatsappResponse =
+  await sendWhatsAppMessage(
+    from,
+    result.reply
+  );
 
-          await saveMessage({
+const outgoingMessageId =
+  whatsappResponse?.messages?.[0]?.id || null;
+
+await saveMessage({
   leadId: lead.id,
   direction: "OUTGOING",
   sender: "AI",
-  content: result.reply
+  content: result.reply,
+  whatsappMessageId: outgoingMessageId
 });
           res.writeHead(200, {
             "Content-Type":
