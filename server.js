@@ -2111,6 +2111,9 @@ if (
     special_requests:
       body.special_requests || null,
 
+        model_image_url:
+      body.model_image_url || null,
+
     reference_image_url:
       body.reference_image_url || null,
 
