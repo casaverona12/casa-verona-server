@@ -2128,6 +2128,84 @@ if (
 
   return;
 }
+
+// =====================================================
+// FACTORY API — SAFE PRODUCTION VIEW
+// =====================================================
+
+if (
+  req.method === "GET" &&
+  url.pathname === "/api/factory/orders"
+) {
+  const auth = await requireAuth(req, res, [
+    USER_ROLES.FACTORY_OWNER,
+    USER_ROLES.FACTORY_WORKER,
+    USER_ROLES.ADMIN
+  ]);
+
+  if (!auth) {
+    return;
+  }
+
+  const db = requireSupabase();
+
+  const { data, error } =
+    await db
+      .from("orders")
+      .select(`
+        id,
+        order_number,
+        product_name,
+        product_id,
+        dimensions,
+        width,
+        depth,
+        chaise_length,
+        chaise_side,
+        fabric_type,
+        fabric_company,
+        fabric_collection,
+        fabric_code,
+        color,
+        comfort,
+        production_notes,
+        special_requests,
+        target_delivery_date,
+        reference_image_url,
+        model_image_url,
+        status,
+        production_orders (
+          id,
+          status,
+          created_at,
+          updated_at
+        )
+      `)
+      .order("created_at", {
+        ascending: false
+      });
+
+  if (error) {
+    throw new Error(
+      `SUPABASE FACTORY ORDERS ERROR: ${error.message}`
+    );
+  }
+
+  res.writeHead(200, {
+    "Content-Type": "application/json; charset=utf-8"
+  });
+
+  res.end(
+    JSON.stringify({
+      success: true,
+      count: data?.length || 0,
+      orders: data || []
+    })
+  );
+
+  return;
+}
+
 // -----------------------------------------------
 // API - CREATE ORDER
 // -----------------------------------------------
