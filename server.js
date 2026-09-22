@@ -2313,14 +2313,7 @@ if (currentProductionError || !currentProduction) {
   res.writeHead(404, {
     "Content-Type": "application/json; charset=utf-8"
   });
-  
-if (
-  auth.profile.role === USER_ROLES.FACTORY_WORKER &&
-  currentProduction.assigned_worker_id !== auth.user.id
-) {
-  sendForbidden(res);
-  return;
-}
+
   res.end(
     JSON.stringify({
       success: false,
@@ -2328,6 +2321,13 @@ if (
     })
   );
 
+  return;
+}
+if (
+  auth.profile.role === USER_ROLES.FACTORY_WORKER &&
+  currentProduction.assigned_worker_id !== auth.user.id
+) {
+  sendForbidden(res);
   return;
 }
 

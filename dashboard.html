@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#111111">
+
+  <title>Casa Verona OS</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #f5f4f0;
+      --sidebar: #111111;
+      --card: #ffffff;
+      --text: #171717;
+      --muted: #77736b;
+      --border: #e6e2da;
+      --accent: #b59a6a;
+      --green: #1f8f5f;
+      --orange: #d98b35;
+      --red: #c84b4b;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .app {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 245px;
+      background: var(--sidebar);
+      color: white;
+      padding: 26px 16px;
+      position: fixed;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      overflow-y: auto;
+    }
+
+    .brand {
+      padding: 0 12px 26px;
+      border-bottom: 1px solid #2b2b2b;
+      margin-bottom: 20px;
+    }
+
+    .brand h1 {
+      font-size: 21px;
+      letter-spacing: 1px;
+    }
+
+    .brand p {
+      color: #aaa;
+      font-size: 12px;
+      margin-top: 5px;
+    }
+
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .nav button {
+      border: 0;
+      background: transparent;
+      color: #c9c9c9;
+      padding: 13px 14px;
+      border-radius: 10px;
+      text-align: right;
+      cursor: pointer;
+      font-size: 14px;
+      transition: .2s;
+    }
+
+    .nav button:hover,
+    .nav button.active {
+      background: #242424;
+      color: white;
+    }
+
+    .main {
+      flex: 1;
+      margin-right: 245px;
+      padding: 30px;
+      min-width: 0;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+
+    .topbar h2 {
+      font-size: 26px;
+    }
+
+    .topbar p {
+      color: var(--muted);
+      margin-top: 5px;
+      font-size: 14px;
+    }
+
+    .status {
+      background: white;
+      border: 1px solid var(--border);
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+    }
+
+    .status span {
+      color: var(--green);
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .stat-number {
+      font-size: 32px;
+      font-weight: 700;
+    }
+
+    .stat-note {
+      margin-top: 7px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.4fr .6fr;
+      gap: 18px;
+    }
+
+    .card h3 {
+      margin-bottom: 18px;
+      font-size: 17px;
+    }
+
+    .funnel-item {
+      margin-bottom: 18px;
+    }
+
+    .funnel-title {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 7px;
+      font-size: 13px;
+    }
+
+    .bar {
+      height: 9px;
+      background: #ece9e2;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .bar div {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 99px;
+    }
+
+    .ai-card {
+      background: #161616;
+      color: white;
+      border: none;
+    }
+
+    .ai-card p {
+      color: #b9b9b9;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .primary {
+      width: 100%;
+      border: 0;
+      background: var(--accent);
+      color: #111;
+      padding: 13px;
+      border-radius: 10px;
+      margin-top: 18px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .table-card {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 650px;
+    }
+
+    th,
+    td {
+      padding: 14px 12px;
+      border-bottom: 1px solid var(--border);
+      text-align: right;
+      font-size: 13px;
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      background: #eee;
+    }
+
+    .hot {
+      background: #ffe5e1;
+      color: #9c3328;
+    }
+
+    .warm {
+      background: #fff0d8;
+      color: #9a631c;
+    }
+
+    .ready {
+      background: #dff5e9;
+      color: #16633f;
+    }
+
+    .section-title {
+      margin-bottom: 18px;
+    }
+
+    .section-title h3 {
+      font-size: 20px;
+    }
+
+    .section-title p {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 5px;
+    }
+
+    .production-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .production-box {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      padding: 20px;
+    }
+
+    .production-box strong {
+      font-size: 28px;
+      display: block;
+      margin-top: 10px;
+    }
+
+    .ai-lead {
+      background: #f7f4ed;
+      padding: 18px;
+      border-radius: 13px;
+      margin-top: 15px;
+    }
+
+    .ai-lead p {
+      margin-top: 8px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    @media (max-width: 950px) {
+      .stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .app {
+        display: block;
+      }
+
+      .sidebar {
+        width: 100%;
+        position: static;
+        padding: 14px;
+      }
+
+      .brand {
+        padding-bottom: 14px;
+      }
+
+      .nav {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .main {
+        margin-right: 0;
+        padding: 18px;
+      }
+
+      .stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .production-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar {
+        align-items: flex-start;
+      }
+
+      .topbar h2 {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <aside class="sidebar">
+
+    <div class="brand">
+      <h1>CASA VERONA</h1>
+      <p>OS • Business Operating System</p>
+    </div>
+
+    <div class="nav">
+      <button class="active" data-page="dashboard">⌂ דשבורד</button>
+      <button data-page="leads">◎ לידים</button>
+      <button data-page="sales">₪ מכירות</button>
+      <button data-page="customers">♙ לקוחות</button>
+      <button data-page="catalog">▦ קטלוג</button>
+      <button data-page="orders">▣ הזמנות</button>
+      <button data-page="production">⚙ ייצור</button>
+      <button data-page="deliveries">▰ משלוחים</button>
+      <button data-page="reports">▥ דוחות</button>
+      <button data-page="ai">✦ AI Sales</button>
+    </div>
+
+  </aside>
+
+  <main class="main">
+
+    <div class="topbar">
+      <div>
+        <h2 id="pageTitle">דשבורד מנהל</h2>
+        <p>Casa Verona OS</p>
+      </div>
+
+      <div class="status">
+        <span>●</span> מערכת פעילה
+      </div>
+    </div>
+
+
+    <!-- DASHBOARD -->
+
+    <section id="dashboard" class="page active">
+
+      <div class="stats">
+
+        <div class="card">
+          <div class="stat-label">לידים</div>
+          <div class="stat-number">41</div>
+          <div class="stat-note">פניות פעילות</div>
+        </div>
+
+        <div class="card">
+          <div class="stat-label">עסקאות</div>
+          <div class="stat-number">3</div>
+          <div class="stat-note">עסקאות שנסגרו</div>
+        </div>
+
+        <div class="card">
+          <div class="stat-label">בייצור</div>
+          <div class="stat-number">2</div>
+          <div class="stat-note">הזמנות פעילות</div>
+        </div>
+
+        <div class="card">
+          <div class="stat-label">אחוז המרה</div>
+          <div class="stat-number">7.3%</div>
+          <div class="stat-note">ליד → עסקה</div>
+        </div>
+
+      </div>
+
+      <div class="grid">
+
+        <div class="card">
+
+          <h3>משפך המכירות</h3>
+
+          <div class="funnel-item">
+            <div class="funnel-title">
+              <span>לידים חדשים</span>
+              <strong>41</strong>
+            </div>
+
+            <div class="bar">
+              <div style="width:100%"></div>
+            </div>
+          </div>
+
+          <div class="funnel-item">
+            <div class="funnel-title">
+              <span>לידים חמים</span>
+              <strong>12</strong>
+            </div>
+
+            <div class="bar">
+              <div style="width:55%"></div>
+            </div>
+          </div>
+
+          <div class="funnel-item">
+            <div class="funnel-title">
+              <span>הצעות מחיר</span>
+              <strong>7</strong>
+            </div>
+
+            <div class="bar">
+              <div style="width:36%"></div>
+            </div>
+          </div>
+
+          <div class="funnel-item">
+            <div class="funnel-title">
+              <span>נסגרו</span>
+              <strong>3</strong>
+            </div>
+
+            <div class="bar">
+              <div style="width:20%"></div>
+            </div>
+          </div>
+
+        </div>
+
+
+        <div class="card ai-card">
+
+          <h3>AI Command Center</h3>
+
+          <p>
+            המערכת מזהה כרגע 3 לידים
+            בעלי כוונת קנייה גבוהה.
+          </p>
+
+          <button
+            class="primary"
+            data-open-page="ai"
+          >
+            פתח AI Sales
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- LEADS -->
+
+    <section id="leads" class="page">
+
+      <div class="section-title">
+        <h3>לידים</h3>
+        <p>ניהול כל הפניות שנכנסות למערכת.</p>
+      </div>
+
+      <div class="card table-card">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>לקוח</th>
+              <th>מוצר</th>
+              <th>סטטוס</th>
+              <th>שלב</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <tr>
+              <td>לקוח חדש</td>
+              <td>Mon Cheri</td>
+              <td><span class="badge hot">חם</span></td>
+              <td>הצעת מחיר</td>
+            </tr>
+
+            <tr>
+              <td>לקוח חדש</td>
+              <td>Torino Moderno</td>
+              <td><span class="badge warm">מעקב</span></td>
+              <td>התאמה</td>
+            </tr>
+
+            <tr>
+              <td>לקוח חדש</td>
+              <td>סלון בהתאמה אישית</td>
+              <td><span class="badge">חדש</span></td>
+              <td>בירור צורך</td>
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+
+    <!-- SALES -->
+
+    <section id="sales" class="page">
+
+      <div class="section-title">
+        <h3>מכירות</h3>
+        <p>עסקאות, הכנסות וסטטוסי סגירה.</p>
+      </div>
+
+      <div class="stats">
+
+        <div class="card">
+          <div class="stat-label">עסקאות החודש</div>
+          <div class="stat-number">3</div>
+        </div>
+
+        <div class="card">
+          <div class="stat-label">לידים חמים</div>
+          <div class="stat-number">12</div>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- CUSTOMERS -->
+
+    <section id="customers" class="page">
+
+      <div class="section-title">
+        <h3>לקוחות</h3>
+        <p>כל לקוחות Casa Verona במקום אחד.</p>
+      </div>
+
+      <div class="card">
+        מאגר הלקוחות יוצג כאן.
+      </div>
+
+    </section>
+
+
+    <!-- CATALOG -->
+
+    <section id="catalog" class="page">
+
+      <div class="section-title">
+        <h3>קטלוג</h3>
+        <p>דגמי Casa Verona וההתאמות שלהם.</p>
+      </div>
+
+      <div class="card">
+        Mon Cheri • Torino Moderno • LUSSO • ALABA • BELLA • ועוד
+      </div>
+
+    </section>
+
+
+    <!-- ORDERS -->
+
+    <section id="orders" class="page">
+
+      <div class="section-title">
+        <h3>הזמנות</h3>
+        <p>מעקב אחר הזמנות לקוחות.</p>
+      </div>
+
+      <div class="card">
+        כאן יוצגו דגם, מידות, בד, צבע, נוחות וסטטוס הזמנה.
+      </div>
+
+    </section>
+
+
+    <!-- PRODUCTION -->
+
+    <section id="production" class="page">
+
+      <div class="section-title">
+        <h3>ניהול ייצור</h3>
+        <p>סטטוס הזמנות במפעל.</p>
+      </div>
+
+      <div class="production-grid">
+
+        <div class="production-box">
+          ממתין לייצור
+          <strong>1</strong>
+        </div>
+
+        <div class="production-box">
+          בייצור
+          <strong>1</strong>
+        </div>
+
+        <div class="production-box">
+          מוכן
+          <strong>1</strong>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- DELIVERIES -->
+
+    <section id="deliveries" class="page">
+
+      <div class="section-title">
+        <h3>משלוחים</h3>
+        <p>הזמנות שממתינות לאספקה ללקוח.</p>
+      </div>
+
+      <div class="card">
+        מערכת המשלוחים של Casa Verona.
+      </div>
+
+    </section>
+
+
+    <!-- REPORTS -->
+
+    <section id="reports" class="page">
+
+      <div class="section-title">
+        <h3>דוחות</h3>
+        <p>ביצועי העסק בזמן אמת.</p>
+      </div>
+
+      <div class="card">
+        לידים • מכירות • המרות • ייצור • משלוחים
+      </div>
+
+    </section>
+
+
+    <!-- AI -->
+
+    <section id="ai" class="page">
+
+      <div class="section-title">
+        <h3>AI Sales Closer</h3>
+        <p>המוח של מערך המכירות.</p>
+      </div>
+
+      <div class="card">
+
+        <h3>ליד חם</h3>
+
+        <div class="ai-lead">
+
+          <strong>
+            מתעניין ב-Mon Cheri במידה 3.5×2
+          </strong>
+
+          <p>
+            המלצת AI: הדגם והמידה ידועים.
+            הליד מוכן להעברה לנציג לצורך הצעת מחיר.
+          </p>
+
+          <span class="badge ready">
+            READY FOR HUMAN
+          </span>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>
+
+
+<script>
+
+const buttons =
+  document.querySelectorAll(
+    ".nav button[data-page]"
+  );
+
+const pages =
+  document.querySelectorAll(".page");
+
+const pageTitle =
+  document.getElementById("pageTitle");
+
+const titles = {
+  dashboard: "דשבורד מנהל",
+  leads: "לידים",
+  sales: "מכירות",
+  customers: "לקוחות",
+  catalog: "קטלוג",
+  orders: "הזמנות",
+  production: "ניהול ייצור",
+  deliveries: "משלוחים",
+  reports: "דוחות",
+  ai: "AI Sales Closer"
+};
+
+
+function openPage(pageName) {
+
+  pages.forEach(page => {
+    page.classList.remove("active");
+  });
+
+  buttons.forEach(button => {
+    button.classList.remove("active");
+  });
+
+  const page =
+    document.getElementById(pageName);
+
+  if (page) {
+    page.classList.add("active");
+  }
+
+  const navButton =
+    document.querySelector(
+      `.nav button[data-page="${pageName}"]`
+    );
+
+  if (navButton) {
+    navButton.classList.add("active");
+  }
+
+  pageTitle.textContent =
+    titles[pageName] || "Casa Verona OS";
+}
+
+
+buttons.forEach(button => {
+
+  button.addEventListener(
+    "click",
+    () => {
+
+      openPage(
+        button.dataset.page
+      );
+
+    }
+  );
+
+});
+
+
+document
+  .querySelectorAll("[data-open-page]")
+  .forEach(button => {
+
+    button.addEventListener(
+      "click",
+      () => {
+
+        openPage(
+          button.dataset.openPage
+        );
+
+      }
+    );
+
+  });
+
+</script>
+
+</body>
+</html>
