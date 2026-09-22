@@ -2022,7 +2022,54 @@ if (
         // -----------------------------------------------
 // MEMORY TEST
 // -----------------------------------------------
+if (
+  url.pathname === "/memory-test/save" &&
+  req.method === "GET"
+) {
+  const phone =
+    String(
+      url.searchParams.get("phone") || ""
+    ).trim();
 
+  const message =
+    String(
+      url.searchParams.get("message") || ""
+    ).trim();
+
+  if (!phone || !message) {
+    sendJSON(res, 400, {
+      success: false,
+      error: "Missing phone or message"
+    });
+    return;
+  }
+
+  const lead =
+    await getOrCreateLead(phone);
+
+  await saveMessage({
+    leadId: lead.id,
+    direction: "INCOMING",
+    sender: "CUSTOMER",
+    content: message
+  });
+
+  const conversation =
+    await loadConversation(
+      lead.id,
+      14
+    );
+
+  sendJSON(res, 200, {
+    success: true,
+    saved: true,
+    conversation,
+    messages_count:
+      conversation.length
+  });
+
+  return;
+}
 if (
   url.pathname === "/memory-test" &&
   req.method === "GET"
