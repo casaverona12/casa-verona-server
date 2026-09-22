@@ -32,6 +32,8 @@ const WHATSAPP_VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN;
 const WHATSAPP_PHONE_NUMBER_ID =
   process.env.WHATSAPP_PHONE_NUMBER_ID;
 const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_ANON_KEY =
+  process.env.SUPABASE_ANON_KEY?.replace(/\s+/g, "").trim();
 const SUPABASE_SECRET_KEY =
   process.env.SUPABASE_SECRET_KEY?.replace(/\s+/g, "").trim();
 
@@ -48,6 +50,22 @@ const supabase =
         }
       )
     : null;
+
+    const supabaseAuth =
+  SUPABASE_URL && SUPABASE_ANON_KEY
+    ? createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY,
+        {
+          auth: {
+            persistSession: false,
+            autoRefreshToken: false,
+            detectSessionInUrl: false
+          }
+        }
+      )
+    : null;
+
 // ======================================================
 // CATALOG
 // ======================================================
@@ -1915,17 +1933,66 @@ const USER_ROLES = {
 async function getAuthenticatedUser(req) {
   const db = requireSupabase();
 
-  const authHeader = req.headers.authorization || "";
+  // --------------------------------------------------
+  // 1. Try Authorization: Bearer <token>
+  // --------------------------------------------------
 
-  if (!authHeader.startsWith("Bearer ")) {
-    return null;
+  const authHeader =
+    req.headers.authorization || "";
+
+  let token = "";
+
+  if (authHeader.startsWith("Bearer ")) {
+    token = authHeader.slice(7).trim();
   }
 
-  const token = authHeader.slice(7).trim();
+  // --------------------------------------------------
+  // 2. If there is no Bearer token,
+  //    try Casa Verona secure cookie
+  // --------------------------------------------------
+
+  if (!token) {
+    const cookieHeader =
+      req.headers.cookie || "";
+
+    const cookies = {};
+
+    cookieHeader
+      .split(";")
+      .forEach((cookie) => {
+        const separatorIndex =
+          cookie.indexOf("=");
+
+        if (separatorIndex === -1) {
+          return;
+        }
+
+        const key =
+          cookie
+            .slice(0, separatorIndex)
+            .trim();
+
+        const value =
+          cookie
+            .slice(separatorIndex + 1)
+            .trim();
+
+        if (key) {
+          cookies[key] = value;
+        }
+      });
+
+    token =
+      cookies.casa_verona_access_token || "";
+  }
 
   if (!token) {
     return null;
   }
+
+  // --------------------------------------------------
+  // 3. Validate token with Supabase Auth
+  // --------------------------------------------------
 
   const {
     data: { user },
@@ -1936,19 +2003,26 @@ async function getAuthenticatedUser(req) {
     return null;
   }
 
-  const { data: profile, error: profileError } =
-    await db
-      .from("user_profiles")
-      .select(`
-        id,
-        full_name,
-        phone,
-        role,
-        language,
-        is_active
-      `)
-      .eq("id", user.id)
-      .single();
+  // --------------------------------------------------
+  // 4. Load Casa Verona user profile
+  // --------------------------------------------------
+
+  const {
+    data: profile,
+    error: profileError
+  } = await db
+    .from("user_profiles")
+    .select(`
+      id,
+      username,
+      full_name,
+      phone,
+      role,
+      language,
+      is_active
+    `)
+    .eq("id", user.id)
+    .single();
 
   if (
     profileError ||
@@ -2044,6 +2118,43 @@ const server =
             req.url,
             `http://${req.headers.host}`
           );
+
+// -----------------------------------------------
+// CASA VERONA ASSETS
+// -----------------------------------------------
+
+if (
+  req.method === "GET" &&
+  url.pathname === "/assets/casa-verona-logo.jpg"
+) {
+  try {
+    const logoPath =
+      require("path").join(
+        __dirname,
+        "assets",
+        "casa-verona-logo.jpg"
+      );
+
+    const logo = require("fs").readFileSync(logoPath);
+
+    res.writeHead(200, {
+      "Content-Type": "image/jpeg",
+      "Cache-Control": "public, max-age=86400"
+    });
+
+    res.end(logo);
+  } catch (error) {
+    console.error("LOGO ERROR:", error);
+
+    res.writeHead(404, {
+      "Content-Type": "text/plain; charset=utf-8"
+    });
+
+    res.end("Logo not found");
+  }
+
+  return;
+}
 
         // -----------------------------------------------
 // CASA VERONA OS DASHBOARD
@@ -2838,6 +2949,372 @@ res.end(
 // =====================================================
 // AUTH TEST — CURRENT USER
 // =====================================================
+
+// ======================================================
+// AUTH — USERNAME + PASSWORD LOGIN
+// ======================================================
+
+// ======================================================
+// AUTH — USERNAME + PASSWORD LOGIN
+// ======================================================
+
+if (
+  req.method === "POST" &&
+  url.pathname === "/api/auth/login"
+) {
+  try {
+    const db = requireSupabase();
+
+    if (!supabaseAuth) {
+      res.writeHead(503, {
+        "Content-Type": "application/json; charset=utf-8"
+      });
+
+      res.end(JSON.stringify({
+        success: false,
+        error: "Authentication service is not configured"
+      }));
+
+      return;
+    }
+
+    let body = "";
+
+    for await (const chunk of req) {
+      body += chunk;
+    }
+
+    let payload;
+
+    try {
+      payload = JSON.parse(body || "{}");
+    } catch {
+      res.writeHead(400, {
+        "Content-Type": "application/json; charset=utf-8"
+      });
+
+      res.end(JSON.stringify({
+        success: false,
+        error: "בקשה לא תקינה"
+      }));
+
+      return;
+    }
+
+    const username =
+      String(payload.username || "")
+        .trim()
+        .toLowerCase();
+
+    const password =
+      String(payload.password || "");
+
+    if (!username || !password) {
+      res.writeHead(400, {
+        "Content-Type": "application/json; charset=utf-8"
+      });
+
+      res.end(JSON.stringify({
+        success: false,
+        error: "יש להזין שם משתמש וסיסמה"
+      }));
+
+      return;
+    }
+
+    // Find active profile by username
+    const {
+      data: profile,
+      error: profileError
+    } = await db
+      .from("user_profiles")
+      .select(`
+        id,
+        username,
+        full_name,
+        role,
+        language,
+        is_active
+      `)
+      .ilike("username", username)
+      .maybeSingle();
+
+    if (
+      profileError ||
+      !profile ||
+      profile.is_active !== true
+    ) {
+      res.writeHead(401, {
+        "Content-Type": "application/json; charset=utf-8"
+      });
+
+      res.end(JSON.stringify({
+        success: false,
+        error: "שם המשתמש או הסיסמה אינם נכונים"
+      }));
+
+      return;
+    }
+
+    // Get email internally from Supabase Auth
+    const {
+      data: authUserData,
+      error: authUserError
+    } = await db.auth.admin.getUserById(profile.id);
+
+    const authEmail =
+      authUserData?.user?.email;
+
+    if (authUserError || !authEmail) {
+      console.error(
+        "AUTH USER LOOKUP ERROR:",
+        authUserError
+      );
+
+      res.writeHead(401, {
+        "Content-Type": "application/json; charset=utf-8"
+      });
+
+      res.end(JSON.stringify({
+        success: false,
+        error: "שם המשתמש או הסיסמה אינם נכונים"
+      }));
+
+      return;
+    }
+
+    // Supabase verifies the real password
+    const {
+      data: loginData,
+      error: loginError
+    } = await supabaseAuth.auth.signInWithPassword({
+      email: authEmail,
+      password
+    });
+
+    if (
+      loginError ||
+      !loginData?.session ||
+      !loginData?.user
+    ) {
+      res.writeHead(401, {
+        "Content-Type": "application/json; charset=utf-8"
+      });
+
+      res.end(JSON.stringify({
+        success: false,
+        error: "שם המשתמש או הסיסמה אינם נכונים"
+      }));
+
+      return;
+    }
+
+    const accessToken =
+      loginData.session.access_token;
+
+    const refreshToken =
+      loginData.session.refresh_token;
+
+    const accessMaxAge = Math.max(
+      60,
+      (loginData.session.expires_at || 0) -
+        Math.floor(Date.now() / 1000)
+    );
+
+    // Secure cookies:
+    // JS in the browser cannot read these tokens.
+    const accessCookie =
+      `casa_verona_access_token=${accessToken}; ` +
+      `HttpOnly; Secure; SameSite=Strict; Path=/; ` +
+      `Max-Age=${accessMaxAge}`;
+
+    const refreshCookie =
+      `casa_verona_refresh_token=${refreshToken}; ` +
+      `HttpOnly; Secure; SameSite=Strict; Path=/; ` +
+      `Max-Age=2592000`;
+
+    res.writeHead(200, {
+      "Content-Type":
+        "application/json; charset=utf-8",
+
+      "Cache-Control": "no-store",
+
+      "Set-Cookie": [
+        accessCookie,
+        refreshCookie
+      ]
+    });
+
+    // Tokens are NOT returned to browser JavaScript
+    res.end(JSON.stringify({
+      success: true,
+
+      user: {
+        id: profile.id,
+        username: profile.username,
+        full_name: profile.full_name,
+        role: profile.role,
+        language: profile.language
+      }
+    }));
+
+    return;
+
+  } catch (error) {
+    console.error("LOGIN ERROR:", error);
+
+    res.writeHead(500, {
+      "Content-Type":
+        "application/json; charset=utf-8"
+    });
+
+    res.end(JSON.stringify({
+      success: false,
+      error: "לא ניתן להתחבר כרגע"
+    }));
+
+    return;
+  }
+}
+// ======================================================
+// AUTH — REFRESH SESSION
+// ======================================================
+
+if (
+  req.method === "POST" &&
+  url.pathname === "/api/auth/refresh"
+) {
+  try {
+    if (!supabaseAuth) {
+      res.writeHead(503, {
+        "Content-Type": "application/json; charset=utf-8"
+      });
+
+      res.end(JSON.stringify({
+        success: false
+      }));
+
+      return;
+    }
+
+    const cookieHeader =
+      req.headers.cookie || "";
+
+    const cookies = {};
+
+    cookieHeader
+      .split(";")
+      .forEach((cookie) => {
+        const separatorIndex =
+          cookie.indexOf("=");
+
+        if (separatorIndex === -1) {
+          return;
+        }
+
+        const key =
+          cookie
+            .slice(0, separatorIndex)
+            .trim();
+
+        const value =
+          cookie
+            .slice(separatorIndex + 1)
+            .trim();
+
+        if (key) {
+          cookies[key] = value;
+        }
+      });
+
+    const refreshToken =
+      cookies.casa_verona_refresh_token;
+
+    if (!refreshToken) {
+      res.writeHead(401, {
+        "Content-Type": "application/json; charset=utf-8"
+      });
+
+      res.end(JSON.stringify({
+        success: false
+      }));
+
+      return;
+    }
+
+    const {
+      data,
+      error
+    } = await supabaseAuth.auth.refreshSession({
+      refresh_token: refreshToken
+    });
+
+    if (
+      error ||
+      !data?.session
+    ) {
+      res.writeHead(401, {
+        "Content-Type": "application/json; charset=utf-8",
+
+        "Set-Cookie": [
+          "casa_verona_access_token=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0",
+          "casa_verona_refresh_token=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0"
+        ]
+      });
+
+      res.end(JSON.stringify({
+        success: false
+      }));
+
+      return;
+    }
+
+    const accessToken =
+      data.session.access_token;
+
+    const newRefreshToken =
+      data.session.refresh_token;
+
+    const accessMaxAge = Math.max(
+      60,
+      (data.session.expires_at || 0) -
+        Math.floor(Date.now() / 1000)
+    );
+
+    res.writeHead(200, {
+      "Content-Type": "application/json; charset=utf-8",
+
+      "Cache-Control": "no-store",
+
+      "Set-Cookie": [
+        `casa_verona_access_token=${accessToken}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${accessMaxAge}`,
+        `casa_verona_refresh_token=${newRefreshToken}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=2592000`
+      ]
+    });
+
+    res.end(JSON.stringify({
+      success: true
+    }));
+
+    return;
+
+  } catch (error) {
+    console.error(
+      "AUTH REFRESH ERROR:",
+      error
+    );
+
+    res.writeHead(500, {
+      "Content-Type": "application/json; charset=utf-8"
+    });
+
+    res.end(JSON.stringify({
+      success: false
+    }));
+
+    return;
+  }
+}
 
 if (
   req.method === "GET" &&

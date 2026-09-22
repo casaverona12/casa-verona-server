@@ -370,10 +370,302 @@
         font-size: 22px;
       }
     }
+
+    /* =====================================================
+   CASA VERONA OS — LUXURY LOGIN
+===================================================== */
+
+.login-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+
+  background:
+    radial-gradient(
+      circle at 15% 15%,
+      rgba(120, 120, 120, 0.10),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at 85% 85%,
+      rgba(20, 20, 20, 0.06),
+      transparent 35%
+    ),
+    #f7f7f5;
+}
+
+.login-screen::before {
+  content: "";
+  position: absolute;
+  inset: 18px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  pointer-events: none;
+}
+
+.login-card {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  padding: 58px 52px 50px;
+
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.10),
+    0 8px 25px rgba(0, 0, 0, 0.04);
+
+  border-radius: 4px;
+}
+
+.login-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 64px;
+  height: 3px;
+  transform: translateX(-50%);
+  background: #691725;
+}
+
+.login-logo {
+  text-align: center;
+  margin-bottom: 42px;
+}
+
+.login-logo::before {
+  content: "";
+  display: block;
+
+  width: 240px;
+  max-width: 85%;
+  height: 95px;
+
+  margin: 0 auto 20px;
+
+  background-image: url("/assets/casa-verona-logo.jpg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+.login-logo h1 {
+  display: none;
+}
+
+.login-logo p {
+  margin: 0;
+  color: #777;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.login-title {
+  text-align: center;
+  margin-bottom: 34px;
+}
+
+.login-title h2 {
+  margin: 0 0 10px;
+  color: #111;
+  font-size: 27px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+}
+
+.login-title p {
+  margin: 0;
+  color: #888;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.login-field {
+  margin-bottom: 20px;
+}
+
+.login-field label {
+  display: block;
+  margin-bottom: 9px;
+
+  color: #292929;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.login-field input {
+  width: 100%;
+  height: 54px;
+  box-sizing: border-box;
+
+  padding: 0 16px;
+
+  color: #111;
+  background: #fafafa;
+
+  border: 1px solid #dedede;
+  border-radius: 3px;
+  outline: none;
+
+  font-family: inherit;
+  font-size: 14px;
+
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.login-field input::placeholder {
+  color: #aaa;
+}
+
+.login-field input:focus {
+  background: #fff;
+  border-color: #691725;
+  box-shadow: 0 0 0 3px rgba(105, 23, 37, 0.07);
+}
+
+.login-button {
+  width: 100%;
+  height: 56px;
+  margin-top: 10px;
+
+  border: 1px solid #111;
+  border-radius: 3px;
+
+  background: #111;
+  color: #fff;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.login-button:hover {
+  background: #262626;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.login-button:active {
+  transform: translateY(0);
+}
+
+.login-error {
+  min-height: 18px;
+  margin-top: 16px;
+
+  color: #691725;
+  text-align: center;
+  font-size: 12px;
+}
+
+@media (max-width: 600px) {
+  .login-screen {
+    padding: 18px;
+    align-items: center;
+  }
+
+  .login-screen::before {
+    inset: 8px;
+  }
+
+  .login-card {
+    padding: 42px 25px 36px;
+  }
+
+  .login-logo {
+    margin-bottom: 32px;
+  }
+
+  .login-logo::before {
+    width: 210px;
+    height: 82px;
+  }
+
+  .login-title h2 {
+    font-size: 24px;
+  }
+
+  .login-field input,
+  .login-button {
+    height: 52px;
+  }
+}
+
   </style>
 </head>
 
 <body>
+
+    <!-- CASA VERONA LOGIN -->
+<div id="loginScreen" class="login-screen">
+  <div class="login-card">
+
+    <div class="login-logo">
+      <h1>CASA VERONA</h1>
+      <p>Business Operating System</p>
+    </div>
+
+    <div class="login-title">
+      <h2>כניסה למערכת</h2>
+      <p>התחברו לחשבון Casa Verona OS</p>
+    </div>
+
+    <form id="loginForm">
+
+      <<div class="login-field">
+  <label for="loginUsername">שם משתמש</label>
+  <input
+    type="text"
+    id="loginUsername"
+    placeholder="הזן שם משתמש"
+    autocomplete="username"
+    autocapitalize="none"
+    spellcheck="false"
+    required
+  >
+</div>
+
+      <div class="login-field">
+        <label for="loginPassword">סיסמה</label>
+        <input
+          type="password"
+          id="loginPassword"
+          placeholder="••••••••"
+          autocomplete="current-password"
+          required
+        >
+      </div>
+
+      <button type="submit" class="login-button">
+        כניסה למערכת
+      </button>
+
+      <div id="loginError" class="login-error"></div>
+
+    </form>
+
+  </div>
+</div>
+
+<!-- END LOGIN -->
 
 <div class="app">
 
@@ -842,6 +1134,212 @@ document
 
   });
 
+</script>
+<script>
+/* =====================================================
+   CASA VERONA OS — AUTH
+===================================================== */
+
+const loginScreen =
+  document.getElementById("loginScreen");
+
+const loginForm =
+  document.getElementById("loginForm");
+
+const loginError =
+  document.getElementById("loginError");
+
+const loginUsername =
+  document.getElementById("loginUsername");
+
+const loginPassword =
+  document.getElementById("loginPassword");
+
+
+function showLogin() {
+  loginScreen.style.display = "flex";
+}
+
+
+function hideLogin() {
+  loginScreen.style.display = "none";
+}
+
+
+async function checkExistingSession() {
+  try {
+    // קודם בודקים אם המשתמש עדיין מחובר
+    let response = await fetch("/api/auth/me", {
+      method: "GET",
+      credentials: "include",
+      cache: "no-store"
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+
+      if (data.success) {
+        hideLogin();
+
+        console.log(
+          "Casa Verona user:",
+          data.user
+        );
+
+        return;
+      }
+    }
+
+    // אם ה-session פג, מרעננים אותו אוטומטית
+    const refreshResponse =
+      await fetch("/api/auth/refresh", {
+        method: "POST",
+        credentials: "include",
+        cache: "no-store"
+      });
+
+    if (!refreshResponse.ok) {
+      showLogin();
+      return;
+    }
+
+    const refreshData =
+      await refreshResponse.json();
+
+    if (!refreshData.success) {
+      showLogin();
+      return;
+    }
+
+    // בודקים שוב אחרי הרענון
+    response = await fetch("/api/auth/me", {
+      method: "GET",
+      credentials: "include",
+      cache: "no-store"
+    });
+
+    if (!response.ok) {
+      showLogin();
+      return;
+    }
+
+    const data = await response.json();
+
+    if (!data.success) {
+      showLogin();
+      return;
+    }
+
+    hideLogin();
+
+    console.log(
+      "Casa Verona user:",
+      data.user
+    );
+
+  } catch (error) {
+    console.error(
+      "SESSION CHECK ERROR:",
+      error
+    );
+
+    showLogin();
+  }
+}
+
+
+loginForm.addEventListener(
+  "submit",
+  async (event) => {
+    event.preventDefault();
+
+    loginError.textContent = "";
+
+    const username =
+      loginUsername.value.trim();
+
+    const password =
+      loginPassword.value;
+
+    if (!username || !password) {
+      loginError.textContent =
+        "יש להזין שם משתמש וסיסמה";
+
+      return;
+    }
+
+    const button =
+      loginForm.querySelector(
+        ".login-button"
+      );
+
+    const originalText =
+      button.textContent;
+
+    button.disabled = true;
+    button.textContent = "מתחבר...";
+
+    try {
+      const response =
+        await fetch("/api/auth/login", {
+          method: "POST",
+
+          credentials: "include",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body: JSON.stringify({
+            username,
+            password
+          })
+        });
+
+      const data =
+        await response.json();
+
+      if (
+        !response.ok ||
+        !data.success
+      ) {
+        loginError.textContent =
+          data.error ||
+          "לא ניתן להתחבר";
+
+        return;
+      }
+
+      loginPassword.value = "";
+
+      hideLogin();
+
+      console.log(
+        "Login successful:",
+        data.user
+      );
+
+    } catch (error) {
+      console.error(
+        "LOGIN ERROR:",
+        error
+      );
+
+      loginError.textContent =
+        "לא ניתן להתחבר כרגע";
+    } finally {
+      button.disabled = false;
+      button.textContent =
+        originalText;
+    }
+  }
+);
+
+
+// Check login automatically
+// every time Casa Verona OS opens.
+checkExistingSession();
 </script>
 
 </body>
