@@ -291,6 +291,44 @@ async function loadConversation(leadId, limit = 14) {
       created_at: item.created_at
     }));
 }
+async function loadCustomerBrain(leadId) {
+  const db = requireSupabase();
+
+  const [
+    { data: lead, error: leadError },
+    { data: aiState, error: aiStateError }
+  ] = await Promise.all([
+    db
+      .from("leads")
+      .select("*")
+      .eq("id", leadId)
+      .maybeSingle(),
+
+    db
+      .from("lead_ai_state")
+      .select("*")
+      .eq("lead_id", leadId)
+      .maybeSingle()
+  ]);
+
+  if (leadError) {
+    throw new Error(
+      `SUPABASE LOAD LEAD MEMORY ERROR: ${leadError.message}`
+    );
+  }
+
+  if (aiStateError) {
+    throw new Error(
+      `SUPABASE LOAD AI MEMORY ERROR: ${aiStateError.message}`
+    );
+  }
+
+  return {
+    customer: lead || null,
+    sales_state: aiState || null
+  };
+}
+
 
 async function updateLeadFromAnalysis(
   leadId,
@@ -435,8 +473,7 @@ async function saveAIState(
             analysis.callback_requested === true,
 
           requested_callback_time:
-            analysis.requested_callback_time ||
-            null,
+            analysis.requested_callback_time || null,
 
           media_action:
             analysis.media_action || null,
@@ -467,7 +504,6 @@ async function saveAIState(
     );
   }
 }
-
 async function saveCallbackRequest(
   leadId,
   analysis
@@ -875,7 +911,11 @@ function getSmartFallbackReply(message, analysis = {}) {
 // ONE-CALL AI SALES CLOSER
 // ======================================================
 
-async function runSalesEngine(message, conversation = []) {
+async function runSalesEngine(
+  message,
+  conversation = [],
+  customerBrain = null
+) {
   const relevantProduct =
     findRelevantProduct(message, conversation);
 
@@ -889,6 +929,19 @@ async function runSalesEngine(message, conversation = []) {
 
   const input = `
 אתה AI Sales Closer של Casa Verona.
+
+CUSTOMER MEMORY:
+${customerBrain
+  ? JSON.stringify(customerBrain, null, 2)
+  : "אין עדיין זיכרון קודם על הלקוח."}
+
+כל המידע ב-CUSTOMER MEMORY הוא מידע שנשמר משיחות קודמות עם אותו לקוח.
+
+השתמש בו כדי לזכור פרטים שהלקוח כבר מסר.
+אל תשאל שוב שאלה שכבר יש עליה תשובה בזיכרון.
+אל תמציא מידע שחסר בזיכרון.
+אם ההודעה הנוכחית של הלקוח סותרת מידע ישן בזיכרון,
+המידע החדש גובר.
 
 אתה לא צ'אטבוט שירות לקוחות.
 אתה איש מכירות מקצועי שמנהל שיחת WhatsApp טבעית.
@@ -2269,7 +2322,9 @@ if (!savedIncomingMessage) {
   res.end("EVENT_RECEIVED");
   return;
 }
-
+const customerBrain =
+  await loadCustomerBrain(lead.id);
+          
 const fullConversation =
   await loadConversation(lead.id, 15);
 
@@ -2281,10 +2336,11 @@ const conversation =
           // =============================================
 
           const result =
-            await runSalesEngine(
-              customerMessage,
-              conversation
-            );
+  await runSalesEngine(
+    customerMessage,
+    conversation,
+    customerBrain
+  );
 
           const analysis =
             result.analysis;
@@ -2300,7 +2356,8 @@ await saveAIState(
   lead.id,
   analysis
 );
-
+          
+          
 await saveCallbackRequest(
   lead.id,
   analysis
