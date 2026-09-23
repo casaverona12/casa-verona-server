@@ -101,7 +101,11 @@ linear-gradient(90deg,rgba(12,12,11,.025) 1px,transparent 1px),
         <div id="loginError" class="cv-auth-error" aria-live="polite"></div>
       </form>
     </main>
-    <footer class="cv-login-foot">CASA VERONA · 2026 · PRIVATE BUSINESS SYSTEM</footer>
+    <footer class="cv-login-foot">
+  <span>CASA VERONA · 2026</span>
+  <strong>Design. Sales. Production.</strong>
+  <small>PRIVATE OPERATING SYSTEM</small>
+</footer>
   </div>
   <div class="cv-login-art">
     <div class="cv-login-art-top"><span>CASA VERONA · PRIVATE OS</span><span>DESIGN · SALES · OPERATIONS</span></div>
@@ -940,4 +944,33 @@ async function cvLoadSummary(){try{const r=await fetch("/api/dashboard/summary",
 if(typeof renderCasaVeronaDate==="function")renderCasaVeronaDate();
 if(typeof checkExistingSession==="function"){checkExistingSession().then(ok=>{if(ok)cvLoadSummary()})}
 </script>
-</body></html>
+</body></html><style>
+.cv-login-foot{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:7px;
+  text-align:center;
+  padding:20px 24px 24px;
+  color:#111;
+}
+
+.cv-login-foot span{
+  font-size:8px;
+  letter-spacing:2.4px;
+  opacity:.42;
+}
+
+.cv-login-foot strong{
+  font-family:Georgia,serif;
+  font-size:15px;
+  font-weight:400;
+  letter-spacing:.7px;
+}
+
+.cv-login-foot small{
+  font-size:7px;
+  letter-spacing:2.2px;
+  opacity:.35;
+}
+</style>
