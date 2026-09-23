@@ -2123,38 +2123,58 @@ const server =
 // CASA VERONA ASSETS
 // -----------------------------------------------
 
+// =====================================================
+// CASA VERONA — STATIC ASSETS
+// =====================================================
+
 if (
   req.method === "GET" &&
-  url.pathname === "/assets/casa-verona-logo.jpg"
+  (
+    url.pathname === "/assets/casa-verona-logo.jpg" ||
+    url.pathname === "/assets/casa-verona-login-bg.png"
+  )
 ) {
   try {
-    const logoPath =
-      require("path").join(
-        __dirname,
-        "assets",
-        "casa-verona-logo.jpg"
-      );
+    const path = require("path");
+    const fs = require("fs");
 
-    const logo = require("fs").readFileSync(logoPath);
+    const assetName =
+      url.pathname === "/assets/casa-verona-logo.jpg"
+        ? "casa-verona-logo.jpg"
+        : "casa-verona-login-bg.png";
+
+    const assetPath = path.join(
+      __dirname,
+      "assets",
+      assetName
+    );
+
+    const asset = fs.readFileSync(assetPath);
+
+    const contentType =
+      assetName.endsWith(".png")
+        ? "image/png"
+        : "image/jpeg";
 
     res.writeHead(200, {
-      "Content-Type": "image/jpeg",
+      "Content-Type": contentType,
       "Cache-Control": "public, max-age=86400"
     });
 
-    res.end(logo);
+    res.end(asset);
   } catch (error) {
-    console.error("LOGO ERROR:", error);
+    console.error("ASSET ERROR:", error);
 
     res.writeHead(404, {
       "Content-Type": "text/plain; charset=utf-8"
     });
 
-    res.end("Logo not found");
+    res.end("Asset not found");
   }
 
   return;
 }
+
 
         // -----------------------------------------------
 // CASA VERONA OS DASHBOARD
