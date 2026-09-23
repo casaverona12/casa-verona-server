@@ -2295,6 +2295,87 @@ if (
   return;
 }
 
+
+// -----------------------------------------------
+// API - ADMIN LEADS CENTER
+// ADMIN ONLY
+// -----------------------------------------------
+
+if (
+  req.method === "GET" &&
+  url.pathname === "/api/admin/leads"
+) {
+  const auth = await requireAuth(req, res, ["ADMIN"]);
+
+  if (!auth) {
+    return;
+  }
+
+  const db = requireSupabase();
+
+  const { data, error } = await db
+    .from("leads")
+    .select(`
+      id,
+      phone,
+      source,
+      stage,
+      temperature,
+      intent,
+      product_interest,
+      product_id,
+      requested_size,
+      requested_color,
+      requested_fabric,
+      comfort_preference,
+      budget,
+      needs_human,
+      quote_ready,
+      summary,
+      last_message_at,
+      created_at,
+      lead_ai_state (
+        sales_objective,
+        next_action,
+        buying_signal,
+        objection,
+        missing_information,
+        needs_human,
+        quote_ready,
+        handoff_reason,
+        should_offer_callback,
+        callback_requested,
+        requested_callback_time,
+        summary,
+        updated_at
+      )
+    `)
+    .order("last_message_at", {
+      ascending: false,
+      nullsFirst: false
+    });
+
+  if (error) {
+    throw new Error(
+      `ADMIN LEADS ERROR: ${error.message}`
+    );
+  }
+
+  res.writeHead(200, {
+    "Content-Type": "application/json; charset=utf-8"
+  });
+
+  res.end(
+    JSON.stringify({
+      success: true,
+      count: data?.length || 0,
+      leads: data || []
+    })
+  );
+
+  return;
+}
+
 // API - LEADS
 // -----------------------------------------------
 

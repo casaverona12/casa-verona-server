@@ -48,6 +48,208 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}bu
 .cv-lower{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.cv-mini{min-height:220px;padding:21px;border:1px solid var(--line);background:#fff}.cv-mini h3{margin:0 0 5px;font:400 18px Georgia,serif}.cv-mini>p{margin:0 0 16px;color:var(--muted);font-size:9px}.cv-task{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-top:1px solid #ece8df;font-size:10px}.cv-task b{font:400 16px Georgia,serif}.cv-warn{color:#b36a34}.cv-good{color:var(--green)}
 .cv-agent{display:flex;align-items:center;gap:10px;padding:15px 0;border-top:1px solid #ece8df}.cv-agent-icon{width:36px;height:36px;display:grid;place-items:center;background:#171613;color:#fff;font:400 14px Georgia,serif}.cv-agent strong{display:block;font-size:10px}.cv-agent small{font-size:8px;color:var(--muted)}.cv-agent i{margin-right:auto;width:7px;height:7px;border-radius:50%;background:var(--green)}
 
+
+/* LEADS CENTER */
+.cv-leads-kpis{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+  margin-bottom:15px;
+}
+.cv-leads-kpi{
+  min-height:145px;
+  padding:20px;
+  border:1px solid var(--line);
+  background:#fff;
+  display:flex;
+  flex-direction:column;
+}
+.cv-leads-kpi.dark{
+  background:#0b0b0a;
+  border-color:#0b0b0a;
+  color:#fff;
+}
+.cv-leads-kpi small{
+  font-size:7px;
+  letter-spacing:2px;
+  color:#817b72;
+}
+.cv-leads-kpi.dark small{color:rgba(255,255,255,.42)}
+.cv-leads-kpi strong{
+  margin-top:20px;
+  font:400 38px/1 Georgia,serif;
+}
+.cv-leads-kpi span{
+  margin-top:auto;
+  padding-top:13px;
+  border-top:1px solid #ece8df;
+  color:#8d877e;
+  font-size:9px;
+}
+.cv-leads-kpi.dark span{
+  border-color:rgba(255,255,255,.1);
+  color:rgba(255,255,255,.48);
+}
+
+.cv-leads-toolbar{
+  display:grid;
+  grid-template-columns:1fr 190px 130px;
+  gap:10px;
+  margin-bottom:12px;
+}
+.cv-leads-search{
+  height:48px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:0 16px;
+  border:1px solid var(--line);
+  background:#fff;
+}
+.cv-leads-search span{
+  font:400 21px Georgia,serif;
+  color:#777168;
+}
+.cv-leads-search input{
+  width:100%;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:#151412;
+  font:inherit;
+  font-size:10px;
+}
+.cv-leads-toolbar select,
+.cv-leads-toolbar button{
+  height:48px;
+  border:1px solid var(--line);
+  background:#fff;
+  padding:0 14px;
+  font:inherit;
+  font-size:9px;
+  color:#292620;
+}
+.cv-leads-toolbar button{
+  cursor:pointer;
+  background:#0b0b0a;
+  border-color:#0b0b0a;
+  color:#fff;
+}
+
+.cv-leads-shell{
+  border:1px solid var(--line);
+  background:#fff;
+  box-shadow:0 12px 38px rgba(0,0,0,.035);
+}
+.cv-leads-table-head,
+.cv-lead-row{
+  display:grid;
+  grid-template-columns:1.15fr 1.1fr .75fr .75fr 1.35fr .7fr;
+  gap:16px;
+  align-items:center;
+}
+.cv-leads-table-head{
+  min-height:47px;
+  padding:0 20px;
+  border-bottom:1px solid #dedad1;
+  background:#f7f5ef;
+  color:#8a847b;
+  font-size:7px;
+  letter-spacing:1.5px;
+}
+.cv-lead-row{
+  min-height:92px;
+  padding:16px 20px;
+  border-bottom:1px solid #ece9e2;
+  transition:.2s ease;
+}
+.cv-lead-row:last-child{border-bottom:0}
+.cv-lead-row:hover{background:#faf9f5}
+
+.cv-lead-phone{
+  display:block;
+  direction:ltr;
+  text-align:right;
+  font:400 15px Georgia,serif;
+}
+.cv-lead-source{
+  display:block;
+  margin-top:5px;
+  color:#969087;
+  font-size:8px;
+}
+.cv-lead-product{
+  display:block;
+  font-size:10px;
+  font-weight:650;
+}
+.cv-lead-summary{
+  display:block;
+  margin-top:5px;
+  color:#8c867d;
+  font-size:8px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width:220px;
+}
+.cv-lead-badge{
+  display:inline-flex;
+  width:max-content;
+  padding:6px 9px;
+  border:1px solid #ddd8ce;
+  background:#f7f5ef;
+  font-size:7px;
+  letter-spacing:.8px;
+}
+.cv-lead-badge.hot{
+  background:#0b0b0a;
+  border-color:#0b0b0a;
+  color:#fff;
+}
+.cv-lead-badge.human{
+  border-color:#6f1d2c;
+  color:#6f1d2c;
+}
+.cv-lead-signal{
+  font:400 20px Georgia,serif;
+}
+.cv-lead-next{
+  font-size:9px;
+  line-height:1.6;
+  color:#514c45;
+}
+.cv-lead-time{
+  color:#8d877e;
+  font-size:8px;
+}
+.cv-leads-loading,
+.cv-leads-empty,
+.cv-leads-error{
+  min-height:220px;
+  display:grid;
+  place-items:center;
+  padding:30px;
+  text-align:center;
+  color:#8b857c;
+  font-size:10px;
+}
+.cv-leads-error{color:#6f1d2c}
+
+@media(max-width:1160px){
+  .cv-leads-kpis{grid-template-columns:1fr 1fr}
+  .cv-leads-shell{overflow-x:auto}
+  .cv-leads-table-head,
+  .cv-lead-row{min-width:900px}
+}
+@media(max-width:760px){
+  .cv-leads-toolbar{grid-template-columns:1fr}
+  .cv-leads-kpis{grid-template-columns:1fr 1fr}
+}
+@media(max-width:430px){
+  .cv-leads-kpis{grid-template-columns:1fr}
+}
+
 /* MODULE PAGES */
 .cv-section-head{margin-bottom:22px}.cv-section-head small{display:block;color:var(--wine);font:400 8px Georgia,serif;letter-spacing:2.5px;margin-bottom:8px}.cv-section-head h1{margin:0;font:400 40px Georgia,serif;letter-spacing:-1.5px}.cv-section-head p{margin:8px 0 0;color:var(--muted);font-size:11px}
 .cv-modules{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.cv-module{min-height:220px;padding:22px;border:1px solid var(--line);background:#fff}.cv-module.dark{background:#171613;color:#fff;border-color:#171613}.cv-module small{font-size:7px;letter-spacing:2px;color:var(--wine)}.cv-module.dark small{color:#d7d2c8}.cv-module h3{margin:28px 0 10px;font:400 22px Georgia,serif}.cv-module p{margin:0;color:var(--muted);font-size:10px;line-height:1.8}.cv-module.dark p{color:rgba(255,255,255,.48)}.cv-empty{margin-top:14px;min-height:170px;display:grid;place-items:center;border:1px dashed #d5d0c6;background:rgba(255,255,255,.4);color:#8b857c;font-size:10px}
@@ -175,7 +377,83 @@ linear-gradient(90deg,rgba(12,12,11,.025) 1px,transparent 1px),
   </div>
 </section>
 
-<section id="leads" class="page"></section>
+
+<section id="leads" class="page">
+
+  <div class="cv-section-head">
+    <small>LEADS · SALES PIPELINE</small>
+    <h1>מרכז הלידים</h1>
+    <p>כל הפניות של Casa Verona, מצב המכירה והפעולה הבאה — במקום אחד.</p>
+  </div>
+
+  <div class="cv-leads-kpis">
+    <article class="cv-leads-kpi">
+      <small>TOTAL LEADS</small>
+      <strong id="cvLeadsTotal">—</strong>
+      <span>כל הלידים</span>
+    </article>
+
+    <article class="cv-leads-kpi dark">
+      <small>HOT LEADS</small>
+      <strong id="cvLeadsHot">—</strong>
+      <span>דורשים תשומת לב</span>
+    </article>
+
+    <article class="cv-leads-kpi">
+      <small>HUMAN HANDOFF</small>
+      <strong id="cvLeadsHuman">—</strong>
+      <span>ממתינים לאיש מכירות</span>
+    </article>
+
+    <article class="cv-leads-kpi">
+      <small>QUOTE READY</small>
+      <strong id="cvLeadsQuote">—</strong>
+      <span>מוכנים להצעה</span>
+    </article>
+  </div>
+
+  <div class="cv-leads-toolbar">
+    <div class="cv-leads-search">
+      <span>⌕</span>
+      <input
+        id="cvLeadsSearch"
+        type="search"
+        placeholder="חיפוש לפי טלפון, מוצר, סטטוס או סיכום..."
+        autocomplete="off"
+      >
+    </div>
+
+    <select id="cvLeadsFilter">
+      <option value="all">כל הלידים</option>
+      <option value="hot">לידים חמים</option>
+      <option value="human">דורשים איש מכירות</option>
+      <option value="quote">מוכנים להצעה</option>
+    </select>
+
+    <button id="cvLeadsRefresh" type="button">
+      רענון נתונים
+    </button>
+  </div>
+
+  <div class="cv-leads-shell">
+    <div class="cv-leads-table-head">
+      <span>לקוח</span>
+      <span>עניין</span>
+      <span>שלב</span>
+      <span>AI SIGNAL</span>
+      <span>פעולה הבאה</span>
+      <span>עדכון</span>
+    </div>
+
+    <div id="cvLeadsList" class="cv-leads-list">
+      <div class="cv-leads-loading">
+        טוען את הלידים של Casa Verona...
+      </div>
+    </div>
+  </div>
+
+</section>
+
 <section id="sales" class="page"></section>
 <section id="followups" class="page"></section>
 <section id="customers" class="page"></section>
@@ -218,9 +496,303 @@ catalog:["קטלוג","מאגר המוצרים והידע של צוות המכי
 "ai-production":["Production AI","ניהול עומסים, דדליינים וחריגות במפעל.","LOAD","עומסי ייצור","RISK","סיכון לאיחור","PRIORITY","סדרי עדיפויות"],
 "ai-ceo":["CEO Brain","תמונת מצב עסקית ותובנות ניהוליות במקום אחד.","EXECUTIVE","מצב העסק","INSIGHTS","תובנות","DECISIONS","בסיס להחלטות"],
 reports:["דוחות ורווחיות","המרות, הכנסות, עלויות ורווחיות.","SALES","דוחות מכירה","PROFIT","רווחיות ועלויות","CONVERSION","משפך והמרות"]};
-function cvBuildPage(id){const p=document.getElementById(id),d=CV_PAGE_COPY[id];if(!p||!d)return;p.innerHTML=`<div class="cv-section-head"><small>${CV_PAGE_META[id][1]}</small><h1>${d[0]}</h1><p>${d[1]}</p></div><div class="cv-modules"><article class="cv-module"><small>${d[2]}</small><h3>${d[3]}</h3><p>המודול מוכן לחיבור לנתונים האמיתיים של Casa Verona.</p></article><article class="cv-module"><small>${d[4]}</small><h3>${d[5]}</h3><p>כאן נבנה את כלי העבודה, התהליכים והאוטומציות של המודול.</p></article><article class="cv-module dark"><small>${d[6]}</small><h3>${d[7]}</h3><p>אין נתוני דמה. המידע יוצג לאחר חיבור ה־API המאובטח.</p></article></div><div class="cv-empty">המסך מוכן לשלב הבא · חיבור נתונים ופונקציונליות</div>`}
+function cvBuildPage(id){if(id==="leads")return;const p=document.getElementById(id),d=CV_PAGE_COPY[id];if(!p||!d)return;p.innerHTML=`<div class="cv-section-head"><small>${CV_PAGE_META[id][1]}</small><h1>${d[0]}</h1><p>${d[1]}</p></div><div class="cv-modules"><article class="cv-module"><small>${d[2]}</small><h3>${d[3]}</h3><p>המודול מוכן לחיבור לנתונים האמיתיים של Casa Verona.</p></article><article class="cv-module"><small>${d[4]}</small><h3>${d[5]}</h3><p>כאן נבנה את כלי העבודה, התהליכים והאוטומציות של המודול.</p></article><article class="cv-module dark"><small>${d[6]}</small><h3>${d[7]}</h3><p>אין נתוני דמה. המידע יוצג לאחר חיבור ה־API המאובטח.</p></article></div><div class="cv-empty">המסך מוכן לשלב הבא · חיבור נתונים ופונקציונליות</div>`}
 Object.keys(CV_PAGE_COPY).forEach(cvBuildPage);
-function cvOpenPage(id){const t=document.getElementById(id);if(!t)return;document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));t.classList.add("active");document.querySelectorAll("[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===id));const title=document.getElementById("pageTitle");if(title)title.textContent=(CV_PAGE_META[id]||[id])[0];window.scrollTo({top:0,behavior:"smooth"})}
+
+
+/* =====================================================
+   CASA VERONA — REAL LEADS CENTER
+===================================================== */
+
+let cvLeadsData = [];
+let cvLeadsLoaded = false;
+
+function cvLeadAIState(lead){
+  const state = lead?.lead_ai_state;
+  if(Array.isArray(state)) return state[0] || {};
+  return state || {};
+}
+
+function cvLeadText(value, fallback="—"){
+  if(value === null || value === undefined || value === "") return fallback;
+  return String(value);
+}
+
+function cvEscapeHTML(value){
+  return String(value ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+function cvLeadIsHot(lead){
+  const temp = String(lead?.temperature || "").toLowerCase();
+  return ["hot","חם"].includes(temp);
+}
+
+function cvLeadSignal(lead){
+  const ai = cvLeadAIState(lead);
+  const n = Number(ai.buying_signal);
+  return Number.isFinite(n) ? n : null;
+}
+
+function cvLeadTime(value){
+  if(!value) return "—";
+
+  const date = new Date(value);
+  if(Number.isNaN(date.getTime())) return "—";
+
+  return new Intl.DateTimeFormat("he-IL",{
+    day:"2-digit",
+    month:"2-digit",
+    hour:"2-digit",
+    minute:"2-digit"
+  }).format(date);
+}
+
+function cvRenderLeads(){
+  const list = document.getElementById("cvLeadsList");
+  if(!list) return;
+
+  const search = (
+    document.getElementById("cvLeadsSearch")?.value || ""
+  ).trim().toLowerCase();
+
+  const filter =
+    document.getElementById("cvLeadsFilter")?.value || "all";
+
+  const filtered = cvLeadsData.filter(lead=>{
+    const ai = cvLeadAIState(lead);
+
+    const haystack = [
+      lead.phone,
+      lead.source,
+      lead.stage,
+      lead.temperature,
+      lead.intent,
+      lead.product_interest,
+      lead.requested_size,
+      lead.requested_color,
+      lead.requested_fabric,
+      lead.budget,
+      lead.summary,
+      ai.summary,
+      ai.next_action,
+      ai.objection
+    ].filter(Boolean).join(" ").toLowerCase();
+
+    if(search && !haystack.includes(search)) return false;
+
+    if(filter === "hot" && !cvLeadIsHot(lead)) return false;
+
+    if(
+      filter === "human" &&
+      !(lead.needs_human === true || ai.needs_human === true)
+    ) return false;
+
+    if(
+      filter === "quote" &&
+      !(lead.quote_ready === true || ai.quote_ready === true)
+    ) return false;
+
+    return true;
+  });
+
+  if(!filtered.length){
+    list.innerHTML = `
+      <div class="cv-leads-empty">
+        לא נמצאו לידים התואמים לחיפוש או לסינון.
+      </div>
+    `;
+    return;
+  }
+
+  list.innerHTML = filtered.map(lead=>{
+    const ai = cvLeadAIState(lead);
+
+    const needsHuman =
+      lead.needs_human === true ||
+      ai.needs_human === true;
+
+    const quoteReady =
+      lead.quote_ready === true ||
+      ai.quote_ready === true;
+
+    const signal = cvLeadSignal(lead);
+
+    const stage =
+      lead.stage ||
+      lead.temperature ||
+      lead.intent ||
+      "—";
+
+    const product =
+      lead.product_interest ||
+      "ללא מוצר שנבחר";
+
+    const summary =
+      lead.summary ||
+      ai.summary ||
+      lead.intent ||
+      "אין עדיין סיכום AI";
+
+    const nextAction =
+      ai.next_action ||
+      (needsHuman
+        ? "נדרשת התערבות איש מכירות"
+        : quoteReady
+          ? "מוכן להתקדמות להצעת מחיר"
+          : "—");
+
+    let badgeClass = "";
+    if(cvLeadIsHot(lead)) badgeClass = "hot";
+    else if(needsHuman) badgeClass = "human";
+
+    return `
+      <article class="cv-lead-row">
+
+        <div>
+          <strong class="cv-lead-phone">
+            ${cvEscapeHTML(cvLeadText(lead.phone))}
+          </strong>
+          <span class="cv-lead-source">
+            ${cvEscapeHTML(cvLeadText(lead.source,"מקור לא ידוע"))}
+          </span>
+        </div>
+
+        <div>
+          <strong class="cv-lead-product">
+            ${cvEscapeHTML(product)}
+          </strong>
+          <span class="cv-lead-summary" title="${cvEscapeHTML(summary)}">
+            ${cvEscapeHTML(summary)}
+          </span>
+        </div>
+
+        <div>
+          <span class="cv-lead-badge ${badgeClass}">
+            ${cvEscapeHTML(stage)}
+          </span>
+        </div>
+
+        <div>
+          <strong class="cv-lead-signal">
+            ${signal === null ? "—" : cvEscapeHTML(signal)}
+          </strong>
+        </div>
+
+        <div class="cv-lead-next">
+          ${cvEscapeHTML(nextAction)}
+        </div>
+
+        <div class="cv-lead-time">
+          ${cvEscapeHTML(cvLeadTime(lead.last_message_at || lead.created_at))}
+        </div>
+
+      </article>
+    `;
+  }).join("");
+}
+
+function cvUpdateLeadsKPIs(){
+  const total = cvLeadsData.length;
+
+  const hot =
+    cvLeadsData.filter(cvLeadIsHot).length;
+
+  const human =
+    cvLeadsData.filter(lead=>{
+      const ai = cvLeadAIState(lead);
+      return lead.needs_human === true || ai.needs_human === true;
+    }).length;
+
+  const quote =
+    cvLeadsData.filter(lead=>{
+      const ai = cvLeadAIState(lead);
+      return lead.quote_ready === true || ai.quote_ready === true;
+    }).length;
+
+  cvSet("cvLeadsTotal",total);
+  cvSet("cvLeadsHot",hot);
+  cvSet("cvLeadsHuman",human);
+  cvSet("cvLeadsQuote",quote);
+}
+
+async function cvLoadLeads(force=false){
+  if(cvLeadsLoaded && !force){
+    cvRenderLeads();
+    return;
+  }
+
+  const list = document.getElementById("cvLeadsList");
+
+  if(list){
+    list.innerHTML = `
+      <div class="cv-leads-loading">
+        טוען את הלידים של Casa Verona...
+      </div>
+    `;
+  }
+
+  try{
+    const response = await fetch("/api/admin/leads",{
+      credentials:"include",
+      cache:"no-store"
+    });
+
+    if(response.status === 401 || response.status === 403){
+      throw new Error("אין הרשאה לצפייה בלידים.");
+    }
+
+    if(!response.ok){
+      throw new Error("טעינת הלידים נכשלה.");
+    }
+
+    const data = await response.json();
+
+    if(!data?.success){
+      throw new Error("השרת לא החזיר נתוני לידים תקינים.");
+    }
+
+    cvLeadsData =
+      Array.isArray(data.leads)
+        ? data.leads
+        : [];
+
+    cvLeadsLoaded = true;
+
+    cvUpdateLeadsKPIs();
+    cvRenderLeads();
+
+  }catch(error){
+    console.error("CASA VERONA LEADS:",error);
+
+    if(list){
+      list.innerHTML = `
+        <div class="cv-leads-error">
+          ${cvEscapeHTML(error.message || "לא ניתן לטעון את הלידים כרגע.")}
+        </div>
+      `;
+    }
+  }
+}
+
+document
+  .getElementById("cvLeadsSearch")
+  ?.addEventListener("input",cvRenderLeads);
+
+document
+  .getElementById("cvLeadsFilter")
+  ?.addEventListener("change",cvRenderLeads);
+
+document
+  .getElementById("cvLeadsRefresh")
+  ?.addEventListener("click",()=>cvLoadLeads(true));
+
+
+function cvOpenPage(id){const t=document.getElementById(id);if(!t)return;document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));t.classList.add("active");document.querySelectorAll("[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===id));const title=document.getElementById("pageTitle");if(title)title.textContent=(CV_PAGE_META[id]||[id])[0];if(id==="leads")cvLoadLeads();window.scrollTo({top:0,behavior:"smooth"})}
 document.addEventListener("click",e=>{const n=e.target.closest("[data-page]"),o=e.target.closest("[data-open-page]");if(n)cvOpenPage(n.dataset.page);if(o)cvOpenPage(o.dataset.openPage)});
 </script>
 
