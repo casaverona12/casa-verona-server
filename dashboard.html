@@ -1474,6 +1474,499 @@ background-repeat: no-repeat !important;
 }
 
   </style>
+/* =====================================================
+   CASA VERONA — ADMIN DASHBOARD V2
+===================================================== */
+
+.cv-dashboard {
+  animation: cvDashboardEnter .55s ease both;
+}
+
+/* HERO */
+.cv-dashboard-hero {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 30px;
+  min-height: 220px;
+  margin-bottom: 24px;
+  padding: 38px 42px;
+  overflow: hidden;
+  border: 1px solid #dedbd3;
+  background:
+    radial-gradient(
+      circle at 8% 10%,
+      rgba(255,255,255,.85),
+      transparent 36%
+    ),
+    linear-gradient(
+      135deg,
+      #e8e6e0 0%,
+      #d8d5cd 100%
+    );
+}
+
+.cv-dashboard-hero::before {
+  content: "CV";
+  position: absolute;
+  left: 28px;
+  bottom: -42px;
+  color: rgba(17,17,17,.035);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 190px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.cv-dashboard-hero-copy {
+  position: relative;
+  z-index: 2;
+}
+
+.cv-dashboard-eyebrow {
+  display: block;
+  margin-bottom: 17px;
+  direction: ltr;
+  text-align: right;
+  color: #721c2b;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 9px;
+  letter-spacing: 3px;
+}
+
+.cv-dashboard-hero h1 {
+  margin: 0;
+  color: #11110f;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(40px, 4vw, 62px);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -2px;
+}
+
+.cv-dashboard-hero p {
+  margin-top: 16px;
+  color: #68645d;
+  font-size: 14px;
+}
+
+.cv-dashboard-date {
+  position: relative;
+  z-index: 2;
+  min-width: 150px;
+  padding-right: 22px;
+  border-right: 2px solid #721c2b;
+}
+
+.cv-dashboard-date span {
+  display: block;
+  margin-bottom: 7px;
+  color: #77736b;
+  font-size: 11px;
+}
+
+.cv-dashboard-date strong {
+  color: #191917;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 17px;
+  font-weight: 400;
+}
+
+
+/* KPI */
+.cv-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.cv-kpi-card {
+  position: relative;
+  min-height: 190px;
+  padding: 22px;
+  overflow: hidden;
+  border: 1px solid #e2dfd7;
+  background: #fff;
+  transition:
+    transform .25s ease,
+    box-shadow .25s ease;
+}
+
+.cv-kpi-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 38px rgba(22,22,20,.07);
+}
+
+.cv-kpi-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cv-kpi-top span {
+  color: #721c2b;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 10px;
+  font-style: italic;
+}
+
+.cv-kpi-top small {
+  color: #8a867e;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 2px;
+}
+
+.cv-kpi-number {
+  margin-top: 28px;
+  color: #11110f;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 48px;
+  line-height: 1;
+}
+
+.cv-kpi-label {
+  margin-top: 8px;
+  color: #282824;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.cv-kpi-footer {
+  position: absolute;
+  right: 22px;
+  bottom: 18px;
+  left: 22px;
+  padding-top: 11px;
+  border-top: 1px solid #ece9e2;
+  color: #98938a;
+  font-size: 10px;
+}
+
+.cv-kpi-card-dark {
+  border-color: #171715;
+  background: #171715;
+}
+
+.cv-kpi-card-dark .cv-kpi-number,
+.cv-kpi-card-dark .cv-kpi-label {
+  color: #fff;
+}
+
+.cv-kpi-card-dark .cv-kpi-top small,
+.cv-kpi-card-dark .cv-kpi-footer {
+  color: rgba(255,255,255,.48);
+}
+
+.cv-kpi-card-dark .cv-kpi-top span {
+  color: #b98a93;
+}
+
+.cv-kpi-card-dark .cv-kpi-footer {
+  border-top-color: rgba(255,255,255,.1);
+}
+
+
+/* MAIN GRID */
+.cv-dashboard-grid {
+  display: grid;
+  grid-template-columns: 1.35fr .65fr;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.cv-dashboard-panel {
+  min-height: 330px;
+  padding: 27px;
+  border: 1px solid #e2dfd7;
+  background: #fff;
+}
+
+.cv-panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-bottom: 21px;
+  border-bottom: 1px solid #ebe8e1;
+}
+
+.cv-panel-header > div {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.cv-panel-index {
+  color: #721c2b;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 10px;
+  font-style: italic;
+}
+
+.cv-panel-header h2 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 22px;
+  font-weight: 400;
+}
+
+.cv-live-indicator {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #77736b;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+.cv-live-indicator i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #1f8f5f;
+  box-shadow: 0 0 0 4px rgba(31,143,95,.1);
+}
+
+
+/* BUSINESS PULSE */
+.cv-pulse-list {
+  margin-top: 8px;
+}
+
+.cv-pulse-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 61px;
+  border-bottom: 1px solid #efede7;
+}
+
+.cv-pulse-row:last-child {
+  border-bottom: 0;
+}
+
+.cv-pulse-row span {
+  color: #66625b;
+  font-size: 13px;
+}
+
+.cv-pulse-row strong {
+  color: #171715;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 23px;
+  font-weight: 400;
+}
+
+
+/* AI COMMAND */
+.cv-ai-command {
+  display: flex;
+  flex-direction: column;
+  border-color: #171715;
+  background:
+    radial-gradient(
+      circle at 90% 0%,
+      rgba(114,28,43,.28),
+      transparent 38%
+    ),
+    #151513;
+  color: #fff;
+}
+
+.cv-ai-command-top {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: rgba(255,255,255,.5);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 2px;
+}
+
+.cv-ai-star {
+  color: #b98a93;
+  font-size: 17px;
+}
+
+.cv-ai-command h2 {
+  margin: 36px 0 15px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 31px;
+  font-weight: 400;
+  letter-spacing: -1px;
+}
+
+.cv-ai-command p {
+  max-width: 370px;
+  color: rgba(255,255,255,.58);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.cv-ai-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 25px;
+  padding: 14px 0;
+  border-top: 1px solid rgba(255,255,255,.09);
+  border-bottom: 1px solid rgba(255,255,255,.09);
+}
+
+.cv-ai-status span {
+  color: rgba(255,255,255,.4);
+  font-size: 8px;
+  letter-spacing: 2px;
+}
+
+.cv-ai-status strong {
+  color: #79c99e;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+}
+
+.cv-ai-open {
+  width: 100%;
+  margin-top: auto;
+  padding: 16px 0 3px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: color .2s ease;
+}
+
+.cv-ai-open:hover {
+  color: #d6aab2;
+}
+
+
+/* BOTTOM STATEMENT */
+.cv-dashboard-bottom {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 30px;
+  padding: 29px 4px 5px;
+}
+
+.cv-dashboard-bottom-label {
+  display: block;
+  margin-bottom: 9px;
+  direction: ltr;
+  text-align: right;
+  color: #721c2b;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 8px;
+  letter-spacing: 2.7px;
+}
+
+.cv-dashboard-bottom h2 {
+  margin: 0;
+  color: #171715;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 32px;
+  font-weight: 400;
+  letter-spacing: -1px;
+}
+
+.cv-dashboard-bottom h2 em {
+  color: #721c2b;
+  font-weight: 400;
+}
+
+.cv-dashboard-bottom p {
+  color: #8a867e;
+  font-size: 10px;
+}
+
+
+/* ANIMATION */
+@keyframes cvDashboardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* TABLET */
+@media (max-width: 1100px) {
+  .cv-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .cv-dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* MOBILE */
+@media (max-width: 700px) {
+  .cv-dashboard-hero {
+    min-height: 250px;
+    padding: 28px 24px;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-end;
+  }
+
+  .cv-dashboard-hero h1 {
+    font-size: 39px;
+  }
+
+  .cv-dashboard-date {
+    width: 100%;
+  }
+
+  .cv-kpi-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .cv-kpi-card {
+    min-height: 170px;
+    padding: 17px;
+  }
+
+  .cv-kpi-number {
+    font-size: 38px;
+  }
+
+  .cv-kpi-footer {
+    right: 17px;
+    left: 17px;
+  }
+
+  .cv-dashboard-panel {
+    padding: 21px;
+  }
+
+  .cv-dashboard-bottom {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 430px) {
+  .cv-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}
 
 </head>
 
@@ -1668,6 +2161,315 @@ background-repeat: no-repeat !important;
 
 </section>
 
+<!-- =====================================================
+     CASA VERONA — ADMIN DASHBOARD V2
+===================================================== -->
+
+<section id="dashboard" class="page active cv-dashboard">
+
+  <!-- WELCOME -->
+  <div class="cv-dashboard-hero">
+
+    <div class="cv-dashboard-hero-copy">
+
+      <span class="cv-dashboard-eyebrow">
+        CASA VERONA · COMMAND CENTER
+      </span>
+
+      <h1 id="cvWelcomeTitle">
+        ברוכים הבאים
+      </h1>
+
+      <p>
+        תמונת מצב חיה של Casa Verona
+      </p>
+
+    </div>
+
+    <div class="cv-dashboard-date">
+
+      <span id="cvDashboardDay">
+        —
+      </span>
+
+      <strong id="cvDashboardDate">
+        —
+      </strong>
+
+    </div>
+
+  </div>
+
+
+  <!-- KPI -->
+  <div class="cv-kpi-grid">
+
+    <article class="cv-kpi-card">
+
+      <div class="cv-kpi-top">
+        <span>01</span>
+        <small>LEADS</small>
+      </div>
+
+      <div
+        class="cv-kpi-number"
+        id="cvKpiLeads"
+      >
+        —
+      </div>
+
+      <div class="cv-kpi-label">
+        לידים חדשים
+      </div>
+
+      <div class="cv-kpi-footer">
+        פעילות המכירות
+      </div>
+
+    </article>
+
+
+    <article class="cv-kpi-card">
+
+      <div class="cv-kpi-top">
+        <span>02</span>
+        <small>SALES</small>
+      </div>
+
+      <div
+        class="cv-kpi-number"
+        id="cvKpiSales"
+      >
+        —
+      </div>
+
+      <div class="cv-kpi-label">
+        עסקאות
+      </div>
+
+      <div class="cv-kpi-footer">
+        עסקאות שנסגרו
+      </div>
+
+    </article>
+
+
+    <article class="cv-kpi-card">
+
+      <div class="cv-kpi-top">
+        <span>03</span>
+        <small>ORDERS</small>
+      </div>
+
+      <div
+        class="cv-kpi-number"
+        id="cvKpiOrders"
+      >
+        —
+      </div>
+
+      <div class="cv-kpi-label">
+        הזמנות פעילות
+      </div>
+
+      <div class="cv-kpi-footer">
+        הזמנות בתהליך
+      </div>
+
+    </article>
+
+
+    <article class="cv-kpi-card cv-kpi-card-dark">
+
+      <div class="cv-kpi-top">
+        <span>04</span>
+        <small>PRODUCTION</small>
+      </div>
+
+      <div
+        class="cv-kpi-number"
+        id="cvKpiProduction"
+      >
+        —
+      </div>
+
+      <div class="cv-kpi-label">
+        בתהליך ייצור
+      </div>
+
+      <div class="cv-kpi-footer">
+        FACTORY STATUS
+      </div>
+
+    </article>
+
+  </div>
+
+
+  <!-- MAIN DASHBOARD -->
+  <div class="cv-dashboard-grid">
+
+    <!-- BUSINESS PULSE -->
+    <article class="cv-dashboard-panel cv-business-pulse">
+
+      <div class="cv-panel-header">
+
+        <div>
+          <span class="cv-panel-index">
+            01
+          </span>
+
+          <h2>
+            מצב העסק
+          </h2>
+        </div>
+
+        <span class="cv-live-indicator">
+          <i></i>
+          LIVE
+        </span>
+
+      </div>
+
+
+      <div class="cv-pulse-list">
+
+        <div class="cv-pulse-row">
+
+          <span>
+            לידים חמים
+          </span>
+
+          <strong id="cvHotLeads">
+            —
+          </strong>
+
+        </div>
+
+
+        <div class="cv-pulse-row">
+
+          <span>
+            ממתינים למעקב
+          </span>
+
+          <strong id="cvFollowups">
+            —
+          </strong>
+
+        </div>
+
+
+        <div class="cv-pulse-row">
+
+          <span>
+            ממתינים לייצור
+          </span>
+
+          <strong id="cvWaitingProduction">
+            —
+          </strong>
+
+        </div>
+
+
+        <div class="cv-pulse-row">
+
+          <span>
+            מוכנים לאספקה
+          </span>
+
+          <strong id="cvReadyDelivery">
+            —
+          </strong>
+
+        </div>
+
+      </div>
+
+    </article>
+
+
+    <!-- AI COMMAND -->
+    <article class="cv-dashboard-panel cv-ai-command">
+
+      <div class="cv-ai-command-top">
+
+        <span class="cv-ai-star">
+          ✦
+        </span>
+
+        <span>
+          CASA VERONA AI
+        </span>
+
+      </div>
+
+      <h2>
+        AI Command Center
+      </h2>
+
+      <p>
+        המוח העסקי של Casa Verona מרכז מכירות,
+        לידים, ייצור והזמנות במקום אחד.
+      </p>
+
+      <div class="cv-ai-status">
+
+        <span>
+          SYSTEM STATUS
+        </span>
+
+        <strong>
+          ONLINE
+        </strong>
+
+      </div>
+
+      <button
+        type="button"
+        data-open-page="ai"
+        class="cv-ai-open"
+      >
+        <span>
+          כניסה למרכז ה־AI
+        </span>
+
+        <span>
+          ←
+        </span>
+      </button>
+
+    </article>
+
+  </div>
+
+
+  <!-- LOWER AREA -->
+  <div class="cv-dashboard-bottom">
+
+    <div>
+
+      <span class="cv-dashboard-bottom-label">
+        CASA VERONA · TODAY
+      </span>
+
+      <h2>
+        כל העסק.
+        <em>מסך אחד.</em>
+      </h2>
+
+    </div>
+
+    <p>
+      מכירות · לקוחות · הזמנות · ייצור · אספקות · AI
+    </p>
+
+  </div>
+
+</section>
+
+<!-- END ADMIN DASHBOARD V2 -->
 
     <!-- LEADS -->
 
@@ -2198,6 +3000,71 @@ loginForm.addEventListener(
 // Check login automatically
 // every time Casa Verona OS opens.
 checkExistingSession();
+</script>
+<script>
+/* =====================================================
+   CASA VERONA — PERSONAL WELCOME
+===================================================== */
+
+async function loadCasaVeronaWelcome() {
+  try {
+    const response = await fetch("/api/auth/me", {
+      method: "GET",
+      credentials: "include"
+    });
+
+    if (!response.ok) return;
+
+    const data = await response.json();
+
+    const user =
+      data.user ||
+      data;
+
+    const fullName =
+      user.full_name ||
+      user.username ||
+      "";
+
+    const firstName =
+      fullName.trim().split(" ")[0];
+
+    const hour =
+      new Date().getHours();
+
+    let greeting = "שלום";
+
+    if (hour >= 5 && hour < 12) {
+      greeting = "בוקר טוב";
+    } else if (hour >= 12 && hour < 17) {
+      greeting = "צהריים טובים";
+    } else if (hour >= 17 && hour < 22) {
+      greeting = "ערב טוב";
+    } else {
+      greeting = "לילה טוב";
+    }
+
+    window.casaVeronaUser = user;
+
+    window.casaVeronaGreeting =
+      firstName
+        ? `${greeting}, ${firstName}`
+        : greeting;
+
+    console.log(
+      "CASA VERONA:",
+      window.casaVeronaGreeting
+    );
+
+  } catch (error) {
+    console.error(
+      "CASA VERONA WELCOME ERROR:",
+      error
+    );
+  }
+}
+
+loadCasaVeronaWelcome();
 </script>
 
 </body>
