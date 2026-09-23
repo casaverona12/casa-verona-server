@@ -1717,7 +1717,9 @@ const loginPassword =
 
 
 function showLogin() {
-  loginScreen.style.display = "flex";
+
+  loginScreen.style.removeProperty("display");
+
 }
 
 
