@@ -1,13 +1,22 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
   <meta name="theme-color" content="#111111">
 
   <title>Casa Verona OS</title>
 
   <style>
+
+    /* =====================================================
+       CASA VERONA OS — FOUNDATION
+    ===================================================== */
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -15,118 +24,949 @@
     }
 
     :root {
-      --bg: #f5f4f0;
-      --sidebar: #111111;
-      --card: #ffffff;
-      --text: #171717;
-      --muted: #77736b;
-      --border: #e6e2da;
-      --accent: #b59a6a;
-      --green: #1f8f5f;
-      --orange: #d98b35;
-      --red: #c84b4b;
+      --cv-bg: #f3f1ec;
+      --cv-surface: #ffffff;
+      --cv-black: #11110f;
+      --cv-dark: #171715;
+      --cv-text: #191917;
+      --cv-muted: #77736b;
+      --cv-border: #e2dfd7;
+      --cv-soft: #ebe8e1;
+      --cv-wine: #721c2b;
+      --cv-wine-soft: #b98a93;
+      --cv-green: #1f8f5f;
+      --cv-orange: #d98b35;
+      --cv-red: #c84b4b;
+      --sidebar-width: 255px;
+    }
+
+    html {
+      min-height: 100%;
+      background: var(--cv-bg);
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
       min-height: 100vh;
+      background: var(--cv-bg);
+      color: var(--cv-text);
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Arial,
+        sans-serif;
     }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+
+    /* =====================================================
+       LOGIN — FULL SCREEN
+    ===================================================== */
+
+    .cv-auth {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+
+      display: grid;
+      grid-template-columns: 57% 43%;
+
+      width: 100%;
+      min-height: 100vh;
+      min-height: 100dvh;
+
+      overflow: hidden;
+
+      background: #d5d4d0;
+    }
+
+
+    /* =====================================================
+       LOGIN — VISUAL SIDE
+    ===================================================== */
+
+    .cv-auth-visual {
+      position: relative;
+      min-height: 100vh;
+
+      overflow: hidden;
+
+      background-image:
+        url("/assets/casa-verona-login-bg.png");
+
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    .cv-auth-shade {
+      position: absolute;
+      inset: 0;
+
+      background:
+        linear-gradient(
+          90deg,
+          rgba(7, 8, 9, .50) 0%,
+          rgba(7, 8, 9, .12) 50%,
+          rgba(7, 8, 9, .07) 100%
+        ),
+        linear-gradient(
+          0deg,
+          rgba(7, 8, 9, .45) 0%,
+          transparent 55%
+        );
+
+      pointer-events: none;
+    }
+
+    .cv-auth-visual-top {
+      position: absolute;
+      z-index: 2;
+
+      top: 45px;
+      right: 48px;
+      left: 48px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      color: rgba(255, 255, 255, .72);
+
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 2.4px;
+    }
+
+    .cv-auth-statement {
+      position: absolute;
+      z-index: 2;
+
+      left: 52px;
+      bottom: 52px;
+
+      max-width: 650px;
+
+      direction: ltr;
+      text-align: left;
+
+      color: #fff;
+    }
+
+    .cv-auth-rule {
+      display: block;
+
+      width: 54px;
+      height: 2px;
+
+      margin-bottom: 22px;
+
+      background: var(--cv-wine);
+    }
+
+    .cv-auth-statement > p {
+      margin-bottom: 16px;
+
+      color: rgba(255, 255, 255, .62);
+
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 2.7px;
+    }
+
+    .cv-auth-statement h1 {
+      color: #fff;
+
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      font-size: clamp(46px, 4.5vw, 72px);
+      font-weight: 400;
+      line-height: .98;
+      letter-spacing: -2.8px;
+    }
+
+    .cv-auth-statement h1 em {
+      color: #d8d8d5;
+      font-weight: 400;
+    }
+
+
+    /* =====================================================
+       LOGIN — ACCESS SIDE
+    ===================================================== */
+
+    .cv-auth-access {
+      position: relative;
+
+      min-height: 100vh;
+
+      overflow: hidden;
+
+      background:
+        radial-gradient(
+          circle at 8% 5%,
+          rgba(255, 255, 255, .24),
+          transparent 32%
+        ),
+        radial-gradient(
+          circle at 95% 92%,
+          rgba(30, 30, 28, .08),
+          transparent 35%
+        ),
+        linear-gradient(
+          135deg,
+          #d8d7d3 0%,
+          #cecdc9 48%,
+          #c5c4c0 100%
+        );
+    }
+
+    .cv-auth-access::before {
+      content: "";
+
+      position: absolute;
+      inset: 20px;
+      z-index: 1;
+
+      border: 1px solid rgba(17, 17, 16, .11);
+
+      pointer-events: none;
+    }
+
+    .cv-auth-access::after {
+      content: "";
+
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+
+      opacity: .38;
+
+      background:
+        repeating-linear-gradient(
+          112deg,
+          rgba(255, 255, 255, .055) 0,
+          rgba(255, 255, 255, .055) 1px,
+          transparent 1px,
+          transparent 8px
+        ),
+        repeating-linear-gradient(
+          24deg,
+          rgba(20, 20, 18, .025) 0,
+          rgba(20, 20, 18, .025) 1px,
+          transparent 1px,
+          transparent 13px
+        );
+
+      pointer-events: none;
+    }
+
+    .cv-auth-access-inner {
+      position: relative;
+      z-index: 2;
+
+      min-height: 100vh;
+
+      padding:
+        38px
+        clamp(42px, 4vw, 72px)
+        30px;
+
+      display: flex;
+      flex-direction: column;
+    }
+
+
+    /* LOGIN BRAND */
+
+    .cv-auth-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+
+      min-height: 105px;
+    }
+
+    .cv-auth-brand {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .cv-auth-logo {
+      display: block;
+
+      width: 290px;
+      height: 100px;
+
+      object-fit: contain;
+      object-position: left center;
+
+      mix-blend-mode: multiply;
+
+      filter:
+        contrast(1.12)
+        saturate(.85);
+
+      transform: translateX(-10px);
+    }
+
+    .cv-auth-brand-line {
+      width: 70px;
+      height: 2px;
+
+      margin-top: 5px;
+
+      background: var(--cv-wine);
+    }
+
+    .cv-auth-private {
+      margin-top: 16px;
+
+      direction: ltr;
+
+      color: #555551;
+
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      font-size: 8px;
+      letter-spacing: 3px;
+      white-space: nowrap;
+    }
+
+
+    /* LOGIN MAIN */
+
+    .cv-auth-main {
+      width: 100%;
+      max-width: 445px;
+
+      margin: auto;
+
+      padding: 18px 0 25px;
+
+      direction: rtl;
+    }
+
+    .cv-auth-overline {
+      margin-bottom: 14px;
+
+      direction: ltr;
+      text-align: right;
+
+      color: var(--cv-wine);
+
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      font-size: 9px;
+      letter-spacing: 3.3px;
+    }
+
+    .cv-auth-intro {
+      margin-bottom: 34px;
+    }
+
+    .cv-auth-intro h2 {
+      margin-bottom: 16px;
+
+      color: #10100f;
+
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      font-size: clamp(46px, 4vw, 60px);
+      font-weight: 400;
+      line-height: .96;
+      letter-spacing: -2.5px;
+    }
+
+    .cv-auth-intro h2 em {
+      color: var(--cv-wine);
+      font-weight: 400;
+    }
+
+    .cv-auth-subtitle {
+      color: #555551;
+
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+
+    /* LOGIN FIELDS */
+
+    .cv-auth-field {
+      margin-bottom: 24px;
+    }
+
+    .cv-auth-field-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      margin-bottom: 9px;
+    }
+
+    .cv-auth-field label {
+      color: #242422;
+
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .cv-auth-field-number {
+      direction: ltr;
+
+      color: var(--cv-wine);
+
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      font-size: 10px;
+      font-style: italic;
+      letter-spacing: 1px;
+    }
+
+    .cv-auth-input-wrap {
+      position: relative;
+    }
+
+    .cv-auth-field input {
+      width: 100%;
+      height: 61px;
+
+      padding: 0 62px 0 20px;
+
+      border: 0;
+      border-top:
+        1px solid rgba(15, 15, 14, .08);
+      border-bottom:
+        1px solid rgba(15, 15, 14, .42);
+
+      border-radius: 0;
+      outline: none;
+
+      color: #11110f;
+      background: rgba(255, 255, 255, .13);
+
+      font-size: 16px;
+
+      transition:
+        background .25s ease,
+        border-color .25s ease,
+        box-shadow .25s ease;
+    }
+
+    .cv-auth-field input::placeholder {
+      color: #74746f;
+
+      font-size: 13px;
+    }
+
+    .cv-auth-field input:focus {
+      background: rgba(255, 255, 255, .28);
+
+      border-bottom-color: var(--cv-wine);
+
+      box-shadow:
+        inset -3px 0 0 var(--cv-wine);
+    }
+
+    .cv-auth-input-mark {
+      position: absolute;
+
+      top: 50%;
+      right: 20px;
+
+      transform: translateY(-50%);
+
+      color: var(--cv-wine);
+
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+
+      pointer-events: none;
+    }
+
+
+    /* LOGIN BUTTON */
+
+    .cv-auth-button {
+      position: relative;
+
+      width: 100%;
+      height: 72px;
+
+      margin-top: 16px;
+      padding: 0 27px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      overflow: hidden;
+
+      border: 0;
+      border-radius: 0;
+
+      background: #11110f;
+      color: #fff;
+
+      cursor: pointer;
+
+      box-shadow:
+        0 18px 40px rgba(20, 20, 18, .16);
+
+      transition:
+        transform .3s ease,
+        box-shadow .3s ease;
+    }
+
+    .cv-auth-button::before {
+      content: "";
+
+      position: absolute;
+      inset: 0;
+
+      background: var(--cv-wine);
+
+      transform: translateX(101%);
+
+      transition:
+        transform .45s
+        cubic-bezier(.2, .8, .2, 1);
+    }
+
+    .cv-auth-button:hover::before {
+      transform: translateX(0);
+    }
+
+    .cv-auth-button:hover {
+      transform: translateY(-3px);
+
+      box-shadow:
+        0 24px 48px rgba(60, 25, 31, .24);
+    }
+
+    .cv-auth-button:disabled {
+      opacity: .65;
+      cursor: wait;
+      transform: none;
+    }
+
+    .cv-auth-button-copy {
+      position: relative;
+      z-index: 2;
+
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+
+      direction: ltr;
+      text-align: left;
+    }
+
+    .cv-auth-button-copy small {
+      margin-bottom: 5px;
+
+      color: rgba(255, 255, 255, .52);
+
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      font-size: 7px;
+      letter-spacing: 2.7px;
+    }
+
+    .cv-auth-button-copy strong {
+      color: #fff;
+
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .cv-auth-arrow {
+      position: relative;
+      z-index: 2;
+
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      font-size: 29px;
+
+      transition: transform .3s ease;
+    }
+
+    .cv-auth-button:hover .cv-auth-arrow {
+      transform: translate(5px, -5px);
+    }
+
+    .cv-auth-error {
+      min-height: 17px;
+
+      margin-top: 12px;
+
+      color: var(--cv-wine);
+
+      text-align: center;
+
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+
+    /* LOGIN FOOTER */
+
+    .cv-auth-footer {
+      padding: 17px 0 5px;
+
+      border-top:
+        1px solid rgba(15, 15, 14, .14);
+    }
+
+    .cv-auth-footer-kicker {
+      display: block;
+
+      margin-bottom: 7px;
+
+      direction: ltr;
+      text-align: right;
+
+      color: var(--cv-wine);
+
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      font-size: 8px;
+      letter-spacing: 2.8px;
+    }
+
+    .cv-auth-company-message strong {
+      display: block;
+
+      color: #0e0e0d;
+
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      font-size: clamp(25px, 2.15vw, 34px);
+      font-weight: 400;
+      line-height: 1.08;
+      letter-spacing: -1.2px;
+    }
+
+    .cv-auth-footer-signature {
+      margin-top: 11px;
+
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      direction: ltr;
+
+      color: #666661;
+
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      font-size: 7px;
+      letter-spacing: 2.3px;
+    }
+
+    .cv-auth-footer-signature span {
+      width: 43px;
+      height: 1px;
+
+      background: var(--cv-wine);
+    }
+
+
+    /* =====================================================
+       APPLICATION SHELL
+    ===================================================== */
 
     .app {
       display: flex;
+
       min-height: 100vh;
     }
 
     .sidebar {
-      width: 245px;
-      background: var(--sidebar);
-      color: white;
-      padding: 26px 16px;
       position: fixed;
-      right: 0;
+
       top: 0;
+      right: 0;
       bottom: 0;
+
+      z-index: 100;
+
+      width: var(--sidebar-width);
+
+      padding: 28px 17px;
+
       overflow-y: auto;
+
+      background: #11110f;
+      color: #fff;
     }
 
     .brand {
-      padding: 0 12px 26px;
-      border-bottom: 1px solid #2b2b2b;
-      margin-bottom: 20px;
+      padding: 0 12px 25px;
+
+      border-bottom:
+        1px solid rgba(255, 255, 255, .1);
+
+      margin-bottom: 21px;
+    }
+
+    .brand-logo {
+      width: 175px;
+      max-width: 100%;
+
+      display: block;
+
+      margin-bottom: 10px;
+
+      filter: brightness(0) invert(1);
+
+      opacity: .94;
     }
 
     .brand h1 {
-      font-size: 21px;
-      letter-spacing: 1px;
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      font-size: 20px;
+      font-weight: 400;
+      letter-spacing: 1.5px;
     }
 
     .brand p {
-      color: #aaa;
-      font-size: 12px;
-      margin-top: 5px;
+      margin-top: 6px;
+
+      color: rgba(255, 255, 255, .42);
+
+      font-size: 8px;
+      letter-spacing: 1.5px;
     }
 
     .nav {
       display: flex;
       flex-direction: column;
-      gap: 7px;
+      gap: 5px;
     }
 
     .nav button {
-      border: 0;
-      background: transparent;
-      color: #c9c9c9;
+      position: relative;
+
+      width: 100%;
+
       padding: 13px 14px;
-      border-radius: 10px;
+
+      border: 0;
+
+      display: flex;
+      align-items: center;
+      gap: 11px;
+
+      background: transparent;
+      color: rgba(255, 255, 255, .58);
+
       text-align: right;
+
       cursor: pointer;
-      font-size: 14px;
-      transition: .2s;
+
+      transition:
+        color .2s ease,
+        background .2s ease;
+    }
+
+    .nav button::before {
+      content: "";
+
+      position: absolute;
+
+      top: 50%;
+      right: 0;
+
+      width: 2px;
+      height: 0;
+
+      transform: translateY(-50%);
+
+      background: var(--cv-wine);
+
+      transition: height .2s ease;
     }
 
     .nav button:hover,
     .nav button.active {
-      background: #242424;
-      color: white;
+      background: rgba(255, 255, 255, .055);
+      color: #fff;
     }
+
+    .nav button.active::before {
+      height: 24px;
+    }
+
+    .nav-index {
+      min-width: 22px;
+
+      direction: ltr;
+
+      color: rgba(255, 255, 255, .26);
+
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      font-size: 8px;
+      font-style: italic;
+    }
+
+    .nav button.active .nav-index {
+      color: var(--cv-wine-soft);
+    }
+
+
+    /* =====================================================
+       MAIN
+    ===================================================== */
 
     .main {
       flex: 1;
-      margin-right: 245px;
-      padding: 30px;
+
       min-width: 0;
+
+      margin-right: var(--sidebar-width);
+
+      padding: 28px 32px 50px;
     }
 
     .topbar {
+      min-height: 58px;
+
+      margin-bottom: 24px;
+
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 20px;
-      margin-bottom: 28px;
+    }
+
+    .topbar-copy span {
+      display: block;
+
+      margin-bottom: 5px;
+
+      color: var(--cv-wine);
+
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      font-size: 8px;
+      letter-spacing: 2.5px;
     }
 
     .topbar h2 {
-      font-size: 26px;
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      font-size: 24px;
+      font-weight: 400;
     }
 
-    .topbar p {
-      color: var(--muted);
-      margin-top: 5px;
-      font-size: 14px;
+    .topbar-user {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
-    .status {
-      background: white;
-      border: 1px solid var(--border);
-      padding: 10px 14px;
-      border-radius: 999px;
+    .topbar-user-copy {
+      text-align: left;
+    }
+
+    .topbar-user-copy strong {
+      display: block;
+
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .topbar-user-copy span {
+      display: block;
+
+      margin-top: 3px;
+
+      color: var(--cv-muted);
+
+      font-size: 9px;
+      letter-spacing: 1px;
+    }
+
+    .topbar-avatar {
+      width: 39px;
+      height: 39px;
+
+      display: grid;
+      place-items: center;
+
+      border: 1px solid var(--cv-border);
+
+      background: #fff;
+
+      color: var(--cv-wine);
+
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
       font-size: 13px;
-    }
-
-    .status span {
-      color: var(--green);
     }
 
     .page {
@@ -135,96 +975,573 @@
 
     .page.active {
       display: block;
+
+      animation:
+        cvPageEnter .35s ease both;
     }
 
-    .stats {
+    @keyframes cvPageEnter {
+      from {
+        opacity: 0;
+        transform: translateY(5px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+
+    /* =====================================================
+       ADMIN DASHBOARD — HERO
+    ===================================================== */
+
+    .cv-dashboard-hero {
+      position: relative;
+
+      min-height: 225px;
+
+      margin-bottom: 17px;
+      padding: 39px 42px;
+
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 30px;
+
+      overflow: hidden;
+
+      border: 1px solid #dedbd3;
+
+      background:
+        radial-gradient(
+          circle at 8% 10%,
+          rgba(255, 255, 255, .9),
+          transparent 36%
+        ),
+        linear-gradient(
+          135deg,
+          #e9e7e1 0%,
+          #d6d3cb 100%
+        );
+    }
+
+    .cv-dashboard-hero::before {
+      content: "CV";
+
+      position: absolute;
+
+      left: 25px;
+      bottom: -48px;
+
+      color: rgba(17, 17, 17, .035);
+
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      font-size: 195px;
+      line-height: 1;
+
+      pointer-events: none;
+    }
+
+    .cv-dashboard-hero-copy {
+      position: relative;
+      z-index: 2;
+    }
+
+    .cv-dashboard-eyebrow {
+      display: block;
+
+      margin-bottom: 16px;
+
+      direction: ltr;
+      text-align: right;
+
+      color: var(--cv-wine);
+
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      font-size: 8px;
+      letter-spacing: 3px;
+    }
+
+    .cv-dashboard-hero h1 {
+      color: var(--cv-black);
+
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      font-size: clamp(42px, 4vw, 62px);
+      font-weight: 400;
+      line-height: 1;
+      letter-spacing: -2px;
+    }
+
+    .cv-dashboard-hero p {
+      margin-top: 15px;
+
+      color: #68645d;
+
+      font-size: 13px;
+    }
+
+    .cv-dashboard-date {
+      position: relative;
+      z-index: 2;
+
+      min-width: 170px;
+
+      padding-right: 20px;
+
+      border-right: 2px solid var(--cv-wine);
+    }
+
+    .cv-dashboard-date span {
+      display: block;
+
+      margin-bottom: 7px;
+
+      color: var(--cv-muted);
+
+      font-size: 11px;
+    }
+
+    .cv-dashboard-date strong {
+      color: var(--cv-text);
+
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      font-size: 17px;
+      font-weight: 400;
+    }
+
+
+    /* =====================================================
+       KPI CARDS
+    ===================================================== */
+
+    .cv-kpi-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      margin-bottom: 20px;
+      gap: 14px;
+
+      margin-bottom: 17px;
     }
 
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 20px;
+    .cv-kpi-card {
+      position: relative;
+
+      min-height: 185px;
+
+      padding: 21px;
+
+      overflow: hidden;
+
+      border: 1px solid var(--cv-border);
+
+      background: #fff;
+
+      transition:
+        transform .25s ease,
+        box-shadow .25s ease;
     }
 
-    .stat-label {
-      color: var(--muted);
+    .cv-kpi-card:hover {
+      transform: translateY(-3px);
+
+      box-shadow:
+        0 16px 38px rgba(22, 22, 20, .07);
+    }
+
+    .cv-kpi-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .cv-kpi-top span {
+      color: var(--cv-wine);
+
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      font-size: 10px;
+      font-style: italic;
+    }
+
+    .cv-kpi-top small {
+      color: #8a867e;
+
+      font-size: 8px;
+      letter-spacing: 2px;
+    }
+
+    .cv-kpi-number {
+      margin-top: 27px;
+
+      color: var(--cv-black);
+
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      font-size: 47px;
+      line-height: 1;
+    }
+
+    .cv-kpi-label {
+      margin-top: 8px;
+
+      color: #282824;
+
       font-size: 13px;
-      margin-bottom: 8px;
+      font-weight: 600;
     }
 
-    .stat-number {
-      font-size: 32px;
-      font-weight: 700;
+    .cv-kpi-footer {
+      position: absolute;
+
+      right: 21px;
+      bottom: 17px;
+      left: 21px;
+
+      padding-top: 10px;
+
+      border-top: 1px solid #ece9e2;
+
+      color: #98938a;
+
+      font-size: 9px;
     }
 
-    .stat-note {
-      margin-top: 7px;
-      font-size: 12px;
-      color: var(--muted);
+    .cv-kpi-card-dark {
+      border-color: var(--cv-dark);
+
+      background: var(--cv-dark);
     }
 
-    .grid {
+    .cv-kpi-card-dark .cv-kpi-number,
+    .cv-kpi-card-dark .cv-kpi-label {
+      color: #fff;
+    }
+
+    .cv-kpi-card-dark .cv-kpi-top small,
+    .cv-kpi-card-dark .cv-kpi-footer {
+      color: rgba(255, 255, 255, .46);
+    }
+
+    .cv-kpi-card-dark .cv-kpi-top span {
+      color: var(--cv-wine-soft);
+    }
+
+    .cv-kpi-card-dark .cv-kpi-footer {
+      border-top-color:
+        rgba(255, 255, 255, .1);
+    }
+
+
+    /* =====================================================
+       DASHBOARD PANELS
+    ===================================================== */
+
+    .cv-dashboard-grid {
       display: grid;
-      grid-template-columns: 1.4fr .6fr;
-      gap: 18px;
+      grid-template-columns: 1.35fr .65fr;
+      gap: 17px;
     }
 
-    .card h3 {
-      margin-bottom: 18px;
+    .cv-panel {
+      min-height: 325px;
+
+      padding: 26px;
+
+      border: 1px solid var(--cv-border);
+
+      background: #fff;
+    }
+
+    .cv-panel-header {
+      padding-bottom: 20px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      border-bottom: 1px solid var(--cv-soft);
+    }
+
+    .cv-panel-heading {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .cv-panel-index {
+      color: var(--cv-wine);
+
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      font-size: 10px;
+      font-style: italic;
+    }
+
+    .cv-panel-heading h3 {
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      font-size: 21px;
+      font-weight: 400;
+    }
+
+    .cv-live {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+
+      color: var(--cv-muted);
+
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+    }
+
+    .cv-live i {
+      width: 7px;
+      height: 7px;
+
+      border-radius: 50%;
+
+      background: var(--cv-green);
+
+      box-shadow:
+        0 0 0 4px rgba(31, 143, 95, .1);
+    }
+
+    .cv-pulse-row {
+      min-height: 61px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      border-bottom: 1px solid #efede7;
+    }
+
+    .cv-pulse-row:last-child {
+      border-bottom: 0;
+    }
+
+    .cv-pulse-row span {
+      color: #66625b;
+
+      font-size: 13px;
+    }
+
+    .cv-pulse-row strong {
+      color: var(--cv-dark);
+
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      font-size: 23px;
+      font-weight: 400;
+    }
+
+
+    /* AI PANEL */
+
+    .cv-ai-panel {
+      display: flex;
+      flex-direction: column;
+
+      border-color: var(--cv-dark);
+
+      background:
+        radial-gradient(
+          circle at 90% 0%,
+          rgba(114, 28, 43, .28),
+          transparent 38%
+        ),
+        #151513;
+
+      color: #fff;
+    }
+
+    .cv-ai-top {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+
+      color: rgba(255, 255, 255, .48);
+
+      font-size: 8px;
+      letter-spacing: 2px;
+    }
+
+    .cv-ai-star {
+      color: var(--cv-wine-soft);
       font-size: 17px;
     }
 
-    .funnel-item {
-      margin-bottom: 18px;
+    .cv-ai-panel h3 {
+      margin: 34px 0 14px;
+
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      font-size: 30px;
+      font-weight: 400;
+      letter-spacing: -1px;
     }
 
-    .funnel-title {
+    .cv-ai-panel p {
+      color: rgba(255, 255, 255, .58);
+
+      font-size: 13px;
+      line-height: 1.75;
+    }
+
+    .cv-ai-status {
+      margin-top: 24px;
+      padding: 13px 0;
+
       display: flex;
+      align-items: center;
       justify-content: space-between;
-      margin-bottom: 7px;
+
+      border-top:
+        1px solid rgba(255, 255, 255, .09);
+
+      border-bottom:
+        1px solid rgba(255, 255, 255, .09);
+    }
+
+    .cv-ai-status span {
+      color: rgba(255, 255, 255, .4);
+
+      font-size: 8px;
+      letter-spacing: 2px;
+    }
+
+    .cv-ai-status strong {
+      color: #79c99e;
+
+      font-size: 9px;
+      letter-spacing: 1.4px;
+    }
+
+    .cv-ai-open {
+      width: 100%;
+
+      margin-top: auto;
+      padding: 18px 0 2px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      border: 0;
+
+      background: transparent;
+      color: #fff;
+
+      cursor: pointer;
+
+      font-size: 12px;
+    }
+
+
+    /* =====================================================
+       GENERIC PAGES
+    ===================================================== */
+
+    .section-head {
+      margin-bottom: 22px;
+
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .section-overline {
+      display: block;
+
+      margin-bottom: 8px;
+
+      color: var(--cv-wine);
+
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      font-size: 8px;
+      letter-spacing: 2.5px;
+    }
+
+    .section-head h1 {
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      font-size: 38px;
+      font-weight: 400;
+      letter-spacing: -1.4px;
+    }
+
+    .section-head p {
+      margin-top: 8px;
+
+      color: var(--cv-muted);
+
       font-size: 13px;
     }
 
-    .bar {
-      height: 9px;
-      background: #ece9e2;
-      border-radius: 99px;
-      overflow: hidden;
+    .card {
+      padding: 22px;
+
+      border: 1px solid var(--cv-border);
+
+      background: #fff;
     }
 
-    .bar div {
-      height: 100%;
-      background: var(--accent);
-      border-radius: 99px;
-    }
+    .empty-state {
+      min-height: 220px;
 
-    .ai-card {
-      background: #161616;
-      color: white;
-      border: none;
-    }
+      display: grid;
+      place-items: center;
 
-    .ai-card p {
-      color: #b9b9b9;
-      line-height: 1.6;
-      font-size: 14px;
-    }
+      color: var(--cv-muted);
 
-    .primary {
-      width: 100%;
-      border: 0;
-      background: var(--accent);
-      color: #111;
-      padding: 13px;
-      border-radius: 10px;
-      margin-top: 18px;
-      font-weight: 700;
-      cursor: pointer;
+      text-align: center;
+
+      font-size: 13px;
     }
 
     .table-card {
@@ -233,2839 +1550,2350 @@
 
     table {
       width: 100%;
+      min-width: 700px;
+
       border-collapse: collapse;
-      min-width: 650px;
     }
 
     th,
     td {
-      padding: 14px 12px;
-      border-bottom: 1px solid var(--border);
+      padding: 15px 13px;
+
+      border-bottom:
+        1px solid var(--cv-border);
+
       text-align: right;
-      font-size: 13px;
+
+      font-size: 12px;
     }
 
     th {
-      color: var(--muted);
+      color: var(--cv-muted);
+
+      font-size: 10px;
       font-weight: 500;
+      letter-spacing: .5px;
     }
 
     .badge {
       display: inline-block;
-      padding: 6px 10px;
+
+      padding: 6px 9px;
+
       border-radius: 999px;
-      font-size: 11px;
+
       background: #eee;
+
+      font-size: 10px;
     }
 
-    .hot {
+    .badge-hot {
       background: #ffe5e1;
       color: #9c3328;
     }
 
-    .warm {
+    .badge-warm {
       background: #fff0d8;
       color: #9a631c;
     }
 
-    .ready {
+    .badge-ready {
       background: #dff5e9;
       color: #16633f;
     }
 
-    .section-title {
-      margin-bottom: 18px;
-    }
 
-    .section-title h3 {
-      font-size: 20px;
-    }
+    /* =====================================================
+       RESPONSIVE
+    ===================================================== */
 
-    .section-title p {
-      color: var(--muted);
-      font-size: 13px;
-      margin-top: 5px;
-    }
+    @media (max-width: 1100px) {
 
-    .production-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-    }
-
-    .production-box {
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: 15px;
-      padding: 20px;
-    }
-
-    .production-box strong {
-      font-size: 28px;
-      display: block;
-      margin-top: 10px;
-    }
-
-    .ai-lead {
-      background: #f7f4ed;
-      padding: 18px;
-      border-radius: 13px;
-      margin-top: 15px;
-    }
-
-    .ai-lead p {
-      margin-top: 8px;
-      color: var(--muted);
-      line-height: 1.6;
-    }
-
-    @media (max-width: 950px) {
-      .stats {
-        grid-template-columns: repeat(2, 1fr);
+      .cv-kpi-grid {
+        grid-template-columns:
+          repeat(2, 1fr);
       }
 
-      .grid {
+      .cv-dashboard-grid {
         grid-template-columns: 1fr;
       }
+
+      .cv-auth {
+        grid-template-columns: 50% 50%;
+      }
+
+      .cv-auth-logo {
+        width: 220px;
+      }
+
     }
 
-    @media (max-width: 700px) {
+
+    @media (max-width: 760px) {
+
+      .cv-auth {
+        display: block;
+        overflow-y: auto;
+      }
+
+      .cv-auth-visual {
+        min-height: 31vh;
+      }
+
+      .cv-auth-visual-top {
+        top: 22px;
+        right: 22px;
+        left: 22px;
+      }
+
+      .cv-auth-visual-top span:last-child {
+        display: none;
+      }
+
+      .cv-auth-statement {
+        right: 23px;
+        left: 23px;
+        bottom: 24px;
+      }
+
+      .cv-auth-rule,
+      .cv-auth-statement > p {
+        display: none;
+      }
+
+      .cv-auth-statement h1 {
+        font-size: 31px;
+      }
+
+      .cv-auth-access {
+        min-height: 69vh;
+      }
+
+      .cv-auth-access::before {
+        inset: 8px;
+      }
+
+      .cv-auth-access-inner {
+        min-height: 69vh;
+
+        padding:
+          23px 27px
+          max(25px, env(safe-area-inset-bottom));
+      }
+
+      .cv-auth-header {
+        justify-content: center;
+        min-height: 75px;
+      }
+
+      .cv-auth-logo {
+        width: 185px;
+        height: 68px;
+      }
+
+      .cv-auth-private {
+        display: none;
+      }
+
+      .cv-auth-main {
+        margin: 12px auto auto;
+        padding: 8px 0 28px;
+      }
+
+      .cv-auth-intro {
+        margin-bottom: 27px;
+      }
+
+      .cv-auth-intro h2 {
+        font-size: 35px;
+      }
+
+      .cv-auth-field {
+        margin-bottom: 19px;
+      }
+
+      .cv-auth-field input {
+        height: 55px;
+      }
+
+      .cv-auth-button {
+        height: 59px;
+      }
+
+      .cv-auth-footer {
+        text-align: center;
+      }
+
+      .cv-auth-footer-kicker {
+        text-align: center;
+      }
+
+      .cv-auth-company-message strong {
+        font-size: 22px;
+      }
+
+      .cv-auth-footer-signature {
+        justify-content: center;
+      }
+
+
+      /* APP MOBILE */
+
       .app {
         display: block;
       }
 
       .sidebar {
-        width: 100%;
         position: static;
-        padding: 14px;
+
+        width: 100%;
+
+        padding: 15px;
       }
 
       .brand {
         padding-bottom: 14px;
       }
 
+      .brand-logo {
+        width: 135px;
+      }
+
       .nav {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns:
+          repeat(2, 1fr);
       }
 
       .main {
         margin-right: 0;
+
         padding: 18px;
-      }
-
-      .stats {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .production-grid {
-        grid-template-columns: 1fr;
       }
 
       .topbar {
         align-items: flex-start;
       }
 
-      .topbar h2 {
-        font-size: 22px;
+      .topbar-user-copy {
+        display: none;
       }
+
+      .cv-dashboard-hero {
+        min-height: 250px;
+
+        padding: 28px 24px;
+
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-end;
+      }
+
+      .cv-dashboard-hero h1 {
+        font-size: 39px;
+      }
+
+      .cv-dashboard-date {
+        width: 100%;
+      }
+
+      .cv-kpi-grid {
+        grid-template-columns:
+          1fr 1fr;
+
+        gap: 10px;
+      }
+
+      .cv-kpi-card {
+        min-height: 170px;
+
+        padding: 17px;
+      }
+
+      .cv-kpi-number {
+        font-size: 38px;
+      }
+
+      .cv-panel {
+        padding: 21px;
+      }
+
     }
 
-    /* =====================================================
-   CASA VERONA OS — LUXURY LOGIN
-===================================================== */
 
+    @media (max-width: 430px) {
 
+      .cv-kpi-grid {
+        grid-template-columns: 1fr;
+      }
 
-/* =====================================================
-   CASA VERONA OS — SIGNATURE LOGIN
-===================================================== */
+      .section-head h1 {
+        font-size: 31px;
+      }
 
-.cv-auth {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-
-  display: grid;
-  grid-template-columns: 57% 43%;
-
-  width: 100%;
-  min-height: 100vh;
-  min-height: 100dvh;
-
-  background: #e9e9e7;
-  overflow: hidden;
-}
-
-
-/* =====================================================
-   VISUAL SIDE
-===================================================== */
-
-.cv-auth-visual {
-  position: relative;
- min-height: 100vh;
-
-background-image: url("/assets/casa-verona-login-bg.png") !important;
-background-size: cover !important;
-background-position: center !important;
-
-background-repeat: no-repeat !important;
-  background-image: url("/assets/casa-verona-login-bg.png");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-
-  overflow: hidden;
-}
-
-.cv-auth-shade {
-  position: absolute;
-  inset: 0;
-
-  background:
-    linear-gradient(
-      90deg,
-      rgba(7, 8, 9, 0.48) 0%,
-      rgba(7, 8, 9, 0.12) 48%,
-      rgba(7, 8, 9, 0.08) 100%
-    ),
-    linear-gradient(
-      0deg,
-      rgba(7, 8, 9, 0.42) 0%,
-      transparent 52%
-    );
-
-  pointer-events: none;
-}
-
-.cv-auth-visual-top {
-  position: absolute;
-  top: 45px;
-  left: 48px;
-  right: 48px;
-  z-index: 2;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  color: rgba(255, 255, 255, 0.72);
-
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 2.4px;
-}
-
-.cv-auth-statement {
-  position: absolute;
-  z-index: 2;
-
-  left: 52px;
-  bottom: 52px;
-
-  max-width: 610px;
-  color: #fff;
-}
-
-.cv-auth-rule {
-  display: block;
-
-  width: 54px;
-  height: 2px;
-
-  margin-bottom: 22px;
-
-  background: #761c2c;
-}
-
-.cv-auth-statement > p {
-  margin: 0 0 16px;
-
-  color: rgba(255, 255, 255, 0.62);
-
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 2.7px;
-}
-
-.cv-auth-statement h1 {
-  margin: 0;
-
-  color: #fff;
-
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(46px, 4.5vw, 72px);
-  font-weight: 400;
-
-  line-height: 0.98;
-  letter-spacing: -2.8px;
-}
-
-.cv-auth-statement h1 em {
-  color: #d8d8d5;
-  font-weight: 400;
-}
-
-.cv-auth-location {
-  margin-top: 31px;
-
-  display: flex;
-  gap: 25px;
-
-  color: rgba(255, 255, 255, 0.5);
-
-  font-size: 8px;
-  font-weight: 600;
-  letter-spacing: 2px;
-}
-
-
-/* =====================================================
-   ACCESS SIDE
-===================================================== */
-
-/* =====================================================
-   CASA VERONA — LUXURY ACCESS PANEL
-===================================================== */
-
-/* =====================================================
-   CASA VERONA — PRIVATE ACCESS V3
-===================================================== */
-
-.cv-auth-access {
-  position: relative;
-  min-height: 100vh;
-  overflow: hidden;
-
-  background:
-    radial-gradient(
-      circle at 8% 5%,
-      rgba(255,255,255,.24),
-      transparent 32%
-    ),
-    radial-gradient(
-      circle at 95% 92%,
-      rgba(30,30,28,.08),
-      transparent 35%
-    ),
-    linear-gradient(
-      135deg,
-      #d8d7d3 0%,
-      #cecdc9 48%,
-      #c5c4c0 100%
-    );
-}
-
-
-/* MINERAL TEXTURE */
-
-.cv-auth-access::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-
-  opacity: .38;
-
-  background:
-    repeating-linear-gradient(
-      112deg,
-      rgba(255,255,255,.055) 0,
-      rgba(255,255,255,.055) 1px,
-      transparent 1px,
-      transparent 8px
-    ),
-    repeating-linear-gradient(
-      24deg,
-      rgba(20,20,18,.025) 0,
-      rgba(20,20,18,.025) 1px,
-      transparent 1px,
-      transparent 13px
-    );
-}
-
-
-/* FINE FRAME */
-
-.cv-auth-access::before {
-  content: "";
-  position: absolute;
-  inset: 20px;
- 
-  z-index: 1;
-  pointer-events: none;
-
-  border:
-    1px solid
-    rgba(17,17,16,.11);
-}
-
-
-.cv-auth-access-inner {
-  position: relative;
-  z-index: 2;
-
-  
-  box-sizing: border-box;
-
-  min-height: 100vh;
-
-  padding:
-    42px
-    clamp(42px, 4vw, 72px)
-    38px;
-
-  display: flex;
-  flex-direction: column;
-
-  animation:
-    cvAccessEnter .7s
-    cubic-bezier(.2,.8,.2,1)
-    both;
-}
-
-
-/* =====================================================
-   BRAND
-===================================================== */
-
-.cv-auth-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-
-  min-height: 108px;
-}
-
-
-.cv-auth-brand {
-  position: relative;
-
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-
-.cv-auth-logo {
-  display: block;
-
-  width: 300px;
-  height: 108px;
-
-  object-fit: contain;
-  object-position: left center;
-
-  mix-blend-mode: multiply;
-
-  filter:
-    contrast(1.12)
-    saturate(.85);
-
-  transform:
-    translateX(-10px);
-}
-
-
-.cv-auth-brand-line {
-  width: 70px;
-  height: 2px;
-
-  margin-top: 7px;
-
-  background: #721c2b;
-}
-
-
-.cv-auth-private {
-  margin-top: 16px;
-
-  color: #555551;
-
-  font-family:
-    Georgia,
-    "Times New Roman",
-    serif;
-
-  font-size: 8px;
-  font-weight: 400;
-
-  letter-spacing: 3px;
-
-  white-space: nowrap;
-}
-
-
-/* =====================================================
-   LOGIN AREA
-===================================================== */
-
-.cv-auth-main {
-  width: 100%;
-  max-width: 465px;
-
-  margin: auto;
-
-  padding: 25px 0 35px;
-
-  direction: rtl;
-}
-
-
-/* =====================================================
-   INTRO
-===================================================== */
-
-.cv-auth-intro {
-  margin-bottom: 43px;
-}
-
-
-
-.cv-auth-overline {
-  margin:
-    0
-    0
-    14px;
-
-  direction: ltr;
-  text-align: right;
-
-  color: #721c2b;
-
-  font-family:
-    Georgia,
-    "Times New Roman",
-    serif;
-
-  font-size: 9px;
-  font-weight: 400;
-
-  letter-spacing: 3.3px;
-}
-
-
-.cv-auth-intro h2 {
-  margin:
-    0
-    0
-    18px;
-
-  color: #10100f;
-
-  font-family:
-    Georgia,
-    "Times New Roman",
-    serif;
-
-  font-size:
-    clamp(
-      50px,
-      4vw,
-      66px
-    );
-
-  font-weight: 400;
-  line-height: .96;
-
-  letter-spacing: -2.8px;
-}
-
-
-.cv-auth-intro h2 em {
-  color: #721c2b;
-
-  font-weight: 400;
-}
-
-
-.cv-auth-subtitle {
-  margin: 0;
-
-  color: #555551;
-
-  font-size: 14px;
-  font-weight: 400;
-
-  line-height: 1.8;
-}
-
-
-/* =====================================================
-   FIELDS
-===================================================== */
-
-.cv-auth-field {
-  margin-bottom: 27px;
-}
-
-
-.cv-auth-field-head {
-  margin-bottom: 10px;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-
-.cv-auth-field label {
-  margin: 0;
-
-  color: #242422;
-
-  font-size: 12px;
-  font-weight: 600;
-
-  letter-spacing: .15px;
-}
-
-
-.cv-auth-field-number {
-  direction: ltr;
-
-  color: #721c2b;
-
-  font-family:
-    Georgia,
-    "Times New Roman",
-    serif;
-
-  font-size: 10px;
-  font-style: italic;
-
-  letter-spacing: 1px;
-}
-
-
-/* INPUT CONTAINER */
-
-.cv-auth-input-wrap {
-  position: relative;
-}
-
-
-.cv-auth-field input {
-  width: 100%;
-  height: 64px;
-
-  box-sizing: border-box;
-
-  padding:
-    0
-    62px
-    0
-    20px;
-
-  border: 0;
-  border-top:
-    1px solid
-    rgba(15,15,14,.08);
-
-  border-bottom:
-    1px solid
-    rgba(15,15,14,.42);
-
-  border-radius: 0;
-
-  outline: none;
-
-  color: #11110f;
-
-  background:
-    rgba(255,255,255,.13);
-
-  font-family: inherit;
-
-  font-size: 16px;
-  font-weight: 400;
-
-  box-shadow:
-    inset 0 1px 0
-    rgba(255,255,255,.28);
-
-  transition:
-    background .3s ease,
-    border-color .3s ease,
-    box-shadow .3s ease;
-}
-
-
-.cv-auth-field input::placeholder {
-  color: #74746f;
-
-  font-size: 13px;
-  font-weight: 400;
-}
-
-
-.cv-auth-field input:focus {
-  background:
-    rgba(255,255,255,.28);
-
-  border-bottom-color:
-    #721c2b;
-
-  box-shadow:
-    inset -3px 0 0
-    #721c2b;
-}
-
-
-/* INPUT SIGNATURE */
-
-.cv-auth-input-mark {
-  position: absolute;
-
-  top: 50%;
-  right: 20px;
-
-  transform:
-    translateY(-50%);
-
-  color: #721c2b;
-
-  font-family:
-    Georgia,
-    "Times New Roman",
-    serif;
-
-  font-size: 9px;
-  font-weight: 700;
-
-  letter-spacing: 1.2px;
-
-  pointer-events: none;
-}
-
-
-/* =====================================================
-   SIGNATURE BUTTON
-===================================================== */
-
-.cv-auth-button {
-  position: relative;
-
-  width: 100%;
-  height: 76px;
-
-  margin-top: 20px;
-
-  padding:
-    0
-    27px;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  overflow: hidden;
-
-  border: 0;
-  border-radius: 0;
-
-  background: #11110f;
-
-  color: #fff;
-
-  cursor: pointer;
-
-  box-shadow:
-    0 18px 40px
-    rgba(20,20,18,.16);
-
-  transition:
-    transform .3s ease,
-    box-shadow .3s ease;
-}
-
-
-/* BURGUNDY SLIDE */
-
-.cv-auth-button::before {
-  content: "";
-
-  position: absolute;
-  inset: 0;
-
-  background: #721c2b;
-
-  transform:
-    translateX(101%);
-
-  transition:
-    transform .45s
-    cubic-bezier(.2,.8,.2,1);
-}
-
-
-.cv-auth-button:hover::before {
-  transform:
-    translateX(0);
-}
-
-
-.cv-auth-button:hover {
-  transform:
-    translateY(-3px);
-
-  box-shadow:
-    0 24px 48px
-    rgba(60,25,31,.24);
-}
-
-
-.cv-auth-button-copy {
-  position: relative;
-  z-index: 2;
-
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-
-  text-align: left;
-}
-
-
-.cv-auth-button-copy small {
-  margin-bottom: 5px;
-
-  color:
-    rgba(255,255,255,.52);
-
-  font-family:
-    Georgia,
-    "Times New Roman",
-    serif;
-
-  font-size: 7px;
-  font-weight: 400;
-
-  letter-spacing: 2.7px;
-}
-
-
-.cv-auth-button-copy strong {
-  color: #fff;
-
-  font-size: 14px;
-  font-weight: 600;
-
-  letter-spacing: .2px;
-}
-
-
-.cv-auth-arrow {
-  position: relative;
-  z-index: 2;
-
-  font-family:
-    Georgia,
-    "Times New Roman",
-    serif;
-
-  font-size: 29px;
-  font-weight: 400;
-
-  transition:
-    transform .3s ease;
-}
-
-
-.cv-auth-button:hover
-.cv-auth-arrow {
-  transform:
-    translate(5px,-5px);
-}
-
-
-.cv-auth-button:disabled {
-  opacity: .6;
-  cursor: wait;
-
-  transform: none;
-}
-
-
-.cv-auth-error {
-  min-height: 17px;
-
-  margin-top: 13px;
-
-  color: #721c2b;
-
-  text-align: center;
-
-  font-size: 11px;
-  font-weight: 500;
-}
-
-
-/* =====================================================
-   BIG COMPANY STATEMENT
-===================================================== */
-
-.cv-auth-footer {
-  position: relative;
-
-  padding: 18px 0 14px;
-
-  border-top:
-    1px solid
-    rgba(15,15,14,.14);
-}
-
-
-.cv-auth-company-message {
-  display: block;
-
-  direction: rtl;
-}
-
-
-.cv-auth-footer-kicker {
-  display: block;
-
-  margin-bottom: 9px;
-
-  direction: ltr;
-  text-align: right;
-
-  color: #721c2b;
-
-  font-family:
-    Georgia,
-    "Times New Roman",
-    serif;
-
-  font-size: 8px;
-  font-weight: 400;
-
-  letter-spacing: 2.8px;
-}
-
-
-.cv-auth-company-message strong {padding-bottom: 4px;
-  display: block;
-
-  margin: 0;
-
-  color: #0e0e0d;
-
-  font-family:
-    Georgia,
-    "Times New Roman",
-    serif;
-
-  font-size: clamp(
-    35px,
-    2.45vw,
-    42px
-  );
-
-  font-weight: 400;
-
-  line-height: 1.03;
-
-  letter-spacing: -1.5px;
-}
-
-
-.cv-auth-footer-signature {
-  margin-top: 15px;
-
-  display: flex;
-  align-items: center;
-
-  gap: 12px;
-
-  direction: ltr;
-
-  color: #666661;
-
-  font-family:
-    Georgia,
-    "Times New Roman",
-    serif;
-
-  font-size: 8px;
-
-  letter-spacing: 2.5px;
-}
-
-
-.cv-auth-footer-signature span {
-  width: 43px;
-  height: 1px;
-
-  background: #721c2b;
-}
-
-
-/* =====================================================
-   ANIMATION
-===================================================== */
-
-@keyframes cvAccessEnter {
-
-  from {
-    opacity: 0;
-
-    transform:
-      translateX(16px);
-  }
-
-  to {
-    opacity: 1;
-
-    transform:
-      translateX(0);
-  }
-
-}
-
-
-/* =====================================================
-   TABLET
-===================================================== */
-
-@media (max-width: 1000px) {
-
-  .cv-auth {
-    grid-template-columns:
-      50%
-      50%;
-  }
-
-  .cv-auth-access-inner {
-    padding:
-      34px
-      38px
-      30px;
-  }
-
-  .cv-auth-logo {
-    width: 230px;
-    height: 88px;
-  }
-
-  .cv-auth-main {
-    max-width: 400px;
-  }
-
-  .cv-auth-intro h2 {
-    font-size: 48px;
-  }
-
-  .cv-auth-company-message strong {
-    font-size: 30px;
-  }
-
-}
-/* =====================================================
-   MOBILE APP
-===================================================== */
-
-@media (max-width: 720px) {
-
-  .cv-auth {
-    display: block;
-
-    overflow-y: auto;
-
-    background: #e7e7e4;
-  }
-
-  .cv-auth-visual {
-    min-height: 31vh;
-    background-position: center 48%;
-  }
-
-  .cv-auth-shade {
-    background:
-      linear-gradient(
-        0deg,
-        rgba(8, 8, 8, 0.5),
-        rgba(8, 8, 8, 0.06)
-      );
-  }
-
-  .cv-auth-visual-top {
-    top: 24px;
-    left: 22px;
-    right: 22px;
-  }
-
-  .cv-auth-visual-top span:last-child {
-    display: none;
-  }
-
-  .cv-auth-statement {
-    left: 23px;
-    right: 23px;
-    bottom: 25px;
-
-    max-width: none;
-  }
-
-  .cv-auth-rule,
-  .cv-auth-statement > p,
-  .cv-auth-location {
-    display: none;
-  }
-
-  .cv-auth-statement h1 {
-    font-size: 32px;
-
-    line-height: 1.02;
-    letter-spacing: -1.2px;
-  }
-
-  .cv-auth-access {
-    min-height: 69vh;
-  }
-
-  .cv-auth-access::before {
-    inset: 8px;
-  }
-
-  .cv-auth-access-inner {
-    min-height: 69vh;
-
-    padding:
-      25px 27px
-      max(25px, env(safe-area-inset-bottom));
-  }
-
-  .cv-auth-header {
-    justify-content: center;
-  }
-
-  .cv-auth-logo {
-    width: 185px;
-    height: 68px;
-  }
-
-  .cv-auth-private {
-    display: none;
-  }
-
-  .cv-auth-main {
-    max-width: 430px;
-
-    margin: 15px auto auto;
-    padding: 10px 0 32px;
-  }
-
-  .cv-auth-intro {
-    margin-bottom: 33px;
-  }
-
-  .cv-auth-intro h2 {
-    font-size: 34px;
-  }
-
-  .cv-auth-field {
-    margin-bottom: 21px;
-  }
-
-  .cv-auth-field input {
-    height: 55px;
-    font-size: 16px;
-  }
-
-  .cv-auth-button {
-    height: 58px;
-  }
-
-  .cv-auth-footer {
-    display: block;
-    padding-top: 20px;
-  }
-
-  .cv-auth-company-message {
-    justify-content: center;
-    text-align: center;
-  }
-
-  .cv-auth-dot {
-    display: none;
-  }
-
-  .cv-auth-company-message strong {
-    font-size: 10px;
-  }
-}
-
-/* CASA VERONA — FINAL LOGIN FINISH */
-
-.cv-auth {
-  grid-template-columns: 57% 43%;
-}
-
-.cv-auth-company-message-final {
-  width: 100%;
-  align-items: flex-start;
-}
-
-.cv-auth-company-message-final > div {
-  width: 100%;
-}
-
-.cv-auth-company-message-final strong {
-  display: block;
-
-  color: #161616;
-
-  font-family: Georgia, "Times New Roman", serif;
-
-  font-size: clamp(24px, 2.1vw, 34px);
-  font-weight: 400;
-
-  line-height: 1.15;
-  letter-spacing: -1px;
-}
-
-.cv-auth-company-message-final div span {
-  margin-top: 13px;
-
-  color: #777773;
-
-  font-size: 8px;
-  font-weight: 700;
-
-  letter-spacing: 2.5px;
-}
-
-.cv-auth-footer-final {
-  padding-top: 27px;
-
-  border-top: 1px solid rgba(20,20,20,0.12);
-}
-
-.cv-auth-main {
-  max-width: 440px;
-}
-
-.cv-auth-intro h2 {
-  font-size: 48px;
-}
-
-.cv-auth-field input {
-  background: rgba(255,255,255,0.18);
-}
-
-.cv-auth-button {
-  margin-top: 20px;
-}
-
-@media (max-width: 720px) {
-
-  .cv-auth-company-message-final strong {
-    font-size: 23px;
-    text-align: center;
-  }
-
-  .cv-auth-company-message-final div span {
-    text-align: center;
-  }
-}
+    }
 
   </style>
-/* =====================================================
-   CASA VERONA — ADMIN DASHBOARD V2
-===================================================== */
-
-.cv-dashboard {
-  animation: cvDashboardEnter .55s ease both;
-}
-
-/* HERO */
-.cv-dashboard-hero {
-  position: relative;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 30px;
-  min-height: 220px;
-  margin-bottom: 24px;
-  padding: 38px 42px;
-  overflow: hidden;
-  border: 1px solid #dedbd3;
-  background:
-    radial-gradient(
-      circle at 8% 10%,
-      rgba(255,255,255,.85),
-      transparent 36%
-    ),
-    linear-gradient(
-      135deg,
-      #e8e6e0 0%,
-      #d8d5cd 100%
-    );
-}
-
-.cv-dashboard-hero::before {
-  content: "CV";
-  position: absolute;
-  left: 28px;
-  bottom: -42px;
-  color: rgba(17,17,17,.035);
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 190px;
-  line-height: 1;
-  pointer-events: none;
-}
-
-.cv-dashboard-hero-copy {
-  position: relative;
-  z-index: 2;
-}
-
-.cv-dashboard-eyebrow {
-  display: block;
-  margin-bottom: 17px;
-  direction: ltr;
-  text-align: right;
-  color: #721c2b;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 9px;
-  letter-spacing: 3px;
-}
-
-.cv-dashboard-hero h1 {
-  margin: 0;
-  color: #11110f;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(40px, 4vw, 62px);
-  font-weight: 400;
-  line-height: 1;
-  letter-spacing: -2px;
-}
-
-.cv-dashboard-hero p {
-  margin-top: 16px;
-  color: #68645d;
-  font-size: 14px;
-}
-
-.cv-dashboard-date {
-  position: relative;
-  z-index: 2;
-  min-width: 150px;
-  padding-right: 22px;
-  border-right: 2px solid #721c2b;
-}
-
-.cv-dashboard-date span {
-  display: block;
-  margin-bottom: 7px;
-  color: #77736b;
-  font-size: 11px;
-}
-
-.cv-dashboard-date strong {
-  color: #191917;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 17px;
-  font-weight: 400;
-}
-
-
-/* KPI */
-.cv-kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-  margin-bottom: 18px;
-}
-
-.cv-kpi-card {
-  position: relative;
-  min-height: 190px;
-  padding: 22px;
-  overflow: hidden;
-  border: 1px solid #e2dfd7;
-  background: #fff;
-  transition:
-    transform .25s ease,
-    box-shadow .25s ease;
-}
-
-.cv-kpi-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 16px 38px rgba(22,22,20,.07);
-}
-
-.cv-kpi-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.cv-kpi-top span {
-  color: #721c2b;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 10px;
-  font-style: italic;
-}
-
-.cv-kpi-top small {
-  color: #8a867e;
-  font-size: 8px;
-  font-weight: 600;
-  letter-spacing: 2px;
-}
-
-.cv-kpi-number {
-  margin-top: 28px;
-  color: #11110f;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 48px;
-  line-height: 1;
-}
-
-.cv-kpi-label {
-  margin-top: 8px;
-  color: #282824;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.cv-kpi-footer {
-  position: absolute;
-  right: 22px;
-  bottom: 18px;
-  left: 22px;
-  padding-top: 11px;
-  border-top: 1px solid #ece9e2;
-  color: #98938a;
-  font-size: 10px;
-}
-
-.cv-kpi-card-dark {
-  border-color: #171715;
-  background: #171715;
-}
-
-.cv-kpi-card-dark .cv-kpi-number,
-.cv-kpi-card-dark .cv-kpi-label {
-  color: #fff;
-}
-
-.cv-kpi-card-dark .cv-kpi-top small,
-.cv-kpi-card-dark .cv-kpi-footer {
-  color: rgba(255,255,255,.48);
-}
-
-.cv-kpi-card-dark .cv-kpi-top span {
-  color: #b98a93;
-}
-
-.cv-kpi-card-dark .cv-kpi-footer {
-  border-top-color: rgba(255,255,255,.1);
-}
-
-
-/* MAIN GRID */
-.cv-dashboard-grid {
-  display: grid;
-  grid-template-columns: 1.35fr .65fr;
-  gap: 18px;
-  margin-bottom: 18px;
-}
-
-.cv-dashboard-panel {
-  min-height: 330px;
-  padding: 27px;
-  border: 1px solid #e2dfd7;
-  background: #fff;
-}
-
-.cv-panel-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  padding-bottom: 21px;
-  border-bottom: 1px solid #ebe8e1;
-}
-
-.cv-panel-header > div {
-  display: flex;
-  align-items: center;
-  gap: 13px;
-}
-
-.cv-panel-index {
-  color: #721c2b;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 10px;
-  font-style: italic;
-}
-
-.cv-panel-header h2 {
-  margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 22px;
-  font-weight: 400;
-}
-
-.cv-live-indicator {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  color: #77736b;
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-}
-
-.cv-live-indicator i {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #1f8f5f;
-  box-shadow: 0 0 0 4px rgba(31,143,95,.1);
-}
-
-
-/* BUSINESS PULSE */
-.cv-pulse-list {
-  margin-top: 8px;
-}
-
-.cv-pulse-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 61px;
-  border-bottom: 1px solid #efede7;
-}
-
-.cv-pulse-row:last-child {
-  border-bottom: 0;
-}
-
-.cv-pulse-row span {
-  color: #66625b;
-  font-size: 13px;
-}
-
-.cv-pulse-row strong {
-  color: #171715;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 23px;
-  font-weight: 400;
-}
-
-
-/* AI COMMAND */
-.cv-ai-command {
-  display: flex;
-  flex-direction: column;
-  border-color: #171715;
-  background:
-    radial-gradient(
-      circle at 90% 0%,
-      rgba(114,28,43,.28),
-      transparent 38%
-    ),
-    #151513;
-  color: #fff;
-}
-
-.cv-ai-command-top {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  color: rgba(255,255,255,.5);
-  font-size: 8px;
-  font-weight: 600;
-  letter-spacing: 2px;
-}
-
-.cv-ai-star {
-  color: #b98a93;
-  font-size: 17px;
-}
-
-.cv-ai-command h2 {
-  margin: 36px 0 15px;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 31px;
-  font-weight: 400;
-  letter-spacing: -1px;
-}
-
-.cv-ai-command p {
-  max-width: 370px;
-  color: rgba(255,255,255,.58);
-  font-size: 13px;
-  line-height: 1.8;
-}
-
-.cv-ai-status {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 25px;
-  padding: 14px 0;
-  border-top: 1px solid rgba(255,255,255,.09);
-  border-bottom: 1px solid rgba(255,255,255,.09);
-}
-
-.cv-ai-status span {
-  color: rgba(255,255,255,.4);
-  font-size: 8px;
-  letter-spacing: 2px;
-}
-
-.cv-ai-status strong {
-  color: #79c99e;
-  font-size: 9px;
-  letter-spacing: 1.5px;
-}
-
-.cv-ai-open {
-  width: 100%;
-  margin-top: auto;
-  padding: 16px 0 3px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border: 0;
-  background: transparent;
-  color: #fff;
-  font-family: inherit;
-  font-size: 12px;
-  cursor: pointer;
-  transition: color .2s ease;
-}
-
-.cv-ai-open:hover {
-  color: #d6aab2;
-}
-
-
-/* BOTTOM STATEMENT */
-.cv-dashboard-bottom {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 30px;
-  padding: 29px 4px 5px;
-}
-
-.cv-dashboard-bottom-label {
-  display: block;
-  margin-bottom: 9px;
-  direction: ltr;
-  text-align: right;
-  color: #721c2b;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 8px;
-  letter-spacing: 2.7px;
-}
-
-.cv-dashboard-bottom h2 {
-  margin: 0;
-  color: #171715;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 32px;
-  font-weight: 400;
-  letter-spacing: -1px;
-}
-
-.cv-dashboard-bottom h2 em {
-  color: #721c2b;
-  font-weight: 400;
-}
-
-.cv-dashboard-bottom p {
-  color: #8a867e;
-  font-size: 10px;
-}
-
-
-/* ANIMATION */
-@keyframes cvDashboardEnter {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-
-/* TABLET */
-@media (max-width: 1100px) {
-  .cv-kpi-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .cv-dashboard-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-
-/* MOBILE */
-@media (max-width: 700px) {
-  .cv-dashboard-hero {
-    min-height: 250px;
-    padding: 28px 24px;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: flex-end;
-  }
-
-  .cv-dashboard-hero h1 {
-    font-size: 39px;
-  }
-
-  .cv-dashboard-date {
-    width: 100%;
-  }
-
-  .cv-kpi-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-
-  .cv-kpi-card {
-    min-height: 170px;
-    padding: 17px;
-  }
-
-  .cv-kpi-number {
-    font-size: 38px;
-  }
-
-  .cv-kpi-footer {
-    right: 17px;
-    left: 17px;
-  }
-
-  .cv-dashboard-panel {
-    padding: 21px;
-  }
-
-  .cv-dashboard-bottom {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-}
-
-@media (max-width: 430px) {
-  .cv-kpi-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
 </head>
-
 <body>
 
-  <!-- CASA VERONA LOGIN — FINAL -->
-<div id="loginScreen" class="cv-auth">
+  <!-- =====================================================
+       CASA VERONA — LOGIN
+  ====================================================== -->
 
-  <!-- 57% — CASA VERONA VIEW -->
-  <section class="cv-auth-visual">
-    <div class="cv-auth-shade"></div>
+  <section id="loginScreen" class="cv-auth">
 
-    <div class="cv-auth-visual-top">
-      <span>CASA VERONA</span>
-      <span>PRIVATE BUSINESS SYSTEM</span>
+    <div class="cv-auth-visual">
+
+      <div class="cv-auth-shade"></div>
+
+      <div class="cv-auth-visual-top">
+        <span>CASA VERONA</span>
+        <span>PRIVATE BUSINESS SYSTEM</span>
+      </div>
+
+      <div class="cv-auth-statement">
+
+        <span class="cv-auth-rule"></span>
+
+        <p>CASA VERONA · PRIVATE ACCESS</p>
+
+        <h1>
+          Built for
+          <em>growth.</em>
+        </h1>
+
+      </div>
+
     </div>
 
-    <div class="cv-auth-statement">
-      <span class="cv-auth-rule"></span>
-      <p>CASA VERONA · OPERATING SYSTEM</p>
 
-      <h1>
-        Great businesses<br>
-        start with <em>great systems.</em>
-      </h1>
+    <div class="cv-auth-access">
+
+      <div class="cv-auth-access-inner">
+
+        <header class="cv-auth-header">
+
+          <div class="cv-auth-brand">
+
+            <img
+              src="/assets/casa-verona-logo.jpg"
+              alt="Casa Verona"
+              class="cv-auth-logo"
+            >
+
+            <span class="cv-auth-brand-line"></span>
+
+          </div>
+
+          <span class="cv-auth-private">
+            PRIVATE · 01
+          </span>
+
+        </header>
+
+
+        <main class="cv-auth-main">
+
+          <div class="cv-auth-overline">
+            CASA VERONA · OS
+          </div>
+
+          <div class="cv-auth-intro">
+
+            <h2>
+              כניסה
+              <em>למערכת.</em>
+            </h2>
+
+            <p class="cv-auth-subtitle">
+              מערכת הניהול הפרטית של Casa Verona
+            </p>
+
+          </div>
+
+
+          <form id="loginForm" autocomplete="on">
+
+            <div class="cv-auth-field">
+
+              <div class="cv-auth-field-head">
+                <label for="loginUsername">
+                  שם משתמש
+                </label>
+
+                <span class="cv-auth-field-number">
+                  01
+                </span>
+              </div>
+
+              <div class="cv-auth-input-wrap">
+
+                <input
+                  id="loginUsername"
+                  name="username"
+                  type="text"
+                  autocomplete="username"
+                  placeholder="הזן שם משתמש"
+                  required
+                >
+
+                <span class="cv-auth-input-mark">
+                  ID
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="cv-auth-field">
+
+              <div class="cv-auth-field-head">
+                <label for="loginPassword">
+                  סיסמה
+                </label>
+
+                <span class="cv-auth-field-number">
+                  02
+                </span>
+              </div>
+
+              <div class="cv-auth-input-wrap">
+
+                <input
+                  id="loginPassword"
+                  name="password"
+                  type="password"
+                  autocomplete="current-password"
+                  placeholder="הזן סיסמה"
+                  required
+                >
+
+                <span class="cv-auth-input-mark">
+                  KEY
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <button
+              id="loginButton"
+              class="cv-auth-button"
+              type="submit"
+            >
+
+              <span class="cv-auth-button-copy">
+
+                <small>
+                  SECURE ACCESS
+                </small>
+
+                <strong>
+                  כניסה ל־Casa Verona OS
+                </strong>
+
+              </span>
+
+              <span class="cv-auth-arrow">
+                ↗
+              </span>
+
+            </button>
+
+
+            <div
+              id="loginError"
+              class="cv-auth-error"
+              aria-live="polite"
+            ></div>
+
+          </form>
+
+        </main>
+
+
+        <footer class="cv-auth-footer">
+
+          <span class="cv-auth-footer-kicker">
+            CASA VERONA · 2026
+          </span>
+
+          <div class="cv-auth-company-message">
+            <strong>
+              Design. Sales. Production.
+            </strong>
+          </div>
+
+          <div class="cv-auth-footer-signature">
+            <span></span>
+            PRIVATE OPERATING SYSTEM
+          </div>
+
+        </footer>
+
+      </div>
+
     </div>
+
   </section>
 
 
-  <!-- 43% — CASA VERONA PRIVATE ACCESS -->
-<section class="cv-auth-access">
+  <!-- =====================================================
+       CASA VERONA — APPLICATION
+  ====================================================== -->
 
-  <div class="cv-auth-access-inner">
+  <div id="appShell" class="app">
 
-    <!-- BRAND -->
-    <header class="cv-auth-header">
+    <!-- SIDEBAR -->
 
-      <div class="cv-auth-brand">
+    <aside class="sidebar">
+
+      <div class="brand">
+
         <img
           src="/assets/casa-verona-logo.jpg"
           alt="Casa Verona"
-          class="cv-auth-logo"
+          class="brand-logo"
         >
 
-        <span class="cv-auth-brand-line"></span>
-      </div>
+        <h1>Casa Verona</h1>
 
-      <span class="cv-auth-private">
-        PRIVATE ACCESS · 2026
-      </span>
-
-    </header>
-
-
-    <!-- LOGIN -->
-    <main class="cv-auth-main">
-
-      <div class="cv-auth-intro">
-
-        <p class="cv-auth-overline">
-          CASA VERONA · PRIVATE BUSINESS
-        </p>
-
-        <h2>
-          ברוכים
-          <em>הבאים.</em>
-        </h2>
-
-        <p class="cv-auth-subtitle">
-          הכניסה למערכת הניהול הפרטית של Casa Verona
-        </p>
+        <p>BUSINESS OPERATING SYSTEM</p>
 
       </div>
 
 
-      <form id="loginForm" class="cv-auth-form">
+      <nav class="nav">
 
-        <!-- USERNAME -->
-        <div class="cv-auth-field">
-
-          <div class="cv-auth-field-head">
-            <span class="cv-auth-field-number">01</span>
-
-            <label for="loginUsername">
-              שם משתמש
-            </label>
-          </div>
-
-          <div class="cv-auth-input-wrap">
-
-            <input
-              id="loginUsername"
-              type="text"
-              autocomplete="username"
-              autocapitalize="none"
-              spellcheck="false"
-              placeholder="שם המשתמש שלך"
-              required
-            >
-
-            <span class="cv-auth-input-mark">
-              CV
-            </span>
-
-          </div>
-
-        </div>
-
-
-        <!-- PASSWORD -->
-        <div class="cv-auth-field">
-
-          <div class="cv-auth-field-head">
-            <span class="cv-auth-field-number">02</span>
-
-            <label for="loginPassword">
-              סיסמה
-            </label>
-          </div>
-
-          <div class="cv-auth-input-wrap">
-
-            <input
-              id="loginPassword"
-              type="password"
-              autocomplete="current-password"
-              placeholder="••••••••"
-              required
-            >
-
-            <span class="cv-auth-input-mark">
-              ●
-            </span>
-
-          </div>
-
-        </div>
-
-
-        <!-- BUTTON -->
         <button
-          type="submit"
-          class="login-button cv-auth-button"
+          type="button"
+          class="active"
+          data-page="dashboard"
         >
-
-          <span class="cv-auth-button-copy">
-            <small>ENTER CASA VERONA</small>
-            <strong>כניסה למערכת</strong>
-          </span>
-
-          <span class="cv-auth-arrow">
-            ↗
-          </span>
-
+          <span class="nav-index">01</span>
+          <span>דשבורד מנהל</span>
         </button>
 
 
-        <div
-          id="loginError"
-          class="login-error cv-auth-error"
-        ></div>
+        <button
+          type="button"
+          data-page="leads"
+        >
+          <span class="nav-index">02</span>
+          <span>לידים</span>
+        </button>
 
-      </form>
+
+        <button
+          type="button"
+          data-page="sales"
+        >
+          <span class="nav-index">03</span>
+          <span>מכירות</span>
+        </button>
+
+
+        <button
+          type="button"
+          data-page="customers"
+        >
+          <span class="nav-index">04</span>
+          <span>לקוחות</span>
+        </button>
+
+
+        <button
+          type="button"
+          data-page="catalog"
+        >
+          <span class="nav-index">05</span>
+          <span>קטלוג</span>
+        </button>
+
+
+        <button
+          type="button"
+          data-page="orders"
+        >
+          <span class="nav-index">06</span>
+          <span>הזמנות</span>
+        </button>
+
+
+        <button
+          type="button"
+          data-page="production"
+        >
+          <span class="nav-index">07</span>
+          <span>ייצור</span>
+        </button>
+
+
+        <button
+          type="button"
+          data-page="deliveries"
+        >
+          <span class="nav-index">08</span>
+          <span>אספקות</span>
+        </button>
+
+
+        <button
+          type="button"
+          data-page="reports"
+        >
+          <span class="nav-index">09</span>
+          <span>דוחות</span>
+        </button>
+
+
+        <button
+          type="button"
+          data-page="ai"
+        >
+          <span class="nav-index">10</span>
+          <span>AI Command Center</span>
+        </button>
+
+      </nav>
+
+    </aside>
+
+
+    <!-- MAIN -->
+
+    <main class="main">
+
+      <!-- TOPBAR -->
+
+      <header class="topbar">
+
+        <div class="topbar-copy">
+
+          <span>
+            CASA VERONA · COMMAND CENTER
+          </span>
+
+          <h2 id="pageTitle">
+            דשבורד מנהל
+          </h2>
+
+        </div>
+
+
+        <div class="topbar-user">
+
+          <div class="topbar-user-copy">
+
+            <strong id="topbarUserName">
+              Casa Verona
+            </strong>
+
+            <span id="topbarUserRole">
+              ADMIN
+            </span>
+
+          </div>
+
+          <div
+            id="topbarAvatar"
+            class="topbar-avatar"
+          >
+            CV
+          </div>
+
+        </div>
+
+      </header>
+
+
+      <!-- =================================================
+           DASHBOARD
+      ================================================== -->
+
+      <section
+        id="dashboard"
+        class="page active"
+      >
+
+        <!-- HERO -->
+
+        <div class="cv-dashboard-hero">
+
+          <div class="cv-dashboard-hero-copy">
+
+            <span class="cv-dashboard-eyebrow">
+              CASA VERONA · COMMAND CENTER
+            </span>
+
+            <h1 id="cvWelcomeTitle">
+              ברוכים הבאים.
+            </h1>
+
+            <p>
+              תמונת מצב חיה של Casa Verona
+            </p>
+
+          </div>
+
+
+          <div class="cv-dashboard-date">
+
+            <span id="cvDashboardDay">
+              —
+            </span>
+
+            <strong id="cvDashboardDate">
+              —
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <!-- KPI -->
+
+        <div class="cv-kpi-grid">
+
+          <article class="cv-kpi-card">
+
+            <div class="cv-kpi-top">
+              <span>01</span>
+              <small>LEADS</small>
+            </div>
+
+            <div
+              id="cvKpiLeads"
+              class="cv-kpi-number"
+            >
+              —
+            </div>
+
+            <div class="cv-kpi-label">
+              לידים חדשים
+            </div>
+
+            <div class="cv-kpi-footer">
+              פעילות המכירות
+            </div>
+
+          </article>
+
+
+          <article class="cv-kpi-card">
+
+            <div class="cv-kpi-top">
+              <span>02</span>
+              <small>SALES</small>
+            </div>
+
+            <div
+              id="cvKpiSales"
+              class="cv-kpi-number"
+            >
+              —
+            </div>
+
+            <div class="cv-kpi-label">
+              עסקאות
+            </div>
+
+            <div class="cv-kpi-footer">
+              עסקאות שנסגרו
+            </div>
+
+          </article>
+
+
+          <article class="cv-kpi-card">
+
+            <div class="cv-kpi-top">
+              <span>03</span>
+              <small>ORDERS</small>
+            </div>
+
+            <div
+              id="cvKpiOrders"
+              class="cv-kpi-number"
+            >
+              —
+            </div>
+
+            <div class="cv-kpi-label">
+              הזמנות פעילות
+            </div>
+
+            <div class="cv-kpi-footer">
+              הזמנות בתהליך
+            </div>
+
+          </article>
+
+
+          <article
+            class="cv-kpi-card cv-kpi-card-dark"
+          >
+
+            <div class="cv-kpi-top">
+              <span>04</span>
+              <small>PRODUCTION</small>
+            </div>
+
+            <div
+              id="cvKpiProduction"
+              class="cv-kpi-number"
+            >
+              —
+            </div>
+
+            <div class="cv-kpi-label">
+              בתהליך ייצור
+            </div>
+
+            <div class="cv-kpi-footer">
+              FACTORY STATUS
+            </div>
+
+          </article>
+
+        </div>
+
+
+        <!-- DASHBOARD LOWER GRID -->
+
+        <div class="cv-dashboard-grid">
+
+          <!-- BUSINESS PULSE -->
+
+          <article class="cv-panel">
+
+            <div class="cv-panel-header">
+
+              <div class="cv-panel-heading">
+
+                <span class="cv-panel-index">
+                  01
+                </span>
+
+                <h3>
+                  מצב העסק
+                </h3>
+
+              </div>
+
+
+              <span class="cv-live">
+                <i></i>
+                LIVE
+              </span>
+
+            </div>
+
+
+            <div>
+
+              <div class="cv-pulse-row">
+
+                <span>
+                  לידים חמים
+                </span>
+
+                <strong id="cvHotLeads">
+                  —
+                </strong>
+
+              </div>
+
+
+              <div class="cv-pulse-row">
+
+                <span>
+                  ממתינים למעקב
+                </span>
+
+                <strong id="cvFollowups">
+                  —
+                </strong>
+
+              </div>
+
+
+              <div class="cv-pulse-row">
+
+                <span>
+                  ממתינים לייצור
+                </span>
+
+                <strong id="cvWaitingProduction">
+                  —
+                </strong>
+
+              </div>
+
+
+              <div class="cv-pulse-row">
+
+                <span>
+                  מוכנים לאספקה
+                </span>
+
+                <strong id="cvReadyDelivery">
+                  —
+                </strong>
+
+              </div>
+
+            </div>
+
+          </article>
+
+
+          <!-- AI COMMAND CENTER -->
+
+          <article class="cv-panel cv-ai-panel">
+
+            <div class="cv-ai-top">
+
+              <span class="cv-ai-star">
+                ✦
+              </span>
+
+              <span>
+                CASA VERONA AI
+              </span>
+
+            </div>
+
+
+            <h3>
+              AI Command Center
+            </h3>
+
+            <p>
+              המוח העסקי של Casa Verona מרכז
+              מכירות, לידים, ייצור והזמנות
+              במקום אחד.
+            </p>
+
+
+            <div class="cv-ai-status">
+
+              <span>
+                SYSTEM STATUS
+              </span>
+
+              <strong>
+                ONLINE
+              </strong>
+
+            </div>
+
+
+            <button
+              type="button"
+              class="cv-ai-open"
+              data-open-page="ai"
+            >
+
+              <span>
+                כניסה למרכז ה־AI
+              </span>
+
+              <span>
+                ←
+              </span>
+
+            </button>
+
+          </article>
+
+        </div>
+
+      </section>
+
+
+      <!-- =================================================
+           LEADS
+      ================================================== -->
+
+      <section
+        id="leads"
+        class="page"
+      >
+
+        <div class="section-head">
+
+          <div>
+
+            <span class="section-overline">
+              CASA VERONA · CRM
+            </span>
+
+            <h1>
+              לידים
+            </h1>
+
+            <p>
+              כל הפניות והלקוחות הפוטנציאליים
+              במקום אחד.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="card table-card">
+
+          <table>
+
+            <thead>
+              <tr>
+                <th>לקוח</th>
+                <th>טלפון</th>
+                <th>מוצר</th>
+                <th>סטטוס</th>
+                <th>מעקב</th>
+              </tr>
+            </thead>
+
+            <tbody id="leadsTableBody">
+
+              <tr>
+                <td
+                  colspan="5"
+                  class="empty-state"
+                >
+                  הנתונים האמיתיים יחוברו
+                  למערכת בשלב הבא.
+                </td>
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </section>
+
+
+      <!-- =================================================
+           SALES
+      ================================================== -->
+
+      <section
+        id="sales"
+        class="page"
+      >
+
+        <div class="section-head">
+
+          <div>
+
+            <span class="section-overline">
+              CASA VERONA · SALES
+            </span>
+
+            <h1>
+              מכירות
+            </h1>
+
+            <p>
+              עסקאות, הכנסות וביצועי המכירות.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="card empty-state">
+          <div>
+            נתוני המכירות האמיתיים יחוברו
+            ל־Casa Verona OS.
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- =================================================
+           CUSTOMERS
+      ================================================== -->
+
+      <section
+        id="customers"
+        class="page"
+      >
+
+        <div class="section-head">
+
+          <div>
+
+            <span class="section-overline">
+              CASA VERONA · CLIENTS
+            </span>
+
+            <h1>
+              לקוחות
+            </h1>
+
+            <p>
+              בסיס הלקוחות של Casa Verona.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="card empty-state">
+          <div>
+            מאגר הלקוחות יחובר כאן.
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- =================================================
+           CATALOG
+      ================================================== -->
+
+      <section
+        id="catalog"
+        class="page"
+      >
+
+        <div class="section-head">
+
+          <div>
+
+            <span class="section-overline">
+              CASA VERONA · COLLECTION
+            </span>
+
+            <h1>
+              קטלוג
+            </h1>
+
+            <p>
+              דגמים, מידות, בדים ומפרטי מוצר.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="card empty-state">
+          <div>
+            קטלוג Casa Verona יחובר כאן
+            ל־catalog.json.
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- =================================================
+           ORDERS
+      ================================================== -->
+
+      <section
+        id="orders"
+        class="page"
+      >
+
+        <div class="section-head">
+
+          <div>
+
+            <span class="section-overline">
+              CASA VERONA · ORDERS
+            </span>
+
+            <h1>
+              הזמנות
+            </h1>
+
+            <p>
+              מעקב מלא ממכירה ועד אספקה.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="card empty-state">
+          <div>
+            ההזמנות האמיתיות מ־Supabase
+            יחוברו כאן.
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- =================================================
+           PRODUCTION
+      ================================================== -->
+
+      <section
+        id="production"
+        class="page"
+      >
+
+        <div class="section-head">
+
+          <div>
+
+            <span class="section-overline">
+              CASA VERONA · FACTORY
+            </span>
+
+            <h1>
+              ייצור
+            </h1>
+
+            <p>
+              ניהול עבודות המפעל וסטטוס הייצור.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="card empty-state">
+          <div>
+            מערכת הייצור והעובדים תחובר כאן.
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- =================================================
+           DELIVERIES
+      ================================================== -->
+
+      <section
+        id="deliveries"
+        class="page"
+      >
+
+        <div class="section-head">
+
+          <div>
+
+            <span class="section-overline">
+              CASA VERONA · LOGISTICS
+            </span>
+
+            <h1>
+              אספקות
+            </h1>
+
+            <p>
+              הזמנות מוכנות, תאריכים וכתובות
+              אספקה.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="card empty-state">
+          <div>
+            מערכת האספקות תחובר כאן.
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- =================================================
+           REPORTS
+      ================================================== -->
+
+      <section
+        id="reports"
+        class="page"
+      >
+
+        <div class="section-head">
+
+          <div>
+
+            <span class="section-overline">
+              CASA VERONA · INTELLIGENCE
+            </span>
+
+            <h1>
+              דוחות
+            </h1>
+
+            <p>
+              ביצועים, המרות, הכנסות ורווחיות.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="card empty-state">
+          <div>
+            מרכז הדוחות העסקיים יופיע כאן.
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- =================================================
+           AI COMMAND CENTER
+      ================================================== -->
+
+      <section
+        id="ai"
+        class="page"
+      >
+
+        <div class="section-head">
+
+          <div>
+
+            <span class="section-overline">
+              CASA VERONA · ARTIFICIAL INTELLIGENCE
+            </span>
+
+            <h1>
+              AI Command Center
+            </h1>
+
+            <p>
+              מרכז הבינה העסקית והמכירתית
+              של Casa Verona.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="cv-dashboard-grid">
+
+          <article class="card">
+
+            <span class="section-overline">
+              AI SALES AGENT
+            </span>
+
+            <h2
+              style="
+                margin-top: 12px;
+                font-family: Georgia, 'Times New Roman', serif;
+                font-weight: 400;
+              "
+            >
+              סוכן המכירות
+            </h2>
+
+            <p
+              style="
+                margin-top: 12px;
+                color: #77736b;
+                line-height: 1.8;
+                font-size: 13px;
+              "
+            >
+              הסוכן שינהל שיחות WhatsApp,
+              יחמם לידים, יבין התנגדויות
+              ויעביר ליד חם לסגירה.
+            </p>
+
+          </article>
+
+
+          <article class="cv-panel cv-ai-panel">
+
+            <div class="cv-ai-top">
+              <span class="cv-ai-star">✦</span>
+              <span>AI CORE</span>
+            </div>
+
+            <h3>
+              Casa Verona Brain
+            </h3>
+
+            <p>
+              כאן נרכז בהמשך Sales Coach,
+              Marketing AI, Follow-Up,
+              Production Manager ו־CEO Brain.
+            </p>
+
+            <div class="cv-ai-status">
+
+              <span>
+                CORE
+              </span>
+
+              <strong>
+                READY
+              </strong>
+
+            </div>
+
+          </article>
+
+        </div>
+
+      </section>
 
     </main>
 
-
-    <!-- STATEMENT -->
-    <footer class="cv-auth-footer">
-
-      <div class="cv-auth-company-message">
-
-        <span class="cv-auth-footer-kicker">
-          CASA VERONA · PEOPLE & CULTURE
-        </span>
-
-        <strong>
-  זכיתם לעבוד ב־Casa Verona<br>
-  החברה החזקה בשוק!!!!
-</strong>
-
-        <div class="cv-auth-footer-signature">
-          <span></span>
-          WELCOME TO CASA VERONA
-        </div>
-
-      </div>
-
-    </footer>
-
   </div>
+    <!-- =====================================================
+       CASA VERONA OS — APPLICATION LOGIC
+  ====================================================== -->
 
-</section>
+  <script>
 
-<!-- =====================================================
-     CASA VERONA — ADMIN DASHBOARD V2
-===================================================== -->
+    /* =====================================================
+       ELEMENTS
+    ===================================================== */
 
-<section id="dashboard" class="page active cv-dashboard">
+    const loginScreen =
+      document.getElementById("loginScreen");
 
-  <!-- WELCOME -->
-  <div class="cv-dashboard-hero">
+    const loginForm =
+      document.getElementById("loginForm");
 
-    <div class="cv-dashboard-hero-copy">
+    const loginError =
+      document.getElementById("loginError");
 
-      <span class="cv-dashboard-eyebrow">
-        CASA VERONA · COMMAND CENTER
-      </span>
+    const loginUsername =
+      document.getElementById("loginUsername");
 
-      <h1 id="cvWelcomeTitle">
-        ברוכים הבאים
-      </h1>
+    const loginPassword =
+      document.getElementById("loginPassword");
 
-      <p>
-        תמונת מצב חיה של Casa Verona
-      </p>
+    const loginButton =
+      document.getElementById("loginButton");
 
-    </div>
+    const pageTitle =
+      document.getElementById("pageTitle");
 
-    <div class="cv-dashboard-date">
+    const topbarUserName =
+      document.getElementById("topbarUserName");
 
-      <span id="cvDashboardDay">
-        —
-      </span>
+    const topbarUserRole =
+      document.getElementById("topbarUserRole");
 
-      <strong id="cvDashboardDate">
-        —
-      </strong>
+    const topbarAvatar =
+      document.getElementById("topbarAvatar");
 
-    </div>
 
-  </div>
+    /* =====================================================
+       PAGE TITLES
+    ===================================================== */
 
+    const pageTitles = {
+      dashboard: "דשבורד מנהל",
+      leads: "לידים",
+      sales: "מכירות",
+      customers: "לקוחות",
+      catalog: "קטלוג",
+      orders: "הזמנות",
+      production: "ייצור",
+      deliveries: "אספקות",
+      reports: "דוחות",
+      ai: "AI Command Center"
+    };
 
-  <!-- KPI -->
-  <div class="cv-kpi-grid">
 
-    <article class="cv-kpi-card">
+    /* =====================================================
+       NAVIGATION
+    ===================================================== */
 
-      <div class="cv-kpi-top">
-        <span>01</span>
-        <small>LEADS</small>
-      </div>
+    function openPage(pageName) {
 
-      <div
-        class="cv-kpi-number"
-        id="cvKpiLeads"
-      >
-        —
-      </div>
+      const targetPage =
+        document.getElementById(pageName);
 
-      <div class="cv-kpi-label">
-        לידים חדשים
-      </div>
-
-      <div class="cv-kpi-footer">
-        פעילות המכירות
-      </div>
-
-    </article>
-
-
-    <article class="cv-kpi-card">
-
-      <div class="cv-kpi-top">
-        <span>02</span>
-        <small>SALES</small>
-      </div>
-
-      <div
-        class="cv-kpi-number"
-        id="cvKpiSales"
-      >
-        —
-      </div>
-
-      <div class="cv-kpi-label">
-        עסקאות
-      </div>
-
-      <div class="cv-kpi-footer">
-        עסקאות שנסגרו
-      </div>
-
-    </article>
-
-
-    <article class="cv-kpi-card">
-
-      <div class="cv-kpi-top">
-        <span>03</span>
-        <small>ORDERS</small>
-      </div>
-
-      <div
-        class="cv-kpi-number"
-        id="cvKpiOrders"
-      >
-        —
-      </div>
-
-      <div class="cv-kpi-label">
-        הזמנות פעילות
-      </div>
-
-      <div class="cv-kpi-footer">
-        הזמנות בתהליך
-      </div>
-
-    </article>
-
-
-    <article class="cv-kpi-card cv-kpi-card-dark">
-
-      <div class="cv-kpi-top">
-        <span>04</span>
-        <small>PRODUCTION</small>
-      </div>
-
-      <div
-        class="cv-kpi-number"
-        id="cvKpiProduction"
-      >
-        —
-      </div>
-
-      <div class="cv-kpi-label">
-        בתהליך ייצור
-      </div>
-
-      <div class="cv-kpi-footer">
-        FACTORY STATUS
-      </div>
-
-    </article>
-
-  </div>
-
-
-  <!-- MAIN DASHBOARD -->
-  <div class="cv-dashboard-grid">
-
-    <!-- BUSINESS PULSE -->
-    <article class="cv-dashboard-panel cv-business-pulse">
-
-      <div class="cv-panel-header">
-
-        <div>
-          <span class="cv-panel-index">
-            01
-          </span>
-
-          <h2>
-            מצב העסק
-          </h2>
-        </div>
-
-        <span class="cv-live-indicator">
-          <i></i>
-          LIVE
-        </span>
-
-      </div>
-
-
-      <div class="cv-pulse-list">
-
-        <div class="cv-pulse-row">
-
-          <span>
-            לידים חמים
-          </span>
-
-          <strong id="cvHotLeads">
-            —
-          </strong>
-
-        </div>
-
-
-        <div class="cv-pulse-row">
-
-          <span>
-            ממתינים למעקב
-          </span>
-
-          <strong id="cvFollowups">
-            —
-          </strong>
-
-        </div>
-
-
-        <div class="cv-pulse-row">
-
-          <span>
-            ממתינים לייצור
-          </span>
-
-          <strong id="cvWaitingProduction">
-            —
-          </strong>
-
-        </div>
-
-
-        <div class="cv-pulse-row">
-
-          <span>
-            מוכנים לאספקה
-          </span>
-
-          <strong id="cvReadyDelivery">
-            —
-          </strong>
-
-        </div>
-
-      </div>
-
-    </article>
-
-
-    <!-- AI COMMAND -->
-    <article class="cv-dashboard-panel cv-ai-command">
-
-      <div class="cv-ai-command-top">
-
-        <span class="cv-ai-star">
-          ✦
-        </span>
-
-        <span>
-          CASA VERONA AI
-        </span>
-
-      </div>
-
-      <h2>
-        AI Command Center
-      </h2>
-
-      <p>
-        המוח העסקי של Casa Verona מרכז מכירות,
-        לידים, ייצור והזמנות במקום אחד.
-      </p>
-
-      <div class="cv-ai-status">
-
-        <span>
-          SYSTEM STATUS
-        </span>
-
-        <strong>
-          ONLINE
-        </strong>
-
-      </div>
-
-      <button
-        type="button"
-        data-open-page="ai"
-        class="cv-ai-open"
-      >
-        <span>
-          כניסה למרכז ה־AI
-        </span>
-
-        <span>
-          ←
-        </span>
-      </button>
-
-    </article>
-
-  </div>
-
-
-  <!-- LOWER AREA -->
-  <div class="cv-dashboard-bottom">
-
-    <div>
-
-      <span class="cv-dashboard-bottom-label">
-        CASA VERONA · TODAY
-      </span>
-
-      <h2>
-        כל העסק.
-        <em>מסך אחד.</em>
-      </h2>
-
-    </div>
-
-    <p>
-      מכירות · לקוחות · הזמנות · ייצור · אספקות · AI
-    </p>
-
-  </div>
-
-</section>
-
-<!-- END ADMIN DASHBOARD V2 -->
-
-    <!-- LEADS -->
-
-    <section id="leads" class="page">
-
-      <div class="section-title">
-        <h3>לידים</h3>
-        <p>ניהול כל הפניות שנכנסות למערכת.</p>
-      </div>
-
-      <div class="card table-card">
-
-        <table>
-
-          <thead>
-            <tr>
-              <th>לקוח</th>
-              <th>מוצר</th>
-              <th>סטטוס</th>
-              <th>שלב</th>
-            </tr>
-          </thead>
-
-          <tbody>
-
-            <tr>
-              <td>לקוח חדש</td>
-              <td>Mon Cheri</td>
-              <td><span class="badge hot">חם</span></td>
-              <td>הצעת מחיר</td>
-            </tr>
-
-            <tr>
-              <td>לקוח חדש</td>
-              <td>Torino Moderno</td>
-              <td><span class="badge warm">מעקב</span></td>
-              <td>התאמה</td>
-            </tr>
-
-            <tr>
-              <td>לקוח חדש</td>
-              <td>סלון בהתאמה אישית</td>
-              <td><span class="badge">חדש</span></td>
-              <td>בירור צורך</td>
-            </tr>
-
-          </tbody>
-
-        </table>
-
-      </div>
-
-    </section>
-
-
-    <!-- SALES -->
-
-    <section id="sales" class="page">
-
-      <div class="section-title">
-        <h3>מכירות</h3>
-        <p>עסקאות, הכנסות וסטטוסי סגירה.</p>
-      </div>
-
-      <div class="stats">
-
-        <div class="card">
-          <div class="stat-label">עסקאות החודש</div>
-          <div class="stat-number">3</div>
-        </div>
-
-        <div class="card">
-          <div class="stat-label">לידים חמים</div>
-          <div class="stat-number">12</div>
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <!-- CUSTOMERS -->
-
-    <section id="customers" class="page">
-
-      <div class="section-title">
-        <h3>לקוחות</h3>
-        <p>כל לקוחות Casa Verona במקום אחד.</p>
-      </div>
-
-      <div class="card">
-        מאגר הלקוחות יוצג כאן.
-      </div>
-
-    </section>
-
-
-    <!-- CATALOG -->
-
-    <section id="catalog" class="page">
-
-      <div class="section-title">
-        <h3>קטלוג</h3>
-        <p>דגמי Casa Verona וההתאמות שלהם.</p>
-      </div>
-
-      <div class="card">
-        Mon Cheri • Torino Moderno • LUSSO • ALABA • BELLA • ועוד
-      </div>
-
-    </section>
-
-
-    <!-- ORDERS -->
-
-    <section id="orders" class="page">
-
-      <div class="section-title">
-        <h3>הזמנות</h3>
-        <p>מעקב אחר הזמנות לקוחות.</p>
-      </div>
-
-      <div class="card">
-        כאן יוצגו דגם, מידות, בד, צבע, נוחות וסטטוס הזמנה.
-      </div>
-
-    </section>
-
-
-    <!-- PRODUCTION -->
-
-    <section id="production" class="page">
-
-      <div class="section-title">
-        <h3>ניהול ייצור</h3>
-        <p>סטטוס הזמנות במפעל.</p>
-      </div>
-
-      <div class="production-grid">
-
-        <div class="production-box">
-          ממתין לייצור
-          <strong>1</strong>
-        </div>
-
-        <div class="production-box">
-          בייצור
-          <strong>1</strong>
-        </div>
-
-        <div class="production-box">
-          מוכן
-          <strong>1</strong>
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <!-- DELIVERIES -->
-
-    <section id="deliveries" class="page">
-
-      <div class="section-title">
-        <h3>משלוחים</h3>
-        <p>הזמנות שממתינות לאספקה ללקוח.</p>
-      </div>
-
-      <div class="card">
-        מערכת המשלוחים של Casa Verona.
-      </div>
-
-    </section>
-
-
-    <!-- REPORTS -->
-
-    <section id="reports" class="page">
-
-      <div class="section-title">
-        <h3>דוחות</h3>
-        <p>ביצועי העסק בזמן אמת.</p>
-      </div>
-
-      <div class="card">
-        לידים • מכירות • המרות • ייצור • משלוחים
-      </div>
-
-    </section>
-
-
-    <!-- AI -->
-
-    <section id="ai" class="page">
-
-      <div class="section-title">
-        <h3>AI Sales Closer</h3>
-        <p>המוח של מערך המכירות.</p>
-      </div>
-
-      <div class="card">
-
-        <h3>ליד חם</h3>
-
-        <div class="ai-lead">
-
-          <strong>
-            מתעניין ב-Mon Cheri במידה 3.5×2
-          </strong>
-
-          <p>
-            המלצת AI: הדגם והמידה ידועים.
-            הליד מוכן להעברה לנציג לצורך הצעת מחיר.
-          </p>
-
-          <span class="badge ready">
-            READY FOR HUMAN
-          </span>
-
-        </div>
-
-      </div>
-
-    </section>
-
-  </main>
-
-</div>
-
-
-<script>
-
-const buttons =
-  document.querySelectorAll(
-    ".nav button[data-page]"
-  );
-
-const pages =
-  document.querySelectorAll(".page");
-
-const pageTitle =
-  document.getElementById("pageTitle");
-
-const titles = {
-  dashboard: "דשבורד מנהל",
-  leads: "לידים",
-  sales: "מכירות",
-  customers: "לקוחות",
-  catalog: "קטלוג",
-  orders: "הזמנות",
-  production: "ניהול ייצור",
-  deliveries: "משלוחים",
-  reports: "דוחות",
-  ai: "AI Sales Closer"
-};
-
-
-function openPage(pageName) {
-
-  pages.forEach(page => {
-    page.classList.remove("active");
-  });
-
-  buttons.forEach(button => {
-    button.classList.remove("active");
-  });
-
-  const page =
-    document.getElementById(pageName);
-
-  if (page) {
-    page.classList.add("active");
-  }
-
-  const navButton =
-    document.querySelector(
-      `.nav button[data-page="${pageName}"]`
-    );
-
-  if (navButton) {
-    navButton.classList.add("active");
-  }
-
-  pageTitle.textContent =
-    titles[pageName] || "Casa Verona OS";
-}
-
-
-buttons.forEach(button => {
-
-  button.addEventListener(
-    "click",
-    () => {
-
-      openPage(
-        button.dataset.page
-      );
-
-    }
-  );
-
-});
-
-
-document
-  .querySelectorAll("[data-open-page]")
-  .forEach(button => {
-
-    button.addEventListener(
-      "click",
-      () => {
-
-        openPage(
-          button.dataset.openPage
-        );
-
-      }
-    );
-
-  });
-
-</script>
-<script>
-/* =====================================================
-   CASA VERONA OS — AUTH
-===================================================== */
-
-const loginScreen =
-  document.getElementById("loginScreen");
-
-const loginForm =
-  document.getElementById("loginForm");
-
-const loginError =
-  document.getElementById("loginError");
-
-const loginUsername =
-  document.getElementById("loginUsername");
-
-const loginPassword =
-  document.getElementById("loginPassword");
-
-
-function showLogin() {
-
-  loginScreen.style.removeProperty("display");
-
-}
-
-
-function hideLogin() {
-  loginScreen.style.display = "none";
-}
-
-
-async function checkExistingSession() {
-  try {
-    // קודם בודקים אם המשתמש עדיין מחובר
-    let response = await fetch("/api/auth/me", {
-      method: "GET",
-      credentials: "include",
-      cache: "no-store"
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-
-      if (data.success) {
-        hideLogin();
-
-        console.log(
-          "Casa Verona user:",
-          data.user
+      if (!targetPage) {
+        console.error(
+          "Page not found:",
+          pageName
         );
 
         return;
       }
-    }
-
-    // אם ה-session פג, מרעננים אותו אוטומטית
-    const refreshResponse =
-      await fetch("/api/auth/refresh", {
-        method: "POST",
-        credentials: "include",
-        cache: "no-store"
-      });
-
-    if (!refreshResponse.ok) {
-      showLogin();
-      return;
-    }
-
-    const refreshData =
-      await refreshResponse.json();
-
-    if (!refreshData.success) {
-      showLogin();
-      return;
-    }
-
-    // בודקים שוב אחרי הרענון
-    response = await fetch("/api/auth/me", {
-      method: "GET",
-      credentials: "include",
-      cache: "no-store"
-    });
-
-    if (!response.ok) {
-      showLogin();
-      return;
-    }
-
-    const data = await response.json();
-
-    if (!data.success) {
-      showLogin();
-      return;
-    }
-
-    hideLogin();
-
-    console.log(
-      "Casa Verona user:",
-      data.user
-    );
-
-  } catch (error) {
-    console.error(
-      "SESSION CHECK ERROR:",
-      error
-    );
-
-    showLogin();
-  }
-}
 
 
-loginForm.addEventListener(
-  "submit",
-  async (event) => {
-    event.preventDefault();
-
-    loginError.textContent = "";
-
-    const username =
-      loginUsername.value.trim();
-
-    const password =
-      loginPassword.value;
-
-    if (!username || !password) {
-      loginError.textContent =
-        "יש להזין שם משתמש וסיסמה";
-
-      return;
-    }
-
-    const button =
-      loginForm.querySelector(
-        ".login-button"
-      );
-
-    const originalText =
-      button.textContent;
-
-    button.disabled = true;
-    button.textContent = "מתחבר...";
-
-    try {
-      const response =
-        await fetch("/api/auth/login", {
-          method: "POST",
-
-          credentials: "include",
-
-          headers: {
-            "Content-Type":
-              "application/json"
-          },
-
-          body: JSON.stringify({
-            username,
-            password
-          })
+      document
+        .querySelectorAll(".page")
+        .forEach((page) => {
+          page.classList.remove("active");
         });
 
-      const data =
-        await response.json();
 
-      if (
-        !response.ok ||
-        !data.success
-      ) {
-        loginError.textContent =
-          data.error ||
-          "לא ניתן להתחבר";
+      targetPage.classList.add("active");
 
-        return;
+
+      document
+        .querySelectorAll(".nav button")
+        .forEach((button) => {
+
+          button.classList.toggle(
+            "active",
+            button.dataset.page === pageName
+          );
+
+        });
+
+
+      if (pageTitle) {
+        pageTitle.textContent =
+          pageTitles[pageName] ||
+          "Casa Verona OS";
       }
 
-      loginPassword.value = "";
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+
+    }
+
+
+    document
+      .querySelectorAll(".nav button")
+      .forEach((button) => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            const pageName =
+              button.dataset.page;
+
+            if (pageName) {
+              openPage(pageName);
+            }
+
+          }
+        );
+
+      });
+
+
+    document
+      .querySelectorAll("[data-open-page]")
+      .forEach((button) => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            const pageName =
+              button.dataset.openPage;
+
+            if (pageName) {
+              openPage(pageName);
+            }
+
+          }
+        );
+
+      });
+
+
+    /* =====================================================
+       LOGIN SCREEN
+    ===================================================== */
+
+    function showLogin() {
+
+      if (!loginScreen) return;
+
+      loginScreen.style.removeProperty(
+        "display"
+      );
+
+    }
+
+
+    function hideLogin() {
+
+      if (!loginScreen) return;
+
+      loginScreen.style.display = "none";
+
+    }
+
+
+    /* =====================================================
+       GREETING
+    ===================================================== */
+
+    function getCasaVeronaGreeting() {
+
+      const hour =
+        new Date().getHours();
+
+
+      if (hour >= 5 && hour < 12) {
+        return "בוקר טוב";
+      }
+
+
+      if (hour >= 12 && hour < 17) {
+        return "צהריים טובים";
+      }
+
+
+      if (hour >= 17 && hour < 22) {
+        return "ערב טוב";
+      }
+
+
+      return "לילה טוב";
+
+    }
+
+
+    /* =====================================================
+       DATE
+    ===================================================== */
+
+    function renderCasaVeronaDate() {
+
+      const now =
+        new Date();
+
+
+      const dayElement =
+        document.getElementById(
+          "cvDashboardDay"
+        );
+
+
+      const dateElement =
+        document.getElementById(
+          "cvDashboardDate"
+        );
+
+
+      if (dayElement) {
+
+        dayElement.textContent =
+          new Intl.DateTimeFormat(
+            "he-IL",
+            {
+              weekday: "long"
+            }
+          ).format(now);
+
+      }
+
+
+      if (dateElement) {
+
+        dateElement.textContent =
+          new Intl.DateTimeFormat(
+            "he-IL",
+            {
+              day: "numeric",
+              month: "long",
+              year: "numeric"
+            }
+          ).format(now);
+
+      }
+
+    }
+
+
+    /* =====================================================
+       USER UI
+    ===================================================== */
+
+    function renderCasaVeronaUser(user) {
+
+      if (!user) return;
+
+
+      const fullName =
+        (
+          user.full_name ||
+          user.username ||
+          "Casa Verona"
+        ).trim();
+
+
+      const firstName =
+        fullName
+          .split(/\s+/)
+          .filter(Boolean)[0] ||
+        "Casa Verona";
+
+
+      const greeting =
+        getCasaVeronaGreeting();
+
+
+      const welcomeTitle =
+        document.getElementById(
+          "cvWelcomeTitle"
+        );
+
+
+      if (welcomeTitle) {
+
+        welcomeTitle.textContent =
+          `${greeting}, ${firstName}.`;
+
+      }
+
+
+      if (topbarUserName) {
+
+        topbarUserName.textContent =
+          fullName;
+
+      }
+
+
+      if (topbarUserRole) {
+
+        topbarUserRole.textContent =
+          user.role ||
+          "USER";
+
+      }
+
+
+      if (topbarAvatar) {
+
+        const avatarText =
+          firstName
+            .slice(0, 2)
+            .toUpperCase();
+
+
+        topbarAvatar.textContent =
+          avatarText;
+
+      }
+
+
+      window.casaVeronaUser =
+        user;
+
+    }
+
+
+    /* =====================================================
+       AUTH — GET CURRENT USER
+    ===================================================== */
+
+    async function getCurrentUser() {
+
+      try {
+
+        const response =
+          await fetch(
+            "/api/auth/me",
+            {
+              method: "GET",
+              credentials: "include",
+              cache: "no-store"
+            }
+          );
+
+
+        if (!response.ok) {
+          return null;
+        }
+
+
+        const data =
+          await response.json();
+
+
+        if (
+          !data ||
+          !data.success ||
+          !data.user
+        ) {
+          return null;
+        }
+
+
+        return data.user;
+
+      } catch (error) {
+
+        console.error(
+          "AUTH ME ERROR:",
+          error
+        );
+
+
+        return null;
+
+      }
+
+    }
+
+
+    /* =====================================================
+       AUTH — REFRESH SESSION
+    ===================================================== */
+
+    async function refreshSession() {
+
+      try {
+
+        const response =
+          await fetch(
+            "/api/auth/refresh",
+            {
+              method: "POST",
+              credentials: "include",
+              cache: "no-store"
+            }
+          );
+
+
+        if (!response.ok) {
+          return false;
+        }
+
+
+        const data =
+          await response.json();
+
+
+        return Boolean(
+          data &&
+          data.success
+        );
+
+      } catch (error) {
+
+        console.error(
+          "AUTH REFRESH ERROR:",
+          error
+        );
+
+
+        return false;
+
+      }
+
+    }
+
+
+    /* =====================================================
+       AUTH — EXISTING SESSION
+    ===================================================== */
+
+    async function checkExistingSession() {
+
+      renderCasaVeronaDate();
+
+
+      let user =
+        await getCurrentUser();
+
+
+      if (user) {
+
+        renderCasaVeronaUser(user);
+
+        hideLogin();
+
+        return true;
+
+      }
+
+
+      const refreshed =
+        await refreshSession();
+
+
+      if (!refreshed) {
+
+        showLogin();
+
+        return false;
+
+      }
+
+
+      user =
+        await getCurrentUser();
+
+
+      if (!user) {
+
+        showLogin();
+
+        return false;
+
+      }
+
+
+      renderCasaVeronaUser(user);
 
       hideLogin();
 
-      console.log(
-        "Login successful:",
-        data.user
-      );
+      return true;
 
-    } catch (error) {
-      console.error(
-        "LOGIN ERROR:",
-        error
-      );
-
-      loginError.textContent =
-        "לא ניתן להתחבר כרגע";
-    } finally {
-      button.disabled = false;
-      button.textContent =
-        originalText;
-    }
-  }
-);
-
-
-// Check login automatically
-// every time Casa Verona OS opens.
-checkExistingSession();
-</script>
-<script>
-/* =====================================================
-   CASA VERONA — PERSONAL WELCOME
-===================================================== */
-
-async function loadCasaVeronaWelcome() {
-  try {
-    const response = await fetch("/api/auth/me", {
-      method: "GET",
-      credentials: "include"
-    });
-
-    if (!response.ok) return;
-
-    const data = await response.json();
-
-    const user =
-      data.user ||
-      data;
-
-    const fullName =
-      user.full_name ||
-      user.username ||
-      "";
-
-    const firstName =
-      fullName.trim().split(" ")[0];
-
-    const hour =
-      new Date().getHours();
-
-    let greeting = "שלום";
-
-    if (hour >= 5 && hour < 12) {
-      greeting = "בוקר טוב";
-    } else if (hour >= 12 && hour < 17) {
-      greeting = "צהריים טובים";
-    } else if (hour >= 17 && hour < 22) {
-      greeting = "ערב טוב";
-    } else {
-      greeting = "לילה טוב";
     }
 
-    window.casaVeronaUser = user;
 
-    window.casaVeronaGreeting =
-      firstName
-        ? `${greeting}, ${firstName}`
-        : greeting;
+    /* =====================================================
+       AUTH — LOGIN
+    ===================================================== */
 
-    console.log(
-      "CASA VERONA:",
-      window.casaVeronaGreeting
-    );
+    if (loginForm) {
 
-  } catch (error) {
-    console.error(
-      "CASA VERONA WELCOME ERROR:",
-      error
-    );
-  }
-}
+      loginForm.addEventListener(
+        "submit",
+        async (event) => {
 
-loadCasaVeronaWelcome();
-</script>
+          event.preventDefault();
+
+
+          if (loginError) {
+            loginError.textContent = "";
+          }
+
+
+          const username =
+            loginUsername
+              ? loginUsername.value.trim()
+              : "";
+
+
+          const password =
+            loginPassword
+              ? loginPassword.value
+              : "";
+
+
+          if (
+            !username ||
+            !password
+          ) {
+
+            if (loginError) {
+
+              loginError.textContent =
+                "יש להזין שם משתמש וסיסמה.";
+
+            }
+
+            return;
+
+          }
+
+
+          const originalButtonHTML =
+            loginButton
+              ? loginButton.innerHTML
+              : "";
+
+
+          if (loginButton) {
+
+            loginButton.disabled = true;
+
+            loginButton.innerHTML = `
+              <span class="cv-auth-button-copy">
+                <small>SECURE ACCESS</small>
+                <strong>מתחבר למערכת...</strong>
+              </span>
+
+              <span class="cv-auth-arrow">
+                ···
+              </span>
+            `;
+
+          }
+
+
+          try {
+
+            const response =
+              await fetch(
+                "/api/auth/login",
+                {
+                  method: "POST",
+
+                  credentials:
+                    "include",
+
+                  headers: {
+                    "Content-Type":
+                      "application/json"
+                  },
+
+                  body:
+                    JSON.stringify({
+                      username,
+                      password
+                    })
+                }
+              );
+
+
+            let data = null;
+
+
+            try {
+
+              data =
+                await response.json();
+
+            } catch (jsonError) {
+
+              data = null;
+
+            }
+
+
+            if (
+              !response.ok ||
+              !data ||
+              !data.success
+            ) {
+
+              throw new Error(
+                data?.error ||
+                "שם המשתמש או הסיסמה אינם נכונים."
+              );
+
+            }
+
+
+            if (loginPassword) {
+              loginPassword.value = "";
+            }
+
+
+            /*
+              אנחנו מעדיפים את המשתמש שחוזר
+              מהשרת אחרי התחברות.
+
+              אם מסיבה כלשהי login מחזיר רק
+              success בלי user, נטען /me.
+            */
+
+            let user =
+              data.user ||
+              null;
+
+
+            if (!user) {
+
+              user =
+                await getCurrentUser();
+
+            }
+
+
+            if (user) {
+
+              renderCasaVeronaUser(
+                user
+              );
+
+            }
+
+
+            renderCasaVeronaDate();
+
+            openPage("dashboard");
+
+            hideLogin();
+
+
+          } catch (error) {
+
+            console.error(
+              "LOGIN ERROR:",
+              error
+            );
+
+
+            if (loginError) {
+
+              loginError.textContent =
+                error.message ||
+                "לא ניתן להתחבר כרגע.";
+
+            }
+
+          } finally {
+
+            if (loginButton) {
+
+              loginButton.disabled =
+                false;
+
+
+              loginButton.innerHTML =
+                originalButtonHTML;
+
+            }
+
+          }
+
+        }
+      );
+
+    }
+
+
+    /* =====================================================
+       START CASA VERONA OS
+    ===================================================== */
+
+    renderCasaVeronaDate();
+
+    checkExistingSession();
+
+  </script>
+    <!-- =====================================================
+       CASA VERONA OS — DASHBOARD DATA LAYER
+       Real business data will be connected here.
+  ====================================================== -->
+
+  <script>
+
+    /* =====================================================
+       DASHBOARD VALUE RENDERER
+    ===================================================== */
+
+    function setDashboardValue(
+      elementId,
+      value
+    ) {
+
+      const element =
+        document.getElementById(
+          elementId
+        );
+
+
+      if (!element) {
+        return;
+      }
+
+
+      if (
+        value === null ||
+        value === undefined ||
+        value === ""
+      ) {
+
+        element.textContent = "—";
+
+        return;
+      }
+
+
+      element.textContent =
+        String(value);
+
+    }
+
+
+    /* =====================================================
+       DASHBOARD SUMMARY RENDERER
+    ===================================================== */
+
+    function renderDashboardSummary(
+      summary
+    ) {
+
+      if (!summary) {
+        return;
+      }
+
+
+      setDashboardValue(
+        "cvKpiLeads",
+        summary.leads
+      );
+
+
+      setDashboardValue(
+        "cvKpiSales",
+        summary.sales
+      );
+
+
+      setDashboardValue(
+        "cvKpiOrders",
+        summary.orders
+      );
+
+
+      setDashboardValue(
+        "cvKpiProduction",
+        summary.production
+      );
+
+
+      setDashboardValue(
+        "cvHotLeads",
+        summary.hot_leads
+      );
+
+
+      setDashboardValue(
+        "cvFollowups",
+        summary.followups
+      );
+
+
+      setDashboardValue(
+        "cvWaitingProduction",
+        summary.waiting_production
+      );
+
+
+      setDashboardValue(
+        "cvReadyDelivery",
+        summary.ready_delivery
+      );
+
+    }
+
+
+    /* =====================================================
+       DASHBOARD SUMMARY API
+
+       IMPORTANT:
+       We do NOT use fake values.
+
+       When the protected backend route
+       /api/dashboard/summary is added,
+       this function will automatically
+       be ready to consume it.
+    ===================================================== */
+
+    async function loadDashboardSummary() {
+
+      try {
+
+        const response =
+          await fetch(
+            "/api/dashboard/summary",
+            {
+              method: "GET",
+              credentials: "include",
+              cache: "no-store"
+            }
+          );
+
+
+        /*
+          The backend route is not connected yet.
+
+          404 is therefore expected until
+          we build the protected summary API.
+        */
+
+        if (response.status === 404) {
+          return;
+        }
+
+
+        if (response.status === 401) {
+          return;
+        }
+
+
+        if (response.status === 403) {
+          return;
+        }
+
+
+        if (!response.ok) {
+
+          console.warn(
+            "Dashboard summary unavailable:",
+            response.status
+          );
+
+          return;
+
+        }
+
+
+        const data =
+          await response.json();
+
+
+        if (
+          !data ||
+          !data.success
+        ) {
+          return;
+        }
+
+
+        const summary =
+          data.summary ||
+          data.data ||
+          null;
+
+
+        if (!summary) {
+          return;
+        }
+
+
+        renderDashboardSummary(
+          summary
+        );
+
+
+      } catch (error) {
+
+        console.warn(
+          "Dashboard summary not connected yet.",
+          error
+        );
+
+      }
+
+    }
+
+
+    /* =====================================================
+       LOAD DASHBOARD DATA
+    ===================================================== */
+
+    loadDashboardSummary();
+
+  </script>
 
 </body>
 </html>
