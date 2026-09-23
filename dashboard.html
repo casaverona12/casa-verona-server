@@ -529,6 +529,10 @@ background-repeat: no-repeat !important;
    CASA VERONA — LUXURY ACCESS PANEL
 ===================================================== */
 
+/* =====================================================
+   CASA VERONA — PRIVATE ACCESS V3
+===================================================== */
+
 .cv-auth-access {
   position: relative;
   min-height: 100vh;
@@ -536,26 +540,25 @@ background-repeat: no-repeat !important;
 
   background:
     radial-gradient(
-      circle at 12% 8%,
-      rgba(255, 255, 255, 0.92) 0%,
-      rgba(255, 255, 255, 0.34) 22%,
-      transparent 48%
+      circle at 8% 5%,
+      rgba(255,255,255,.24),
+      transparent 32%
     ),
     radial-gradient(
-      circle at 88% 92%,
-      rgba(80, 80, 76, 0.10) 0%,
-      transparent 38%
+      circle at 95% 92%,
+      rgba(30,30,28,.08),
+      transparent 35%
     ),
     linear-gradient(
-      138deg,
-      #f0f0ed 0%,
-      #e5e5e1 42%,
-      #dadad6 100%
+      135deg,
+      #d8d7d3 0%,
+      #cecdc9 48%,
+      #c5c4c0 100%
     );
 }
 
 
-/* SUBTLE PLASTER / STONE TEXTURE */
+/* MINERAL TEXTURE */
 
 .cv-auth-access::after {
   content: "";
@@ -564,65 +567,66 @@ background-repeat: no-repeat !important;
   z-index: 0;
   pointer-events: none;
 
-  opacity: 0.22;
+  opacity: .38;
 
-  background-image:
+  background:
     repeating-linear-gradient(
-      115deg,
-      rgba(255, 255, 255, 0.10) 0px,
-      rgba(255, 255, 255, 0.10) 1px,
+      112deg,
+      rgba(255,255,255,.055) 0,
+      rgba(255,255,255,.055) 1px,
       transparent 1px,
-      transparent 7px
+      transparent 8px
     ),
     repeating-linear-gradient(
-      28deg,
-      rgba(40, 40, 38, 0.018) 0px,
-      rgba(40, 40, 38, 0.018) 1px,
+      24deg,
+      rgba(20,20,18,.025) 0,
+      rgba(20,20,18,.025) 1px,
       transparent 1px,
-      transparent 11px
+      transparent 13px
     );
 }
 
 
-/* ARCHITECTURAL FRAME */
+/* FINE FRAME */
 
 .cv-auth-access::before {
   content: "";
   position: absolute;
-  inset: 22px;
+  inset: 20px;
   z-index: 1;
-
-  border: 1px solid rgba(17, 17, 17, 0.08);
-
   pointer-events: none;
+
+  border:
+    1px solid
+    rgba(17,17,16,.11);
 }
 
-
-/* =====================================================
-   INNER
-===================================================== */
 
 .cv-auth-access-inner {
   position: relative;
   z-index: 2;
 
-  min-height: 100vh;
   box-sizing: border-box;
 
-  padding: 48px 68px 38px;
+  min-height: 100vh;
+
+  padding:
+    42px
+    clamp(42px, 4vw, 72px)
+    38px;
 
   display: flex;
   flex-direction: column;
 
   animation:
-    cvAccessEnter 0.75s
-    cubic-bezier(.2, .8, .2, 1)
+    cvAccessEnter .7s
+    cubic-bezier(.2,.8,.2,1)
     both;
 }
 
 
 /* =====================================================
-   HEADER / BRAND
+   BRAND
 ===================================================== */
 
 .cv-auth-header {
@@ -630,63 +634,79 @@ background-repeat: no-repeat !important;
   align-items: flex-start;
   justify-content: space-between;
 
-  min-height: 105px;
+  min-height: 108px;
 }
 
+
+.cv-auth-brand {
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+
 .cv-auth-logo {
-  width: 275px;
-  height: 105px;
+  display: block;
+
+  width: 300px;
+  height: 108px;
 
   object-fit: contain;
   object-position: left center;
 
   mix-blend-mode: multiply;
 
-  filter: contrast(1.08);
+  filter:
+    contrast(1.12)
+    saturate(.85);
 
-  transform: translateX(-8px);
+  transform:
+    translateX(-10px);
 }
 
-.cv-auth-private {
-  position: relative;
 
-  margin-top: 12px;
-  padding-left: 34px;
+.cv-auth-brand-line {
+  width: 70px;
+  height: 2px;
 
-  color: #777773;
-
-  font-size: 8px;
-  font-weight: 600;
-  letter-spacing: 2.8px;
-
-  white-space: nowrap;
-}
-
-.cv-auth-private::before {
-  content: "";
-
-  position: absolute;
-  left: 0;
-  top: 50%;
-
-  width: 22px;
-  height: 1px;
+  margin-top: 7px;
 
   background: #721c2b;
 }
 
 
+.cv-auth-private {
+  margin-top: 16px;
+
+  color: #555551;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size: 8px;
+  font-weight: 400;
+
+  letter-spacing: 3px;
+
+  white-space: nowrap;
+}
+
+
 /* =====================================================
-   MAIN LOGIN
+   LOGIN AREA
 ===================================================== */
 
 .cv-auth-main {
   width: 100%;
-  max-width: 455px;
+  max-width: 465px;
 
   margin: auto;
 
-  padding: 35px 0 45px;
+  padding: 25px 0 35px;
 
   direction: rtl;
 }
@@ -697,38 +717,15 @@ background-repeat: no-repeat !important;
 ===================================================== */
 
 .cv-auth-intro {
-  position: relative;
-
-  display: block;
-
-  margin-bottom: 50px;
+  margin-bottom: 43px;
 }
 
-.cv-auth-index {
-  position: absolute;
-
-  top: 4px;
-  left: 0;
-
-  color: #721c2b;
-
-  font-family:
-    Georgia,
-    "Times New Roman",
-    serif;
-
-  font-size: 11px;
-  font-style: italic;
-
-  letter-spacing: 1px;
-}
-
-.cv-auth-intro > div {
-  display: block;
-}
 
 .cv-auth-overline {
-  margin: 0 0 17px;
+  margin:
+    0
+    0
+    14px;
 
   direction: ltr;
   text-align: right;
@@ -743,104 +740,130 @@ background-repeat: no-repeat !important;
   font-size: 9px;
   font-weight: 400;
 
-  letter-spacing: 3.2px;
+  letter-spacing: 3.3px;
 }
 
 
-/* MAIN TITLE */
-
 .cv-auth-intro h2 {
-  position: relative;
+  margin:
+    0
+    0
+    18px;
 
-  margin: 0 0 18px;
-
-  color: #11110f;
+  color: #10100f;
 
   font-family:
     Georgia,
     "Times New Roman",
     serif;
 
-  font-size: clamp(46px, 3.5vw, 61px);
+  font-size:
+    clamp(
+      50px,
+      4vw,
+      66px
+    );
+
   font-weight: 400;
+  line-height: .96;
 
-  line-height: 1.04;
-
-  letter-spacing: -2.4px;
-}
-
-.cv-auth-intro h2::after {
-  content: "";
-
-  display: block;
-
-  width: 58px;
-  height: 2px;
-
-  margin-top: 24px;
-
-  background: #721c2b;
+  letter-spacing: -2.8px;
 }
 
 
-/* SUBTITLE */
+.cv-auth-intro h2 em {
+  color: #721c2b;
+
+  font-weight: 400;
+}
+
 
 .cv-auth-subtitle {
-  max-width: 360px;
-
   margin: 0;
 
-  color: #686864;
+  color: #555551;
 
   font-size: 14px;
   font-weight: 400;
 
-  line-height: 1.9;
-
-  letter-spacing: 0.05px;
+  line-height: 1.8;
 }
 
 
 /* =====================================================
-   FORM
+   FIELDS
 ===================================================== */
 
-.cv-auth-form {
-  position: relative;
-}
-
 .cv-auth-field {
-  position: relative;
-
-  margin-bottom: 31px;
+  margin-bottom: 27px;
 }
+
+
+.cv-auth-field-head {
+  margin-bottom: 10px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 
 .cv-auth-field label {
-  display: block;
+  margin: 0;
 
-  margin-bottom: 11px;
+  color: #242422;
 
-  color: #292927;
-
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
 
-  letter-spacing: 0.3px;
+  letter-spacing: .15px;
 }
 
 
-/* INPUT */
+.cv-auth-field-number {
+  direction: ltr;
+
+  color: #721c2b;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size: 10px;
+  font-style: italic;
+
+  letter-spacing: 1px;
+}
+
+
+/* INPUT CONTAINER */
+
+.cv-auth-input-wrap {
+  position: relative;
+}
+
 
 .cv-auth-field input {
   width: 100%;
-  height: 62px;
+  height: 64px;
 
   box-sizing: border-box;
 
-  padding: 0 19px;
+  padding:
+    0
+    62px
+    0
+    20px;
 
-  border: 1px solid rgba(18, 18, 18, 0.12);
-  border-bottom: 1px solid rgba(18, 18, 18, 0.40);
+  border: 0;
+  border-top:
+    1px solid
+    rgba(15,15,14,.08);
+
+  border-bottom:
+    1px solid
+    rgba(15,15,14,.42);
 
   border-radius: 0;
 
@@ -848,55 +871,88 @@ background-repeat: no-repeat !important;
 
   color: #11110f;
 
-  background: rgba(255, 255, 255, 0.28);
-
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background:
+    rgba(255,255,255,.13);
 
   font-family: inherit;
-  font-size: 15px;
+
+  font-size: 16px;
   font-weight: 400;
 
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.48);
+    inset 0 1px 0
+    rgba(255,255,255,.28);
 
   transition:
-    background 0.3s ease,
-    border-color 0.3s ease,
-    box-shadow 0.3s ease,
-    transform 0.3s ease;
+    background .3s ease,
+    border-color .3s ease,
+    box-shadow .3s ease;
 }
 
+
 .cv-auth-field input::placeholder {
-  color: #92928e;
+  color: #74746f;
 
   font-size: 13px;
   font-weight: 400;
 }
 
-.cv-auth-field input:focus {
-  background: rgba(255, 255, 255, 0.58);
 
-  border-color: rgba(114, 28, 43, 0.58);
+.cv-auth-field input:focus {
+  background:
+    rgba(255,255,255,.28);
+
+  border-bottom-color:
+    #721c2b;
 
   box-shadow:
-    0 12px 35px rgba(20, 20, 18, 0.06),
-    inset 3px 0 0 #721c2b;
+    inset -3px 0 0
+    #721c2b;
+}
+
+
+/* INPUT SIGNATURE */
+
+.cv-auth-input-mark {
+  position: absolute;
+
+  top: 50%;
+  right: 20px;
+
+  transform:
+    translateY(-50%);
+
+  color: #721c2b;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size: 9px;
+  font-weight: 700;
+
+  letter-spacing: 1.2px;
+
+  pointer-events: none;
 }
 
 
 /* =====================================================
-   BUTTON
+   SIGNATURE BUTTON
 ===================================================== */
 
 .cv-auth-button {
   position: relative;
 
   width: 100%;
-  height: 66px;
+  height: 76px;
 
-  margin-top: 18px;
-  padding: 0 25px;
+  margin-top: 20px;
+
+  padding:
+    0
+    27px;
 
   display: flex;
   align-items: center;
@@ -904,33 +960,26 @@ background-repeat: no-repeat !important;
 
   overflow: hidden;
 
-  border: 1px solid #151514;
+  border: 0;
   border-radius: 0;
 
-  background: #151514;
+  background: #11110f;
 
-  color: #ffffff;
-
-  font-family: inherit;
-
-  font-size: 13px;
-  font-weight: 600;
-
-  letter-spacing: 0.3px;
+  color: #fff;
 
   cursor: pointer;
 
   box-shadow:
-    0 14px 32px rgba(15, 15, 14, 0.12);
+    0 18px 40px
+    rgba(20,20,18,.16);
 
   transition:
-    transform 0.3s ease,
-    border-color 0.3s ease,
-    box-shadow 0.3s ease;
+    transform .3s ease,
+    box-shadow .3s ease;
 }
 
 
-/* BURGUNDY HOVER LAYER */
+/* BURGUNDY SLIDE */
 
 .cv-auth-button::before {
   content: "";
@@ -940,66 +989,107 @@ background-repeat: no-repeat !important;
 
   background: #721c2b;
 
-  transform: translateX(101%);
+  transform:
+    translateX(101%);
 
   transition:
-    transform 0.42s
-    cubic-bezier(.2, .8, .2, 1);
+    transform .45s
+    cubic-bezier(.2,.8,.2,1);
 }
+
 
 .cv-auth-button:hover::before {
-  transform: translateX(0);
+  transform:
+    translateX(0);
 }
 
-.cv-auth-button span {
-  position: relative;
-  z-index: 2;
-}
 
 .cv-auth-button:hover {
-  transform: translateY(-2px);
-
-  border-color: #721c2b;
+  transform:
+    translateY(-3px);
 
   box-shadow:
-    0 20px 42px rgba(60, 25, 31, 0.20);
+    0 24px 48px
+    rgba(60,25,31,.24);
 }
 
-.cv-auth-button:disabled {
-  opacity: 0.6;
 
+.cv-auth-button-copy {
+  position: relative;
+  z-index: 2;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  text-align: left;
+}
+
+
+.cv-auth-button-copy small {
+  margin-bottom: 5px;
+
+  color:
+    rgba(255,255,255,.52);
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size: 7px;
+  font-weight: 400;
+
+  letter-spacing: 2.7px;
+}
+
+
+.cv-auth-button-copy strong {
+  color: #fff;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  letter-spacing: .2px;
+}
+
+
+.cv-auth-arrow {
+  position: relative;
+  z-index: 2;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size: 29px;
+  font-weight: 400;
+
+  transition:
+    transform .3s ease;
+}
+
+
+.cv-auth-button:hover
+.cv-auth-arrow {
+  transform:
+    translate(5px,-5px);
+}
+
+
+.cv-auth-button:disabled {
+  opacity: .6;
   cursor: wait;
 
   transform: none;
 }
 
 
-/* ARROW */
-
-.cv-auth-arrow {
-  font-family:
-    Georgia,
-    "Times New Roman",
-    serif;
-
-  font-size: 22px;
-  font-weight: 400;
-
-  transition:
-    transform 0.3s ease;
-}
-
-.cv-auth-button:hover .cv-auth-arrow {
-  transform: translateX(-7px);
-}
-
-
-/* ERROR */
-
 .cv-auth-error {
-  min-height: 18px;
+  min-height: 17px;
 
-  margin-top: 16px;
+  margin-top: 13px;
 
   color: #721c2b;
 
@@ -1011,78 +1101,36 @@ background-repeat: no-repeat !important;
 
 
 /* =====================================================
-   FOOTER
+   BIG COMPANY STATEMENT
 ===================================================== */
 
 .cv-auth-footer {
-  padding-top: 27px;
+  position: relative;
 
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-
-  gap: 25px;
+  padding-top: 25px;
 
   border-top:
-    1px solid rgba(20, 20, 18, 0.10);
+    1px solid
+    rgba(15,15,14,.14);
 }
 
 
-/* COMPANY MESSAGE */
-
 .cv-auth-company-message {
-  max-width: 420px;
-
-  display: flex;
-  align-items: flex-start;
-
-  gap: 14px;
+  display: block;
 
   direction: rtl;
 }
 
-.cv-auth-dot {
-  flex: 0 0 auto;
 
-  width: 7px;
-  height: 7px;
-
-  margin-top: 8px;
-
-  border-radius: 50%;
-
-  background: #721c2b;
-
-  box-shadow:
-    0 0 0 5px rgba(114, 28, 43, 0.08);
-}
-
-.cv-auth-company-message strong {
+.cv-auth-footer-kicker {
   display: block;
 
-  color: #242422;
-
-  font-family:
-    Georgia,
-    "Times New Roman",
-    serif;
-
-  font-size: 18px;
-  font-weight: 400;
-
-  line-height: 1.55;
-
-  letter-spacing: -0.25px;
-}
-
-.cv-auth-company-message div span {
-  display: block;
-
-  margin-top: 7px;
+  margin-bottom: 9px;
 
   direction: ltr;
+  text-align: right;
 
-  color: #888884;
+  color: #721c2b;
 
   font-family:
     Georgia,
@@ -1092,23 +1140,64 @@ background-repeat: no-repeat !important;
   font-size: 8px;
   font-weight: 400;
 
-  letter-spacing: 2.6px;
+  letter-spacing: 2.8px;
 }
 
 
-/* SECURE */
+.cv-auth-company-message strong {
+  display: block;
 
-.cv-auth-secure {
-  flex: 0 0 auto;
+  margin: 0;
 
-  color: #92928e;
+  color: #0e0e0d;
 
-  font-size: 7px;
-  font-weight: 600;
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
 
-  letter-spacing: 1.8px;
+  font-size: clamp(
+    35px,
+    2.45vw,
+    42px
+  );
 
-  white-space: nowrap;
+  font-weight: 400;
+
+  line-height: 1.03;
+
+  letter-spacing: -1.5px;
+}
+
+
+.cv-auth-footer-signature {
+  margin-top: 15px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  direction: ltr;
+
+  color: #666661;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size: 8px;
+
+  letter-spacing: 2.5px;
+}
+
+
+.cv-auth-footer-signature span {
+  width: 43px;
+  height: 1px;
+
+  background: #721c2b;
 }
 
 
@@ -1116,36 +1205,22 @@ background-repeat: no-repeat !important;
    ANIMATION
 ===================================================== */
 
-.cv-auth-statement {
-  animation:
-    cvStatementEnter 0.85s
-    0.12s
-    cubic-bezier(.2, .8, .2, 1)
-    both;
-}
-
 @keyframes cvAccessEnter {
+
   from {
     opacity: 0;
-    transform: translateX(16px);
+
+    transform:
+      translateX(16px);
   }
 
   to {
     opacity: 1;
-    transform: translateX(0);
-  }
-}
 
-@keyframes cvStatementEnter {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
+    transform:
+      translateX(0);
   }
 
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 
@@ -1156,18 +1231,20 @@ background-repeat: no-repeat !important;
 @media (max-width: 1000px) {
 
   .cv-auth {
-    grid-template-columns: 50% 50%;
+    grid-template-columns:
+      50%
+      50%;
   }
 
   .cv-auth-access-inner {
     padding:
-      36px
-      40px
+      34px
+      38px
       30px;
   }
 
   .cv-auth-logo {
-    width: 220px;
+    width: 230px;
     height: 88px;
   }
 
@@ -1176,28 +1253,14 @@ background-repeat: no-repeat !important;
   }
 
   .cv-auth-intro h2 {
-    font-size: 47px;
-  }
-
-  .cv-auth-statement {
-    left: 35px;
-    bottom: 40px;
-  }
-
-  .cv-auth-statement h1 {
-    font-size: 47px;
+    font-size: 48px;
   }
 
   .cv-auth-company-message strong {
-    font-size: 15px;
+    font-size: 30px;
   }
 
-  .cv-auth-secure {
-    display: none;
-  }
 }
-
-
 /* =====================================================
    MOBILE APP
 ===================================================== */
@@ -1437,47 +1500,66 @@ background-repeat: no-repeat !important;
   </section>
 
 
-  <!-- 43% — REAL LOGIN -->
-  <section class="cv-auth-access">
+  <!-- 43% — CASA VERONA PRIVATE ACCESS -->
+<section class="cv-auth-access">
 
-    <div class="cv-auth-access-inner">
+  <div class="cv-auth-access-inner">
 
-      <header class="cv-auth-header">
+    <!-- BRAND -->
+    <header class="cv-auth-header">
+
+      <div class="cv-auth-brand">
         <img
           src="/assets/casa-verona-logo.jpg"
           alt="Casa Verona"
           class="cv-auth-logo"
         >
 
-        <span class="cv-auth-private">
-          PRIVATE ACCESS
-        </span>
-      </header>
+        <span class="cv-auth-brand-line"></span>
+      </div>
+
+      <span class="cv-auth-private">
+        PRIVATE ACCESS · 2026
+      </span>
+
+    </header>
 
 
-      <main class="cv-auth-main">
+    <!-- LOGIN -->
+    <main class="cv-auth-main">
 
-        <div class="cv-auth-intro">
-          <div>
-            <p class="cv-auth-overline">
-              CASA VERONA OS
-            </p>
+      <div class="cv-auth-intro">
 
-            <h2>ברוכים הבאים</h2>
+        <p class="cv-auth-overline">
+          CASA VERONA · PRIVATE BUSINESS
+        </p>
 
-            <p class="cv-auth-subtitle">
-              התחברו למערכת הניהול הפרטית של Casa Verona
-            </p>
-          </div>
-        </div>
+        <h2>
+          ברוכים
+          <em>הבאים.</em>
+        </h2>
+
+        <p class="cv-auth-subtitle">
+          הכניסה למערכת הניהול הפרטית של Casa Verona
+        </p>
+
+      </div>
 
 
-        <form id="loginForm" class="cv-auth-form">
+      <form id="loginForm" class="cv-auth-form">
 
-          <div class="cv-auth-field">
+        <!-- USERNAME -->
+        <div class="cv-auth-field">
+
+          <div class="cv-auth-field-head">
+            <span class="cv-auth-field-number">01</span>
+
             <label for="loginUsername">
               שם משתמש
             </label>
+          </div>
+
+          <div class="cv-auth-input-wrap">
 
             <input
               id="loginUsername"
@@ -1485,16 +1567,31 @@ background-repeat: no-repeat !important;
               autocomplete="username"
               autocapitalize="none"
               spellcheck="false"
-              placeholder="הזן שם משתמש"
+              placeholder="שם המשתמש שלך"
               required
             >
+
+            <span class="cv-auth-input-mark">
+              CV
+            </span>
+
           </div>
 
+        </div>
 
-          <div class="cv-auth-field">
+
+        <!-- PASSWORD -->
+        <div class="cv-auth-field">
+
+          <div class="cv-auth-field-head">
+            <span class="cv-auth-field-number">02</span>
+
             <label for="loginPassword">
               סיסמה
             </label>
+          </div>
+
+          <div class="cv-auth-input-wrap">
 
             <input
               id="loginPassword"
@@ -1503,202 +1600,70 @@ background-repeat: no-repeat !important;
               placeholder="••••••••"
               required
             >
-          </div>
 
-
-          <button
-            type="submit"
-            class="login-button cv-auth-button"
-          >
-            <span>כניסה למערכת</span>
-            <span class="cv-auth-arrow">←</span>
-          </button>
-
-
-          <div
-            id="loginError"
-            class="login-error cv-auth-error"
-          ></div>
-
-        </form>
-
-      </main>
-
-
-      <footer class="cv-auth-footer cv-auth-footer-final">
-
-        <div class="cv-auth-company-message cv-auth-company-message-final">
-
-          <span class="cv-auth-dot"></span>
-
-          <div>
-            <strong>
-              זכיתם לעבוד בחברה<br>
-              המובילה כיום בשוק!
-            </strong>
-
-            <span>
-              WELCOME TO CASA VERONA
+            <span class="cv-auth-input-mark">
+              ●
             </span>
+
           </div>
 
         </div>
 
-      </footer>
 
-    </div>
+        <!-- BUTTON -->
+        <button
+          type="submit"
+          class="login-button cv-auth-button"
+        >
 
-  </section>
+          <span class="cv-auth-button-copy">
+            <small>ENTER CASA VERONA</small>
+            <strong>כניסה למערכת</strong>
+          </span>
 
-</div>
+          <span class="cv-auth-arrow">
+            ↗
+          </span>
 
-<!-- END CASA VERONA LOGIN -->
-
-
-<div class="app">
-
-  <aside class="sidebar">
-
-    <div class="brand">
-      <h1>CASA VERONA</h1>
-      <p>OS • Business Operating System</p>
-    </div>
-
-    <div class="nav">
-      <button class="active" data-page="dashboard">⌂ דשבורד</button>
-      <button data-page="leads">◎ לידים</button>
-      <button data-page="sales">₪ מכירות</button>
-      <button data-page="customers">♙ לקוחות</button>
-      <button data-page="catalog">▦ קטלוג</button>
-      <button data-page="orders">▣ הזמנות</button>
-      <button data-page="production">⚙ ייצור</button>
-      <button data-page="deliveries">▰ משלוחים</button>
-      <button data-page="reports">▥ דוחות</button>
-      <button data-page="ai">✦ AI Sales</button>
-    </div>
-
-  </aside>
-
-  <main class="main">
-
-    <div class="topbar">
-      <div>
-        <h2 id="pageTitle">דשבורד מנהל</h2>
-        <p>Casa Verona OS</p>
-      </div>
-
-      <div class="status">
-        <span>●</span> מערכת פעילה
-      </div>
-    </div>
+        </button>
 
 
-    <!-- DASHBOARD -->
+        <div
+          id="loginError"
+          class="login-error cv-auth-error"
+        ></div>
 
-    <section id="dashboard" class="page active">
+      </form>
 
-      <div class="stats">
+    </main>
 
-        <div class="card">
-          <div class="stat-label">לידים</div>
-          <div class="stat-number">41</div>
-          <div class="stat-note">פניות פעילות</div>
-        </div>
 
-        <div class="card">
-          <div class="stat-label">עסקאות</div>
-          <div class="stat-number">3</div>
-          <div class="stat-note">עסקאות שנסגרו</div>
-        </div>
+    <!-- STATEMENT -->
+    <footer class="cv-auth-footer">
 
-        <div class="card">
-          <div class="stat-label">בייצור</div>
-          <div class="stat-number">2</div>
-          <div class="stat-note">הזמנות פעילות</div>
-        </div>
+      <div class="cv-auth-company-message">
 
-        <div class="card">
-          <div class="stat-label">אחוז המרה</div>
-          <div class="stat-number">7.3%</div>
-          <div class="stat-note">ליד → עסקה</div>
+        <span class="cv-auth-footer-kicker">
+          CASA VERONA · PEOPLE & CULTURE
+        </span>
+
+        <strong>
+          זכיתם לעבוד בחברה<br>
+          החזקה בשוק!
+        </strong>
+
+        <div class="cv-auth-footer-signature">
+          <span></span>
+          WELCOME TO CASA VERONA
         </div>
 
       </div>
 
-      <div class="grid">
+    </footer>
 
-        <div class="card">
+  </div>
 
-          <h3>משפך המכירות</h3>
-
-          <div class="funnel-item">
-            <div class="funnel-title">
-              <span>לידים חדשים</span>
-              <strong>41</strong>
-            </div>
-
-            <div class="bar">
-              <div style="width:100%"></div>
-            </div>
-          </div>
-
-          <div class="funnel-item">
-            <div class="funnel-title">
-              <span>לידים חמים</span>
-              <strong>12</strong>
-            </div>
-
-            <div class="bar">
-              <div style="width:55%"></div>
-            </div>
-          </div>
-
-          <div class="funnel-item">
-            <div class="funnel-title">
-              <span>הצעות מחיר</span>
-              <strong>7</strong>
-            </div>
-
-            <div class="bar">
-              <div style="width:36%"></div>
-            </div>
-          </div>
-
-          <div class="funnel-item">
-            <div class="funnel-title">
-              <span>נסגרו</span>
-              <strong>3</strong>
-            </div>
-
-            <div class="bar">
-              <div style="width:20%"></div>
-            </div>
-          </div>
-
-        </div>
-
-
-        <div class="card ai-card">
-
-          <h3>AI Command Center</h3>
-
-          <p>
-            המערכת מזהה כרגע 3 לידים
-            בעלי כוונת קנייה גבוהה.
-          </p>
-
-          <button
-            class="primary"
-            data-open-page="ai"
-          >
-            פתח AI Sales
-          </button>
-
-        </div>
-
-      </div>
-
-    </section>
+</section>
 
 
     <!-- LEADS -->
