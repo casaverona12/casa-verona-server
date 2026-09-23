@@ -2214,6 +2214,87 @@ if (
 }
 
         // -----------------------------------------------
+
+// -----------------------------------------------
+// API - DASHBOARD SUMMARY
+// ADMIN ONLY
+// -----------------------------------------------
+
+if (
+  req.method === "GET" &&
+  url.pathname === "/api/dashboard/summary"
+) {
+  const auth = await requireAuth(req, res, ["ADMIN"]);
+
+  if (!auth) {
+    return;
+  }
+
+  const db = requireSupabase();
+
+  const [
+    leadsResult,
+    ordersResult,
+    productionResult,
+    deliveriesResult
+  ] = await Promise.all([
+    db
+      .from("leads")
+      .select("id", { count: "exact", head: true }),
+
+    db
+      .from("orders")
+      .select("id", { count: "exact", head: true }),
+
+    db
+      .from("production_orders")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "WAITING"),
+
+    db
+      .from("deliveries")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "WAITING")
+  ]);
+
+  const queryError =
+    leadsResult.error ||
+    ordersResult.error ||
+    productionResult.error ||
+    deliveriesResult.error;
+
+  if (queryError) {
+    throw new Error(
+      `DASHBOARD SUMMARY ERROR: ${queryError.message}`
+    );
+  }
+
+  res.writeHead(200, {
+    "Content-Type": "application/json; charset=utf-8"
+  });
+
+  res.end(
+    JSON.stringify({
+      success: true,
+      summary: {
+        leads: leadsResult.count || 0,
+        orders: ordersResult.count || 0,
+        production: productionResult.count || 0,
+        waiting_production: productionResult.count || 0,
+        ready_delivery: deliveriesResult.count || 0,
+
+        sales: null,
+        hot_leads: null,
+        followups: null,
+        followups_today: null,
+        followups_late: null
+      }
+    })
+  );
+
+  return;
+}
+
 // API - LEADS
 // -----------------------------------------------
 
