@@ -1064,17 +1064,91 @@ background-repeat: no-repeat !important;
   }
 }
 
+/* CASA VERONA — FINAL LOGIN FINISH */
+
+.cv-auth {
+  grid-template-columns: 57% 43%;
+}
+
+.cv-auth-company-message-final {
+  width: 100%;
+  align-items: flex-start;
+}
+
+.cv-auth-company-message-final > div {
+  width: 100%;
+}
+
+.cv-auth-company-message-final strong {
+  display: block;
+
+  color: #161616;
+
+  font-family: Georgia, "Times New Roman", serif;
+
+  font-size: clamp(24px, 2.1vw, 34px);
+  font-weight: 400;
+
+  line-height: 1.15;
+  letter-spacing: -1px;
+}
+
+.cv-auth-company-message-final div span {
+  margin-top: 13px;
+
+  color: #777773;
+
+  font-size: 8px;
+  font-weight: 700;
+
+  letter-spacing: 2.5px;
+}
+
+.cv-auth-footer-final {
+  padding-top: 27px;
+
+  border-top: 1px solid rgba(20,20,20,0.12);
+}
+
+.cv-auth-main {
+  max-width: 440px;
+}
+
+.cv-auth-intro h2 {
+  font-size: 48px;
+}
+
+.cv-auth-field input {
+  background: rgba(255,255,255,0.18);
+}
+
+.cv-auth-button {
+  margin-top: 20px;
+}
+
+@media (max-width: 720px) {
+
+  .cv-auth-company-message-final strong {
+    font-size: 23px;
+    text-align: center;
+  }
+
+  .cv-auth-company-message-final div span {
+    text-align: center;
+  }
+}
+
   </style>
 
 </head>
 
 <body>
 
-  <!-- CASA VERONA LOGIN — SIGNATURE EDITION -->
+  <!-- CASA VERONA LOGIN — FINAL -->
 <div id="loginScreen" class="cv-auth">
 
-  <div class="cv-auth-visual">
-
+  <!-- 57% — CASA VERONA VIEW -->
+  <section class="cv-auth-visual">
     <div class="cv-auth-shade"></div>
 
     <div class="cv-auth-visual-top">
@@ -1084,30 +1158,22 @@ background-repeat: no-repeat !important;
 
     <div class="cv-auth-statement">
       <span class="cv-auth-rule"></span>
-
       <p>CASA VERONA · OPERATING SYSTEM</p>
 
       <h1>
         Great businesses<br>
-        start with
-        <em>great systems.</em>
+        start with <em>great systems.</em>
       </h1>
-
-      <div class="cv-auth-location">
-        <span>ISRAEL</span>
-        <span>EST. 2026</span>
-      </div>
     </div>
+  </section>
 
-  </div>
 
-
-  <div class="cv-auth-access">
+  <!-- 43% — REAL LOGIN -->
+  <section class="cv-auth-access">
 
     <div class="cv-auth-access-inner">
 
       <header class="cv-auth-header">
-
         <img
           src="/assets/casa-verona-logo.jpg"
           alt="Casa Verona"
@@ -1117,24 +1183,21 @@ background-repeat: no-repeat !important;
         <span class="cv-auth-private">
           PRIVATE ACCESS
         </span>
-
       </header>
 
 
       <main class="cv-auth-main">
 
         <div class="cv-auth-intro">
-          <span class="cv-auth-index">01</span>
-
           <div>
             <p class="cv-auth-overline">
               CASA VERONA OS
             </p>
 
-            <h2>כניסה למערכת</h2>
+            <h2>ברוכים הבאים</h2>
 
             <p class="cv-auth-subtitle">
-              ברוכים הבאים למערכת הניהול של Casa Verona
+              התחברו למערכת הניהול הפרטית של Casa Verona
             </p>
           </div>
         </div>
@@ -1143,7 +1206,6 @@ background-repeat: no-repeat !important;
         <form id="loginForm" class="cv-auth-form">
 
           <div class="cv-auth-field">
-
             <label for="loginUsername">
               שם משתמש
             </label>
@@ -1157,12 +1219,10 @@ background-repeat: no-repeat !important;
               placeholder="הזן שם משתמש"
               required
             >
-
           </div>
 
 
           <div class="cv-auth-field">
-
             <label for="loginPassword">
               סיסמה
             </label>
@@ -1174,7 +1234,6 @@ background-repeat: no-repeat !important;
               placeholder="••••••••"
               required
             >
-
           </div>
 
 
@@ -1197,34 +1256,34 @@ background-repeat: no-repeat !important;
       </main>
 
 
-      <footer class="cv-auth-footer">
+      <footer class="cv-auth-footer cv-auth-footer-final">
 
-        <div class="cv-auth-company-message">
+        <div class="cv-auth-company-message cv-auth-company-message-final">
+
           <span class="cv-auth-dot"></span>
 
           <div>
             <strong>
-             „זכיתם לעבוד בחברה המובילה כיום בשוק!”
+              זכיתם לעבוד בחברה<br>
+              המובילה כיום בשוק!
             </strong>
 
             <span>
               WELCOME TO CASA VERONA
             </span>
           </div>
-        </div>
 
-        <div class="cv-auth-secure">
-          SECURE · PRIVATE · CASA VERONA
         </div>
 
       </footer>
 
     </div>
 
-  </div>
+  </section>
 
 </div>
-<!-- END CASA VERONA LOGIN -->>
+
+<!-- END CASA VERONA LOGIN -->
 
 
 <div class="app">
