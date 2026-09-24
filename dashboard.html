@@ -291,6 +291,90 @@ linear-gradient(90deg,rgba(12,12,11,.025) 1px,transparent 1px),
 @media(max-width:760px){.cv-login{display:flex;flex-direction:column;overflow:auto}.cv-login-art{order:1;width:100%}.cv-login-panel{order:2;width:100%}.cv-login-art{min-height:34vh}.cv-login-art-copy{left:24px;bottom:22px}.cv-login-art-copy h1{font-size:34px}.cv-login-panel{min-height:66vh;padding:25px 28px}.cv-login-panel:before{inset:8px}.cv-login-box{margin:35px auto}.cv-login-box h2{font-size:43px}.cv-app{display:block}.cv-side{position:static;width:100%}.cv-nav{display:grid;grid-template-columns:1fr 1fr}.cv-main{margin-right:0;padding:18px}.cv-user-copy{display:none}.cv-hero{grid-template-columns:1fr;min-height:330px;padding:27px 23px}.cv-hero h1{font-size:41px}.cv-kpis{grid-template-columns:1fr 1fr}.cv-lower,.cv-modules{grid-template-columns:1fr}}
 @media(max-width:430px){.cv-kpis,.cv-nav{grid-template-columns:1fr}}
 </style>
+
+<style>
+/* =====================================================
+   CASA VERONA — PUSH NOTIFICATIONS
+===================================================== */
+
+.cv-push-card{
+  margin:18px 0 4px;
+  padding:14px 12px;
+  border:1px solid rgba(255,255,255,.10);
+  background:linear-gradient(
+    135deg,
+    rgba(255,255,255,.055),
+    rgba(255,255,255,.018)
+  );
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+
+.cv-push-copy{
+  min-width:0;
+}
+
+.cv-push-copy small{
+  display:block;
+  margin-bottom:5px;
+  color:rgba(255,255,255,.28);
+  font-size:6px;
+  letter-spacing:1.8px;
+  direction:ltr;
+}
+
+.cv-push-copy strong{
+  display:block;
+  color:#fff;
+  font-size:10px;
+  font-weight:500;
+}
+
+.cv-push-copy span{
+  display:block;
+  margin-top:4px;
+  color:rgba(255,255,255,.38);
+  font-size:7px;
+}
+
+.cv-push-btn{
+  flex-shrink:0;
+  border:1px solid rgba(255,255,255,.18);
+  background:#fff;
+  color:#0b0b0a;
+  padding:8px 10px;
+  font-size:8px;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.cv-push-btn:hover{
+  background:#d49ba5;
+  border-color:#d49ba5;
+}
+
+.cv-push-btn:disabled{
+  opacity:.5;
+  cursor:default;
+}
+
+.cv-push-card.active{
+  border-color:rgba(101,191,145,.25);
+}
+
+.cv-push-card.active .cv-push-copy span{
+  color:#65bf91;
+}
+
+.cv-push-card.active .cv-push-btn{
+  background:#65bf91;
+  border-color:#65bf91;
+  color:#07110c;
+}
+</style>
+
 </head>
 <body>
 
@@ -328,7 +412,25 @@ linear-gradient(90deg,rgba(12,12,11,.025) 1px,transparent 1px),
 <div class="cv-app">
 <aside class="cv-side">
   <div class="cv-side-brand"><div class="cv-wordmark"><b>CASA VERONA</b><small>DESIGN · LIVING</small><i></i></div><div class="cv-side-meta">BUSINESS OPERATING SYSTEM</div></div>
-  <div class="cv-nav-group"><span class="cv-nav-label">COMMAND</span><nav class="cv-nav">
+
+<div class="cv-push-card" id="cvPushCard">
+  <div class="cv-push-copy">
+    <small>CASA VERONA · ALERTS</small>
+    <strong>התראות מערכת</strong>
+    <span id="cvPushStatus">התראות כבויות</span>
+  </div>
+
+  <button
+    type="button"
+    id="cvEnablePush"
+    class="cv-push-btn"
+  >
+    <span>🔔</span>
+    הפעל
+  </button>
+</div>
+
+<div class="cv-nav-group"><span class="cv-nav-label">COMMAND</span><nav class="cv-nav">
     <button class="active" data-page="dashboard"><span class="cv-nav-no">01</span><span class="cv-nav-name">Command Center</span></button>
     <button data-page="leads"><span class="cv-nav-no">02</span><span class="cv-nav-name">לידים</span></button>
     <button data-page="sales"><span class="cv-nav-no">03</span><span class="cv-nav-name">מכירות</span></button>
@@ -1666,6 +1768,232 @@ if ("serviceWorker" in navigator) {
   });
 }
 </script>
+
+<script>
+/* =====================================================
+   CASA VERONA — PUSH NOTIFICATIONS CLIENT
+===================================================== */
+
+const CV_VAPID_PUBLIC_KEY =
+  "BCLFXHPwI_nxTP9zQmE_Onr1-BUvny0JuI2KH3Z3cY4q46MBbVur8VFpb_gexEdja7Cd3XAfOvnGKdqTuYQThIg";
+
+function cvUrlBase64ToUint8Array(base64String){
+
+  const padding = "=".repeat(
+    (4 - base64String.length % 4) % 4
+  );
+
+  const base64 =
+    base64String + padding;
+
+  const rawData =
+    window.atob(
+      base64
+        .replace(/-/g, "+")
+        .replace(/_/g, "/")
+    );
+
+  return Uint8Array.from(
+    [...rawData].map(
+      char => char.charCodeAt(0)
+    )
+  );
+}
+
+async function cvEnablePushNotifications(){
+
+  const button =
+    document.getElementById("cvEnablePush");
+
+  const card =
+    document.getElementById("cvPushCard");
+
+  const status =
+    document.getElementById("cvPushStatus");
+
+  if(!button || !status) return;
+
+  if(!("serviceWorker" in navigator)){
+    status.textContent =
+      "הדפדפן אינו תומך";
+    return;
+  }
+
+  if(!("PushManager" in window)){
+    status.textContent =
+      "Push אינו נתמך";
+    return;
+  }
+
+  try{
+
+    button.disabled = true;
+    button.textContent = "מתחבר...";
+
+    const permission =
+      await Notification.requestPermission();
+
+    if(permission !== "granted"){
+
+      status.textContent =
+        "ההרשאה להתראות נדחתה";
+
+      button.disabled = false;
+      button.textContent = "הפעל";
+
+      return;
+    }
+
+    const registration =
+      await navigator.serviceWorker.ready;
+
+    let subscription =
+      await registration.pushManager.getSubscription();
+
+    if(!subscription){
+
+      subscription =
+        await registration.pushManager.subscribe({
+          userVisibleOnly:true,
+          applicationServerKey:
+            cvUrlBase64ToUint8Array(
+              CV_VAPID_PUBLIC_KEY
+            )
+        });
+    }
+
+    const response =
+      await fetch(
+        "/api/admin/push/subscribe",
+        {
+          method:"POST",
+          credentials:"include",
+          headers:{
+            "Content-Type":"application/json"
+          },
+          body:JSON.stringify({
+            subscription:
+              subscription.toJSON()
+          })
+        }
+      );
+
+    const data =
+      await response
+        .json()
+        .catch(() => ({}));
+
+    if(
+      !response.ok ||
+      !data?.success
+    ){
+      throw new Error(
+        data?.error ||
+        "שמירת המכשיר נכשלה"
+      );
+    }
+
+    status.textContent =
+      "התראות פעילות ✓";
+
+    button.textContent =
+      "פעיל";
+
+    card?.classList.add("active");
+
+  }catch(error){
+
+    console.error(
+      "CASA VERONA PUSH:",
+      error
+    );
+
+    status.textContent =
+      error.message ||
+      "לא ניתן להפעיל התראות";
+
+    button.disabled = false;
+    button.textContent = "נסה שוב";
+  }
+}
+
+async function cvCheckPushStatus(){
+
+  const button =
+    document.getElementById("cvEnablePush");
+
+  const status =
+    document.getElementById("cvPushStatus");
+
+  const card =
+    document.getElementById("cvPushCard");
+
+  if(!button || !status) return;
+
+  if(
+    !("Notification" in window) ||
+    !("serviceWorker" in navigator)
+  ){
+    return;
+  }
+
+  if(
+    Notification.permission !== "granted"
+  ){
+    return;
+  }
+
+  try{
+
+    const registration =
+      await navigator.serviceWorker.ready;
+
+    const subscription =
+      await registration
+        .pushManager
+        .getSubscription();
+
+    if(subscription){
+
+      status.textContent =
+        "התראות פעילות ✓";
+
+      button.textContent =
+        "פעיל";
+
+      button.disabled = true;
+
+      card?.classList.add("active");
+    }
+
+  }catch(error){
+
+    console.error(
+      "PUSH STATUS:",
+      error
+    );
+  }
+}
+
+document
+  .getElementById("cvEnablePush")
+  ?.addEventListener(
+    "click",
+    cvEnablePushNotifications
+  );
+
+if(
+  document.readyState === "loading"
+){
+  document.addEventListener(
+    "DOMContentLoaded",
+    cvCheckPushStatus
+  );
+}else{
+  cvCheckPushStatus();
+}
+</script>
+
 </body></html><style>
 .cv-login-foot{
   display:flex;
