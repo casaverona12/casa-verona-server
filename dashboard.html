@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#12110f">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Casa Verona">
+<meta name="mobile-web-app-capable" content="yes">
+
 <title>Casa Verona OS</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#f2f0e9;color:#0c0c0b}
@@ -1515,6 +1522,15 @@ function cvRenderSummary(s){if(!s)return;cvSet("cvKpiLeads",s.leads);cvSet("cvKp
 async function cvLoadSummary(){try{const r=await fetch("/api/dashboard/summary",{credentials:"include",cache:"no-store"});if([401,403,404].includes(r.status)||!r.ok)return;const d=await r.json();if(d?.success)cvRenderSummary(d.summary||d.data)}catch(e){}}
 if(typeof renderCasaVeronaDate==="function")renderCasaVeronaDate();
 if(typeof checkExistingSession==="function"){checkExistingSession().then(ok=>{if(ok)cvLoadSummary()})}
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js")
+      .then(() => console.log("Casa Verona PWA ready"))
+      .catch(err => console.error("PWA ERROR:", err));
+  });
+}
 </script>
 </body></html><style>
 .cv-login-foot{

@@ -522,6 +522,133 @@ async function saveAIState(
     );
   }
 }
+// ======================================================
+// CASA VERONA — SMART FOLLOW-UP ENGINE
+// ======================================================
+
+function calculateNextFollowup(analysis) {
+  const now = Date.now();
+
+  const stage = String(
+    analysis.stage || ""
+  ).toUpperCase();
+
+  const temperature = String(
+    analysis.temperature || ""
+  ).toUpperCase();
+
+  const nextAction = String(
+    analysis.next_action || ""
+  ).toUpperCase();
+
+  const needsHuman =
+    analysis.needs_human === true;
+
+  const quoteReady =
+    analysis.quote_ready === true;
+
+  const callbackRequested =
+    analysis.callback_requested === true;
+
+  // Customer explicitly requested a callback.
+  // Callback engine handles this separately.
+  if (callbackRequested) {
+    return null;
+  }
+
+  // Human intervention should happen quickly.
+  if (needsHuman) {
+    return new Date(
+      now + 30 * 60 * 1000
+    ).toISOString();
+  }
+
+  // Customer is ready for a quote / closing.
+  if (
+    quoteReady ||
+    stage === "CLOSING" ||
+    nextAction === "CLOSE"
+  ) {
+    return new Date(
+      now + 2 * 60 * 60 * 1000
+    ).toISOString();
+  }
+
+  // Hot lead — don't let it cool down.
+  if (temperature === "HOT") {
+    return new Date(
+      now + 4 * 60 * 60 * 1000
+    ).toISOString();
+  }
+
+  // Active buying conversation.
+  if (
+    stage === "QUALIFICATION" ||
+    stage === "DETAIL" ||
+    stage === "PRODUCTION" ||
+    stage === "PRICE" ||
+    stage === "OFFER"
+  ) {
+    return new Date(
+      now + 24 * 60 * 60 * 1000
+    ).toISOString();
+  }
+
+  // Warm lead.
+  if (temperature === "WARM") {
+    return new Date(
+      now + 48 * 60 * 60 * 1000
+    ).toISOString();
+  }
+
+  // Cold / early lead.
+  return new Date(
+    now + 72 * 60 * 60 * 1000
+  ).toISOString();
+}
+
+async function scheduleSmartFollowup(
+  leadId,
+  analysis
+) {
+  const db = requireSupabase();
+
+  const nextFollowupAt =
+    calculateNextFollowup(analysis);
+
+  // Callback requests are managed by callback_requests.
+  if (!nextFollowupAt) {
+    const { error } = await db
+      .from("leads")
+      .update({
+        next_followup_at: null,
+        followup_status: "CALLBACK"
+      })
+      .eq("id", leadId);
+
+    if (error) {
+      throw new Error(
+        `FOLLOW-UP CALLBACK UPDATE ERROR: ${error.message}`
+      );
+    }
+
+    return;
+  }
+
+  const { error } = await db
+    .from("leads")
+    .update({
+      next_followup_at: nextFollowupAt,
+      followup_status: "SCHEDULED"
+    })
+    .eq("id", leadId);
+
+  if (error) {
+    throw new Error(
+      `FOLLOW-UP SCHEDULE ERROR: ${error.message}`
+    );
+  }
+}
 async function saveCallbackRequest(
   leadId,
   analysis
@@ -2177,6 +2304,68 @@ if (
 
 
         // -----------------------------------------------
+// CASA VERONA PWA MANIFEST
+if (req.method === "GET" && url.pathname === "/manifest.json") {
+  try {
+    const manifest = require("fs").readFileSync(
+      require("path").join(__dirname, "public", "manifest.json")
+    );
+    res.writeHead(200, {
+      "Content-Type": "application/manifest+json; charset=utf-8",
+      "Cache-Control": "no-cache"
+    });
+    res.end(manifest);
+  } catch (error) {
+    console.error("MANIFEST ERROR:", error);
+    res.writeHead(404, {"Content-Type":"text/plain; charset=utf-8"});
+    res.end("Manifest not found");
+  }
+  return;
+}
+
+// CASA VERONA PWA ICONS
+if (req.method === "GET" && url.pathname.startsWith("/icons/")) {
+  try {
+    const iconName = require("path").basename(url.pathname);
+    const iconPath = require("path").join(__dirname, "public", "icons", iconName);
+    const icon = require("fs").readFileSync(iconPath);
+
+    res.writeHead(200, {
+      "Content-Type": "image/png",
+      "Cache-Control": "public, max-age=86400"
+    });
+
+    res.end(icon);
+  } catch (error) {
+    console.error("PWA ICON ERROR:", error);
+    res.writeHead(404, {
+      "Content-Type": "text/plain; charset=utf-8"
+    });
+    res.end("Icon not found");
+  }
+  return;
+}
+
+// CASA VERONA PWA SERVICE WORKER
+if (req.method === "GET" && url.pathname === "/sw.js") {
+  try {
+    const sw = require("fs").readFileSync(
+      require("path").join(__dirname, "public", "sw.js")
+    );
+    res.writeHead(200, {
+      "Content-Type": "application/javascript; charset=utf-8",
+      "Cache-Control": "no-cache",
+      "Service-Worker-Allowed": "/"
+    });
+    res.end(sw);
+  } catch (error) {
+    console.error("SERVICE WORKER ERROR:", error);
+    res.writeHead(404, {"Content-Type":"text/plain; charset=utf-8"});
+    res.end("Service Worker not found");
+  }
+  return;
+}
+
 // CASA VERONA OS DASHBOARD
 // -----------------------------------------------
 
@@ -2236,7 +2425,11 @@ if (
     leadsResult,
     ordersResult,
     productionResult,
-    deliveriesResult
+    deliveriesResult,
+    followupsResult,
+    followupsTodayResult,
+    followupsLateResult,
+    hotLeadsResult
   ] = await Promise.all([
     db
       .from("leads")
@@ -2254,14 +2447,50 @@ if (
     db
       .from("deliveries")
       .select("id", { count: "exact", head: true })
-      .eq("status", "WAITING")
+      .eq("status", "WAITING"),
+
+    db
+      .from("leads")
+      .select("id", { count: "exact", head: true })
+      .eq("followup_status", "SCHEDULED"),
+
+    db
+      .from("leads")
+      .select("id", { count: "exact", head: true })
+      .eq("followup_status", "SCHEDULED")
+      .gte(
+        "next_followup_at",
+        new Date(new Date().setHours(0, 0, 0, 0)).toISOString()
+      )
+      .lte(
+        "next_followup_at",
+        new Date(new Date().setHours(23, 59, 59, 999)).toISOString()
+      ),
+
+    db
+      .from("leads")
+      .select("id", { count: "exact", head: true })
+      .eq("followup_status", "SCHEDULED")
+      .lt(
+        "next_followup_at",
+        new Date(new Date().setHours(0, 0, 0, 0)).toISOString()
+      ),
+
+    db
+      .from("leads")
+      .select("id", { count: "exact", head: true })
+      .ilike("temperature", "HOT")
   ]);
 
   const queryError =
     leadsResult.error ||
     ordersResult.error ||
     productionResult.error ||
-    deliveriesResult.error;
+    deliveriesResult.error ||
+    followupsResult.error ||
+    followupsTodayResult.error ||
+    followupsLateResult.error ||
+    hotLeadsResult.error;
 
   if (queryError) {
     throw new Error(
@@ -2284,10 +2513,10 @@ if (
         ready_delivery: deliveriesResult.count || 0,
 
         sales: null,
-        hot_leads: null,
-        followups: null,
-        followups_today: null,
-        followups_late: null
+        hot_leads: hotLeadsResult.count || 0,
+        followups: followupsResult.count || 0,
+        followups_today: followupsTodayResult.count || 0,
+        followups_late: followupsLateResult.count || 0
       }
     })
   );
@@ -3429,12 +3658,12 @@ if (
     // JS in the browser cannot read these tokens.
     const accessCookie =
       `casa_verona_access_token=${accessToken}; ` +
-      `HttpOnly; Secure; SameSite=Strict; Path=/; ` +
+      `HttpOnly; SameSite=Strict; Path=/; ` +
       `Max-Age=${accessMaxAge}`;
 
     const refreshCookie =
       `casa_verona_refresh_token=${refreshToken}; ` +
-      `HttpOnly; Secure; SameSite=Strict; Path=/; ` +
+      `HttpOnly; SameSite=Strict; Path=/; ` +
       `Max-Age=2592000`;
 
     res.writeHead(200, {
@@ -3982,6 +4211,11 @@ await updateLeadFromAnalysis(
 );
 
 await saveAIState(
+  lead.id,
+  analysis
+);
+
+await scheduleSmartFollowup(
   lead.id,
   analysis
 );
