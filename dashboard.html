@@ -512,7 +512,53 @@ linear-gradient(90deg,rgba(12,12,11,.025) 1px,transparent 1px),
     </button>
   </div>
 
-  <div class="cv-followup-layout">
+
+<div class="cv-fu-modal" id="cvFuModal">
+  <div class="cv-fu-modal-backdrop" data-fu-close></div>
+
+  <div class="cv-fu-modal-card">
+    <div class="cv-fu-modal-head">
+      <div>
+        <small>CASA VERONA · FOLLOW-UP</small>
+        <h3>Follow-Up חדש</h3>
+      </div>
+
+      <button type="button" class="cv-fu-modal-x" data-fu-close>×</button>
+    </div>
+
+    <form id="cvFuCreateForm">
+
+      <label class="cv-fu-field">
+        <span>בחר ליד</span>
+        <select id="cvFuLeadSelect" required>
+          <option value="">טוען לידים...</option>
+        </select>
+      </label>
+
+      <div class="cv-fu-form-grid">
+        <label class="cv-fu-field">
+          <span>תאריך</span>
+          <input id="cvFuDate" type="date" required>
+        </label>
+
+        <label class="cv-fu-field">
+          <span>שעה</span>
+          <input id="cvFuTime" type="time" required>
+        </label>
+      </div>
+
+      <div class="cv-fu-modal-error" id="cvFuCreateError"></div>
+
+      <button class="cv-fu-create-submit" type="submit">
+        <span>יצירת Follow-Up</span>
+        <span>←</span>
+      </button>
+
+    </form>
+  </div>
+</div>
+
+<div class="cv-followup-layout">
 
     <div class="cv-followup-main">
       <div class="cv-followup-list-head">
@@ -2427,6 +2473,325 @@ document.querySelectorAll("[data-fu-filter]").forEach(button=>{
   .cv-fu-buttons button{
     flex:1;
     text-align:center;
+  }
+}
+</style>
+
+<script>
+/* =====================================================
+   CASA VERONA — CREATE FOLLOW-UP
+===================================================== */
+
+function cvFuCloseModal(){
+  document.getElementById("cvFuModal")?.classList.remove("open");
+}
+
+async function cvFuOpenModal(){
+  const modal = document.getElementById("cvFuModal");
+  const select = document.getElementById("cvFuLeadSelect");
+  const errorBox = document.getElementById("cvFuCreateError");
+
+  if(!modal || !select) return;
+
+  modal.classList.add("open");
+
+  if(errorBox) errorBox.textContent = "";
+
+  select.innerHTML = `<option value="">טוען לידים...</option>`;
+
+  try{
+    // Load real leads if they have not already been loaded.
+    if(!cvLeadsLoaded){
+      await cvLoadLeads(true);
+    }
+
+    if(!cvLeadsData.length){
+      select.innerHTML = `<option value="">אין לידים זמינים</option>`;
+      return;
+    }
+
+    select.innerHTML = `
+      <option value="">בחר ליד...</option>
+      ${cvLeadsData.map(lead=>{
+        const phone = cvEscapeHTML(lead.phone || "ללא מספר");
+        const product = cvEscapeHTML(lead.product_interest || "לא צוין מוצר");
+        const temp = cvEscapeHTML(lead.temperature || "—");
+
+        return `
+          <option value="${cvEscapeHTML(lead.id)}">
+            ${phone} · ${product} · ${temp}
+          </option>
+        `;
+      }).join("")}
+    `;
+
+    // Default: tomorrow at 10:00.
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const yyyy = tomorrow.getFullYear();
+    const mm = String(tomorrow.getMonth()+1).padStart(2,"0");
+    const dd = String(tomorrow.getDate()).padStart(2,"0");
+
+    const dateInput = document.getElementById("cvFuDate");
+    const timeInput = document.getElementById("cvFuTime");
+
+    if(dateInput) dateInput.value = `${yyyy}-${mm}-${dd}`;
+    if(timeInput) timeInput.value = "10:00";
+
+  }catch(error){
+    console.error("FOLLOW-UP MODAL:",error);
+
+    select.innerHTML = `<option value="">טעינת הלידים נכשלה</option>`;
+
+    if(errorBox){
+      errorBox.textContent =
+        error.message || "לא ניתן לטעון את הלידים.";
+    }
+  }
+}
+
+document
+  .getElementById("cvNewFollowupBtn")
+  ?.addEventListener("click",cvFuOpenModal);
+
+document
+  .querySelectorAll("[data-fu-close]")
+  .forEach(el=>{
+    el.addEventListener("click",cvFuCloseModal);
+  });
+
+document
+  .getElementById("cvFuCreateForm")
+  ?.addEventListener("submit",async event=>{
+    event.preventDefault();
+
+    const leadId =
+      document.getElementById("cvFuLeadSelect")?.value;
+
+    const date =
+      document.getElementById("cvFuDate")?.value;
+
+    const time =
+      document.getElementById("cvFuTime")?.value;
+
+    const errorBox =
+      document.getElementById("cvFuCreateError");
+
+    const submit =
+      event.currentTarget.querySelector(
+        ".cv-fu-create-submit"
+      );
+
+    if(errorBox) errorBox.textContent = "";
+
+    if(!leadId || !date || !time){
+      if(errorBox){
+        errorBox.textContent =
+          "יש לבחור ליד, תאריך ושעה.";
+      }
+      return;
+    }
+
+    const nextAt = new Date(`${date}T${time}`);
+
+    if(
+      Number.isNaN(nextAt.getTime()) ||
+      nextAt.getTime() <= Date.now()
+    ){
+      if(errorBox){
+        errorBox.textContent =
+          "יש לבחור מועד עתידי.";
+      }
+      return;
+    }
+
+    try{
+      if(submit){
+        submit.disabled = true;
+        submit.querySelector("span").textContent =
+          "יוצר Follow-Up...";
+      }
+
+      const response = await fetch(
+        "/api/admin/followups/action",
+        {
+          method:"POST",
+          credentials:"include",
+          cache:"no-store",
+          headers:{
+            "Content-Type":"application/json"
+          },
+          body:JSON.stringify({
+            lead_id:leadId,
+            action:"create",
+            next_followup_at:nextAt.toISOString()
+          })
+        }
+      );
+
+      const data =
+        await response.json().catch(()=>({}));
+
+      if(!response.ok || !data?.success){
+        throw new Error(
+          data?.error || "יצירת המעקב נכשלה."
+        );
+      }
+
+      cvFuCloseModal();
+
+      cvFollowupsLoaded = false;
+      await cvLoadFollowups(true);
+
+    }catch(error){
+      console.error("CREATE FOLLOW-UP:",error);
+
+      if(errorBox){
+        errorBox.textContent =
+          error.message || "לא ניתן ליצור Follow-Up.";
+      }
+
+    }finally{
+      if(submit){
+        submit.disabled = false;
+        submit.querySelector("span").textContent =
+          "יצירת Follow-Up";
+      }
+    }
+  });
+</script>
+
+<style>
+/* CASA VERONA — FOLLOW-UP MODAL */
+
+.cv-fu-modal{
+  position:fixed;
+  inset:0;
+  z-index:12000;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+
+.cv-fu-modal.open{
+  display:flex;
+}
+
+.cv-fu-modal-backdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(7,7,6,.72);
+  backdrop-filter:blur(5px);
+}
+
+.cv-fu-modal-card{
+  position:relative;
+  z-index:2;
+  width:min(540px,100%);
+  background:#f4f1ea;
+  border:1px solid rgba(255,255,255,.18);
+  padding:30px;
+  box-shadow:0 30px 80px rgba(0,0,0,.3);
+}
+
+.cv-fu-modal-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  border-bottom:1px solid var(--line);
+  padding-bottom:20px;
+  margin-bottom:24px;
+}
+
+.cv-fu-modal-head small{
+  font-size:7px;
+  letter-spacing:2.3px;
+  color:var(--wine);
+}
+
+.cv-fu-modal-head h3{
+  margin:8px 0 0;
+  font:400 32px Georgia,serif;
+}
+
+.cv-fu-modal-x{
+  width:38px;
+  height:38px;
+  border:1px solid var(--line);
+  background:transparent;
+  font-size:22px;
+}
+
+.cv-fu-field{
+  display:block;
+  margin-bottom:18px;
+}
+
+.cv-fu-field > span{
+  display:block;
+  margin-bottom:8px;
+  font-size:9px;
+  font-weight:600;
+}
+
+.cv-fu-field select,
+.cv-fu-field input{
+  width:100%;
+  height:52px;
+  border:1px solid #cbc7bd;
+  background:#fff;
+  padding:0 13px;
+  color:#111;
+  border-radius:0;
+}
+
+.cv-fu-form-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+.cv-fu-modal-error{
+  min-height:20px;
+  margin-bottom:10px;
+  color:var(--wine);
+  font-size:10px;
+}
+
+.cv-fu-create-submit{
+  width:100%;
+  min-height:58px;
+  border:0;
+  background:#0b0b0a;
+  color:#fff;
+  padding:0 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.cv-fu-create-submit:disabled{
+  opacity:.55;
+}
+
+@media(max-width:600px){
+  .cv-fu-modal{
+    padding:12px;
+  }
+
+  .cv-fu-modal-card{
+    padding:22px 18px;
+  }
+
+  .cv-fu-modal-head h3{
+    font-size:27px;
+  }
+
+  .cv-fu-form-grid{
+    grid-template-columns:1fr;
+    gap:0;
   }
 }
 </style>

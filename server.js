@@ -2667,7 +2667,7 @@ if (
   const leadId = String(payload.lead_id || "").trim();
   const action = String(payload.action || "").trim().toLowerCase();
 
-  if (!leadId || !["complete", "postpone"].includes(action)) {
+  if (!leadId || !["complete", "postpone", "create"].includes(action)) {
     res.writeHead(400, {
       "Content-Type": "application/json; charset=utf-8"
     });
@@ -2689,7 +2689,7 @@ if (
     };
   }
 
-  if (action === "postpone") {
+  if (action === "create" || action === "postpone") {
     const nextAt = new Date(payload.next_followup_at);
 
     if (
