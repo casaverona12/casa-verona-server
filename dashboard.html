@@ -354,6 +354,8 @@ linear-gradient(90deg,rgba(12,12,11,.025) 1px,transparent 1px),
 </aside>
 
 <main class="cv-main">
+<button class="cv-mobile-menu-btn" id="cvMobileMenuBtn" type="button" aria-label="פתח תפריט">☰</button>
+<div class="cv-mobile-overlay" id="cvMobileOverlay"></div>
 <header class="cv-top"><div><span class="cv-top-kicker">CASA VERONA · PRIVATE OS</span><h2 id="pageTitle">Command Center</h2></div><div class="cv-user"><div class="cv-user-copy"><strong id="topbarUserName">Casa Verona</strong><span id="topbarUserRole">ADMIN</span></div><div id="topbarAvatar" class="cv-avatar">CV</div></div></header>
 
 <section id="dashboard" class="page active">
@@ -1562,3 +1564,120 @@ if ("serviceWorker" in navigator) {
   opacity:.35;
 }
 </style>
+
+<style>
+/* CASA VERONA — MOBILE APP SIDEBAR */
+.cv-mobile-menu-btn,
+.cv-mobile-overlay {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .cv-app {
+    display: block !important;
+  }
+
+  .cv-side {
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: min(82vw, 310px) !important;
+    height: 100dvh !important;
+    z-index: 10020 !important;
+    overflow-y: auto !important;
+    transform: translateX(105%) !important;
+    transition: transform .28s ease !important;
+    box-shadow: -18px 0 45px rgba(0,0,0,.22);
+  }
+
+  .cv-side.cv-mobile-open {
+    transform: translateX(0) !important;
+  }
+
+  .cv-main {
+    margin-right: 0 !important;
+    width: 100% !important;
+    padding-top: 72px !important;
+  }
+
+  .cv-mobile-menu-btn {
+    display: flex;
+    position: fixed;
+    top: max(14px, env(safe-area-inset-top));
+    right: 16px;
+    z-index: 10010;
+    width: 46px;
+    height: 46px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255,255,255,.16);
+    background: #090909;
+    color: #fff;
+    font-size: 21px;
+    box-shadow: 0 10px 28px rgba(0,0,0,.18);
+  }
+
+  .cv-mobile-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 10015;
+    background: rgba(0,0,0,.46);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: .25s ease;
+  }
+
+  .cv-mobile-overlay.cv-mobile-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .cv-nav {
+    display: block !important;
+  }
+}
+</style>
+
+<script>
+/* CASA VERONA — MOBILE SIDEBAR CONTROLLER */
+(() => {
+  const menuBtn = document.getElementById("cvMobileMenuBtn");
+  const sidebar = document.querySelector(".cv-side");
+  const overlay = document.getElementById("cvMobileOverlay");
+
+  if (!menuBtn || !sidebar || !overlay) return;
+
+  function openMobileMenu() {
+    sidebar.classList.add("cv-mobile-open");
+    overlay.classList.add("cv-mobile-open");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeMobileMenu() {
+    sidebar.classList.remove("cv-mobile-open");
+    overlay.classList.remove("cv-mobile-open");
+    document.body.style.overflow = "";
+  }
+
+  menuBtn.addEventListener("click", openMobileMenu);
+  overlay.addEventListener("click", closeMobileMenu);
+
+  sidebar.querySelectorAll("[data-page]").forEach(button => {
+    button.addEventListener("click", () => {
+      if (window.innerWidth <= 760) {
+        closeMobileMenu();
+      }
+    });
+  });
+
+  window.addEventListener("resize", () => {
+    if (window.innerWidth > 760) {
+      closeMobileMenu();
+    }
+  });
+})();
+</script>
