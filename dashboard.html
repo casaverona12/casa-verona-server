@@ -2795,3 +2795,201 @@ document
   }
 }
 </style>
+
+<style>
+/* =====================================================
+   CASA VERONA — PREMIUM FOLLOW-UP MODAL
+===================================================== */
+
+.cv-fu-modal{
+  padding:24px;
+}
+
+.cv-fu-modal-backdrop{
+  background:rgba(10,9,8,.78);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+}
+
+.cv-fu-modal-card{
+  width:min(620px,100%);
+  padding:0;
+  overflow:hidden;
+  background:#f5f2eb;
+  border:1px solid rgba(255,255,255,.22);
+  box-shadow:0 40px 120px rgba(0,0,0,.42);
+}
+
+.cv-fu-modal-card:before{
+  content:"";
+  display:block;
+  height:5px;
+  background:var(--wine);
+}
+
+.cv-fu-modal-head{
+  padding:30px 32px 25px;
+  margin:0;
+  border-bottom:1px solid #d8d3c8;
+  align-items:center;
+}
+
+.cv-fu-modal-head small{
+  display:block;
+  margin-bottom:9px;
+  font-size:7px;
+  letter-spacing:3px;
+  color:var(--wine);
+}
+
+.cv-fu-modal-head h3{
+  margin:0;
+  font:400 38px/.95 Georgia,serif;
+  letter-spacing:-1.3px;
+}
+
+.cv-fu-modal-x{
+  width:44px;
+  height:44px;
+  border:1px solid #d2cec4;
+  background:transparent;
+  display:grid;
+  place-items:center;
+  font:300 25px/1 Arial,sans-serif;
+  transition:.2s;
+}
+
+.cv-fu-modal-x:hover{
+  background:#111;
+  color:#fff;
+  border-color:#111;
+}
+
+#cvFuCreateForm{
+  padding:28px 32px 32px;
+}
+
+.cv-fu-field{
+  margin:0 0 22px;
+}
+
+.cv-fu-field > span{
+  margin-bottom:9px;
+  color:#625e56;
+  font-size:8px;
+  letter-spacing:1.4px;
+  text-transform:uppercase;
+}
+
+.cv-fu-field select,
+.cv-fu-field input{
+  appearance:none;
+  -webkit-appearance:none;
+  width:100%;
+  height:60px;
+  padding:0 17px;
+  border:1px solid #d1cdc3;
+  outline:none;
+  background:#fff;
+  color:#111;
+  font-size:12px;
+  transition:.2s;
+}
+
+.cv-fu-field select:focus,
+.cv-fu-field input:focus{
+  border-color:#111;
+  box-shadow:0 0 0 1px #111;
+}
+
+.cv-fu-form-grid{
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
+
+.cv-fu-modal-error{
+  min-height:22px;
+  margin:0 0 8px;
+  color:var(--wine);
+  font-size:10px;
+}
+
+.cv-fu-create-submit{
+  height:68px;
+  margin-top:3px;
+  padding:0 23px;
+  background:#0b0b0a;
+  border:0;
+  color:#fff;
+  transition:.25s;
+}
+
+.cv-fu-create-submit:hover{
+  background:var(--wine);
+}
+
+.cv-fu-create-submit span:first-child{
+  font-size:12px;
+  font-weight:600;
+}
+
+.cv-fu-create-submit span:last-child{
+  font:400 26px Georgia,serif;
+}
+
+/* iPhone / mobile */
+@media(max-width:600px){
+
+  .cv-fu-modal{
+    align-items:flex-end;
+    padding:0;
+  }
+
+  .cv-fu-modal-card{
+    width:100%;
+    max-height:92dvh;
+    overflow-y:auto;
+    border:0;
+    border-radius:0;
+  }
+
+  .cv-fu-modal-head{
+    padding:25px 21px 21px;
+  }
+
+  .cv-fu-modal-head h3{
+    font-size:32px;
+  }
+
+  #cvFuCreateForm{
+    padding:23px 21px 28px;
+  }
+
+  .cv-fu-form-grid{
+    grid-template-columns:1fr 1fr;
+    gap:9px;
+  }
+
+  .cv-fu-field select,
+  .cv-fu-field input{
+    height:57px;
+    font-size:16px;
+  }
+
+  .cv-fu-create-submit{
+    height:64px;
+  }
+}
+</style>
+
+<script>
+/* CASA VERONA — FOLLOW-UP MODAL CLICK FIX */
+document.addEventListener("click", function(event){
+  const newFollowupButton = event.target.closest("#cvNewFollowupBtn");
+
+  if(newFollowupButton){
+    event.preventDefault();
+    cvFuOpenModal();
+  }
+});
+</script>
