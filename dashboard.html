@@ -464,7 +464,93 @@ linear-gradient(90deg,rgba(12,12,11,.025) 1px,transparent 1px),
 </section>
 
 <section id="sales" class="page"></section>
-<section id="followups" class="page"></section>
+<section id="followups" class="page">
+
+  <div class="cv-section-head">
+    <small>SALES · FOLLOW-UP ENGINE</small>
+    <h1>Follow-Up Center</h1>
+    <p>כל לקוח שצריך לחזור אליו — בזמן הנכון, עם ההקשר והפעולה הבאה.</p>
+  </div>
+
+  <div class="cv-followup-kpis">
+    <article class="cv-followup-kpi">
+      <small>TODAY</small>
+      <strong id="cvFuToday">0</strong>
+      <span>מעקבים להיום</span>
+    </article>
+
+    <article class="cv-followup-kpi danger">
+      <small>OVERDUE</small>
+      <strong id="cvFuOverdue">0</strong>
+      <span>מעקבים באיחור</span>
+    </article>
+
+    <article class="cv-followup-kpi">
+      <small>UPCOMING</small>
+      <strong id="cvFuUpcoming">0</strong>
+      <span>מעקבים עתידיים</span>
+    </article>
+
+    <article class="cv-followup-kpi dark">
+      <small>HOT LEADS</small>
+      <strong id="cvFuHot">0</strong>
+      <span>לידים חמים במעקב</span>
+    </article>
+  </div>
+
+  <div class="cv-followup-toolbar">
+    <div class="cv-followup-tabs">
+      <button class="active" data-fu-filter="today">היום</button>
+      <button data-fu-filter="overdue">באיחור</button>
+      <button data-fu-filter="upcoming">עתידיים</button>
+      <button data-fu-filter="all">הכול</button>
+    </div>
+
+    <button class="cv-followup-new" id="cvNewFollowupBtn">
+      <span>＋</span>
+      <strong>Follow-Up חדש</strong>
+    </button>
+  </div>
+
+  <div class="cv-followup-layout">
+
+    <div class="cv-followup-main">
+      <div class="cv-followup-list-head">
+        <div>
+          <small>FOLLOW-UP QUEUE</small>
+          <h3>המעקבים שלך</h3>
+        </div>
+        <span id="cvFuListStatus">LIVE</span>
+      </div>
+
+      <div id="cvFollowupList" class="cv-followup-list">
+        <div class="cv-followup-empty">
+          <small>CASA VERONA · FOLLOW-UP ENGINE</small>
+          <strong>אין כרגע מעקבים להצגה</strong>
+          <span>מעקבים חדשים שייווצרו במערכת יופיעו כאן.</span>
+        </div>
+      </div>
+    </div>
+
+    <aside class="cv-followup-ai">
+      <small>✦ CASA VERONA AI</small>
+      <h3>Follow-Up Intelligence</h3>
+      <p>ה־AI מנתח את מצב הליד ומציג את הפעולה המומלצת לפני החזרה ללקוח.</p>
+
+      <div class="cv-followup-ai-card">
+        <span>NEXT BEST ACTION</span>
+        <strong id="cvFuAIAction">בחר Follow-Up מהרשימה</strong>
+      </div>
+
+      <div class="cv-followup-ai-card">
+        <span>CONTEXT</span>
+        <strong id="cvFuAIContext">היסטוריית השיחה והסיבה למעקב יוצגו כאן.</strong>
+      </div>
+    </aside>
+
+  </div>
+
+</section>
 <section id="customers" class="page"></section>
 <section id="orders" class="page"></section>
 <section id="production" class="page"></section>
@@ -505,7 +591,7 @@ catalog:["קטלוג","מאגר המוצרים והידע של צוות המכי
 "ai-production":["Production AI","ניהול עומסים, דדליינים וחריגות במפעל.","LOAD","עומסי ייצור","RISK","סיכון לאיחור","PRIORITY","סדרי עדיפויות"],
 "ai-ceo":["CEO Brain","תמונת מצב עסקית ותובנות ניהוליות במקום אחד.","EXECUTIVE","מצב העסק","INSIGHTS","תובנות","DECISIONS","בסיס להחלטות"],
 reports:["דוחות ורווחיות","המרות, הכנסות, עלויות ורווחיות.","SALES","דוחות מכירה","PROFIT","רווחיות ועלויות","CONVERSION","משפך והמרות"]};
-function cvBuildPage(id){if(id==="leads")return;const p=document.getElementById(id),d=CV_PAGE_COPY[id];if(!p||!d)return;p.innerHTML=`<div class="cv-section-head"><small>${CV_PAGE_META[id][1]}</small><h1>${d[0]}</h1><p>${d[1]}</p></div><div class="cv-modules"><article class="cv-module"><small>${d[2]}</small><h3>${d[3]}</h3><p>המודול מוכן לחיבור לנתונים האמיתיים של Casa Verona.</p></article><article class="cv-module"><small>${d[4]}</small><h3>${d[5]}</h3><p>כאן נבנה את כלי העבודה, התהליכים והאוטומציות של המודול.</p></article><article class="cv-module dark"><small>${d[6]}</small><h3>${d[7]}</h3><p>אין נתוני דמה. המידע יוצג לאחר חיבור ה־API המאובטח.</p></article></div><div class="cv-empty">המסך מוכן לשלב הבא · חיבור נתונים ופונקציונליות</div>`}
+function cvBuildPage(id){if(id==="leads" || id==="followups")return;const p=document.getElementById(id),d=CV_PAGE_COPY[id];if(!p||!d)return;p.innerHTML=`<div class="cv-section-head"><small>${CV_PAGE_META[id][1]}</small><h1>${d[0]}</h1><p>${d[1]}</p></div><div class="cv-modules"><article class="cv-module"><small>${d[2]}</small><h3>${d[3]}</h3><p>המודול מוכן לחיבור לנתונים האמיתיים של Casa Verona.</p></article><article class="cv-module"><small>${d[4]}</small><h3>${d[5]}</h3><p>כאן נבנה את כלי העבודה, התהליכים והאוטומציות של המודול.</p></article><article class="cv-module dark"><small>${d[6]}</small><h3>${d[7]}</h3><p>אין נתוני דמה. המידע יוצג לאחר חיבור ה־API המאובטח.</p></article></div><div class="cv-empty">המסך מוכן לשלב הבא · חיבור נתונים ופונקציונליות</div>`}
 Object.keys(CV_PAGE_COPY).forEach(cvBuildPage);
 
 
@@ -801,7 +887,7 @@ document
   ?.addEventListener("click",()=>cvLoadLeads(true));
 
 
-function cvOpenPage(id){const t=document.getElementById(id);if(!t)return;document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));t.classList.add("active");document.querySelectorAll("[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===id));const title=document.getElementById("pageTitle");if(title)title.textContent=(CV_PAGE_META[id]||[id])[0];if(id==="leads")cvLoadLeads();window.scrollTo({top:0,behavior:"smooth"})}
+function cvOpenPage(id){const t=document.getElementById(id);if(!t)return;document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));t.classList.add("active");document.querySelectorAll("[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===id));const title=document.getElementById("pageTitle");if(title)title.textContent=(CV_PAGE_META[id]||[id])[0];if(id==="leads")cvLoadLeads();if(id==="followups")cvLoadFollowups();window.scrollTo({top:0,behavior:"smooth"})}
 document.addEventListener("click",e=>{const n=e.target.closest("[data-page]"),o=e.target.closest("[data-open-page]");if(n)cvOpenPage(n.dataset.page);if(o)cvOpenPage(o.dataset.openPage)});
 </script>
 
@@ -1681,3 +1767,590 @@ if ("serviceWorker" in navigator) {
   });
 })();
 </script>
+
+<style>
+/* =====================================================
+   CASA VERONA — FOLLOW-UP CENTER
+===================================================== */
+
+.cv-followup-kpis{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+  margin-bottom:18px;
+}
+
+.cv-followup-kpi{
+  min-height:150px;
+  padding:22px;
+  background:#fbfaf6;
+  border:1px solid var(--line);
+  display:flex;
+  flex-direction:column;
+}
+
+.cv-followup-kpi small{
+  font-size:7px;
+  letter-spacing:2.2px;
+  color:var(--muted);
+}
+
+.cv-followup-kpi strong{
+  margin:auto 0 5px;
+  font:400 42px Georgia,serif;
+}
+
+.cv-followup-kpi span{
+  font-size:11px;
+  color:var(--muted);
+}
+
+.cv-followup-kpi.dark{
+  background:#0b0b0a;
+  color:#fff;
+  border-color:#0b0b0a;
+}
+
+.cv-followup-kpi.dark small,
+.cv-followup-kpi.dark span{
+  color:rgba(255,255,255,.55);
+}
+
+.cv-followup-kpi.danger strong{
+  color:var(--wine);
+}
+
+.cv-followup-toolbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+  margin-bottom:18px;
+}
+
+.cv-followup-tabs{
+  display:flex;
+  gap:7px;
+  flex-wrap:wrap;
+}
+
+.cv-followup-tabs button{
+  border:1px solid var(--line);
+  background:#fbfaf6;
+  padding:11px 18px;
+  font-size:10px;
+}
+
+.cv-followup-tabs button.active{
+  background:#0b0b0a;
+  color:#fff;
+  border-color:#0b0b0a;
+}
+
+.cv-followup-new{
+  min-height:44px;
+  border:0;
+  background:var(--wine);
+  color:#fff;
+  padding:0 18px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.cv-followup-layout{
+  display:grid;
+  grid-template-columns:minmax(0,1.65fr) minmax(280px,.65fr);
+  gap:18px;
+}
+
+.cv-followup-main,
+.cv-followup-ai{
+  background:#fbfaf6;
+  border:1px solid var(--line);
+}
+
+.cv-followup-main{
+  min-height:470px;
+}
+
+.cv-followup-list-head{
+  padding:22px 24px;
+  border-bottom:1px solid var(--line);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.cv-followup-list-head small{
+  font-size:7px;
+  letter-spacing:2.2px;
+  color:var(--muted);
+}
+
+.cv-followup-list-head h3{
+  margin:6px 0 0;
+  font:400 25px Georgia,serif;
+}
+
+.cv-followup-list-head > span{
+  font-size:7px;
+  letter-spacing:2px;
+  color:var(--green);
+}
+
+.cv-followup-list{
+  padding:14px;
+}
+
+.cv-followup-empty{
+  min-height:330px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  padding:30px;
+  border:1px dashed #d3d0c8;
+}
+
+.cv-followup-empty small{
+  font-size:7px;
+  letter-spacing:2.3px;
+  color:var(--wine);
+}
+
+.cv-followup-empty strong{
+  margin:14px 0 8px;
+  font:400 24px Georgia,serif;
+}
+
+.cv-followup-empty span{
+  max-width:390px;
+  font-size:11px;
+  line-height:1.7;
+  color:var(--muted);
+}
+
+.cv-followup-ai{
+  padding:26px;
+  background:#11110f;
+  color:#fff;
+}
+
+.cv-followup-ai > small{
+  color:#c99aa3;
+  font-size:7px;
+  letter-spacing:2.4px;
+}
+
+.cv-followup-ai h3{
+  margin:12px 0;
+  font:400 29px Georgia,serif;
+}
+
+.cv-followup-ai > p{
+  color:rgba(255,255,255,.55);
+  font-size:11px;
+  line-height:1.7;
+  margin-bottom:26px;
+}
+
+.cv-followup-ai-card{
+  border-top:1px solid rgba(255,255,255,.14);
+  padding:18px 0;
+}
+
+.cv-followup-ai-card span{
+  display:block;
+  margin-bottom:9px;
+  font-size:7px;
+  letter-spacing:2px;
+  color:#c99aa3;
+}
+
+.cv-followup-ai-card strong{
+  font-size:12px;
+  line-height:1.7;
+  font-weight:500;
+}
+
+/* MOBILE */
+@media(max-width:760px){
+
+  .cv-followup-kpis{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .cv-followup-kpi{
+    min-height:125px;
+    padding:17px;
+  }
+
+  .cv-followup-kpi strong{
+    font-size:34px;
+  }
+
+  .cv-followup-toolbar{
+    align-items:stretch;
+    flex-direction:column;
+  }
+
+  .cv-followup-tabs{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+  }
+
+  .cv-followup-tabs button{
+    width:100%;
+  }
+
+  .cv-followup-new{
+    justify-content:center;
+  }
+
+  .cv-followup-layout{
+    grid-template-columns:1fr;
+  }
+
+  .cv-followup-ai{
+    order:-1;
+  }
+
+  .cv-followup-main{
+    min-height:400px;
+  }
+}
+</style>
+
+<script>
+/* =====================================================
+   CASA VERONA — REAL FOLLOW-UP CENTER
+===================================================== */
+
+let cvFollowupsData = [];
+let cvFollowupFilter = "today";
+let cvFollowupsLoaded = false;
+
+function cvFuAIState(lead){
+  const state = lead?.lead_ai_state;
+  if(Array.isArray(state)) return state[0] || {};
+  return state || {};
+}
+
+function cvFuFormatTime(value){
+  if(!value) return "—";
+  const date = new Date(value);
+  if(Number.isNaN(date.getTime())) return "—";
+
+  return new Intl.DateTimeFormat("he-IL",{
+    day:"2-digit",
+    month:"2-digit",
+    hour:"2-digit",
+    minute:"2-digit"
+  }).format(date);
+}
+
+function cvUpdateFollowupKPIs(counts={}){
+  const values = {
+    cvFuToday: counts.today || 0,
+    cvFuOverdue: counts.overdue || 0,
+    cvFuUpcoming: counts.upcoming || 0,
+    cvFuHot: counts.hot || 0
+  };
+
+  Object.entries(values).forEach(([id,value])=>{
+    const el = document.getElementById(id);
+    if(el) el.textContent = value;
+  });
+}
+
+function cvSelectFollowup(lead){
+  const ai = cvFuAIState(lead);
+
+  const action = document.getElementById("cvFuAIAction");
+  const context = document.getElementById("cvFuAIContext");
+
+  if(action){
+    action.textContent =
+      ai.next_action ||
+      "לחזור ללקוח ולבדוק האם ניתן להתקדם לסגירה.";
+  }
+
+  if(context){
+    context.textContent =
+      ai.summary ||
+      lead.summary ||
+      "אין עדיין סיכום שיחה זמין.";
+  }
+}
+
+function cvRenderFollowups(){
+  const list = document.getElementById("cvFollowupList");
+  if(!list) return;
+
+  const filtered = cvFollowupsData.filter(lead=>{
+    if(cvFollowupFilter === "all") return true;
+    return lead.timing === cvFollowupFilter;
+  });
+
+  if(!filtered.length){
+    list.innerHTML = `
+      <div class="cv-followup-empty">
+        <small>CASA VERONA · FOLLOW-UP ENGINE</small>
+        <strong>אין מעקבים בקטגוריה הזאת</strong>
+        <span>כשייכנס מעקב מתאים הוא יופיע כאן אוטומטית.</span>
+      </div>
+    `;
+    return;
+  }
+
+  list.innerHTML = filtered.map((lead,index)=>{
+    const ai = cvFuAIState(lead);
+
+    const timingLabel =
+      lead.timing === "overdue"
+        ? "באיחור"
+        : lead.timing === "today"
+        ? "היום"
+        : "עתידי";
+
+    const phone = cvEscapeHTML(lead.phone || "ללא מספר");
+    const product = cvEscapeHTML(
+      lead.product_interest || "מוצר לא צוין"
+    );
+
+    const nextAction = cvEscapeHTML(
+      ai.next_action ||
+      "לחזור ללקוח ולהמשיך את תהליך המכירה"
+    );
+
+    const waPhone = String(lead.phone || "").replace(/\D/g,"");
+
+    return `
+      <article class="cv-fu-row" data-fu-index="${index}">
+        <div class="cv-fu-time">
+          <small>${timingLabel}</small>
+          <strong>${cvEscapeHTML(cvFuFormatTime(lead.next_followup_at))}</strong>
+        </div>
+
+        <div class="cv-fu-customer">
+          <strong>${phone}</strong>
+          <span>${product}</span>
+        </div>
+
+        <div class="cv-fu-action">
+          <small>NEXT ACTION</small>
+          <strong>${nextAction}</strong>
+        </div>
+
+        <div class="cv-fu-temperature">
+          ${cvEscapeHTML(lead.temperature || "—")}
+        </div>
+
+        <div class="cv-fu-buttons">
+          ${
+            waPhone
+            ? `<a href="https://wa.me/${waPhone}" target="_blank" rel="noopener">WhatsApp</a>`
+            : ""
+          }
+          <button type="button" data-fu-select="${index}">פרטים</button>
+        </div>
+      </article>
+    `;
+  }).join("");
+
+  list.querySelectorAll("[data-fu-select]").forEach(button=>{
+    button.addEventListener("click",()=>{
+      const index = Number(button.dataset.fuSelect);
+      const lead = filtered[index];
+      if(lead) cvSelectFollowup(lead);
+    });
+  });
+}
+
+async function cvLoadFollowups(force=false){
+  if(cvFollowupsLoaded && !force){
+    cvRenderFollowups();
+    return;
+  }
+
+  const list = document.getElementById("cvFollowupList");
+
+  if(list){
+    list.innerHTML = `
+      <div class="cv-followup-empty">
+        <small>CASA VERONA · LIVE DATA</small>
+        <strong>טוען מעקבים...</strong>
+        <span>מתחבר ל־Follow-Up Engine.</span>
+      </div>
+    `;
+  }
+
+  try{
+    const response = await fetch("/api/admin/followups",{
+      credentials:"include",
+      cache:"no-store"
+    });
+
+    if(response.status === 401 || response.status === 403){
+      throw new Error("אין הרשאה לצפייה במעקבים.");
+    }
+
+    if(!response.ok){
+      throw new Error("טעינת המעקבים נכשלה.");
+    }
+
+    const data = await response.json();
+
+    if(!data?.success){
+      throw new Error("השרת לא החזיר נתוני Follow-Up תקינים.");
+    }
+
+    cvFollowupsData =
+      Array.isArray(data.followups)
+        ? data.followups
+        : [];
+
+    cvFollowupsLoaded = true;
+
+    cvUpdateFollowupKPIs(data.counts || {});
+    cvRenderFollowups();
+
+  }catch(error){
+    console.error("CASA VERONA FOLLOWUPS:",error);
+
+    if(list){
+      list.innerHTML = `
+        <div class="cv-followup-empty">
+          <small>FOLLOW-UP ERROR</small>
+          <strong>לא ניתן לטעון את המעקבים</strong>
+          <span>${cvEscapeHTML(error.message || "שגיאה לא ידועה")}</span>
+        </div>
+      `;
+    }
+  }
+}
+
+document.querySelectorAll("[data-fu-filter]").forEach(button=>{
+  button.addEventListener("click",()=>{
+    document.querySelectorAll("[data-fu-filter]")
+      .forEach(b=>b.classList.remove("active"));
+
+    button.classList.add("active");
+    cvFollowupFilter = button.dataset.fuFilter;
+    cvRenderFollowups();
+  });
+});
+</script>
+
+<style>
+/* CASA VERONA — FOLLOW-UP LIVE ROWS */
+
+.cv-fu-row{
+  display:grid;
+  grid-template-columns:120px minmax(150px,.8fr) minmax(220px,1.4fr) 80px auto;
+  gap:18px;
+  align-items:center;
+  padding:18px 16px;
+  border-bottom:1px solid var(--line);
+  background:#fbfaf6;
+  transition:.2s ease;
+}
+
+.cv-fu-row:hover{
+  background:#f4f1ea;
+}
+
+.cv-fu-time small,
+.cv-fu-action small{
+  display:block;
+  margin-bottom:6px;
+  font-size:7px;
+  letter-spacing:1.8px;
+  color:var(--wine);
+}
+
+.cv-fu-time strong{
+  font:400 15px Georgia,serif;
+}
+
+.cv-fu-customer strong{
+  display:block;
+  font-size:13px;
+}
+
+.cv-fu-customer span{
+  display:block;
+  margin-top:5px;
+  color:var(--muted);
+  font-size:10px;
+}
+
+.cv-fu-action strong{
+  display:block;
+  font-size:11px;
+  line-height:1.55;
+  font-weight:500;
+}
+
+.cv-fu-temperature{
+  text-align:center;
+  padding:7px 8px;
+  border:1px solid var(--line);
+  font-size:8px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+
+.cv-fu-buttons{
+  display:flex;
+  gap:6px;
+}
+
+.cv-fu-buttons a,
+.cv-fu-buttons button{
+  border:1px solid var(--line);
+  background:#fff;
+  color:#111;
+  text-decoration:none;
+  padding:9px 11px;
+  font-size:9px;
+  white-space:nowrap;
+}
+
+.cv-fu-buttons a{
+  background:#111;
+  color:#fff;
+  border-color:#111;
+}
+
+@media(max-width:760px){
+
+  .cv-fu-row{
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+    padding:18px 14px;
+    margin-bottom:8px;
+    border:1px solid var(--line);
+  }
+
+  .cv-fu-action{
+    grid-column:1 / -1;
+  }
+
+  .cv-fu-temperature{
+    text-align:right;
+  }
+
+  .cv-fu-buttons{
+    justify-content:flex-end;
+  }
+
+  .cv-fu-buttons a,
+  .cv-fu-buttons button{
+    flex:1;
+    text-align:center;
+  }
+}
+</style>

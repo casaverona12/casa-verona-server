@@ -2526,6 +2526,108 @@ if (
 
 
 // -----------------------------------------------
+// -----------------------------------------------
+// API - ADMIN FOLLOW-UP CENTER
+// ADMIN ONLY
+// -----------------------------------------------
+
+if (
+  req.method === "GET" &&
+  url.pathname === "/api/admin/followups"
+) {
+  const auth = await requireAuth(req, res, ["ADMIN"]);
+
+  if (!auth) {
+    return;
+  }
+
+  const db = requireSupabase();
+
+  const { data, error } = await db
+    .from("leads")
+    .select(`
+      id,
+      phone,
+      source,
+      stage,
+      temperature,
+      intent,
+      product_interest,
+      summary,
+      needs_human,
+      quote_ready,
+      next_followup_at,
+      followup_status,
+      last_message_at,
+      created_at,
+      lead_ai_state (
+        summary,
+        next_action,
+        objection,
+        buying_signal,
+        needs_human,
+        quote_ready
+      )
+    `)
+    .eq("followup_status", "SCHEDULED")
+    .not("next_followup_at", "is", null)
+    .order("next_followup_at", { ascending: true });
+
+  if (error) {
+    throw new Error(
+      `FOLLOW-UP CENTER ERROR: ${error.message}`
+    );
+  }
+
+  const now = new Date();
+  const startToday = new Date();
+  startToday.setHours(0, 0, 0, 0);
+
+  const endToday = new Date();
+  endToday.setHours(23, 59, 59, 999);
+
+  const followups = (data || []).map(lead => {
+    const when = new Date(lead.next_followup_at);
+
+    let timing = "upcoming";
+
+    if (when < startToday) {
+      timing = "overdue";
+    } else if (when <= endToday) {
+      timing = "today";
+    }
+
+    return {
+      ...lead,
+      timing
+    };
+  });
+
+  res.writeHead(200, {
+    "Content-Type": "application/json; charset=utf-8",
+    "Cache-Control": "no-store"
+  });
+
+  res.end(JSON.stringify({
+    success: true,
+    counts: {
+      total: followups.length,
+      today: followups.filter(x => x.timing === "today").length,
+      overdue: followups.filter(x => x.timing === "overdue").length,
+      upcoming: followups.filter(x => x.timing === "upcoming").length,
+      hot: followups.filter(
+        x => String(x.temperature || "").toUpperCase() === "HOT"
+      ).length
+    },
+    followups
+  }));
+
+  return;
+}
+
+
+// -----------------------------------------------
+
 // API - ADMIN LEADS CENTER
 // ADMIN ONLY
 // -----------------------------------------------
