@@ -2242,8 +2242,8 @@ async function cvFollowupAction(lead, action){
   };
 
   if(action === "complete"){
-    const ok = confirm("לסמן את ה-Follow-Up כבוצע?");
-    if(!ok) return;
+    cvFuOpenCompleteModal(lead);
+    return;
   }
 
   if(action === "postpone"){
@@ -3159,4 +3159,297 @@ async function cvFuSavePostpone(date,time){
 
   return true;
 }
+</script>
+
+<div class="cv-complete-modal" id="cvCompleteModal">
+  <div class="cv-complete-backdrop" data-complete-close></div>
+
+  <div class="cv-complete-card">
+    <button
+      type="button"
+      class="cv-complete-x"
+      data-complete-close
+    >×</button>
+
+    <small>CASA VERONA · FOLLOW-UP</small>
+
+    <div class="cv-complete-icon">✓</div>
+
+    <h3>המעקב בוצע?</h3>
+
+    <p>
+      המעקב יסומן כבוצע ויוסר מרשימת
+      ה־Follow-Ups הפעילים.
+    </p>
+
+    <div class="cv-complete-lead" id="cvCompleteLead">
+      —
+    </div>
+
+    <div class="cv-complete-actions">
+      <button type="button" data-complete-close>
+        ביטול
+      </button>
+
+      <button
+        type="button"
+        class="primary"
+        id="cvCompleteConfirm"
+      >
+        <span>כן, סמן כבוצע</span>
+        <span>✓</span>
+      </button>
+    </div>
+
+    <div
+      class="cv-complete-error"
+      id="cvCompleteError"
+    ></div>
+  </div>
+</div>
+
+<style>
+/* CASA VERONA — COMPLETE FOLLOW-UP */
+
+.cv-complete-modal{
+  position:fixed;
+  inset:0;
+  z-index:13000;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+
+.cv-complete-modal.open{
+  display:flex;
+}
+
+.cv-complete-backdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(8,8,7,.78);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+}
+
+.cv-complete-card{
+  position:relative;
+  z-index:2;
+  width:min(480px,100%);
+  padding:42px 38px 34px;
+  background:#f5f2eb;
+  text-align:center;
+  box-shadow:0 35px 100px rgba(0,0,0,.4);
+}
+
+.cv-complete-card:before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  height:5px;
+  background:var(--wine);
+}
+
+.cv-complete-x{
+  position:absolute;
+  top:17px;
+  right:17px;
+  width:38px;
+  height:38px;
+  border:1px solid var(--line);
+  background:transparent;
+  font-size:22px;
+}
+
+.cv-complete-card > small{
+  display:block;
+  color:var(--wine);
+  font-size:7px;
+  letter-spacing:2.6px;
+}
+
+.cv-complete-icon{
+  width:68px;
+  height:68px;
+  margin:25px auto 19px;
+  display:grid;
+  place-items:center;
+  border:1px solid #bbb5aa;
+  border-radius:50%;
+  font:400 27px Georgia,serif;
+}
+
+.cv-complete-card h3{
+  margin:0;
+  font:400 36px/1 Georgia,serif;
+}
+
+.cv-complete-card p{
+  max-width:340px;
+  margin:15px auto 22px;
+  color:#68635b;
+  font-size:11px;
+  line-height:1.8;
+}
+
+.cv-complete-lead{
+  padding:15px;
+  margin-bottom:24px;
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  font-size:11px;
+}
+
+.cv-complete-actions{
+  display:grid;
+  grid-template-columns:1fr 1.7fr;
+  gap:9px;
+}
+
+.cv-complete-actions button{
+  min-height:58px;
+  padding:0 16px;
+  border:1px solid #ccc7bc;
+  background:transparent;
+}
+
+.cv-complete-actions .primary{
+  border-color:#0b0b0a;
+  background:#0b0b0a;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.cv-complete-error{
+  min-height:18px;
+  margin-top:12px;
+  color:var(--wine);
+  font-size:10px;
+}
+
+@media(max-width:600px){
+  .cv-complete-modal{
+    align-items:flex-end;
+    padding:0;
+  }
+
+  .cv-complete-card{
+    width:100%;
+    padding:45px 22px 30px;
+  }
+
+  .cv-complete-card h3{
+    font-size:32px;
+  }
+}
+</style>
+
+<script>
+let cvCompleteLeadData = null;
+
+function cvFuOpenCompleteModal(lead){
+  if(!lead?.id) return;
+
+  cvCompleteLeadData = lead;
+
+  const modal =
+    document.getElementById("cvCompleteModal");
+
+  const info =
+    document.getElementById("cvCompleteLead");
+
+  const error =
+    document.getElementById("cvCompleteError");
+
+  if(info){
+    const product =
+      lead.product_interest || "ללא מוצר";
+
+    const phone =
+      lead.phone || "ללא מספר";
+
+    info.textContent = `${product} · ${phone}`;
+  }
+
+  if(error) error.textContent = "";
+
+  modal?.classList.add("open");
+}
+
+function cvFuCloseCompleteModal(){
+  document
+    .getElementById("cvCompleteModal")
+    ?.classList.remove("open");
+
+  cvCompleteLeadData = null;
+}
+
+document.addEventListener("click",event=>{
+  if(event.target.closest("[data-complete-close]")){
+    cvFuCloseCompleteModal();
+  }
+});
+
+document
+  .getElementById("cvCompleteConfirm")
+  ?.addEventListener("click",async function(){
+
+    if(!cvCompleteLeadData?.id) return;
+
+    const button = this;
+    const error =
+      document.getElementById("cvCompleteError");
+
+    try{
+      button.disabled = true;
+
+      const response = await fetch(
+        "/api/admin/followups/action",
+        {
+          method:"POST",
+          credentials:"include",
+          cache:"no-store",
+          headers:{
+            "Content-Type":"application/json"
+          },
+          body:JSON.stringify({
+            lead_id:cvCompleteLeadData.id,
+            action:"complete"
+          })
+        }
+      );
+
+      const data =
+        await response.json().catch(()=>({}));
+
+      if(!response.ok || !data?.success){
+        throw new Error(
+          data?.error ||
+          "סימון המעקב כבוצע נכשל."
+        );
+      }
+
+      cvFuCloseCompleteModal();
+
+      cvFollowupsLoaded = false;
+      await cvLoadFollowups(true);
+
+    }catch(err){
+      console.error("COMPLETE FOLLOW-UP:",err);
+
+      if(error){
+        error.textContent =
+          err.message ||
+          "לא ניתן לעדכן את המעקב.";
+      }
+
+    }finally{
+      button.disabled = false;
+    }
+  });
 </script>
