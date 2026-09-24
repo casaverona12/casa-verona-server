@@ -3124,7 +3124,20 @@ res.end(
 
           return;
         }
+// -----------------------------------------------
+// PASSWORD RESET PAGE
+// -----------------------------------------------
 
+if (
+  url.pathname === "/reset-password" &&
+  req.method === "GET"
+) {
+  serveHtml(
+    res,
+    "reset-password.html"
+  );
+  return;
+}
         // -----------------------------------------------
 // DATABASE HEALTH
 // -----------------------------------------------
@@ -3139,7 +3152,116 @@ res.end(
 // ======================================================
 // AUTH — USERNAME + PASSWORD LOGIN
 // ======================================================
+// ======================================================
+// AUTH — RESET PASSWORD
+// ======================================================
 
+if (
+  req.method === "POST" &&
+  url.pathname === "/api/auth/reset-password"
+) {
+  try {
+    const db = requireSupabase();
+
+    let body = "";
+
+    for await (const chunk of req) {
+      body += chunk;
+    }
+
+    let payload;
+
+    try {
+      payload = JSON.parse(body || "{}");
+    } catch {
+      sendJSON(res, 400, {
+        success: false,
+        error: "בקשה לא תקינה"
+      });
+      return;
+    }
+
+    const password = String(
+      payload.password || ""
+    );
+
+    if (password.length < 8) {
+      sendJSON(res, 400, {
+        success: false,
+        error: "הסיסמה חייבת להכיל לפחות 8 תווים"
+      });
+      return;
+    }
+
+    const authHeader =
+      req.headers.authorization || "";
+
+    if (!authHeader.startsWith("Bearer ")) {
+      sendJSON(res, 401, {
+        success: false,
+        error: "קישור האיפוס אינו תקין או שפג תוקפו"
+      });
+      return;
+    }
+
+    const recoveryToken =
+      authHeader.slice(7).trim();
+
+    const {
+      data: userData,
+      error: userError
+    } = await db.auth.getUser(recoveryToken);
+
+    if (userError || !userData?.user?.id) {
+      sendJSON(res, 401, {
+        success: false,
+        error: "קישור האיפוס אינו תקין או שפג תוקפו"
+      });
+      return;
+    }
+
+    const {
+      error: updateError
+    } = await db.auth.admin.updateUserById(
+      userData.user.id,
+      {
+        password
+      }
+    );
+
+    if (updateError) {
+      console.error(
+        "PASSWORD RESET ERROR:",
+        updateError
+      );
+
+      sendJSON(res, 500, {
+        success: false,
+        error: "לא ניתן לעדכן את הסיסמה כרגע"
+      });
+      return;
+    }
+
+    sendJSON(res, 200, {
+      success: true
+    });
+
+    return;
+
+  } catch (error) {
+    console.error(
+      "PASSWORD RESET ERROR:",
+      error
+    );
+
+    sendJSON(res, 500, {
+      success: false,
+      error: "אירעה שגיאה באיפוס הסיסמה"
+    });
+
+    return;
+  }
+}
 if (
   req.method === "POST" &&
   url.pathname === "/api/auth/login"
