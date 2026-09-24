@@ -2155,10 +2155,28 @@ function cvRenderFollowups(){
             : ""
           }
           <button type="button" data-fu-select="${index}">פרטים</button>
+          <button type="button" data-fu-complete="${index}">✓ בוצע</button>
+          <button type="button" data-fu-postpone="${index}">דחה</button>
         </div>
       </article>
     `;
   }).join("");
+
+  list.querySelectorAll("[data-fu-complete]").forEach(button=>{
+    button.addEventListener("click",()=>{
+      const index = Number(button.dataset.fuComplete);
+      const lead = filtered[index];
+      if(lead) cvFollowupAction(lead,"complete");
+    });
+  });
+
+  list.querySelectorAll("[data-fu-postpone]").forEach(button=>{
+    button.addEventListener("click",()=>{
+      const index = Number(button.dataset.fuPostpone);
+      const lead = filtered[index];
+      if(lead) cvFollowupAction(lead,"postpone");
+    });
+  });
 
   list.querySelectorAll("[data-fu-select]").forEach(button=>{
     button.addEventListener("click",()=>{
@@ -2167,6 +2185,64 @@ function cvRenderFollowups(){
       if(lead) cvSelectFollowup(lead);
     });
   });
+}
+
+async function cvFollowupAction(lead, action){
+  if(!lead?.id) return;
+
+  let payload = {
+    lead_id: lead.id,
+    action
+  };
+
+  if(action === "complete"){
+    const ok = confirm("לסמן את ה-Follow-Up כבוצע?");
+    if(!ok) return;
+  }
+
+  if(action === "postpone"){
+    const value = prompt(
+      "הזן מועד חדש בפורמט:\n2026-09-25 14:30"
+    );
+
+    if(!value) return;
+
+    const date = new Date(value.replace(" ","T"));
+
+    if(Number.isNaN(date.getTime())){
+      alert("התאריך או השעה אינם תקינים.");
+      return;
+    }
+
+    payload.next_followup_at = date.toISOString();
+  }
+
+  try{
+    const response = await fetch("/api/admin/followups/action",{
+      method:"POST",
+      credentials:"include",
+      cache:"no-store",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify(payload)
+    });
+
+    const data = await response.json().catch(()=>({}));
+
+    if(!response.ok || !data?.success){
+      throw new Error(
+        data?.error || "עדכון ה-Follow-Up נכשל."
+      );
+    }
+
+    cvFollowupsLoaded = false;
+    await cvLoadFollowups(true);
+
+  }catch(error){
+    console.error("FOLLOW-UP ACTION:",error);
+    alert(error.message || "לא ניתן לעדכן את המעקב.");
+  }
 }
 
 async function cvLoadFollowups(force=false){

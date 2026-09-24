@@ -2628,6 +2628,131 @@ if (
 
 // -----------------------------------------------
 
+// -----------------------------------------------
+// API - FOLLOW-UP ACTIONS
+// ADMIN ONLY
+// -----------------------------------------------
+
+if (
+  req.method === "POST" &&
+  url.pathname === "/api/admin/followups/action"
+) {
+  const auth = await requireAuth(req, res, ["ADMIN"]);
+
+  if (!auth) {
+    return;
+  }
+
+  let body = "";
+
+  for await (const chunk of req) {
+    body += chunk;
+  }
+
+  let payload;
+
+  try {
+    payload = JSON.parse(body || "{}");
+  } catch {
+    res.writeHead(400, {
+      "Content-Type": "application/json; charset=utf-8"
+    });
+    res.end(JSON.stringify({
+      success: false,
+      error: "INVALID_JSON"
+    }));
+    return;
+  }
+
+  const leadId = String(payload.lead_id || "").trim();
+  const action = String(payload.action || "").trim().toLowerCase();
+
+  if (!leadId || !["complete", "postpone"].includes(action)) {
+    res.writeHead(400, {
+      "Content-Type": "application/json; charset=utf-8"
+    });
+    res.end(JSON.stringify({
+      success: false,
+      error: "INVALID_FOLLOWUP_ACTION"
+    }));
+    return;
+  }
+
+  const db = requireSupabase();
+
+  let updateData;
+
+  if (action === "complete") {
+    updateData = {
+      followup_status: "COMPLETED",
+      next_followup_at: null
+    };
+  }
+
+  if (action === "postpone") {
+    const nextAt = new Date(payload.next_followup_at);
+
+    if (
+      !payload.next_followup_at ||
+      Number.isNaN(nextAt.getTime()) ||
+      nextAt.getTime() <= Date.now()
+    ) {
+      res.writeHead(400, {
+        "Content-Type": "application/json; charset=utf-8"
+      });
+      res.end(JSON.stringify({
+        success: false,
+        error: "INVALID_FOLLOWUP_DATE"
+      }));
+      return;
+    }
+
+    updateData = {
+      followup_status: "SCHEDULED",
+      next_followup_at: nextAt.toISOString()
+    };
+  }
+
+  const { data, error } = await db
+    .from("leads")
+    .update(updateData)
+    .eq("id", leadId)
+    .select("id, next_followup_at, followup_status")
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(
+      `FOLLOW-UP ACTION ERROR: ${error.message}`
+    );
+  }
+
+  if (!data) {
+    res.writeHead(404, {
+      "Content-Type": "application/json; charset=utf-8"
+    });
+    res.end(JSON.stringify({
+      success: false,
+      error: "LEAD_NOT_FOUND"
+    }));
+    return;
+  }
+
+  res.writeHead(200, {
+    "Content-Type": "application/json; charset=utf-8",
+    "Cache-Control": "no-store"
+  });
+
+  res.end(JSON.stringify({
+    success: true,
+    followup: data
+  }));
+
+  return;
+}
+
+
+// -----------------------------------------------
+
 // API - ADMIN LEADS CENTER
 // ADMIN ONLY
 // -----------------------------------------------
