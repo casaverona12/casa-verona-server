@@ -2247,20 +2247,8 @@ async function cvFollowupAction(lead, action){
   }
 
   if(action === "postpone"){
-    const value = prompt(
-      "הזן מועד חדש בפורמט:\n2026-09-25 14:30"
-    );
-
-    if(!value) return;
-
-    const date = new Date(value.replace(" ","T"));
-
-    if(Number.isNaN(date.getTime())){
-      alert("התאריך או השעה אינם תקינים.");
-      return;
-    }
-
-    payload.next_followup_at = date.toISOString();
+    cvFuOpenPostponeModal(lead);
+    return;
   }
 
   try{
@@ -2487,9 +2475,19 @@ function cvFuCloseModal(){
 }
 
 async function cvFuOpenModal(){
+  cvFuPostponeLead = null;
+
   const modal = document.getElementById("cvFuModal");
   const select = document.getElementById("cvFuLeadSelect");
   const errorBox = document.getElementById("cvFuCreateError");
+
+  const title = modal?.querySelector(".cv-fu-modal-head h3");
+  const submitText = modal?.querySelector(".cv-fu-create-submit span:first-child");
+  const leadField = select?.closest(".cv-fu-field");
+
+  if(title) title.textContent = "Follow-Up חדש";
+  if(submitText) submitText.textContent = "יצירת Follow-Up";
+  if(leadField) leadField.style.display = "";
 
   if(!modal || !select) return;
 
@@ -2584,6 +2582,27 @@ document
       );
 
     if(errorBox) errorBox.textContent = "";
+
+    if(cvFuPostponeLead){
+      if(!date || !time){
+        if(errorBox) errorBox.textContent = "יש לבחור תאריך ושעה.";
+        return;
+      }
+
+      try{
+        if(submit) submit.disabled = true;
+        await cvFuSavePostpone(date,time);
+      }catch(error){
+        if(errorBox){
+          errorBox.textContent =
+            error.message || "לא ניתן לדחות את המעקב.";
+        }
+      }finally{
+        if(submit) submit.disabled = false;
+      }
+
+      return;
+    }
 
     if(!leadId || !date || !time){
       if(errorBox){
@@ -3044,3 +3063,100 @@ document.addEventListener("click", function(event){
   }
 }
 </style>
+
+<script>
+/* =====================================================
+   CASA VERONA — PREMIUM POSTPONE FLOW
+===================================================== */
+
+let cvFuPostponeLead = null;
+
+function cvFuOpenPostponeModal(lead){
+  if(!lead?.id) return;
+
+  cvFuPostponeLead = lead;
+
+  const modal = document.getElementById("cvFuModal");
+  const title = modal?.querySelector(".cv-fu-modal-head h3");
+  const select = document.getElementById("cvFuLeadSelect");
+  const dateInput = document.getElementById("cvFuDate");
+  const timeInput = document.getElementById("cvFuTime");
+  const submit = modal?.querySelector(".cv-fu-create-submit span:first-child");
+  const errorBox = document.getElementById("cvFuCreateError");
+
+  if(!modal || !dateInput || !timeInput) return;
+
+  if(title) title.textContent = "דחיית Follow-Up";
+  if(submit) submit.textContent = "שמירת מועד חדש";
+  if(errorBox) errorBox.textContent = "";
+
+  if(select){
+    select.closest(".cv-fu-field").style.display = "none";
+  }
+
+  const current = lead.next_followup_at
+    ? new Date(lead.next_followup_at)
+    : new Date();
+
+  if(current.getTime() <= Date.now()){
+    current.setHours(current.getHours() + 1);
+  }
+
+  const yyyy = current.getFullYear();
+  const mm = String(current.getMonth()+1).padStart(2,"0");
+  const dd = String(current.getDate()).padStart(2,"0");
+  const hh = String(current.getHours()).padStart(2,"0");
+  const min = String(current.getMinutes()).padStart(2,"0");
+
+  dateInput.value = `${yyyy}-${mm}-${dd}`;
+  timeInput.value = `${hh}:${min}`;
+
+  modal.classList.add("open");
+}
+
+async function cvFuSavePostpone(date,time){
+  if(!cvFuPostponeLead?.id) return false;
+
+  const nextAt = new Date(`${date}T${time}`);
+
+  if(
+    Number.isNaN(nextAt.getTime()) ||
+    nextAt.getTime() <= Date.now()
+  ){
+    throw new Error("יש לבחור מועד עתידי.");
+  }
+
+  const response = await fetch(
+    "/api/admin/followups/action",
+    {
+      method:"POST",
+      credentials:"include",
+      cache:"no-store",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        lead_id:cvFuPostponeLead.id,
+        action:"postpone",
+        next_followup_at:nextAt.toISOString()
+      })
+    }
+  );
+
+  const data = await response.json().catch(()=>({}));
+
+  if(!response.ok || !data?.success){
+    throw new Error(
+      data?.error || "דחיית המעקב נכשלה."
+    );
+  }
+
+  cvFuPostponeLead = null;
+  cvFuCloseModal();
+
+  cvFollowupsLoaded = false;
+  await cvLoadFollowups(true);
+
+  return true;
+}
+</script>
