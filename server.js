@@ -2,6 +2,7 @@ const http = require("http");
 const fs = require("fs");
 const path = require("path");
 const { createClient } = require("@supabase/supabase-js");
+const webpush = require("web-push");
 // ======================================================
 // ENV
 // ======================================================
@@ -31,11 +32,25 @@ const WHATSAPP_ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN;
 const WHATSAPP_VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN;
 const WHATSAPP_PHONE_NUMBER_ID =
   process.env.WHATSAPP_PHONE_NUMBER_ID;
+const VAPID_PUBLIC_KEY =
+  process.env.VAPID_PUBLIC_KEY?.trim();
+
+const VAPID_PRIVATE_KEY =
+  process.env.VAPID_PRIVATE_KEY?.trim();
+
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY =
   process.env.SUPABASE_ANON_KEY?.replace(/\s+/g, "").trim();
 const SUPABASE_SECRET_KEY =
   process.env.SUPABASE_SECRET_KEY?.replace(/\s+/g, "").trim();
+
+if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
+  webpush.setVapidDetails(
+    "mailto:notifications@casa-verona.co.il",
+    VAPID_PUBLIC_KEY,
+    VAPID_PRIVATE_KEY
+  );
+}
 
 const supabase =
   SUPABASE_URL && SUPABASE_SECRET_KEY
@@ -2210,6 +2225,104 @@ async function requireAuth(req, res, allowedRoles = []) {
   return auth;
 }
 
+// -----------------------------------------------
+// API - ADMIN PUSH SUBSCRIPTION
+// ADMIN ONLY
+// -----------------------------------------------
+
+async function handlePushSubscription(req, res) {
+
+  const auth = await requireAuth(req, res, ["ADMIN"]);
+
+  if (!auth) {
+    return;
+  }
+
+  let body = "";
+
+  for await (const chunk of req) {
+    body += chunk;
+  }
+
+  let payload;
+
+  try {
+    payload = JSON.parse(body || "{}");
+  } catch {
+    res.writeHead(400, {
+      "Content-Type": "application/json; charset=utf-8"
+    });
+
+    res.end(JSON.stringify({
+      success: false,
+      error: "INVALID_JSON"
+    }));
+
+    return;
+  }
+
+  const subscription = payload.subscription || {};
+
+  const endpoint = String(
+    subscription.endpoint || ""
+  ).trim();
+
+  const p256dh = String(
+    subscription.keys?.p256dh || ""
+  ).trim();
+
+  const authKey = String(
+    subscription.keys?.auth || ""
+  ).trim();
+
+  if (!endpoint || !p256dh || !authKey) {
+
+    res.writeHead(400, {
+      "Content-Type": "application/json; charset=utf-8"
+    });
+
+    res.end(JSON.stringify({
+      success: false,
+      error: "INVALID_PUSH_SUBSCRIPTION"
+    }));
+
+    return;
+  }
+
+  const db = requireSupabase();
+
+  const { error } = await db
+    .from("push_subscriptions")
+    .upsert(
+      {
+        user_id: auth.user.id,
+        endpoint,
+        p256dh,
+        auth: authKey,
+        user_agent: req.headers["user-agent"] || null,
+        updated_at: new Date().toISOString()
+      },
+      {
+        onConflict: "endpoint"
+      }
+    );
+
+  if (error) {
+    throw new Error(
+      `PUSH SUBSCRIPTION ERROR: ${error.message}`
+    );
+  }
+
+  res.writeHead(200, {
+    "Content-Type": "application/json; charset=utf-8",
+    "Cache-Control": "no-store"
+  });
+
+  res.end(JSON.stringify({
+    success: true
+  }));
+}
+
 const server =
   http.createServer(
     async (req, res) => {
@@ -2247,6 +2360,18 @@ const server =
           );
 
 // -----------------------------------------------
+// -----------------------------------------------
+        // CASA VERONA — PUSH SUBSCRIPTION
+        // -----------------------------------------------
+
+        if (
+          req.method === "POST" &&
+          url.pathname === "/api/admin/push/subscribe"
+        ) {
+          await handlePushSubscription(req, res);
+          return;
+        }
+
 // CASA VERONA ASSETS
 // -----------------------------------------------
 
