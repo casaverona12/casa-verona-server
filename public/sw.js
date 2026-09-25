@@ -7,11 +7,25 @@ self.addEventListener("activate", event => {
 });
 
 self.addEventListener("fetch", event => {
+
   if (event.request.method !== "GET") return;
+
+  // Always request the newest app page.
+  if (event.request.mode === "navigate") {
+
+    event.respondWith(
+      fetch(event.request, {
+        cache: "no-store"
+      })
+    );
+
+    return;
+  }
 
   event.respondWith(
     fetch(event.request)
   );
+
 });
 
 /* =====================================================
@@ -133,4 +147,4 @@ self.addEventListener(
     );
 
   }
-);
+);\n
