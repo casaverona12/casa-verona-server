@@ -700,7 +700,263 @@ linear-gradient(90deg,rgba(12,12,11,.025) 1px,transparent 1px),
 
 </section>
 <section id="customers" class="page"></section>
-<section id="orders" class="page"></section>
+
+<section id="orders" class="page">
+
+  <div class="cv-orders-head">
+    <div>
+      <small>CASA VERONA · ORDER CENTER</small>
+      <h2>מרכז <em>ההזמנות.</em></h2>
+      <p>מהעסקה ועד הייצור, אישור המפעל והאספקה ללקוח.</p>
+    </div>
+
+    <button type="button" id="cvNewOrderBtn" class="cv-order-new-btn">
+      <span>+ הזמנה חדשה</span>
+    </button>
+  </div>
+
+  <div class="cv-orders-stats">
+    <div>
+      <small>ACTIVE ORDERS</small>
+      <strong id="cvOrdersActive">—</strong>
+      <span>הזמנות פעילות</span>
+    </div>
+
+    <div>
+      <small>FACTORY APPROVAL</small>
+      <strong id="cvOrdersPendingFactory">—</strong>
+      <span>ממתינות למפעל</span>
+    </div>
+
+    <div>
+      <small>IN PRODUCTION</small>
+      <strong id="cvOrdersProduction">—</strong>
+      <span>בתהליך ייצור</span>
+    </div>
+
+    <div>
+      <small>DELIVERY</small>
+      <strong id="cvOrdersDelivery">—</strong>
+      <span>ממתינות לאספקה</span>
+    </div>
+  </div>
+
+  <div class="cv-orders-list-head">
+    <div>
+      <small>ORDER PIPELINE</small>
+      <h3>כל ההזמנות</h3>
+    </div>
+    <span>LIVE</span>
+  </div>
+
+  <div id="cvOrdersList" class="cv-orders-list">
+    <div class="cv-orders-empty">
+      <small>CASA VERONA · OPERATIONS</small>
+      <strong>טוען הזמנות...</strong>
+      <span>ההזמנות של Casa Verona יוצגו כאן.</span>
+    </div>
+  </div>
+
+
+  <!-- NEW ORDER MODAL -->
+  <div id="cvOrderModal" class="cv-order-modal" hidden>
+
+    <div class="cv-order-modal-card">
+
+      <div class="cv-order-modal-head">
+        <div>
+          <small>CASA VERONA · NEW ORDER</small>
+          <h3>הזמנה חדשה</h3>
+        </div>
+
+        <button type="button" id="cvOrderModalClose">×</button>
+      </div>
+
+      <form id="cvNewOrderForm">
+
+        <div class="cv-order-section-title">
+          <small>01</small>
+          <div>
+            <strong>פרטי הלקוח</strong>
+            <span>פרטי ההזמנה והאספקה</span>
+          </div>
+        </div>
+
+        <div class="cv-order-grid">
+
+          <label>
+            <span>שם לקוח</span>
+            <input id="cvOrderCustomerName" required>
+          </label>
+
+          <label>
+            <span>טלפון</span>
+            <input id="cvOrderCustomerPhone" type="tel" required>
+          </label>
+
+          <label>
+            <span>שם הדגם</span>
+            <input id="cvOrderProductName" required>
+          </label>
+
+          <label>
+            <span>מחיר מכירה ₪</span>
+            <input id="cvOrderSalePrice" type="number" min="0">
+          </label>
+
+        </div>
+
+
+        <div class="cv-order-section-title">
+          <small>02</small>
+          <div>
+            <strong>מידות ומפרט</strong>
+            <span>המפרט שיעבור למפעל</span>
+          </div>
+        </div>
+
+        <div class="cv-order-grid">
+
+          <label>
+            <span>רוחב (ס"מ)</span>
+            <input id="cvOrderWidth" type="number">
+          </label>
+
+          <label>
+            <span>עומק (ס"מ)</span>
+            <input id="cvOrderDepth" type="number">
+          </label>
+
+          <label>
+            <span>אורך שזלונג (ס"מ)</span>
+            <input id="cvOrderChaiseLength" type="number">
+          </label>
+
+          <label>
+            <span>צד שזלונג</span>
+            <select id="cvOrderChaiseSide">
+              <option value="">ללא / לא נבחר</option>
+              <option value="RIGHT">ימין</option>
+              <option value="LEFT">שמאל</option>
+            </select>
+          </label>
+
+          <label>
+            <span>חברת בד</span>
+            <input id="cvOrderFabricCompany">
+          </label>
+
+          <label>
+            <span>קולקציה</span>
+            <input id="cvOrderFabricCollection">
+          </label>
+
+          <label>
+            <span>קוד בד</span>
+            <input id="cvOrderFabricCode">
+          </label>
+
+          <label>
+            <span>צבע</span>
+            <input id="cvOrderColor">
+          </label>
+
+        </div>
+
+
+        <div class="cv-order-section-title">
+          <small>03</small>
+          <div>
+            <strong>סקיצה ו־AI Design Studio</strong>
+            <span>תמונה, הדמיה ומפרט חזותי למפעל</span>
+          </div>
+        </div>
+
+        <div class="cv-order-ai-box">
+
+          <label class="cv-order-upload">
+            <span>＋</span>
+            <strong>העלה תמונה / סקיצה</strong>
+            <small>JPG · PNG · WEBP</small>
+            <input id="cvOrderReferenceImage" type="file" accept="image/*" hidden>
+          </label>
+
+          <div class="cv-order-ai-preview">
+            <small>REFERENCE</small>
+            <div id="cvOrderReferencePreview">
+              טרם הועלתה תמונה
+            </div>
+          </div>
+
+          <div class="cv-order-ai-panel">
+            <small>✦ CASA VERONA AI</small>
+            <strong>AI Design Studio</strong>
+            <p>
+              צור הדמיה על בסיס הדגם, המידות, צד השזלונג,
+              הבד והבקשות המיוחדות.
+            </p>
+
+            <button type="button" id="cvGenerateOrderAI" disabled>
+              ✦ צור הדמיה
+            </button>
+
+            <span>AI יופעל לאחר חיבור מנוע ההדמיות.</span>
+          </div>
+
+        </div>
+
+
+        <div class="cv-order-section-title">
+          <small>04</small>
+          <div>
+            <strong>מועד ובקשות מיוחדות</strong>
+            <span>ברירת המחדל: עד 14 יום</span>
+          </div>
+        </div>
+
+        <div class="cv-order-grid">
+
+          <label>
+            <span>תאריך הזמנה</span>
+            <input id="cvOrderDate" type="date" required>
+          </label>
+
+          <label>
+            <span>תאריך אספקה יעד</span>
+            <input id="cvOrderTargetDate" type="date" required>
+          </label>
+
+        </div>
+
+        <label class="cv-order-full-field">
+          <span>בקשות מיוחדות / הערות למפעל</span>
+          <textarea id="cvOrderSpecialRequests" rows="4"></textarea>
+        </label>
+
+
+        <div class="cv-order-factory-box">
+          <small>FACTORY WORKFLOW</small>
+          <strong>לאחר השמירה ההזמנה תישלח לאישור המפעל</strong>
+          <span>
+            בעל המפעל יקבל Push, יבדוק את המפרט,
+            יוסיף מחיר ייצור מוערך ויאשר את ההזמנה.
+          </span>
+        </div>
+
+        <div id="cvOrderFormError" class="cv-order-error"></div>
+
+        <button type="submit" class="cv-order-submit">
+          <span>שמור ושלח למפעל</span>
+          <span>←</span>
+        </button>
+
+      </form>
+
+    </div>
+  </div>
+
+</section>
+
 <section id="production" class="page"></section>
 <section id="deliveries" class="page"></section>
 <section id="catalog" class="page"></section>
@@ -3824,3 +4080,631 @@ document
     }
   });
 </script>
+
+<style>
+/* =====================================================
+   CASA VERONA — ORDER CENTER
+===================================================== */
+
+.cv-orders-head{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:24px;
+  margin-bottom:28px;
+}
+
+.cv-orders-head small,
+.cv-orders-list-head small{
+  font-size:9px;
+  letter-spacing:2.4px;
+  opacity:.45;
+}
+
+.cv-orders-head h2{
+  margin:8px 0 6px;
+  font-family:Georgia,serif;
+  font-size:38px;
+  font-weight:400;
+}
+
+.cv-orders-head h2 em{
+  font-weight:400;
+}
+
+.cv-orders-head p{
+  margin:0;
+  opacity:.55;
+  font-size:13px;
+}
+
+.cv-order-new-btn{
+  border:0;
+  background:#111;
+  color:#fff;
+  padding:15px 22px;
+  cursor:pointer;
+  font-weight:600;
+}
+
+.cv-orders-stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+  margin-bottom:28px;
+}
+
+.cv-orders-stats > div{
+  border:1px solid rgba(0,0,0,.09);
+  padding:20px;
+  min-height:115px;
+  display:flex;
+  flex-direction:column;
+}
+
+.cv-orders-stats small{
+  font-size:8px;
+  letter-spacing:1.8px;
+  opacity:.4;
+}
+
+.cv-orders-stats strong{
+  font-family:Georgia,serif;
+  font-size:32px;
+  font-weight:400;
+  margin:12px 0 5px;
+}
+
+.cv-orders-stats span{
+  font-size:11px;
+  opacity:.55;
+}
+
+.cv-orders-list-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:12px;
+}
+
+.cv-orders-list-head h3{
+  margin:5px 0 0;
+  font-family:Georgia,serif;
+  font-weight:400;
+  font-size:23px;
+}
+
+.cv-orders-list-head > span{
+  font-size:8px;
+  letter-spacing:2px;
+  opacity:.4;
+}
+
+.cv-orders-list{
+  border-top:1px solid rgba(0,0,0,.1);
+}
+
+.cv-orders-empty{
+  padding:55px 20px;
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.cv-orders-empty small{
+  font-size:8px;
+  letter-spacing:2px;
+  opacity:.4;
+}
+
+.cv-orders-empty strong{
+  font-family:Georgia,serif;
+  font-size:20px;
+  font-weight:400;
+}
+
+.cv-orders-empty span{
+  font-size:11px;
+  opacity:.45;
+}
+
+
+/* MODAL */
+
+.cv-order-modal{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  background:rgba(0,0,0,.58);
+  padding:30px;
+  overflow:auto;
+}
+
+.cv-order-modal[hidden]{
+  display:none !important;
+}
+
+.cv-order-modal-card{
+  width:min(980px,100%);
+  margin:0 auto;
+  background:#fff;
+  padding:30px;
+}
+
+.cv-order-modal-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  padding-bottom:22px;
+  border-bottom:1px solid rgba(0,0,0,.1);
+}
+
+.cv-order-modal-head small{
+  font-size:8px;
+  letter-spacing:2.2px;
+  opacity:.4;
+}
+
+.cv-order-modal-head h3{
+  margin:6px 0 0;
+  font-family:Georgia,serif;
+  font-size:30px;
+  font-weight:400;
+}
+
+#cvOrderModalClose{
+  border:0;
+  background:none;
+  font-size:28px;
+  cursor:pointer;
+}
+
+.cv-order-section-title{
+  display:flex;
+  gap:13px;
+  align-items:flex-start;
+  margin:30px 0 16px;
+}
+
+.cv-order-section-title > small{
+  font-family:Georgia,serif;
+  font-size:20px;
+  opacity:.3;
+}
+
+.cv-order-section-title div{
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+}
+
+.cv-order-section-title strong{
+  font-size:14px;
+}
+
+.cv-order-section-title span{
+  font-size:10px;
+  opacity:.45;
+}
+
+.cv-order-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:14px;
+}
+
+.cv-order-grid label,
+.cv-order-full-field{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+}
+
+.cv-order-grid label span,
+.cv-order-full-field > span{
+  font-size:10px;
+  opacity:.6;
+}
+
+.cv-order-grid input,
+.cv-order-grid select,
+.cv-order-full-field textarea{
+  width:100%;
+  box-sizing:border-box;
+  border:1px solid rgba(0,0,0,.13);
+  background:#fff;
+  padding:13px;
+  font:inherit;
+  outline:none;
+}
+
+.cv-order-full-field{
+  margin-top:15px;
+}
+
+.cv-order-ai-box{
+  display:grid;
+  grid-template-columns:1fr 1fr 1.25fr;
+  gap:12px;
+}
+
+.cv-order-upload,
+.cv-order-ai-preview,
+.cv-order-ai-panel{
+  min-height:180px;
+  border:1px solid rgba(0,0,0,.11);
+  padding:20px;
+  box-sizing:border-box;
+}
+
+.cv-order-upload{
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  flex-direction:column;
+  gap:7px;
+}
+
+.cv-order-upload > span{
+  font-size:32px;
+  font-weight:200;
+}
+
+.cv-order-upload small,
+.cv-order-ai-preview small,
+.cv-order-ai-panel small{
+  font-size:8px;
+  letter-spacing:1.6px;
+  opacity:.4;
+}
+
+.cv-order-ai-preview{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+#cvOrderReferencePreview{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  font-size:10px;
+  opacity:.45;
+  overflow:hidden;
+}
+
+#cvOrderReferencePreview img{
+  width:100%;
+  height:150px;
+  object-fit:cover;
+}
+
+.cv-order-ai-panel{
+  background:#111;
+  color:#fff;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+}
+
+.cv-order-ai-panel > strong{
+  font-family:Georgia,serif;
+  font-size:21px;
+  font-weight:400;
+  margin:9px 0;
+}
+
+.cv-order-ai-panel p{
+  font-size:10px;
+  line-height:1.7;
+  opacity:.6;
+  margin:0 0 15px;
+}
+
+.cv-order-ai-panel button{
+  width:100%;
+  border:1px solid rgba(255,255,255,.25);
+  background:#fff;
+  color:#111;
+  padding:12px;
+  cursor:pointer;
+}
+
+.cv-order-ai-panel button:disabled{
+  opacity:.4;
+  cursor:not-allowed;
+}
+
+.cv-order-ai-panel > span{
+  font-size:8px;
+  opacity:.4;
+  margin-top:9px;
+}
+
+.cv-order-factory-box{
+  margin-top:25px;
+  border:1px solid rgba(0,0,0,.12);
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.cv-order-factory-box small{
+  font-size:8px;
+  letter-spacing:2px;
+  opacity:.4;
+}
+
+.cv-order-factory-box strong{
+  font-size:13px;
+}
+
+.cv-order-factory-box span{
+  font-size:10px;
+  opacity:.55;
+}
+
+.cv-order-error{
+  margin-top:15px;
+  font-size:11px;
+}
+
+.cv-order-submit{
+  width:100%;
+  margin-top:15px;
+  border:0;
+  background:#111;
+  color:#fff;
+  padding:17px 20px;
+  display:flex;
+  justify-content:space-between;
+  cursor:pointer;
+  font-weight:600;
+}
+
+@media(max-width:760px){
+
+  .cv-orders-head{
+    align-items:stretch;
+    flex-direction:column;
+  }
+
+  .cv-order-new-btn{
+    width:100%;
+  }
+
+  .cv-orders-stats{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .cv-order-modal{
+    padding:10px;
+  }
+
+  .cv-order-modal-card{
+    padding:20px;
+  }
+
+  .cv-order-grid{
+    grid-template-columns:1fr;
+  }
+
+  .cv-order-ai-box{
+    grid-template-columns:1fr;
+  }
+}
+</style>
+
+<script>
+/* =====================================================
+   CASA VERONA — ORDER CENTER UI
+===================================================== */
+
+(function(){
+
+  const newBtn =
+    document.getElementById("cvNewOrderBtn");
+
+  const modal =
+    document.getElementById("cvOrderModal");
+
+  const closeBtn =
+    document.getElementById("cvOrderModalClose");
+
+  const form =
+    document.getElementById("cvNewOrderForm");
+
+  const orderDate =
+    document.getElementById("cvOrderDate");
+
+  const targetDate =
+    document.getElementById("cvOrderTargetDate");
+
+  const imageInput =
+    document.getElementById("cvOrderReferenceImage");
+
+  const imagePreview =
+    document.getElementById("cvOrderReferencePreview");
+
+
+  function cvDateInputValue(date){
+    const y = date.getFullYear();
+    const m = String(date.getMonth()+1).padStart(2,"0");
+    const d = String(date.getDate()).padStart(2,"0");
+
+    return `${y}-${m}-${d}`;
+  }
+
+
+  function cvSetDefaultOrderDates(){
+
+    const today = new Date();
+
+    const delivery = new Date(today);
+    delivery.setDate(delivery.getDate() + 14);
+
+    if(orderDate){
+      orderDate.value =
+        cvDateInputValue(today);
+    }
+
+    if(targetDate){
+      targetDate.value =
+        cvDateInputValue(delivery);
+    }
+  }
+
+
+  function cvOpenOrderModal(){
+
+    if(!modal) return;
+
+    cvSetDefaultOrderDates();
+
+    modal.hidden = false;
+
+    document.body.style.overflow = "hidden";
+  }
+
+
+  function cvCloseOrderModal(){
+
+    if(!modal) return;
+
+    modal.hidden = true;
+
+    document.body.style.overflow = "";
+  }
+
+
+  newBtn?.addEventListener(
+    "click",
+    cvOpenOrderModal
+  );
+
+
+  closeBtn?.addEventListener(
+    "click",
+    cvCloseOrderModal
+  );
+
+
+  modal?.addEventListener(
+    "click",
+    event => {
+
+      if(event.target === modal){
+        cvCloseOrderModal();
+      }
+
+    }
+  );
+
+
+  document.addEventListener(
+    "keydown",
+    event => {
+
+      if(
+        event.key === "Escape" &&
+        modal &&
+        !modal.hidden
+      ){
+        cvCloseOrderModal();
+      }
+
+    }
+  );
+
+
+  orderDate?.addEventListener(
+    "change",
+    () => {
+
+      if(!orderDate.value || !targetDate){
+        return;
+      }
+
+      const base =
+        new Date(orderDate.value + "T12:00:00");
+
+      base.setDate(base.getDate() + 14);
+
+      targetDate.value =
+        cvDateInputValue(base);
+    }
+  );
+
+
+  imageInput?.addEventListener(
+    "change",
+    () => {
+
+      const file =
+        imageInput.files?.[0];
+
+      if(!file || !imagePreview){
+        return;
+      }
+
+      if(!file.type.startsWith("image/")){
+        imageInput.value = "";
+        imagePreview.textContent =
+          "יש לבחור קובץ תמונה";
+        return;
+      }
+
+      const reader =
+        new FileReader();
+
+      reader.onload = () => {
+
+        imagePreview.innerHTML = "";
+
+        const img =
+          document.createElement("img");
+
+        img.src = reader.result;
+        img.alt = "סקיצת הזמנה";
+
+        imagePreview.appendChild(img);
+      };
+
+      reader.readAsDataURL(file);
+    }
+  );
+
+
+  /*
+   * Temporary:
+   * Prevent real order submission until
+   * API + Factory workflow are connected.
+   */
+  form?.addEventListener(
+    "submit",
+    event => {
+
+      event.preventDefault();
+
+      const error =
+        document.getElementById(
+          "cvOrderFormError"
+        );
+
+      if(error){
+        error.textContent =
+          "הטופס מוכן. חיבור השמירה והשליחה למפעל יתווסף בשלב הבא.";
+      }
+
+    }
+  );
+
+})();
+</script>
+
