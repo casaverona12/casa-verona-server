@@ -1850,12 +1850,12 @@ async function cvEnablePushNotifications(){
     let subscription =
       await registration.pushManager.getSubscription();
 
-    // Re-create subscription with the current VAPID public key.
+    // Remove old subscription created with the previous VAPID key.
     if(subscription){
       await subscription.unsubscribe();
-      subscription = null;
     }
 
+    // Create a fresh subscription with the current VAPID key.
     subscription =
       await registration.pushManager.subscribe({
         userVisibleOnly:true,
