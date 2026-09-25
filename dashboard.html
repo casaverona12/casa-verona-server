@@ -1850,17 +1850,20 @@ async function cvEnablePushNotifications(){
     let subscription =
       await registration.pushManager.getSubscription();
 
-    if(!subscription){
-
-      subscription =
-        await registration.pushManager.subscribe({
-          userVisibleOnly:true,
-          applicationServerKey:
-            cvUrlBase64ToUint8Array(
-              CV_VAPID_PUBLIC_KEY
-            )
-        });
+    // Re-create subscription with the current VAPID public key.
+    if(subscription){
+      await subscription.unsubscribe();
+      subscription = null;
     }
+
+    subscription =
+      await registration.pushManager.subscribe({
+        userVisibleOnly:true,
+        applicationServerKey:
+          cvUrlBase64ToUint8Array(
+            CV_VAPID_PUBLIC_KEY
+          )
+      });
 
     const response =
       await fetch(
