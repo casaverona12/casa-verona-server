@@ -4681,25 +4681,174 @@ document
   );
 
 
-  /*
-   * Temporary:
-   * Prevent real order submission until
-   * API + Factory workflow are connected.
-   */
   form?.addEventListener(
     "submit",
-    event => {
+    async event => {
 
       event.preventDefault();
 
-      const error =
-        document.getElementById(
-          "cvOrderFormError"
+      const errorBox =
+        document.getElementById("cvOrderFormError");
+
+      const submitButton =
+        form.querySelector('button[type="submit"]');
+
+      if(errorBox){
+        errorBox.textContent = "";
+      }
+
+      const value = id =>
+        document.getElementById(id)?.value?.trim() || "";
+
+      const numberValue = id => {
+        const raw = value(id);
+        if(raw === "") return null;
+
+        const parsed = Number(raw);
+        return Number.isFinite(parsed) ? parsed : null;
+      };
+
+      const payload = {
+        customer_name:
+          value("cvOrderCustomerName"),
+
+        customer_phone:
+          value("cvOrderCustomerPhone"),
+
+        product_name:
+          value("cvOrderProductName"),
+
+        sale_price:
+          numberValue("cvOrderSalePrice"),
+
+        width:
+          numberValue("cvOrderWidth"),
+
+        depth:
+          numberValue("cvOrderDepth"),
+
+        chaise_length:
+          numberValue("cvOrderChaiseLength"),
+
+        chaise_side:
+          value("cvOrderChaiseSide") || null,
+
+        fabric_company:
+          value("cvOrderFabricCompany") || null,
+
+        fabric_collection:
+          value("cvOrderFabricCollection") || null,
+
+        fabric_code:
+          value("cvOrderFabricCode") || null,
+
+        color:
+          value("cvOrderColor") || null,
+
+        special_requests:
+          value("cvOrderSpecialRequests") || null,
+
+        order_date:
+          value("cvOrderDate"),
+
+        target_delivery_date:
+          value("cvOrderTargetDate"),
+
+        reference_image_url: null,
+        model_image_url: null
+      };
+
+      if(
+        !payload.customer_name ||
+        !payload.customer_phone ||
+        !payload.product_name
+      ){
+        if(errorBox){
+          errorBox.textContent =
+            "יש למלא שם לקוח, טלפון ושם דגם.";
+        }
+        return;
+      }
+
+      try {
+
+        if(submitButton){
+          submitButton.disabled = true;
+          submitButton.innerHTML =
+            "<span>שומר הזמנה...</span><span>•••</span>";
+        }
+
+        const response = await fetch(
+          "/api/orders",
+          {
+            method: "POST",
+            credentials: "include",
+            cache: "no-store",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+          }
         );
 
-      if(error){
-        error.textContent =
-          "הטופס מוכן. חיבור השמירה והשליחה למפעל יתווסף בשלב הבא.";
+        const data =
+          await response.json().catch(() => ({}));
+
+        if(!response.ok || !data?.success){
+          throw new Error(
+            data?.error ||
+            `ORDER_CREATE_FAILED_${response.status}`
+          );
+        }
+
+        console.log(
+          "Casa Verona order created:",
+          data
+        );
+
+        if(errorBox){
+          errorBox.textContent =
+            `הזמנה #${data.order?.order_number || ""} נוצרה ונשלחה למפעל ✓`;
+        }
+
+        form.reset();
+
+        if(typeof cvSetOrderDefaultDates === "function"){
+          cvSetOrderDefaultDates();
+        }
+
+        setTimeout(() => {
+
+          const modal =
+            document.getElementById("cvOrderModal");
+
+          if(modal){
+            modal.hidden = true;
+          }
+
+        }, 900);
+
+      } catch(err) {
+
+        console.error(
+          "CASA VERONA CREATE ORDER:",
+          err
+        );
+
+        if(errorBox){
+          errorBox.textContent =
+            err.message ||
+            "שמירת ההזמנה נכשלה";
+        }
+
+      } finally {
+
+        if(submitButton){
+          submitButton.disabled = false;
+          submitButton.innerHTML =
+            "<span>שמור ושלח למפעל</span><span>←</span>";
+        }
+
       }
 
     }
