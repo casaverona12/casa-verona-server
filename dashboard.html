@@ -1955,6 +1955,32 @@ async function cvCheckPushStatus(){
 
     if(subscription){
 
+      // Sync an existing browser subscription with Casa Verona server.
+      const response = await fetch(
+        "/api/admin/push/subscribe",
+        {
+          method:"POST",
+          credentials:"include",
+          cache:"no-store",
+          headers:{
+            "Content-Type":"application/json"
+          },
+          body:JSON.stringify({
+            subscription:subscription.toJSON()
+          })
+        }
+      );
+
+      const data =
+        await response.json().catch(()=>({}));
+
+      if(!response.ok || !data?.success){
+        throw new Error(
+          data?.error ||
+          "PUSH_SUBSCRIPTION_SYNC_FAILED"
+        );
+      }
+
       status.textContent =
         "התראות פעילות ✓";
 
@@ -1964,6 +1990,10 @@ async function cvCheckPushStatus(){
       button.disabled = true;
 
       card?.classList.add("active");
+
+      console.log(
+        "Casa Verona Push subscription synced"
+      );
     }
 
   }catch(error){
