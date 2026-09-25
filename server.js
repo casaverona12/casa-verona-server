@@ -3000,6 +3000,164 @@ if (
 // API - ORDERS
 // -----------------------------------------------
 
+
+if (
+  req.method === "POST" &&
+  url.pathname === "/api/orders"
+) {
+  const auth = await requireAuth(req, res, [
+    USER_ROLES.ADMIN
+  ]);
+
+  if (!auth) {
+    return;
+  }
+
+  const bodyText = await readRequestBody(req);
+
+  let body;
+
+  try {
+    body = JSON.parse(bodyText || "{}");
+  } catch {
+    res.writeHead(400, {
+      "Content-Type": "application/json; charset=utf-8"
+    });
+
+    res.end(JSON.stringify({
+      success: false,
+      error: "INVALID_JSON"
+    }));
+
+    return;
+  }
+
+  const customerName =
+    String(body.customer_name || "").trim();
+
+  const customerPhone =
+    String(body.customer_phone || "").trim();
+
+  const productName =
+    String(body.product_name || "").trim();
+
+  if (!customerName || !customerPhone || !productName) {
+    res.writeHead(400, {
+      "Content-Type": "application/json; charset=utf-8"
+    });
+
+    res.end(JSON.stringify({
+      success: false,
+      error: "MISSING_REQUIRED_ORDER_FIELDS"
+    }));
+
+    return;
+  }
+
+  const db = requireSupabase();
+
+  const today =
+    new Date().toISOString().slice(0, 10);
+
+  const targetDate =
+    body.target_delivery_date || (() => {
+      const d = new Date();
+      d.setDate(d.getDate() + 14);
+      return d.toISOString().slice(0, 10);
+    })();
+
+  // 1. Create the Casa Verona order.
+  // order_number is generated automatically by Postgres.
+  const {
+    data: order,
+    error: orderError
+  } = await db
+    .from("orders")
+    .insert({
+      customer_name: customerName,
+      customer_phone: customerPhone,
+      product_name: productName,
+
+      width: body.width || null,
+      depth: body.depth || null,
+      chaise_length: body.chaise_length || null,
+      chaise_side: body.chaise_side || null,
+
+      fabric_type: body.fabric_type || null,
+      fabric_company: body.fabric_company || null,
+      fabric_collection: body.fabric_collection || null,
+      fabric_code: body.fabric_code || null,
+      color: body.color || null,
+      comfort: body.comfort || null,
+
+      special_requests:
+        body.special_requests || null,
+
+      production_notes:
+        body.production_notes || null,
+
+      reference_image_url:
+        body.reference_image_url || null,
+
+      model_image_url:
+        body.model_image_url || null,
+
+      sale_price:
+        body.sale_price || null,
+
+      status: "NEW",
+      order_date: body.order_date || today,
+      target_delivery_date: targetDate
+    })
+    .select("*")
+    .single();
+
+  if (orderError) {
+    throw new Error(
+      `SUPABASE CREATE ORDER ERROR: ${orderError.message}`
+    );
+  }
+
+  // 2. Automatically create the factory production job.
+  const {
+    data: production,
+    error: productionError
+  } = await db
+    .from("production_orders")
+    .insert({
+      order_id: order.id,
+      status: "WAITING",
+      due_date: targetDate,
+      approval_status: "PENDING"
+    })
+    .select("*")
+    .single();
+
+  if (productionError) {
+    // Avoid leaving an orphan order if production creation fails.
+    await db
+      .from("orders")
+      .delete()
+      .eq("id", order.id);
+
+    throw new Error(
+      `SUPABASE CREATE PRODUCTION ERROR: ${productionError.message}`
+    );
+  }
+
+  res.writeHead(201, {
+    "Content-Type": "application/json; charset=utf-8"
+  });
+
+  res.end(JSON.stringify({
+    success: true,
+    order,
+    production
+  }));
+
+  return;
+}
+
 if (
   req.method === "GET" &&
   url.pathname === "/api/orders"
