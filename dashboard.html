@@ -5144,10 +5144,22 @@ document
   }
 
   function cvRenderOrders(){
+
     const list =
       document.getElementById("cvOrdersList");
 
     if(!list) return;
+
+    const role = String(
+      window.casaVeronaUser?.role || ""
+    ).toUpperCase();
+
+    const isAdmin =
+      role === "ADMIN";
+
+    const isFactory =
+      role === "FACTORY_OWNER" ||
+      role === "FACTORY_WORKER";
 
     const openOrders =
       cvOrdersData.filter(order => {
@@ -5160,16 +5172,19 @@ document
         cvOrderStatus(order).key === "approval"
       ).length;
 
-    const production =
+    const productionCount =
       openOrders.filter(order =>
         cvOrderStatus(order).key === "production"
       ).length;
 
+    const ready =
+      openOrders.filter(order =>
+        cvOrderStatus(order).key === "ready"
+      ).length;
+
     const delivery =
       openOrders.filter(order =>
-        ["delivery","ready"].includes(
-          cvOrderStatus(order).key
-        )
+        cvOrderStatus(order).key === "delivery"
       ).length;
 
     const set = (id,value) => {
@@ -5179,17 +5194,21 @@ document
 
     set("cvOrdersActive", openOrders.length);
     set("cvOrdersPendingFactory", pending);
-    set("cvOrdersProduction", production);
-    set("cvOrdersDelivery", delivery);
+    set("cvOrdersProduction", productionCount);
+    set("cvOrdersDelivery", ready + delivery);
 
     if(!openOrders.length){
+
       list.innerHTML = `
-        <div class="cv-orders-empty">
-          <small>CASA VERONA · OPERATIONS</small>
-          <strong>אין כרגע הזמנות פתוחות</strong>
-          <span>הזמנה חדשה שתיווצר תופיע כאן אוטומטית.</span>
+        <div class="cv-v4-empty">
+          <span>CV</span>
+          <strong>אין הזמנות פעילות</strong>
+          <p>
+            הזמנות חדשות יופיעו כאן אוטומטית.
+          </p>
         </div>
       `;
+
       return;
     }
 
@@ -5199,7 +5218,7 @@ document
         const status =
           cvOrderStatus(order);
 
-        const productionData =
+        const production =
           cvOrderProduction(order);
 
         const days =
@@ -5207,142 +5226,277 @@ document
             order.target_delivery_date
           );
 
-        let deadline = "ללא דדליין";
+        let deadline = "ללא תאריך יעד";
 
         if(days !== null){
+
           if(days < 0){
             deadline =
-              `באיחור ${Math.abs(days)} ימים`;
+              `${Math.abs(days)} ימים באיחור`;
           }else if(days === 0){
             deadline = "אספקה היום";
+          }else if(days === 1){
+            deadline = "נותר יום אחד";
           }else{
             deadline = `נותרו ${days} ימים`;
           }
+
         }
 
-        const dimensions = [
-          order.width
-            ? `רוחב ${order.width} ס"מ`
-            : null,
-          order.depth
-            ? `עומק ${order.depth} ס"מ`
-            : null,
-          order.chaise_length
-            ? `שזלונג ${order.chaise_length} ס"מ`
-            : null
-        ].filter(Boolean).join(" · ");
+        const fabric =
+          [
+            order.fabric_company,
+            order.fabric_collection,
+            order.fabric_code
+          ]
+          .filter(Boolean)
+          .join(" · ");
+
+        const dimensions =
+          [
+            order.width
+              ? `${order.width}`
+              : null,
+
+            order.depth
+              ? `${order.depth}`
+              : null,
+
+            order.chaise_length
+              ? `שזלונג ${order.chaise_length}`
+              : null
+          ]
+          .filter(Boolean)
+          .join(" × ");
+
+        const factoryPrice =
+          Number(
+            production.estimated_cost ||
+            order.product_cost ||
+            0
+          );
+
+        const qcImage =
+          order.factory_final_image_url ||
+          "";
+
+        const qcText =
+          qcImage
+            ? "תמונת מוצר התקבלה"
+            : "ללא תמונת מוצר";
+
+        const adminMeta =
+          isAdmin && factoryPrice
+            ? `
+              <span class="cv-v4-factory-price">
+                מפעל ₪${factoryPrice.toLocaleString("he-IL")}
+              </span>
+            `
+            : "";
+
+        const factoryMeta =
+          isFactory
+            ? `
+              <span>
+                ${
+                  production.approval_status === "APPROVED"
+                    ? "מאושר לייצור"
+                    : "ממתין לאישור"
+                }
+              </span>
+            `
+            : "";
 
         return `
+
           <article
-            class="cv-order-live-card"
-            data-order-id="${cvOrderEscape(order.id)}"
+            class="cv-v4-order-card"
+            role="button"
+            tabindex="0"
+            data-order-inquiry="${cvOrderEscape(order.id)}"
           >
-            <div class="cv-order-live-top">
-              <div>
-                <small>
-                  ORDER #${cvOrderEscape(order.order_number)}
-                </small>
+
+            <div class="cv-v4-order-accent"></div>
+
+            <div class="cv-v4-card-main">
+
+              <div class="cv-v4-card-head">
+
+                <div class="cv-v4-order-number">
+                  <small>ORDER</small>
+                  <strong>
+                    #${cvOrderEscape(
+                      order.order_number || "—"
+                    )}
+                  </strong>
+                </div>
+
+                <span
+                  class="cv-v4-status cv-v4-status-${cvOrderEscape(status.key)}"
+                >
+                  ${cvOrderEscape(status.label)}
+                </span>
+
+              </div>
+
+
+              <div class="cv-v4-product">
 
                 <h3>
-                  ${cvOrderEscape(order.product_name || "ללא דגם")}
+                  ${cvOrderEscape(
+                    order.product_name ||
+                    "ללא שם דגם"
+                  )}
                 </h3>
 
-                <span>
-                  ${cvOrderEscape(order.customer_name || "ללא שם")}
-                </span>
-              </div>
+                <div class="cv-v4-customer">
 
-              <span class="cv-order-live-status status-${status.key}">
-                ${status.label}
-              </span>
-            </div>
+                  <strong>
+                    ${cvOrderEscape(
+                      order.customer_name ||
+                      "ללא שם"
+                    )}
+                  </strong>
 
-            <div class="cv-order-live-info">
-              <div>
-                <small>DELIVERY TARGET</small>
-                <strong>
-                  ${cvOrderDateLabel(order.target_delivery_date)}
-                </strong>
-                <span>${deadline}</span>
-              </div>
-
-              <div>
-                <small>SPECIFICATION</small>
-                <strong>
-                  ${cvOrderEscape(dimensions || "מפרט בהזמנה")}
-                </strong>
-                <span>
-                  ${cvOrderEscape(
-                    [
-                      order.fabric_company,
-                      order.fabric_collection,
-                      order.fabric_code
-                    ].filter(Boolean).join(" · ") ||
-                    "ללא פרטי בד"
-                  )}
-                </span>
-              </div>
-
-              <div>
-                <small>FACTORY</small>
-                <strong>
                   ${
-                    productionData.approval_status === "APPROVED"
-                      ? "מאושרת"
-                      : "ממתינה לאישור"
+                    isAdmin
+                      ? `
+                        <span>
+                          ${cvOrderEscape(
+                            order.customer_phone || ""
+                          )}
+                        </span>
+                      `
+                      : ""
                   }
-                </strong>
-                <span>
-                  ${
-                    productionData.estimated_cost
-                      ? `עלות: ₪${Number(
-                          productionData.estimated_cost
-                        ).toLocaleString("he-IL")}`
-                      : "טרם הוזנה עלות"
-                  }
-                </span>
+
+                </div>
+
               </div>
+
+
+              <div class="cv-v4-order-data">
+
+                <div>
+                  <small>יעד</small>
+
+                  <strong>
+                    ${cvOrderEscape(
+                      cvOrderDateLabel(
+                        order.target_delivery_date
+                      )
+                    )}
+                  </strong>
+
+                  <span>${cvOrderEscape(deadline)}</span>
+                </div>
+
+                <div>
+                  <small>מפרט</small>
+
+                  <strong>
+                    ${cvOrderEscape(
+                      dimensions ||
+                      "מפרט בהזמנה"
+                    )}
+                  </strong>
+
+                  <span>
+                    ${cvOrderEscape(
+                      fabric ||
+                      "ללא פרטי בד"
+                    )}
+                  </span>
+                </div>
+
+              </div>
+
+
+              <div class="cv-v4-progress">
+
+                <div class="done">
+                  <i></i>
+                  <span>התקבלה</span>
+                </div>
+
+                <div class="${
+                  production.approval_status === "APPROVED"
+                    ? "done"
+                    : ""
+                }">
+                  <i></i>
+                  <span>אישור</span>
+                </div>
+
+                <div class="${
+                  ["production","ready","delivery"]
+                    .includes(status.key)
+                    ? "done"
+                    : ""
+                }">
+                  <i></i>
+                  <span>ייצור</span>
+                </div>
+
+                <div class="${
+                  qcImage ? "done" : ""
+                }">
+                  <i></i>
+                  <span>תמונה</span>
+                </div>
+
+                <div class="${
+                  ["ready","delivery"]
+                    .includes(status.key)
+                    ? "done"
+                    : ""
+                }">
+                  <i></i>
+                  <span>מוכן</span>
+                </div>
+
+              </div>
+
+
+              <div class="cv-v4-card-footer">
+
+                <div class="cv-v4-card-meta">
+
+                  <span class="${
+                    qcImage
+                      ? "cv-v4-qc-ok"
+                      : "cv-v4-qc-missing"
+                  }">
+                    ${
+                      qcImage
+                        ? "✓"
+                        : "!"
+                    }
+                    ${qcText}
+                  </span>
+
+                  ${adminMeta}
+                  ${factoryMeta}
+
+                </div>
+
+                <div class="cv-v4-open">
+                  <span>פתיחת הזמנה</span>
+                  <strong>←</strong>
+                </div>
+
+              </div>
+
             </div>
 
-            <div class="cv-order-live-progress">
-              <span class="${status.key !== "new" ? "done" : ""}">
-                התקבלה
-              </span>
-              <span class="${
-                ["production","ready","delivery"].includes(status.key)
-                  ? "done"
-                  : ""
-              }">
-                אישור מפעל
-              </span>
-              <span class="${
-                ["ready","delivery"].includes(status.key)
-                  ? "done"
-                  : ""
-              }">
-                ייצור
-              </span>
-              <span class="${
-                status.key === "delivery"
-                  ? "done"
-                  : ""
-              }">
-                אספקה
-              </span>
-            </div>
-
-            <button
-              type="button"
-              class="cv-order-inquiry-btn"
-              data-order-inquiry="${cvOrderEscape(order.id)}"
-            >
-              <span>בירור הזמנה</span>
-              <span>←</span>
-            </button>
           </article>
+
         `;
+
       }).join("");
+
   }
+
 
   async function cvLoadOrders(){
     if(cvOrdersLoading) return;
@@ -8151,6 +8305,643 @@ document
 
   .cv-v3-finance-grid strong{
     font-size:20px;
+  }
+}
+
+</style>
+
+<style>
+/* =========================================================
+   CASA VERONA — ORDERS V4
+   Premium Mobile / Desktop Operations
+========================================================= */
+
+#orders{
+  --cv-ink:#171513;
+  --cv-soft:#f3f0ea;
+  --cv-paper:#fbfaf7;
+  --cv-line:#e2ddd4;
+  --cv-muted:#8c857b;
+  --cv-wine:#6f2637;
+  --cv-wine-soft:#f0e5e7;
+
+  background:
+    radial-gradient(circle at 85% 0%,rgba(111,38,55,.07),transparent 28%),
+    #f3f0ea;
+  min-height:100vh;
+}
+
+/* ===== HEADER ===== */
+
+#orders .cv-orders-head{
+  position:relative;
+  padding:38px 38px 30px;
+  margin-bottom:0;
+  overflow:hidden;
+  background:#171513;
+  color:#fff;
+}
+
+#orders .cv-orders-head:after{
+  content:"CV";
+  position:absolute;
+  left:-8px;
+  bottom:-42px;
+  font-family:Georgia,serif;
+  font-size:150px;
+  line-height:1;
+  color:rgba(255,255,255,.025);
+  pointer-events:none;
+}
+
+#orders .cv-orders-head small{
+  color:rgba(255,255,255,.42);
+  letter-spacing:2.4px;
+}
+
+#orders .cv-orders-head h2{
+  margin:9px 0 8px;
+  color:#fff;
+  font-family:Georgia,serif;
+  font-size:38px;
+  font-weight:400;
+}
+
+#orders .cv-orders-head h2 em{
+  color:#c9b7a1;
+  font-style:italic;
+}
+
+#orders .cv-orders-head p{
+  max-width:480px;
+  margin:0;
+  color:rgba(255,255,255,.48);
+  font-size:10px;
+  line-height:1.7;
+}
+
+#orders .cv-order-new-btn{
+  position:relative;
+  z-index:2;
+  min-width:150px;
+  min-height:48px;
+  border:1px solid rgba(255,255,255,.22);
+  background:#fff;
+  color:#171513;
+  font-size:10px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+/* ===== KPI ===== */
+
+#orders .cv-orders-stats{
+  margin:0;
+  padding:0 38px 32px;
+  display:grid;
+  grid-template-columns:1.35fr repeat(3,1fr);
+  gap:1px;
+  background:#171513;
+}
+
+#orders .cv-orders-stats > div{
+  min-height:112px;
+  padding:22px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  background:#211f1c;
+  color:#fff;
+}
+
+#orders .cv-orders-stats > div:first-child{
+  background:var(--cv-wine);
+}
+
+#orders .cv-orders-stats small{
+  font-size:7px;
+  letter-spacing:1.7px;
+  color:rgba(255,255,255,.42);
+}
+
+#orders .cv-orders-stats strong{
+  margin:8px 0 3px;
+  font-family:Georgia,serif;
+  font-size:36px;
+  line-height:1;
+  font-weight:400;
+}
+
+#orders .cv-orders-stats span{
+  color:rgba(255,255,255,.55);
+  font-size:9px;
+}
+
+/* ===== LIST AREA ===== */
+
+#orders .cv-orders-list-head{
+  margin:0;
+  padding:34px 38px 17px;
+  align-items:flex-end;
+}
+
+#orders .cv-orders-list-head small{
+  font-size:7px;
+  letter-spacing:2px;
+  color:var(--cv-muted);
+}
+
+#orders .cv-orders-list-head h3{
+  margin:5px 0 0;
+  font-family:Georgia,serif;
+  font-size:27px;
+  font-weight:400;
+  color:var(--cv-ink);
+}
+
+#orders .cv-orders-list-head > span{
+  padding:6px 9px;
+  border:1px solid #d8d2c8;
+  border-radius:30px;
+  color:#777067;
+  font-size:7px;
+  letter-spacing:1.5px;
+}
+
+#orders .cv-orders-list{
+  padding:0 38px 70px;
+  border:0;
+}
+
+/* ===== ORDER CARD ===== */
+
+#orders .cv-v4-order-card{
+  position:relative;
+  margin-bottom:13px;
+  display:grid;
+  grid-template-columns:5px minmax(0,1fr);
+  overflow:hidden;
+  border:1px solid var(--cv-line);
+  background:var(--cv-paper);
+  box-shadow:0 5px 18px rgba(29,24,19,.035);
+  cursor:pointer;
+  transition:
+    transform .18s ease,
+    box-shadow .18s ease,
+    border-color .18s ease;
+  -webkit-tap-highlight-color:transparent;
+}
+
+#orders .cv-v4-order-card:hover{
+  transform:translateY(-2px);
+  border-color:#cec6bb;
+  box-shadow:0 16px 38px rgba(29,24,19,.08);
+}
+
+#orders .cv-v4-order-card:active{
+  transform:scale(.995);
+}
+
+#orders .cv-v4-order-accent{
+  background:var(--cv-wine);
+}
+
+#orders .cv-v4-card-main{
+  padding:22px 24px 0;
+}
+
+#orders .cv-v4-card-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+}
+
+#orders .cv-v4-order-number{
+  display:flex;
+  align-items:baseline;
+  gap:5px;
+}
+
+#orders .cv-v4-order-number small{
+  font-size:6px;
+  letter-spacing:1.6px;
+  color:#aaa399;
+}
+
+#orders .cv-v4-order-number strong{
+  font-family:Georgia,serif;
+  font-size:14px;
+  font-weight:400;
+}
+
+#orders .cv-v4-status{
+  padding:7px 10px;
+  border-radius:30px;
+  font-size:8px;
+  font-weight:600;
+  white-space:nowrap;
+}
+
+#orders .cv-v4-status-new{
+  background:#ebe8e2;
+  color:#665f56;
+}
+
+#orders .cv-v4-status-approval{
+  background:#efe6d9;
+  color:#80663f;
+}
+
+#orders .cv-v4-status-production{
+  background:#e4eaed;
+  color:#526974;
+}
+
+#orders .cv-v4-status-ready{
+  background:#e4ece4;
+  color:#4e6b56;
+}
+
+#orders .cv-v4-status-delivery{
+  background:var(--cv-wine-soft);
+  color:var(--cv-wine);
+}
+
+/* PRODUCT */
+
+#orders .cv-v4-product{
+  padding:18px 0 20px;
+}
+
+#orders .cv-v4-product h3{
+  margin:0 0 7px;
+  font-family:Georgia,serif;
+  font-size:27px;
+  line-height:1.05;
+  font-weight:400;
+  color:var(--cv-ink);
+}
+
+#orders .cv-v4-customer{
+  display:flex;
+  align-items:center;
+  gap:9px;
+}
+
+#orders .cv-v4-customer strong{
+  font-size:10px;
+  color:#4f4a43;
+}
+
+#orders .cv-v4-customer span{
+  font-size:9px;
+  color:#999187;
+}
+
+/* DATA */
+
+#orders .cv-v4-order-data{
+  display:grid;
+  grid-template-columns:.8fr 1.4fr;
+  border-top:1px solid var(--cv-line);
+  border-bottom:1px solid var(--cv-line);
+}
+
+#orders .cv-v4-order-data > div{
+  padding:16px 0;
+}
+
+#orders .cv-v4-order-data > div + div{
+  padding-right:22px;
+  border-right:1px solid var(--cv-line);
+}
+
+#orders .cv-v4-order-data small{
+  display:block;
+  margin-bottom:6px;
+  font-size:6px;
+  letter-spacing:1.5px;
+  color:#aaa399;
+}
+
+#orders .cv-v4-order-data strong{
+  display:block;
+  margin-bottom:4px;
+  font-size:10px;
+  font-weight:600;
+  color:#34302b;
+}
+
+#orders .cv-v4-order-data span{
+  font-size:8px;
+  color:#938c82;
+}
+
+/* PROGRESS */
+
+#orders .cv-v4-progress{
+  position:relative;
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  padding:20px 0 18px;
+}
+
+#orders .cv-v4-progress:before{
+  content:"";
+  position:absolute;
+  top:25px;
+  right:9%;
+  left:9%;
+  height:1px;
+  background:#ded9d0;
+}
+
+#orders .cv-v4-progress > div{
+  position:relative;
+  z-index:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:9px;
+  color:#aaa299;
+  font-size:7px;
+}
+
+#orders .cv-v4-progress i{
+  width:9px;
+  height:9px;
+  border:3px solid var(--cv-paper);
+  border-radius:50%;
+  background:#d4cec5;
+  box-shadow:0 0 0 1px #d4cec5;
+}
+
+#orders .cv-v4-progress .done{
+  color:#4d4740;
+  font-weight:600;
+}
+
+#orders .cv-v4-progress .done i{
+  background:var(--cv-wine);
+  box-shadow:0 0 0 1px var(--cv-wine);
+}
+
+/* FOOTER */
+
+#orders .cv-v4-card-footer{
+  min-height:48px;
+  margin:0 -24px;
+  padding:0 24px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  border-top:1px solid var(--cv-line);
+  background:#f5f2ed;
+}
+
+#orders .cv-v4-card-meta{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font-size:7px;
+  color:#8b847a;
+}
+
+#orders .cv-v4-qc-ok{
+  color:#56705c;
+}
+
+#orders .cv-v4-qc-missing{
+  color:#9a7041;
+}
+
+#orders .cv-v4-factory-price{
+  padding-right:12px;
+  border-right:1px solid #d9d3ca;
+}
+
+#orders .cv-v4-open{
+  flex:none;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  color:var(--cv-wine);
+  font-size:8px;
+  font-weight:700;
+}
+
+#orders .cv-v4-open strong{
+  font-size:14px;
+  font-weight:400;
+}
+
+/* EMPTY */
+
+#orders .cv-v4-empty{
+  min-height:300px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  background:var(--cv-paper);
+  border:1px solid var(--cv-line);
+}
+
+#orders .cv-v4-empty > span{
+  width:50px;
+  height:50px;
+  display:grid;
+  place-items:center;
+  margin-bottom:15px;
+  border:1px solid #d5cfc5;
+  border-radius:50%;
+  font-family:Georgia,serif;
+}
+
+#orders .cv-v4-empty strong{
+  font-family:Georgia,serif;
+  font-size:22px;
+  font-weight:400;
+}
+
+#orders .cv-v4-empty p{
+  margin:7px 0 0;
+  color:#958e84;
+  font-size:9px;
+}
+
+/* =========================================================
+   MOBILE — iPhone + Galaxy
+========================================================= */
+
+@media(max-width:760px){
+
+  #orders{
+    padding-bottom:85px;
+  }
+
+  #orders .cv-orders-head{
+    padding:27px 18px 23px;
+  }
+
+  #orders .cv-orders-head:after{
+    left:-12px;
+    bottom:-24px;
+    font-size:100px;
+  }
+
+  #orders .cv-orders-head h2{
+    font-size:31px;
+  }
+
+  #orders .cv-orders-head p{
+    max-width:260px;
+    font-size:9px;
+  }
+
+  #orders .cv-order-new-btn{
+    width:100%;
+    min-height:52px;
+    margin-top:20px;
+  }
+
+  #orders .cv-orders-stats{
+    padding:0 18px 22px;
+    grid-template-columns:repeat(3,1fr);
+  }
+
+  #orders .cv-orders-stats > div{
+    min-height:84px;
+    padding:14px 10px;
+  }
+
+  #orders .cv-orders-stats > div:first-child{
+    grid-column:1 / -1;
+    min-height:110px;
+  }
+
+  #orders .cv-orders-stats > div:first-child strong{
+    font-size:48px;
+  }
+
+  #orders .cv-orders-stats small{
+    font-size:5px;
+    letter-spacing:1.1px;
+  }
+
+  #orders .cv-orders-stats strong{
+    font-size:26px;
+  }
+
+  #orders .cv-orders-stats span{
+    font-size:7px;
+  }
+
+  #orders .cv-orders-list-head{
+    padding:27px 16px 14px;
+  }
+
+  #orders .cv-orders-list-head h3{
+    font-size:24px;
+  }
+
+  #orders .cv-orders-list{
+    padding:0 12px 45px;
+  }
+
+  #orders .cv-v4-order-card{
+    margin-bottom:11px;
+    grid-template-columns:4px minmax(0,1fr);
+    border-radius:3px;
+  }
+
+  #orders .cv-v4-card-main{
+    padding:18px 16px 0;
+  }
+
+  #orders .cv-v4-product{
+    padding:15px 0 17px;
+  }
+
+  #orders .cv-v4-product h3{
+    font-size:24px;
+  }
+
+  #orders .cv-v4-order-data{
+    grid-template-columns:1fr 1.35fr;
+  }
+
+  #orders .cv-v4-order-data > div{
+    padding:14px 0;
+  }
+
+  #orders .cv-v4-order-data > div + div{
+    padding-right:13px;
+  }
+
+  #orders .cv-v4-order-data strong{
+    font-size:9px;
+  }
+
+  #orders .cv-v4-progress{
+    padding:19px 0 17px;
+  }
+
+  #orders .cv-v4-progress > div{
+    gap:8px;
+    font-size:6px;
+  }
+
+  #orders .cv-v4-card-footer{
+    min-height:50px;
+    margin:0 -16px;
+    padding:0 16px;
+  }
+
+  #orders .cv-v4-card-meta{
+    gap:7px;
+    font-size:6px;
+  }
+
+  #orders .cv-v4-open span{
+    display:none;
+  }
+
+  #orders .cv-v4-open strong{
+    width:30px;
+    height:30px;
+    display:grid;
+    place-items:center;
+    border-radius:50%;
+    background:var(--cv-wine);
+    color:#fff;
+  }
+}
+
+/* SMALL GALAXY / IPHONE */
+
+@media(max-width:380px){
+
+  #orders .cv-v4-customer span{
+    display:none;
+  }
+
+  #orders .cv-v4-order-data{
+    grid-template-columns:1fr;
+  }
+
+  #orders .cv-v4-order-data > div + div{
+    padding-right:0;
+    border-right:0;
+    border-top:1px solid var(--cv-line);
+  }
+
+  #orders .cv-v4-factory-price{
+    display:none;
   }
 }
 
