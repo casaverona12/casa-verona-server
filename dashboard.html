@@ -1355,7 +1355,7 @@ document
   ?.addEventListener("click",()=>cvLoadLeads(true));
 
 
-function cvOpenPage(id){const t=document.getElementById(id);if(!t)return;document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));t.classList.add("active");document.querySelectorAll("[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===id));const title=document.getElementById("pageTitle");if(title)title.textContent=(CV_PAGE_META[id]||[id])[0];if(id==="leads")cvLoadLeads();if(id==="followups")cvLoadFollowups();if(id==="orders")cvLoadOrders();window.scrollTo({top:0,behavior:"smooth"})}
+function cvOpenPage(id){const t=document.getElementById(id);if(!t)return;document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));t.classList.add("active");document.querySelectorAll("[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===id));const title=document.getElementById("pageTitle");if(title)title.textContent=(CV_PAGE_META[id]||[id])[0];if(id==="leads")cvLoadLeads();if(id==="followups")cvLoadFollowups();if(id==="orders")window.cvLoadOrders?.();window.scrollTo({top:0,behavior:"smooth"})}
 document.addEventListener("click",e=>{const n=e.target.closest("[data-page]"),o=e.target.closest("[data-open-page]");if(n)cvOpenPage(n.dataset.page);if(o)cvOpenPage(o.dataset.openPage)});
 </script>
 
@@ -5993,6 +5993,8 @@ document
     }
   );
 
+
+  window.cvLoadOrders = cvLoadOrders;
 
   function cvDateInputValue(date){
     const y = date.getFullYear();
