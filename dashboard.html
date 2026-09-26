@@ -5339,14 +5339,37 @@ document
       document.getElementById("cvOrdersList");
 
     try{
+      let currentUser =
+        window.casaVeronaUser || null;
+
+      if(!currentUser){
+        currentUser = await getCurrentUser();
+
+        if(currentUser){
+          window.casaVeronaUser = currentUser;
+        }
+      }
+
+      if(!currentUser){
+        throw new Error("לא נמצאה התחברות פעילה");
+      }
+
       const role = String(
-        window.casaVeronaUser?.role || ""
+        currentUser.role || ""
       ).toUpperCase();
 
-      const ordersEndpoint =
-        role === "ADMIN"
-          ? "/api/orders"
-          : "/api/factory/orders";
+      let ordersEndpoint;
+
+      if(role === "ADMIN"){
+        ordersEndpoint = "/api/orders";
+      }else if(
+        role === "FACTORY_OWNER" ||
+        role === "FACTORY_WORKER"
+      ){
+        ordersEndpoint = "/api/factory/orders";
+      }else{
+        throw new Error("אין הרשאה לצפייה בהזמנות");
+      }
 
       const response = await fetch(
         ordersEndpoint,
