@@ -758,6 +758,70 @@ linear-gradient(90deg,rgba(12,12,11,.025) 1px,transparent 1px),
   </div>
 
 
+
+  <!-- ORDER INQUIRY / COMMAND CENTER -->
+  <div id="cvOrderInquiryModal" class="cv-order-inquiry-modal" hidden>
+
+    <div class="cv-order-inquiry-shell">
+
+      <aside class="cv-order-inquiry-side">
+
+        <small>CASA VERONA · OPERATIONS</small>
+        <h3>בירור הזמנה</h3>
+
+        <p>
+          חיפוש ובקרה על כל ההזמנות הפתוחות של Casa Verona.
+        </p>
+
+        <input
+          id="cvOrderInquirySearch"
+          class="cv-order-inquiry-search"
+          type="search"
+          placeholder="מספר הזמנה, לקוח או דגם..."
+        >
+
+        <div
+          id="cvOrderInquiryResults"
+          class="cv-order-inquiry-results"
+        ></div>
+
+      </aside>
+
+      <main class="cv-order-command">
+
+        <div class="cv-order-command-head">
+
+          <div>
+            <small>ORDER COMMAND CENTER</small>
+            <h2 id="cvOrderCommandTitle">בחר הזמנה</h2>
+          </div>
+
+          <button
+            type="button"
+            id="cvOrderInquiryClose"
+            class="cv-order-command-close"
+          >×</button>
+
+        </div>
+
+        <div id="cvOrderCommandBody">
+
+          <div class="cv-orders-empty">
+            <small>CASA VERONA · OPERATIONS</small>
+            <strong>בחר הזמנה מהרשימה</strong>
+            <span>
+              כאן יוצגו המפרט, הייצור, האספקה והנתונים הניהוליים.
+            </span>
+          </div>
+
+        </div>
+
+      </main>
+
+    </div>
+
+  </div>
+
   <!-- NEW ORDER MODAL -->
   <div id="cvOrderModal" class="cv-order-modal" hidden>
 
@@ -1291,7 +1355,7 @@ document
   ?.addEventListener("click",()=>cvLoadLeads(true));
 
 
-function cvOpenPage(id){const t=document.getElementById(id);if(!t)return;document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));t.classList.add("active");document.querySelectorAll("[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===id));const title=document.getElementById("pageTitle");if(title)title.textContent=(CV_PAGE_META[id]||[id])[0];if(id==="leads")cvLoadLeads();if(id==="followups")cvLoadFollowups();window.scrollTo({top:0,behavior:"smooth"})}
+function cvOpenPage(id){const t=document.getElementById(id);if(!t)return;document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));t.classList.add("active");document.querySelectorAll("[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===id));const title=document.getElementById("pageTitle");if(title)title.textContent=(CV_PAGE_META[id]||[id])[0];if(id==="leads")cvLoadLeads();if(id==="followups")cvLoadFollowups();if(id==="orders")cvLoadOrders();window.scrollTo({top:0,behavior:"smooth"})}
 document.addEventListener("click",e=>{const n=e.target.closest("[data-page]"),o=e.target.closest("[data-open-page]");if(n)cvOpenPage(n.dataset.page);if(o)cvOpenPage(o.dataset.openPage)});
 </script>
 
@@ -2399,6 +2463,419 @@ if(
     display: block !important;
   }
 }
+
+/* =====================================================
+   CASA VERONA — PREMIUM OPERATIONS CENTER
+===================================================== */
+
+.cv-order-live-card{
+  margin:16px 0;
+  border:1px solid rgba(0,0,0,.10);
+  background:#fff;
+  padding:24px;
+  position:relative;
+  overflow:hidden;
+  transition:
+    transform .25s ease,
+    box-shadow .25s ease,
+    border-color .25s ease;
+}
+
+.cv-order-live-card::before{
+  content:"";
+  position:absolute;
+  top:0;
+  right:0;
+  width:3px;
+  height:100%;
+  background:#111;
+  opacity:.12;
+}
+
+.cv-order-live-card:hover{
+  transform:translateY(-2px);
+  border-color:rgba(0,0,0,.2);
+  box-shadow:0 18px 45px rgba(0,0,0,.07);
+}
+
+.cv-order-live-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:20px;
+  padding-bottom:20px;
+  border-bottom:1px solid rgba(0,0,0,.08);
+}
+
+.cv-order-live-top small{
+  display:block;
+  font-size:8px;
+  letter-spacing:2px;
+  opacity:.4;
+}
+
+.cv-order-live-top h3{
+  margin:7px 0 4px;
+  font-family:Georgia,serif;
+  font-size:27px;
+  font-weight:400;
+}
+
+.cv-order-live-top > div > span{
+  font-size:11px;
+  opacity:.5;
+}
+
+.cv-order-live-status{
+  padding:9px 12px;
+  border:1px solid rgba(0,0,0,.12);
+  font-size:9px;
+  white-space:nowrap;
+  letter-spacing:.4px;
+}
+
+.cv-order-live-status.status-approval{
+  background:#111;
+  color:#fff;
+}
+
+.cv-order-live-status.status-production{
+  background:#f3f0e9;
+}
+
+.cv-order-live-status.status-ready,
+.cv-order-live-status.status-delivery{
+  background:#edf3ed;
+}
+
+.cv-order-live-info{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:0;
+  margin:22px 0;
+  border:1px solid rgba(0,0,0,.08);
+}
+
+.cv-order-live-info > div{
+  padding:17px;
+  min-height:82px;
+  border-left:1px solid rgba(0,0,0,.08);
+  display:flex;
+  flex-direction:column;
+}
+
+.cv-order-live-info > div:last-child{
+  border-left:0;
+}
+
+.cv-order-live-info small{
+  font-size:7px;
+  letter-spacing:1.7px;
+  opacity:.35;
+}
+
+.cv-order-live-info strong{
+  margin:8px 0 4px;
+  font-size:12px;
+  font-weight:600;
+}
+
+.cv-order-live-info span{
+  font-size:9px;
+  opacity:.5;
+}
+
+.cv-order-live-progress{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  position:relative;
+  margin:26px 0 20px;
+  gap:4px;
+}
+
+.cv-order-live-progress::before{
+  content:"";
+  position:absolute;
+  top:7px;
+  right:12.5%;
+  left:12.5%;
+  height:1px;
+  background:rgba(0,0,0,.12);
+}
+
+.cv-order-live-progress span{
+  position:relative;
+  padding-top:22px;
+  text-align:center;
+  font-size:8px;
+  opacity:.35;
+}
+
+.cv-order-live-progress span::before{
+  content:"";
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:#d9d9d9;
+  border:3px solid #fff;
+  box-shadow:0 0 0 1px rgba(0,0,0,.12);
+  position:absolute;
+  top:1px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:2;
+}
+
+.cv-order-live-progress span.done{
+  opacity:1;
+}
+
+.cv-order-live-progress span.done::before{
+  background:#111;
+}
+
+.cv-order-inquiry-btn{
+  width:100%;
+  border:1px solid #111;
+  background:#111;
+  color:#fff;
+  padding:14px 17px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  cursor:pointer;
+  font:inherit;
+  font-size:11px;
+  transition:.2s ease;
+}
+
+.cv-order-inquiry-btn:hover{
+  background:#fff;
+  color:#111;
+}
+
+/* ORDER INQUIRY */
+
+.cv-order-inquiry-modal{
+  position:fixed;
+  inset:0;
+  z-index:10050;
+  background:rgba(10,10,10,.68);
+  backdrop-filter:blur(10px);
+  padding:24px;
+  overflow:auto;
+}
+
+.cv-order-inquiry-modal[hidden]{
+  display:none !important;
+}
+
+.cv-order-inquiry-shell{
+  width:min(1180px,100%);
+  min-height:650px;
+  margin:20px auto;
+  background:#f8f7f3;
+  display:grid;
+  grid-template-columns:340px 1fr;
+  box-shadow:0 30px 100px rgba(0,0,0,.28);
+}
+
+.cv-order-inquiry-side{
+  background:#111;
+  color:#fff;
+  padding:28px;
+}
+
+.cv-order-inquiry-side small{
+  font-size:8px;
+  letter-spacing:2px;
+  opacity:.45;
+}
+
+.cv-order-inquiry-side h3{
+  font-family:Georgia,serif;
+  font-size:29px;
+  font-weight:400;
+  margin:8px 0 5px;
+}
+
+.cv-order-inquiry-side p{
+  margin:0 0 20px;
+  font-size:10px;
+  opacity:.5;
+  line-height:1.6;
+}
+
+.cv-order-inquiry-search{
+  width:100%;
+  box-sizing:border-box;
+  padding:13px;
+  border:1px solid rgba(255,255,255,.15);
+  background:rgba(255,255,255,.06);
+  color:#fff;
+  outline:none;
+  font:inherit;
+}
+
+.cv-order-inquiry-results{
+  margin-top:16px;
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+}
+
+.cv-order-inquiry-result{
+  width:100%;
+  text-align:right;
+  border:1px solid rgba(255,255,255,.11);
+  background:transparent;
+  color:#fff;
+  padding:13px;
+  cursor:pointer;
+}
+
+.cv-order-inquiry-result:hover,
+.cv-order-inquiry-result.active{
+  background:#fff;
+  color:#111;
+}
+
+.cv-order-inquiry-result strong{
+  display:block;
+  font-size:11px;
+}
+
+.cv-order-inquiry-result span{
+  display:block;
+  font-size:8px;
+  opacity:.55;
+  margin-top:5px;
+}
+
+.cv-order-command{
+  padding:34px;
+}
+
+.cv-order-command-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:20px;
+  padding-bottom:25px;
+  border-bottom:1px solid rgba(0,0,0,.1);
+}
+
+.cv-order-command-head small{
+  font-size:8px;
+  letter-spacing:2px;
+  opacity:.4;
+}
+
+.cv-order-command-head h2{
+  font-family:Georgia,serif;
+  font-size:34px;
+  font-weight:400;
+  margin:7px 0 0;
+}
+
+.cv-order-command-close{
+  border:0;
+  background:transparent;
+  font-size:30px;
+  cursor:pointer;
+}
+
+.cv-order-command-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+  margin-top:22px;
+}
+
+.cv-order-command-box{
+  background:#fff;
+  border:1px solid rgba(0,0,0,.08);
+  padding:20px;
+  min-height:120px;
+}
+
+.cv-order-command-box small{
+  font-size:8px;
+  letter-spacing:1.8px;
+  opacity:.35;
+}
+
+.cv-order-command-box strong{
+  display:block;
+  margin:10px 0 5px;
+  font-size:14px;
+}
+
+.cv-order-command-box span{
+  display:block;
+  font-size:10px;
+  line-height:1.7;
+  opacity:.55;
+}
+
+.cv-order-command-finance{
+  background:#111;
+  color:#fff;
+}
+
+@media(max-width:760px){
+
+  .cv-order-live-info{
+    grid-template-columns:1fr;
+  }
+
+  .cv-order-live-info > div{
+    border-left:0;
+    border-bottom:1px solid rgba(0,0,0,.08);
+  }
+
+  .cv-order-live-info > div:last-child{
+    border-bottom:0;
+  }
+
+  .cv-order-live-top{
+    flex-direction:column;
+  }
+
+  .cv-order-live-status{
+    width:100%;
+    box-sizing:border-box;
+    text-align:center;
+  }
+
+  .cv-order-inquiry-modal{
+    padding:0;
+  }
+
+  .cv-order-inquiry-shell{
+    margin:0;
+    min-height:100vh;
+    grid-template-columns:1fr;
+  }
+
+  .cv-order-inquiry-side{
+    padding:22px;
+  }
+
+  .cv-order-command{
+    padding:22px;
+  }
+
+  .cv-order-command-grid{
+    grid-template-columns:1fr;
+  }
+
+  .cv-order-command-head h2{
+    font-size:27px;
+  }
+}
+
+
 </style>
 
 <script>
@@ -4533,6 +5010,967 @@ document
     document.getElementById("cvOrderReferencePreview");
 
 
+
+  let cvOrdersData = [];
+  let cvOrdersLoading = false;
+
+  function cvOrderProduction(order){
+    const value = order?.production_orders;
+
+    if(Array.isArray(value)){
+      return value[0] || {};
+    }
+
+    return value || {};
+  }
+
+  function cvOrderDelivery(order){
+    const value = order?.deliveries;
+
+    if(Array.isArray(value)){
+      return value[0] || {};
+    }
+
+    return value || {};
+  }
+
+  function cvOrderEscape(value){
+    return String(value ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function cvOrderDateLabel(value){
+    if(!value) return "ללא תאריך";
+
+    const date = new Date(value + "T12:00:00");
+
+    if(Number.isNaN(date.getTime())){
+      return value;
+    }
+
+    return new Intl.DateTimeFormat(
+      "he-IL",
+      {
+        day:"2-digit",
+        month:"2-digit",
+        year:"numeric"
+      }
+    ).format(date);
+  }
+
+  function cvOrderStatus(order){
+    const production = cvOrderProduction(order);
+    const delivery = cvOrderDelivery(order);
+
+    if(
+      delivery.status === "DELIVERED" ||
+      order.status === "DELIVERED"
+    ){
+      return {
+        key:"delivered",
+        label:"נמסרה"
+      };
+    }
+
+    if(
+      delivery.status === "WAITING" ||
+      production.status === "READY"
+    ){
+      return {
+        key:"delivery",
+        label:"ממתינה לאספקה"
+      };
+    }
+
+    if(production.approval_status === "PENDING"){
+      return {
+        key:"approval",
+        label:"ממתינה לאישור המפעל"
+      };
+    }
+
+    if(production.status === "IN_PROGRESS"){
+      return {
+        key:"production",
+        label:"בייצור"
+      };
+    }
+
+    if(production.status === "READY"){
+      return {
+        key:"ready",
+        label:"מוכנה"
+      };
+    }
+
+    return {
+      key:"new",
+      label:"הזמנה חדשה"
+    };
+  }
+
+  function cvOrderDaysLeft(value){
+    if(!value) return null;
+
+    const target =
+      new Date(value + "T23:59:59");
+
+    if(Number.isNaN(target.getTime())){
+      return null;
+    }
+
+    return Math.ceil(
+      (target.getTime() - Date.now()) /
+      86400000
+    );
+  }
+
+  function cvRenderOrders(){
+    const list =
+      document.getElementById("cvOrdersList");
+
+    if(!list) return;
+
+    const openOrders =
+      cvOrdersData.filter(order => {
+        const status = cvOrderStatus(order);
+        return status.key !== "delivered";
+      });
+
+    const pending =
+      openOrders.filter(order =>
+        cvOrderStatus(order).key === "approval"
+      ).length;
+
+    const production =
+      openOrders.filter(order =>
+        cvOrderStatus(order).key === "production"
+      ).length;
+
+    const delivery =
+      openOrders.filter(order =>
+        ["delivery","ready"].includes(
+          cvOrderStatus(order).key
+        )
+      ).length;
+
+    const set = (id,value) => {
+      const el = document.getElementById(id);
+      if(el) el.textContent = value;
+    };
+
+    set("cvOrdersActive", openOrders.length);
+    set("cvOrdersPendingFactory", pending);
+    set("cvOrdersProduction", production);
+    set("cvOrdersDelivery", delivery);
+
+    if(!openOrders.length){
+      list.innerHTML = `
+        <div class="cv-orders-empty">
+          <small>CASA VERONA · OPERATIONS</small>
+          <strong>אין כרגע הזמנות פתוחות</strong>
+          <span>הזמנה חדשה שתיווצר תופיע כאן אוטומטית.</span>
+        </div>
+      `;
+      return;
+    }
+
+    list.innerHTML =
+      openOrders.map(order => {
+
+        const status =
+          cvOrderStatus(order);
+
+        const productionData =
+          cvOrderProduction(order);
+
+        const days =
+          cvOrderDaysLeft(
+            order.target_delivery_date
+          );
+
+        let deadline = "ללא דדליין";
+
+        if(days !== null){
+          if(days < 0){
+            deadline =
+              `באיחור ${Math.abs(days)} ימים`;
+          }else if(days === 0){
+            deadline = "אספקה היום";
+          }else{
+            deadline = `נותרו ${days} ימים`;
+          }
+        }
+
+        const dimensions = [
+          order.width
+            ? `רוחב ${order.width} ס"מ`
+            : null,
+          order.depth
+            ? `עומק ${order.depth} ס"מ`
+            : null,
+          order.chaise_length
+            ? `שזלונג ${order.chaise_length} ס"מ`
+            : null
+        ].filter(Boolean).join(" · ");
+
+        return `
+          <article
+            class="cv-order-live-card"
+            data-order-id="${cvOrderEscape(order.id)}"
+          >
+            <div class="cv-order-live-top">
+              <div>
+                <small>
+                  ORDER #${cvOrderEscape(order.order_number)}
+                </small>
+
+                <h3>
+                  ${cvOrderEscape(order.product_name || "ללא דגם")}
+                </h3>
+
+                <span>
+                  ${cvOrderEscape(order.customer_name || "ללא שם")}
+                </span>
+              </div>
+
+              <span class="cv-order-live-status status-${status.key}">
+                ${status.label}
+              </span>
+            </div>
+
+            <div class="cv-order-live-info">
+              <div>
+                <small>DELIVERY TARGET</small>
+                <strong>
+                  ${cvOrderDateLabel(order.target_delivery_date)}
+                </strong>
+                <span>${deadline}</span>
+              </div>
+
+              <div>
+                <small>SPECIFICATION</small>
+                <strong>
+                  ${cvOrderEscape(dimensions || "מפרט בהזמנה")}
+                </strong>
+                <span>
+                  ${cvOrderEscape(
+                    [
+                      order.fabric_company,
+                      order.fabric_collection,
+                      order.fabric_code
+                    ].filter(Boolean).join(" · ") ||
+                    "ללא פרטי בד"
+                  )}
+                </span>
+              </div>
+
+              <div>
+                <small>FACTORY</small>
+                <strong>
+                  ${
+                    productionData.approval_status === "APPROVED"
+                      ? "מאושרת"
+                      : "ממתינה לאישור"
+                  }
+                </strong>
+                <span>
+                  ${
+                    productionData.estimated_cost
+                      ? `עלות: ₪${Number(
+                          productionData.estimated_cost
+                        ).toLocaleString("he-IL")}`
+                      : "טרם הוזנה עלות"
+                  }
+                </span>
+              </div>
+            </div>
+
+            <div class="cv-order-live-progress">
+              <span class="${status.key !== "new" ? "done" : ""}">
+                התקבלה
+              </span>
+              <span class="${
+                ["production","ready","delivery"].includes(status.key)
+                  ? "done"
+                  : ""
+              }">
+                אישור מפעל
+              </span>
+              <span class="${
+                ["ready","delivery"].includes(status.key)
+                  ? "done"
+                  : ""
+              }">
+                ייצור
+              </span>
+              <span class="${
+                status.key === "delivery"
+                  ? "done"
+                  : ""
+              }">
+                אספקה
+              </span>
+            </div>
+
+            <button
+              type="button"
+              class="cv-order-inquiry-btn"
+              data-order-inquiry="${cvOrderEscape(order.id)}"
+            >
+              <span>בירור הזמנה</span>
+              <span>←</span>
+            </button>
+          </article>
+        `;
+      }).join("");
+  }
+
+  async function cvLoadOrders(){
+    if(cvOrdersLoading) return;
+
+    cvOrdersLoading = true;
+
+    const list =
+      document.getElementById("cvOrdersList");
+
+    try{
+      const role = String(
+        window.casaVeronaUser?.role || ""
+      ).toUpperCase();
+
+      const ordersEndpoint =
+        role === "ADMIN"
+          ? "/api/orders"
+          : "/api/factory/orders";
+
+      const response = await fetch(
+        ordersEndpoint,
+        {
+          credentials:"include",
+          cache:"no-store"
+        }
+      );
+
+      const data =
+        await response.json().catch(() => ({}));
+
+      if(!response.ok || !data?.success){
+        throw new Error(
+          data?.error ||
+          `ORDERS_LOAD_FAILED_${response.status}`
+        );
+      }
+
+      cvOrdersData =
+        Array.isArray(data.orders)
+          ? data.orders
+          : [];
+
+      cvRenderOrders();
+
+    }catch(error){
+
+      console.error(
+        "CASA VERONA LOAD ORDERS:",
+        error
+      );
+
+      if(list){
+        list.innerHTML = `
+          <div class="cv-orders-empty">
+            <small>CASA VERONA · OPERATIONS</small>
+            <strong>לא הצלחנו לטעון את ההזמנות</strong>
+            <span>${cvOrderEscape(error.message)}</span>
+          </div>
+        `;
+      }
+
+    }finally{
+      cvOrdersLoading = false;
+    }
+  }
+
+
+  /* =====================================================
+     CASA VERONA — ORDER INQUIRY COMMAND CENTER
+  ===================================================== */
+
+  const cvOrderInquiryModal =
+    document.getElementById("cvOrderInquiryModal");
+
+  const cvOrderInquiryClose =
+    document.getElementById("cvOrderInquiryClose");
+
+  const cvOrderInquirySearch =
+    document.getElementById("cvOrderInquirySearch");
+
+  const cvOrderInquiryResults =
+    document.getElementById("cvOrderInquiryResults");
+
+  const cvOrderCommandTitle =
+    document.getElementById("cvOrderCommandTitle");
+
+  const cvOrderCommandBody =
+    document.getElementById("cvOrderCommandBody");
+
+
+  function cvCurrentOrderRole(){
+
+    return String(
+      window.casaVeronaUser?.role || ""
+    ).toUpperCase();
+
+  }
+
+
+  function cvIsOrderAdmin(){
+
+    return cvCurrentOrderRole() === "ADMIN";
+
+  }
+
+
+  function cvOrderMoney(value){
+
+    const number = Number(value);
+
+    if(!Number.isFinite(number)){
+      return "—";
+    }
+
+    return new Intl.NumberFormat(
+      "he-IL",
+      {
+        style:"currency",
+        currency:"ILS",
+        maximumFractionDigits:0
+      }
+    ).format(number);
+
+  }
+
+
+  function cvOrderStatusText(value){
+
+    const statuses = {
+      PENDING:"ממתין",
+      WAITING:"ממתין לייצור",
+      APPROVED:"מאושר",
+      REJECTED:"נדחה",
+      IN_PROGRESS:"בייצור",
+      READY:"מוכן",
+      DELIVERED:"נמסר",
+      COMPLETED:"הושלם"
+    };
+
+    return statuses[value] || value || "—";
+
+  }
+
+
+  function cvOpenOrderInquiry(orderId = null){
+
+    if(!cvOrderInquiryModal){
+      return;
+    }
+
+    cvOrderInquiryModal.hidden = false;
+
+    document.body.style.overflow = "hidden";
+
+    if(cvOrderInquirySearch){
+      cvOrderInquirySearch.value = "";
+    }
+
+    cvRenderOrderInquiryResults();
+
+    if(orderId){
+      cvShowOrderCommand(orderId);
+    }
+
+  }
+
+
+  function cvCloseOrderInquiry(){
+
+    if(!cvOrderInquiryModal){
+      return;
+    }
+
+    cvOrderInquiryModal.hidden = true;
+
+    document.body.style.overflow = "";
+
+  }
+
+
+  function cvRenderOrderInquiryResults(){
+
+    if(!cvOrderInquiryResults){
+      return;
+    }
+
+    const search =
+      (
+        cvOrderInquirySearch?.value || ""
+      )
+      .trim()
+      .toLowerCase();
+
+    const filtered =
+      cvOrdersData.filter(order => {
+
+        const production =
+          cvOrderProduction(order);
+
+        const haystack = [
+          order.order_number,
+          order.customer_name,
+          order.customer_phone,
+          order.product_name,
+          order.color,
+          order.fabric_company,
+          order.fabric_collection,
+          order.fabric_code,
+          order.status,
+          production.status,
+          production.approval_status
+        ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+        return (
+          !search ||
+          haystack.includes(search)
+        );
+
+      });
+
+    if(!filtered.length){
+
+      cvOrderInquiryResults.innerHTML = `
+        <div style="
+          padding:20px 5px;
+          font-size:10px;
+          opacity:.5;
+        ">
+          לא נמצאו הזמנות.
+        </div>
+      `;
+
+      return;
+    }
+
+    cvOrderInquiryResults.innerHTML =
+      filtered.map(order => {
+
+        const production =
+          cvOrderProduction(order);
+
+        return `
+          <button
+            type="button"
+            class="cv-order-inquiry-result"
+            data-command-order="${cvOrderEscape(order.id)}"
+          >
+            <strong>
+              #${cvOrderEscape(order.order_number || "—")}
+              ·
+              ${cvOrderEscape(
+                order.customer_name ||
+                order.product_name ||
+                "הזמנה"
+              )}
+            </strong>
+
+            <span>
+              ${cvOrderEscape(
+                order.product_name || "ללא דגם"
+              )}
+              ·
+              ${cvOrderEscape(
+                cvOrderStatusText(
+                  production.status ||
+                  order.status
+                )
+              )}
+            </span>
+          </button>
+        `;
+
+      }).join("");
+
+  }
+
+
+  function cvShowOrderCommand(orderId){
+
+    const order =
+      cvOrdersData.find(
+        item =>
+          String(item.id) ===
+          String(orderId)
+      );
+
+    if(!order || !cvOrderCommandBody){
+      return;
+    }
+
+    const production =
+      cvOrderProduction(order);
+
+    const delivery =
+      cvOrderDelivery(order);
+
+    const isAdmin =
+      cvIsOrderAdmin();
+
+    const salePrice =
+      Number(order.sale_price || 0);
+
+    const productionCost =
+      Number(
+        production.estimated_cost ||
+        order.production_cost ||
+        0
+      );
+
+    const deliveryCost =
+      Number(
+        order.delivery_cost || 0
+      );
+
+    const profit =
+      salePrice -
+      productionCost -
+      deliveryCost;
+
+    if(cvOrderCommandTitle){
+
+      cvOrderCommandTitle.textContent =
+        `הזמנה #${order.order_number || "—"}`;
+
+    }
+
+    document
+      .querySelectorAll(
+        "[data-command-order]"
+      )
+      .forEach(button => {
+
+        button.classList.toggle(
+          "active",
+          String(
+            button.dataset.commandOrder
+          ) === String(orderId)
+        );
+
+      });
+
+    const financeHTML =
+      isAdmin
+        ? `
+          <div class="
+            cv-order-command-box
+            cv-order-command-finance
+          ">
+            <small>MANAGEMENT · FINANCE</small>
+
+            <strong>
+              ${cvOrderMoney(salePrice)}
+              מחיר מכירה
+            </strong>
+
+            <span>
+              עלות ייצור:
+              ${cvOrderMoney(productionCost)}
+            </span>
+
+            <span>
+              עלות אספקה:
+              ${cvOrderMoney(deliveryCost)}
+            </span>
+
+            <span>
+              רווח צפוי:
+              ${cvOrderMoney(profit)}
+            </span>
+          </div>
+        `
+        : "";
+
+    cvOrderCommandBody.innerHTML = `
+
+      <div class="cv-order-command-grid">
+
+        <div class="cv-order-command-box">
+          <small>CUSTOMER</small>
+
+          <strong>
+            ${cvOrderEscape(
+              order.customer_name ||
+              "ללא שם לקוח"
+            )}
+          </strong>
+
+          <span>
+            ${cvOrderEscape(
+              order.customer_phone || "—"
+            )}
+          </span>
+
+          <span>
+            הזמנה:
+            #${cvOrderEscape(
+              order.order_number || "—"
+            )}
+          </span>
+        </div>
+
+
+        <div class="cv-order-command-box">
+          <small>PRODUCT</small>
+
+          <strong>
+            ${cvOrderEscape(
+              order.product_name ||
+              "ללא דגם"
+            )}
+          </strong>
+
+          <span>
+            רוחב:
+            ${cvOrderEscape(
+              order.width ?? "—"
+            )}
+            · עומק:
+            ${cvOrderEscape(
+              order.depth ?? "—"
+            )}
+          </span>
+
+          <span>
+            שזלונג:
+            ${cvOrderEscape(
+              order.chaise_length ?? "—"
+            )}
+            ·
+            ${cvOrderEscape(
+              order.chaise_side || "—"
+            )}
+          </span>
+        </div>
+
+
+        <div class="cv-order-command-box">
+          <small>FABRIC & FINISH</small>
+
+          <strong>
+            ${cvOrderEscape(
+              order.fabric_company ||
+              "ללא חברת בד"
+            )}
+          </strong>
+
+          <span>
+            ${cvOrderEscape(
+              order.fabric_collection || "—"
+            )}
+            ·
+            ${cvOrderEscape(
+              order.fabric_code || "—"
+            )}
+          </span>
+
+          <span>
+            צבע:
+            ${cvOrderEscape(
+              order.color || "—"
+            )}
+          </span>
+        </div>
+
+
+        <div class="cv-order-command-box">
+          <small>FACTORY</small>
+
+          <strong>
+            ${cvOrderEscape(
+              cvOrderStatusText(
+                production.status
+              )
+            )}
+          </strong>
+
+          <span>
+            אישור:
+            ${cvOrderEscape(
+              cvOrderStatusText(
+                production.approval_status
+              )
+            )}
+          </span>
+
+          <span>
+            יעד:
+            ${cvOrderEscape(
+              cvOrderDateLabel(
+                production.due_date ||
+                order.target_delivery_date
+              )
+            )}
+          </span>
+        </div>
+
+
+        <div class="cv-order-command-box">
+          <small>DELIVERY</small>
+
+          <strong>
+            ${cvOrderEscape(
+              cvOrderStatusText(
+                delivery.status
+              )
+            )}
+          </strong>
+
+          <span>
+            תאריך יעד:
+            ${cvOrderEscape(
+              cvOrderDateLabel(
+                order.target_delivery_date
+              )
+            )}
+          </span>
+        </div>
+
+
+        <div class="cv-order-command-box">
+          <small>SPECIAL REQUESTS</small>
+
+          <strong>בקשות מיוחדות</strong>
+
+          <span>
+            ${cvOrderEscape(
+              order.special_requests ||
+              order.production_notes ||
+              "אין בקשות מיוחדות"
+            )}
+          </span>
+        </div>
+
+
+        ${financeHTML}
+
+      </div>
+
+
+      <div class="cv-order-live-progress">
+
+        <span class="done">
+          הזמנה
+        </span>
+
+        <span class="${
+          production.approval_status === "APPROVED"
+            ? "done"
+            : ""
+        }">
+          אישור מפעל
+        </span>
+
+        <span class="${
+          ["IN_PROGRESS","READY"].includes(
+            production.status
+          )
+            ? "done"
+            : ""
+        }">
+          ייצור
+        </span>
+
+        <span class="${
+          production.status === "READY" ||
+          ["READY","DELIVERED","COMPLETED"].includes(
+            delivery.status
+          )
+            ? "done"
+            : ""
+        }">
+          אספקה
+        </span>
+
+      </div>
+    `;
+
+  }
+
+
+  document.addEventListener(
+    "click",
+    event => {
+
+      const inquiryButton =
+        event.target.closest(
+          "[data-order-inquiry]"
+        );
+
+      if(inquiryButton){
+
+        cvOpenOrderInquiry(
+          inquiryButton.dataset.orderInquiry
+        );
+
+        return;
+      }
+
+      const commandButton =
+        event.target.closest(
+          "[data-command-order]"
+        );
+
+      if(commandButton){
+
+        cvShowOrderCommand(
+          commandButton.dataset.commandOrder
+        );
+
+      }
+
+    }
+  );
+
+
+  cvOrderInquirySearch?.addEventListener(
+    "input",
+    cvRenderOrderInquiryResults
+  );
+
+
+  cvOrderInquiryClose?.addEventListener(
+    "click",
+    cvCloseOrderInquiry
+  );
+
+
+  cvOrderInquiryModal?.addEventListener(
+    "click",
+    event => {
+
+      if(event.target === cvOrderInquiryModal){
+        cvCloseOrderInquiry();
+      }
+
+    }
+  );
+
+
   function cvDateInputValue(date){
     const y = date.getFullYear();
     const m = String(date.getMonth()+1).padStart(2,"0");
@@ -4813,9 +6251,8 @@ document
 
         form.reset();
 
-        if(typeof cvSetOrderDefaultDates === "function"){
-          cvSetOrderDefaultDates();
-        }
+        cvSetDefaultOrderDates();
+        await cvLoadOrders();
 
         setTimeout(() => {
 
@@ -4855,4 +6292,4 @@ document
   );
 
 })();
-</script>
+</script>\n

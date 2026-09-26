@@ -3162,6 +3162,14 @@ if (
   req.method === "GET" &&
   url.pathname === "/api/orders"
 ) {
+  const auth = await requireAuth(req, res, [
+    USER_ROLES.ADMIN
+  ]);
+
+  if (!auth) {
+    return;
+  }
+
   const db = requireSupabase();
 
   const { data, error } =
@@ -3621,167 +3629,6 @@ if (
 // API - CREATE ORDER
 // -----------------------------------------------
 
-if (
-  req.method === "POST" &&
-  url.pathname === "/api/orders"
-) {
-  const db = requireSupabase();
-
-  const rawBody =
-    await readRequestBody(req);
-
-  let body;
-
-  try {
-    body = JSON.parse(rawBody || "{}");
-  } catch {
-    res.writeHead(400, {
-      "Content-Type": "application/json; charset=utf-8"
-    });
-
-    res.end(
-      JSON.stringify({
-        success: false,
-        error: "Invalid JSON"
-      })
-    );
-
-    return;
-  }
-
-  const order = {
-    lead_id:
-      body.lead_id || null,
-
-    customer_name:
-      body.customer_name || null,
-
-    customer_phone:
-      body.customer_phone || null,
-
-    product_name:
-      body.product_name || null,
-
-    product_id:
-      body.product_id || null,
-
-    dimensions:
-      body.dimensions || null,
-
-    width:
-      body.width || null,
-
-    depth:
-      body.depth || null,
-
-    chaise_length:
-      body.chaise_length || null,
-
-    chaise_side:
-      body.chaise_side || null,
-
-    fabric_type:
-      body.fabric_type || null,
-
-    fabric_company:
-      body.fabric_company || null,
-
-    fabric_collection:
-      body.fabric_collection || null,
-
-    fabric_code:
-      body.fabric_code || null,
-
-    color:
-      body.color || null,
-
-    comfort:
-      body.comfort || null,
-
-    customer_notes:
-      body.customer_notes || null,
-
-    production_notes:
-      body.production_notes || null,
-
-    special_requests:
-      body.special_requests || null,
-
-        model_image_url:
-      body.model_image_url || null,
-
-    reference_image_url:
-      body.reference_image_url || null,
-
-    sale_price:
-      body.sale_price ?? null,
-
-    product_cost:
-      body.product_cost ?? null,
-
-    delivery_cost:
-      body.delivery_cost ?? null,
-
-    target_delivery_date:
-      body.target_delivery_date || null,
-
-    status: "NEW"
-  };
-
-  const { data, error } =
-    await db
-      .from("orders")
-      .insert(order)
-      .select("*")
-      .single();
-
-  if (error) {
-    throw new Error(
-      `SUPABASE CREATE ORDER ERROR: ${error.message}`
-    );
-  }
-
-  const { error: productionError } =
-    await db
-      .from("production_orders")
-      .insert({
-        order_id: data.id,
-        status: "WAITING"
-      });
-
-  if (productionError) {
-    throw new Error(
-      `SUPABASE CREATE PRODUCTION ERROR: ${productionError.message}`
-    );
-  }
-
-  const { error: deliveryError } =
-    await db
-      .from("deliveries")
-      .insert({
-        order_id: data.id,
-        status: "WAITING"
-      });
-
-  if (deliveryError) {
-    throw new Error(
-      `SUPABASE CREATE DELIVERY ERROR: ${deliveryError.message}`
-    );
-  }
-
-  res.writeHead(201, {
-    "Content-Type": "application/json; charset=utf-8"
-  });
-  
-res.end(
-  JSON.stringify({
-    success: true,
-    order: data
-  })
-);
-
-  return;
-}
         
         // -----------------------------------------------
         // HEALTH / HOME
