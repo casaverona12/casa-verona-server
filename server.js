@@ -3457,6 +3457,247 @@ if (
 }
 
 // =====================================================
+// CASA VERONA — DELIVERIES API
+// =====================================================
+
+// -----------------------------------------------------
+// GET /api/deliveries
+// Delivery jobs + order + production/QC information
+// -----------------------------------------------------
+if (
+  req.method === "GET" &&
+  url.pathname === "/api/deliveries"
+) {
+  const auth = await requireAuth(req, res, [
+    USER_ROLES.FACTORY_OWNER,
+    USER_ROLES.ADMIN
+  ]);
+
+  if (!auth) {
+    return;
+  }
+
+  const db = requireSupabase();
+
+  const { data, error } = await db
+    .from("deliveries")
+    .select(`
+      id,
+      order_id,
+      status,
+      delivery_date,
+      delivery_time,
+      driver_name,
+      driver_phone,
+      delivery_address,
+      notes,
+      delivered_at,
+      created_at,
+      updated_at,
+      orders (
+        id,
+        order_number,
+        customer_name,
+        customer_phone,
+        product_name,
+        target_delivery_date,
+        model_image_url,
+        reference_image_url,
+        production_orders (
+          id,
+          status,
+          final_image_url,
+          ready_at
+        )
+      )
+    `)
+    .order("created_at", {
+      ascending: false
+    });
+
+  if (error) {
+    throw new Error(
+      `SUPABASE DELIVERIES ERROR: ${error.message}`
+    );
+  }
+
+  res.writeHead(200, {
+    "Content-Type": "application/json; charset=utf-8"
+  });
+
+  res.end(
+    JSON.stringify({
+      success: true,
+      count: data?.length || 0,
+      deliveries: data || []
+    })
+  );
+
+  return;
+}
+
+
+// -----------------------------------------------------
+// PATCH /api/deliveries/:id
+// Schedule / update / complete delivery
+// -----------------------------------------------------
+if (
+  req.method === "PATCH" &&
+  url.pathname.startsWith("/api/deliveries/")
+) {
+  const auth = await requireAuth(req, res, [
+    USER_ROLES.FACTORY_OWNER,
+    USER_ROLES.ADMIN
+  ]);
+
+  if (!auth) {
+    return;
+  }
+
+  const deliveryId =
+    url.pathname.split("/").filter(Boolean).pop();
+
+  if (!deliveryId) {
+    res.writeHead(400, {
+      "Content-Type": "application/json; charset=utf-8"
+    });
+
+    res.end(
+      JSON.stringify({
+        success: false,
+        error: "MISSING_DELIVERY_ID"
+      })
+    );
+
+    return;
+  }
+
+  const bodyText = await readRequestBody(req);
+
+  let body;
+
+  try {
+    body = JSON.parse(bodyText || "{}");
+  } catch {
+    res.writeHead(400, {
+      "Content-Type": "application/json; charset=utf-8"
+    });
+
+    res.end(
+      JSON.stringify({
+        success: false,
+        error: "INVALID_JSON"
+      })
+    );
+
+    return;
+  }
+
+  const allowedStatuses = [
+    "WAITING",
+    "SCHEDULED",
+    "OUT_FOR_DELIVERY",
+    "DELIVERED"
+  ];
+
+  if (
+    body.status !== undefined &&
+    !allowedStatuses.includes(body.status)
+  ) {
+    res.writeHead(400, {
+      "Content-Type": "application/json; charset=utf-8"
+    });
+
+    res.end(
+      JSON.stringify({
+        success: false,
+        error: "INVALID_DELIVERY_STATUS"
+      })
+    );
+
+    return;
+  }
+
+  const updateData = {
+    updated_at: new Date().toISOString()
+  };
+
+  const editableFields = [
+    "delivery_date",
+    "delivery_time",
+    "driver_name",
+    "driver_phone",
+    "delivery_address",
+    "notes"
+  ];
+
+  for (const field of editableFields) {
+    if (body[field] !== undefined) {
+      updateData[field] =
+        body[field] === ""
+          ? null
+          : body[field];
+    }
+  }
+
+  if (body.status !== undefined) {
+    updateData.status = body.status;
+
+    if (body.status === "DELIVERED") {
+      updateData.delivered_at =
+        new Date().toISOString();
+    } else {
+      updateData.delivered_at = null;
+    }
+  }
+
+  const db = requireSupabase();
+
+  const {
+    data: delivery,
+    error
+  } = await db
+    .from("deliveries")
+    .update(updateData)
+    .eq("id", deliveryId)
+    .select(`
+      id,
+      order_id,
+      status,
+      delivery_date,
+      delivery_time,
+      driver_name,
+      driver_phone,
+      delivery_address,
+      notes,
+      delivered_at,
+      created_at,
+      updated_at
+    `)
+    .single();
+
+  if (error) {
+    throw new Error(
+      `SUPABASE UPDATE DELIVERY ERROR: ${error.message}`
+    );
+  }
+
+  res.writeHead(200, {
+    "Content-Type": "application/json; charset=utf-8"
+  });
+
+  res.end(
+    JSON.stringify({
+      success: true,
+      delivery
+    })
+  );
+
+  return;
+}
+
+
+// =====================================================
 // FACTORY API — SAFE PRODUCTION VIEW
 // =====================================================
 
@@ -3714,6 +3955,46 @@ if (error) {
   throw new Error(
     `SUPABASE UPDATE PRODUCTION ERROR: ${error.message}`
   );
+}
+
+// =====================================================
+// READY -> DELIVERY
+// When production is completed, create one delivery job.
+// =====================================================
+if (body.status === "READY") {
+
+  const {
+    data: existingDelivery,
+    error: deliveryLookupError
+  } = await db
+    .from("deliveries")
+    .select("id, order_id, status")
+    .eq("order_id", data.order_id)
+    .maybeSingle();
+
+  if (deliveryLookupError) {
+    throw new Error(
+      `SUPABASE DELIVERY LOOKUP ERROR: ${deliveryLookupError.message}`
+    );
+  }
+
+  if (!existingDelivery) {
+
+    const {
+      error: deliveryCreateError
+    } = await db
+      .from("deliveries")
+      .insert({
+        order_id: data.order_id,
+        status: "WAITING"
+      });
+
+    if (deliveryCreateError) {
+      throw new Error(
+        `SUPABASE CREATE DELIVERY ERROR: ${deliveryCreateError.message}`
+      );
+    }
+  }
 }
 
 // Save activity: who changed what and when
