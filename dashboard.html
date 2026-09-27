@@ -8704,8 +8704,8 @@ document
           String(orderId)
       ) ||
       (
-        typeof cvFactoryOrders !== "undefined"
-          ? cvFactoryOrders.find(
+        Array.isArray(window.cvFactoryOrdersBridge)
+          ? window.cvFactoryOrdersBridge.find(
               item =>
                 String(item.id) ===
                 String(orderId)
@@ -14549,6 +14549,9 @@ document.addEventListener(
         Array.isArray(data.orders)
           ? data.orders
           : [];
+
+      // Bridge Factory OS orders to the Order Details module
+      window.cvFactoryOrdersBridge = cvFactoryOrders;
 
 
       updateKpis();
