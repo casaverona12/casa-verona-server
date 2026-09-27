@@ -8558,22 +8558,46 @@ document
 
   function cvOpenOrderInquiry(orderId = null){
 
-    if(!cvOrderInquiryModal){
-      return;
-    }
+    try{
 
-    cvOrderInquiryModal.hidden = false;
+      if(!cvOrderInquiryModal){
+        alert("DEBUG 1: MODAL NOT FOUND");
+        return;
+      }
 
-    /* body scroll lock removed — modal handles its own scroll */
+      cvOrderInquiryModal.hidden = false;
 
-    if(cvOrderInquirySearch){
-      cvOrderInquirySearch.value = "";
-    }
+      alert(
+        "DEBUG 2: MODAL OPENED" +
+        "\\nhidden=" + cvOrderInquiryModal.hidden +
+        "\\ndisplay=" + getComputedStyle(cvOrderInquiryModal).display
+      );
 
-    cvRenderOrderInquiryResults();
+      if(cvOrderInquirySearch){
+        cvOrderInquirySearch.value = "";
+      }
 
-    if(orderId){
-      cvShowOrderCommand(orderId);
+      try{
+        cvRenderOrderInquiryResults();
+        alert("DEBUG 3: RESULTS OK");
+      }catch(error){
+        alert("DEBUG RESULTS ERROR: " + error.message);
+        throw error;
+      }
+
+      if(orderId){
+        try{
+          cvShowOrderCommand(orderId);
+          alert("DEBUG 4: ORDER COMMAND OK");
+        }catch(error){
+          alert("DEBUG COMMAND ERROR: " + error.message);
+          throw error;
+        }
+      }
+
+    }catch(error){
+      alert("DEBUG FINAL ERROR: " + error.message);
+      console.error(error);
     }
 
   }
