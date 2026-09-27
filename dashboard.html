@@ -543,6 +543,188 @@ linear-gradient(90deg,rgba(12,12,11,.025) 1px,transparent 1px),
   <div id="topbarAvatar" class="cv-avatar">CV</div>
 </div></header>
 
+
+<!-- =====================================================
+     CASA VERONA — FACTORY OWNER HOME
+===================================================== -->
+
+<section id="factory-home" class="page">
+
+  <div class="cv-fo-home">
+
+    <header class="cv-fo-hero">
+
+      <div class="cv-fo-hero-copy">
+        <small>CASA VERONA · FACTORY COMMAND CENTER</small>
+
+        <h1 id="cvFactoryWelcome">
+          שלום, Ahmd.
+        </h1>
+
+        <p>
+          כל מה שקורה במפעל — הזמנות, ייצור,
+          אישורים ואספקות במקום אחד.
+        </p>
+      </div>
+
+      <div class="cv-fo-today">
+        <small>TODAY · FACTORY</small>
+
+        <strong id="cvFactoryHomeDate">
+          —
+        </strong>
+
+        <span>
+          <i></i>
+          FACTORY ONLINE
+        </span>
+      </div>
+
+    </header>
+
+
+    <div class="cv-fo-kpis">
+
+      <button
+        type="button"
+        data-factory-home-open="factory-approvals"
+      >
+        <small>NEW ORDERS</small>
+        <strong id="cvFoPending">0</strong>
+        <span>ממתינות לאישור</span>
+      </button>
+
+      <button
+        type="button"
+        data-factory-home-open="production"
+      >
+        <small>IN PRODUCTION</small>
+        <strong id="cvFoProgress">0</strong>
+        <span>בתהליך ייצור</span>
+      </button>
+
+      <button
+        type="button"
+        class="attention"
+        data-factory-home-open="production"
+      >
+        <small>NEEDS ATTENTION</small>
+        <strong id="cvFoRisk">0</strong>
+        <span>דורשות טיפול</span>
+      </button>
+
+      <button
+        type="button"
+        data-factory-home-open="deliveries"
+      >
+        <small>READY</small>
+        <strong id="cvFoReady">0</strong>
+        <span>מוכנות לאספקה</span>
+      </button>
+
+      <button
+        type="button"
+        data-factory-home-open="deliveries"
+      >
+        <small>DELIVERIES</small>
+        <strong id="cvFoDeliveries">0</strong>
+        <span>אספקות מתואמות</span>
+      </button>
+
+    </div>
+
+
+    <section class="cv-fo-attention">
+
+      <div class="cv-fo-section-head">
+        <div>
+          <small>LIVE PRIORITIES</small>
+          <h2>דורש ממך פעולה</h2>
+        </div>
+
+        <span>LIVE</span>
+      </div>
+
+      <div
+        id="cvFactoryAttentionList"
+        class="cv-fo-attention-list"
+      >
+        <div class="cv-fo-empty">
+          טוען את נתוני המפעל...
+        </div>
+      </div>
+
+    </section>
+
+
+    <div class="cv-fo-actions">
+
+      <button
+        type="button"
+        data-factory-home-open="factory-approvals"
+      >
+        <span class="cv-fo-action-no">01</span>
+        <small>ORDERS</small>
+        <strong>אישור הזמנות</strong>
+        <p>
+          הזמנות חדשות, פרטי ייצור,
+          מחיר מפעל ואישור.
+        </p>
+        <b>פתח ←</b>
+      </button>
+
+
+      <button
+        type="button"
+        data-factory-home-open="production"
+      >
+        <span class="cv-fo-action-no">02</span>
+        <small>PRODUCTION</small>
+        <strong>רצפת הייצור</strong>
+        <p>
+          עבודות פעילות, QC,
+          סטטוסים ודדליינים.
+        </p>
+        <b>פתח ←</b>
+      </button>
+
+
+      <button
+        type="button"
+        data-factory-home-open="deliveries"
+      >
+        <span class="cv-fo-action-no">03</span>
+        <small>DELIVERY</small>
+        <strong>אספקות</strong>
+        <p>
+          קביעת תאריך וטווח שעות
+          להגעת ההובלה.
+        </p>
+        <b>פתח ←</b>
+      </button>
+
+
+      <button
+        type="button"
+        class="dark"
+        data-factory-home-open="ai-production"
+      >
+        <span class="cv-fo-action-no">04</span>
+        <small>CASA VERONA AI</small>
+        <strong>Production AI</strong>
+        <p>
+          עומסים, איחורים,
+          חריגות וסדרי עדיפויות.
+        </p>
+        <b>פתח ←</b>
+      </button>
+
+    </div>
+
+  </div>
+
+</section>
+
 <section id="dashboard" class="page active">
   <div class="cv-hero">
     <div class="cv-hero-copy"><span class="cv-hero-kicker">CASA VERONA · EXECUTIVE COMMAND CENTER</span><h1 id="cvWelcomeTitle">ברוכים <em>הבאים.</em></h1><p>כל Casa Verona במסך אחד — מכירות, Follow-Ups, הזמנות, ייצור, אספקות ו־AI.</p></div>
@@ -1118,6 +1300,62 @@ linear-gradient(90deg,rgba(12,12,11,.025) 1px,transparent 1px),
 
 </section>
 
+
+
+<!-- =====================================================
+     CASA VERONA — FACTORY ORDER APPROVALS
+===================================================== -->
+
+<section id="factory-approvals" class="page">
+
+  <div class="cv-fa">
+
+    <header class="cv-fa-head">
+
+      <div>
+        <small>CASA VERONA · FACTORY APPROVALS</small>
+
+        <h2>אישור הזמנות</h2>
+
+        <p>
+          הזמנות חדשות שממתינות למחיר מפעל ולאישור.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        id="cvFactoryApprovalsRefresh"
+        class="cv-fa-refresh"
+      >
+        ↻ רענון
+      </button>
+
+    </header>
+
+
+    <div class="cv-fa-summary">
+
+      <div>
+        <small>WAITING FOR APPROVAL</small>
+        <strong id="cvFaPendingCount">0</strong>
+        <span>הזמנות ממתינות</span>
+      </div>
+
+    </div>
+
+
+    <div
+      id="cvFactoryApprovalsList"
+      class="cv-fa-list"
+    >
+      <div class="cv-fa-empty">
+        טוען הזמנות חדשות...
+      </div>
+    </div>
+
+  </div>
+
+</section>
 
 <section id="production" class="page">
 
@@ -2017,12 +2255,12 @@ document.addEventListener("click",e=>{const n=e.target.closest("[data-page]"),o=
             typeof cvOpenPage ===
             "function"
           ){
-            cvOpenPage("production");
+            cvOpenPage("factory-home");
           }else if(
             typeof openPage ===
             "function"
           ){
-            openPage("production");
+            openPage("factory-home");
           }
 
         },0);
@@ -2403,7 +2641,7 @@ document.addEventListener("click",e=>{const n=e.target.closest("[data-page]"),o=
               loginRole ===
               "FACTORY_OWNER"
             ){
-              openPage("production");
+              openPage("factory-home");
             }else{
               openPage("dashboard");
             }
@@ -13587,6 +13825,306 @@ document.addEventListener(
       ).length
     );
 
+
+    /* ================================================
+       FACTORY OWNER HOME — LIVE DATA
+    ================================================= */
+
+    const pendingOrders =
+      cvFactoryOrders.filter(order => {
+        const p = productionOf(order);
+
+        return (
+          p.approval_status === "PENDING"
+        );
+      });
+
+
+    const progressOrders =
+      cvFactoryOrders.filter(order => {
+        const p = productionOf(order);
+
+        return (
+          p.status === "IN_PROGRESS"
+        );
+      });
+
+
+    const readyOrders =
+      cvFactoryOrders.filter(order => {
+        const p = productionOf(order);
+
+        return (
+          p.status === "READY"
+        );
+      });
+
+
+    const now =
+      new Date();
+
+
+    const riskOrders =
+      cvFactoryOrders.filter(order => {
+
+        const p =
+          productionOf(order);
+
+        if(
+          p.status === "READY"
+        ){
+          return false;
+        }
+
+        const rawDate =
+          p.due_date ||
+          order.target_delivery_date;
+
+        if(!rawDate){
+          return false;
+        }
+
+        const due =
+          new Date(rawDate);
+
+        if(
+          Number.isNaN(
+            due.getTime()
+          )
+        ){
+          return false;
+        }
+
+        const diff =
+          due.getTime() -
+          now.getTime();
+
+        const days =
+          diff /
+          (1000 * 60 * 60 * 24);
+
+        /*
+          Risk =
+          already late OR due within 3 days.
+        */
+        return days <= 3;
+
+      });
+
+
+    set(
+      "cvFoPending",
+      pendingOrders.length
+    );
+
+    set(
+      "cvFoProgress",
+      progressOrders.length
+    );
+
+    set(
+      "cvFoRisk",
+      riskOrders.length
+    );
+
+    set(
+      "cvFoReady",
+      readyOrders.length
+    );
+
+    /*
+      Delivery scheduling will be connected
+      when the delivery module is built.
+    */
+    set(
+      "cvFoDeliveries",
+      0
+    );
+
+
+    const attention =
+      document.getElementById(
+        "cvFactoryAttentionList"
+      );
+
+
+    if(attention){
+
+      const priorityOrders = [
+        ...pendingOrders.map(order => ({
+          type: "PENDING",
+          order
+        })),
+
+        ...riskOrders
+          .filter(
+            order =>
+              !pendingOrders.includes(order)
+          )
+          .map(order => ({
+            type: "RISK",
+            order
+          }))
+      ];
+
+
+      if(!priorityOrders.length){
+
+        attention.innerHTML = `
+          <div class="cv-fo-empty">
+            אין כרגע משימות דחופות ✓
+          </div>
+        `;
+
+      }else{
+
+        attention.innerHTML =
+          priorityOrders
+            .slice(0,8)
+            .map(item => {
+
+              const order =
+                item.order;
+
+              const p =
+                productionOf(order);
+
+              const number =
+                esc(
+                  order.order_number ||
+                  "—"
+                );
+
+              const product =
+                esc(
+                  order.product_name ||
+                  "ללא שם"
+                );
+
+
+              let message = "";
+
+              if(
+                item.type ===
+                "PENDING"
+              ){
+
+                const created =
+                  p.created_at
+                    ? new Date(
+                        p.created_at
+                      )
+                    : null;
+
+                let waiting = "";
+
+                if(
+                  created &&
+                  !Number.isNaN(
+                    created.getTime()
+                  )
+                ){
+
+                  const minutes =
+                    Math.max(
+                      0,
+                      Math.floor(
+                        (
+                          Date.now() -
+                          created.getTime()
+                        ) /
+                        60000
+                      )
+                    );
+
+                  if(minutes < 60){
+                    waiting =
+                      ` · ממתינה ${minutes} דקות`;
+                  }else{
+                    waiting =
+                      ` · ממתינה ${Math.floor(minutes / 60)} שעות`;
+                  }
+
+                }
+
+                message =
+                  `הזמנה חדשה ממתינה לאישור${waiting}`;
+
+              }else{
+
+                const rawDate =
+                  p.due_date ||
+                  order.target_delivery_date;
+
+                let dateText = "";
+
+                if(rawDate){
+
+                  const due =
+                    new Date(rawDate);
+
+                  if(
+                    !Number.isNaN(
+                      due.getTime()
+                    )
+                  ){
+
+                    dateText =
+                      new Intl.DateTimeFormat(
+                        "he-IL",
+                        {
+                          day:"2-digit",
+                          month:"2-digit"
+                        }
+                      ).format(due);
+
+                  }
+
+                }
+
+                message =
+                  dateText
+                    ? `דורשת טיפול · יעד ${dateText}`
+                    : "דורשת טיפול";
+
+              }
+
+
+              return `
+                <button
+                  type="button"
+                  class="cv-fo-priority"
+                  data-factory-home-open="${
+                    item.type === "PENDING"
+                      ? "production"
+                      : "production"
+                  }"
+                >
+                  <div>
+                    <small>
+                      #${number}
+                    </small>
+
+                    <strong>
+                      ${product}
+                    </strong>
+
+                    <span>
+                      ${message}
+                    </span>
+                  </div>
+
+                  <b>←</b>
+                </button>
+              `;
+
+            })
+            .join("");
+
+      }
+
+    }
+
   }
 
 
@@ -13648,6 +14186,7 @@ document.addEventListener(
 
       updateKpis();
       renderFactory();
+      renderFactoryApprovals();
 
 
     }catch(error){
@@ -13898,6 +14437,565 @@ document.addEventListener(
   );
 
 
+
+
+  /* =====================================================
+     FACTORY OWNER — ORDER APPROVAL CENTER
+  ===================================================== */
+
+  function renderFactoryApprovals(){
+
+    const container =
+      document.getElementById(
+        "cvFactoryApprovalsList"
+      );
+
+    if(!container){
+      return;
+    }
+
+
+    const pending =
+      cvFactoryOrders.filter(order => {
+
+        const production =
+          productionOf(order);
+
+        return (
+          production.approval_status ===
+          "PENDING"
+        );
+
+      });
+
+
+    const count =
+      document.getElementById(
+        "cvFaPendingCount"
+      );
+
+    if(count){
+      count.textContent =
+        pending.length;
+    }
+
+
+    if(!pending.length){
+
+      container.innerHTML = `
+        <div class="cv-fa-empty">
+          <strong>אין הזמנות שממתינות לאישור</strong>
+          <span>כל ההזמנות טופלו ✓</span>
+        </div>
+      `;
+
+      return;
+    }
+
+
+    container.innerHTML =
+      pending.map(order => {
+
+        const production =
+          productionOf(order);
+
+        const productionId =
+          production.id;
+
+        const image =
+          order.model_image_url ||
+          order.reference_image_url ||
+          "";
+
+
+        const dimensions = [
+          order.width
+            ? `רוחב ${esc(order.width)}`
+            : null,
+
+          order.depth
+            ? `עומק ${esc(order.depth)}`
+            : null,
+
+          order.chaise_length
+            ? `שזלונג ${esc(order.chaise_length)}`
+            : null,
+
+          order.chaise_side
+            ? `צד ${esc(order.chaise_side)}`
+            : null
+        ]
+        .filter(Boolean)
+        .join(" · ") || "—";
+
+
+        const fabric = [
+          order.fabric_type,
+          order.fabric_company,
+          order.fabric_collection,
+          order.fabric_code
+        ]
+        .filter(Boolean)
+        .map(esc)
+        .join(" · ") || "—";
+
+
+        let deliveryDate = "—";
+
+        if(order.target_delivery_date){
+
+          const date =
+            new Date(
+              order.target_delivery_date
+            );
+
+          if(
+            !Number.isNaN(
+              date.getTime()
+            )
+          ){
+
+            deliveryDate =
+              new Intl.DateTimeFormat(
+                "he-IL",
+                {
+                  day:"2-digit",
+                  month:"2-digit",
+                  year:"numeric"
+                }
+              ).format(date);
+
+          }
+
+        }
+
+
+        return `
+
+          <article
+            class="cv-fa-order"
+            data-fa-production="${esc(productionId)}"
+          >
+
+            <div class="cv-fa-order-image">
+
+              ${
+                image
+                  ? `
+                    <img
+                      src="${esc(image)}"
+                      alt=""
+                    >
+                  `
+                  : `
+                    <div class="cv-fa-no-image">
+                      CASA VERONA
+                    </div>
+                  `
+              }
+
+              <span>
+                #${esc(
+                  order.order_number ||
+                  "—"
+                )}
+              </span>
+
+            </div>
+
+
+            <div class="cv-fa-order-content">
+
+              <header class="cv-fa-order-head">
+
+                <div>
+                  <small>NEW FACTORY ORDER</small>
+
+                  <h3>
+                    ${esc(
+                      order.product_name ||
+                      "ללא שם"
+                    )}
+                  </h3>
+                </div>
+
+                <span class="cv-fa-pending">
+                  ממתין לאישור
+                </span>
+
+              </header>
+
+
+              <div class="cv-fa-specs">
+
+                <div>
+                  <small>מידות</small>
+                  <strong>${dimensions}</strong>
+                </div>
+
+                <div>
+                  <small>בד</small>
+                  <strong>${fabric}</strong>
+                </div>
+
+                <div>
+                  <small>צבע</small>
+                  <strong>
+                    ${esc(order.color || "—")}
+                  </strong>
+                </div>
+
+                <div>
+                  <small>נוחות</small>
+                  <strong>
+                    ${esc(order.comfort || "—")}
+                  </strong>
+                </div>
+
+                <div>
+                  <small>יעד אספקה</small>
+                  <strong>
+                    ${deliveryDate}
+                  </strong>
+                </div>
+
+              </div>
+
+
+              ${
+                order.production_notes
+                  ? `
+                    <div class="cv-fa-note">
+                      <small>הערות ייצור</small>
+                      <p>
+                        ${esc(
+                          order.production_notes
+                        )}
+                      </p>
+                    </div>
+                  `
+                  : ""
+              }
+
+
+              ${
+                order.special_requests
+                  ? `
+                    <div class="cv-fa-note important">
+                      <small>בקשות מיוחדות</small>
+                      <p>
+                        ${esc(
+                          order.special_requests
+                        )}
+                      </p>
+                    </div>
+                  `
+                  : ""
+              }
+
+
+              <div class="cv-fa-form">
+
+                <label>
+                  <span>
+                    מחיר מפעל ₪
+                  </span>
+
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    inputmode="decimal"
+                    data-fa-cost
+                    placeholder="הכנס מחיר"
+                    value="${
+                      production.estimated_cost ??
+                      ""
+                    }"
+                  >
+                </label>
+
+
+                <label>
+                  <span>
+                    הערות המפעל
+                  </span>
+
+                  <textarea
+                    data-fa-notes
+                    rows="3"
+                    placeholder="הערות, שינויים או מידע חשוב..."
+                  >${esc(
+                    production.factory_notes ||
+                    ""
+                  )}</textarea>
+                </label>
+
+              </div>
+
+
+              <div class="cv-fa-buttons">
+
+                <button
+                  type="button"
+                  class="cv-fa-approve"
+                  data-fa-action="APPROVED"
+                  data-fa-production-id="${esc(productionId)}"
+                >
+                  <small>APPROVE ORDER</small>
+                  <strong>אשר הזמנה</strong>
+                </button>
+
+
+                <button
+                  type="button"
+                  class="cv-fa-reject"
+                  data-fa-action="REJECTED"
+                  data-fa-production-id="${esc(productionId)}"
+                >
+                  דחה הזמנה
+                </button>
+
+              </div>
+
+
+              <div
+                class="cv-fa-message"
+                data-fa-message
+              ></div>
+
+            </div>
+
+          </article>
+        `;
+
+      }).join("");
+
+  }
+
+
+  async function submitFactoryApproval(
+    productionId,
+    approvalStatus,
+    card
+  ){
+
+    if(
+      !productionId ||
+      !card
+    ){
+      return;
+    }
+
+
+    const costInput =
+      card.querySelector(
+        "[data-fa-cost]"
+      );
+
+    const notesInput =
+      card.querySelector(
+        "[data-fa-notes]"
+      );
+
+    const message =
+      card.querySelector(
+        "[data-fa-message]"
+      );
+
+
+    const cost =
+      String(
+        costInput?.value || ""
+      ).trim();
+
+
+    if(
+      approvalStatus === "APPROVED" &&
+      cost === ""
+    ){
+
+      if(message){
+        message.textContent =
+          "יש להזין מחיר מפעל לפני אישור ההזמנה.";
+      }
+
+      costInput?.focus();
+
+      return;
+    }
+
+
+    const buttons =
+      card.querySelectorAll(
+        "[data-fa-action]"
+      );
+
+    buttons.forEach(button => {
+      button.disabled = true;
+    });
+
+
+    if(message){
+      message.textContent =
+        approvalStatus === "APPROVED"
+          ? "מאשר את ההזמנה..."
+          : "מעדכן את ההזמנה...";
+    }
+
+
+    try{
+
+      const payload = {
+        approval_status:
+          approvalStatus,
+
+        factory_notes:
+          String(
+            notesInput?.value || ""
+          ).trim()
+      };
+
+
+      if(cost !== ""){
+        payload.estimated_cost =
+          Number(cost);
+      }
+
+
+      const response =
+        await fetch(
+          `/api/factory/approval/${encodeURIComponent(productionId)}`,
+          {
+            method:"PATCH",
+            credentials:"include",
+            cache:"no-store",
+
+            headers:{
+              "Content-Type":
+                "application/json"
+            },
+
+            body:
+              JSON.stringify(payload)
+          }
+        );
+
+
+      const data =
+        await response
+          .json()
+          .catch(() => ({}));
+
+
+      if(
+        !response.ok ||
+        !data?.success
+      ){
+
+        if(
+          data?.error ===
+          "FACTORY_COST_REQUIRED"
+        ){
+          throw new Error(
+            "יש להזין מחיר מפעל לפני האישור."
+          );
+        }
+
+        throw new Error(
+          data?.error ||
+          "לא ניתן לעדכן את ההזמנה."
+        );
+
+      }
+
+
+      if(message){
+
+        message.textContent =
+          approvalStatus === "APPROVED"
+            ? "ההזמנה אושרה בהצלחה ✓"
+            : "ההזמנה נדחתה.";
+
+      }
+
+
+      await loadFactoryOrders();
+
+
+    }catch(error){
+
+      console.error(
+        "FACTORY APPROVAL:",
+        error
+      );
+
+
+      if(message){
+        message.textContent =
+          error.message ||
+          "לא ניתן לעדכן את ההזמנה.";
+      }
+
+
+      buttons.forEach(button => {
+        button.disabled = false;
+      });
+
+    }
+
+  }
+
+
+  document.addEventListener(
+    "click",
+    event => {
+
+      const actionButton =
+        event.target.closest(
+          "[data-fa-action]"
+        );
+
+      if(actionButton){
+
+        const productionId =
+          actionButton.dataset
+            .faProductionId;
+
+        const action =
+          actionButton.dataset
+            .faAction;
+
+        const card =
+          actionButton.closest(
+            "[data-fa-production]"
+          );
+
+
+        submitFactoryApproval(
+          productionId,
+          action,
+          card
+        );
+
+        return;
+      }
+
+
+      if(
+        event.target.closest(
+          "#cvFactoryApprovalsRefresh"
+        )
+      ){
+
+        loadFactoryOrders();
+
+      }
+
+    }
+  );
+
+
   window.cvLoadFactoryOrders =
     loadFactoryOrders;
 
@@ -13918,7 +15016,10 @@ document.addEventListener(
           arguments
         );
 
-      if(pageName === "production"){
+      if(
+        pageName === "production" ||
+        pageName === "factory-approvals"
+      ){
 
         applyFactoryLanguage();
         loadFactoryOrders();
@@ -17979,5 +19080,713 @@ document.addEventListener(
 
 </script>
 
+
+<script id="cv-factory-owner-home-runtime">
+
+(() => {
+
+  function factoryGreeting(){
+
+    const hour =
+      new Date().getHours();
+
+    if(hour >= 5 && hour < 12){
+      return "בוקר טוב";
+    }
+
+    if(hour >= 12 && hour < 17){
+      return "צהריים טובים";
+    }
+
+    if(hour >= 17 && hour < 22){
+      return "ערב טוב";
+    }
+
+    return "לילה טוב";
+  }
+
+
+  function renderFactoryOwnerHome(){
+
+    const user =
+      window.casaVeronaUser;
+
+    if(
+      !user ||
+      String(user.role || "")
+        .toUpperCase() !== "FACTORY_OWNER"
+    ){
+      return;
+    }
+
+
+    const fullName =
+      String(
+        user.full_name ||
+        user.username ||
+        "Ahmd"
+      ).trim();
+
+    const firstName =
+      fullName
+        .split(/\s+/)
+        .filter(Boolean)[0] ||
+        "Ahmd";
+
+
+    const welcome =
+      document.getElementById(
+        "cvFactoryWelcome"
+      );
+
+    if(welcome){
+      welcome.textContent =
+        `${factoryGreeting()}, ${firstName}.`;
+    }
+
+
+    const date =
+      document.getElementById(
+        "cvFactoryHomeDate"
+      );
+
+    if(date){
+
+      date.textContent =
+        new Intl.DateTimeFormat(
+          "he-IL",
+          {
+            weekday:"long",
+            day:"numeric",
+            month:"long"
+          }
+        ).format(new Date());
+
+    }
+
+  }
+
+
+  document.addEventListener(
+    "click",
+    event => {
+
+      const button =
+        event.target.closest(
+          "[data-factory-home-open]"
+        );
+
+      if(!button){
+        return;
+      }
+
+      const page =
+        button.dataset.factoryHomeOpen;
+
+      if(
+        page &&
+        typeof openPage === "function"
+      ){
+        openPage(page);
+      }
+
+    }
+  );
+
+
+  const observer =
+    new MutationObserver(() => {
+      renderFactoryOwnerHome();
+    });
+
+
+  observer.observe(
+    document.body,
+    {
+      attributes:true,
+      subtree:false
+    }
+  );
+
+
+  setInterval(
+    renderFactoryOwnerHome,
+    30000
+  );
+
+
+  setTimeout(
+    renderFactoryOwnerHome,
+    0
+  );
+
+})();
+
+</script>
+
 </body>
 </html>
+
+<style id="cv-factory-owner-home-style">
+
+.cv-fo-home{
+  padding:28px;
+  max-width:1500px;
+  margin:0 auto;
+}
+
+.cv-fo-hero{
+  display:flex;
+  justify-content:space-between;
+  gap:30px;
+  align-items:flex-end;
+  padding:38px;
+  border:1px solid rgba(20,20,16,.12);
+  border-radius:24px;
+  background:#f4f0e8;
+  margin-bottom:22px;
+}
+
+.cv-fo-hero-copy small,
+.cv-fo-section-head small,
+.cv-fo-actions small{
+  letter-spacing:.16em;
+  font-size:10px;
+  opacity:.62;
+}
+
+.cv-fo-hero h1{
+  margin:8px 0 8px;
+  font-size:clamp(34px,5vw,64px);
+  font-weight:500;
+  line-height:1;
+}
+
+.cv-fo-hero p{
+  margin:0;
+  opacity:.66;
+  max-width:620px;
+}
+
+.cv-fo-today{
+  min-width:220px;
+  text-align:left;
+}
+
+.cv-fo-today strong{
+  display:block;
+  margin:8px 0 14px;
+}
+
+.cv-fo-today span{
+  font-size:11px;
+  letter-spacing:.12em;
+}
+
+.cv-fo-today i{
+  display:inline-block;
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:#47744d;
+  margin-inline-end:6px;
+}
+
+.cv-fo-kpis{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:12px;
+  margin-bottom:22px;
+}
+
+.cv-fo-kpis button{
+  text-align:right;
+  border:1px solid rgba(20,20,16,.12);
+  border-radius:18px;
+  padding:20px;
+  background:#fff;
+  cursor:pointer;
+}
+
+.cv-fo-kpis button.attention{
+  background:#2a211e;
+  color:#fff;
+}
+
+.cv-fo-kpis small{
+  display:block;
+  font-size:9px;
+  letter-spacing:.13em;
+  opacity:.58;
+}
+
+.cv-fo-kpis strong{
+  display:block;
+  font-size:38px;
+  margin:12px 0 4px;
+}
+
+.cv-fo-kpis span{
+  font-size:13px;
+}
+
+.cv-fo-attention{
+  border:1px solid rgba(20,20,16,.12);
+  border-radius:22px;
+  background:#fff;
+  padding:24px;
+  margin-bottom:22px;
+}
+
+.cv-fo-section-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
+  margin-bottom:20px;
+}
+
+.cv-fo-section-head h2{
+  margin:4px 0 0;
+  font-size:25px;
+}
+
+.cv-fo-section-head > span{
+  font-size:10px;
+  letter-spacing:.15em;
+}
+
+.cv-fo-empty{
+  padding:22px 0;
+  opacity:.55;
+}
+
+.cv-fo-actions{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:14px;
+}
+
+.cv-fo-actions > button{
+  min-height:220px;
+  padding:24px;
+  border:1px solid rgba(20,20,16,.12);
+  border-radius:22px;
+  background:#fff;
+  text-align:right;
+  cursor:pointer;
+  position:relative;
+}
+
+.cv-fo-actions > button.dark{
+  background:#171713;
+  color:#fff;
+}
+
+.cv-fo-action-no{
+  position:absolute;
+  left:20px;
+  top:18px;
+  opacity:.35;
+  font-size:11px;
+}
+
+.cv-fo-actions strong{
+  display:block;
+  font-size:24px;
+  margin:14px 0 10px;
+}
+
+.cv-fo-actions p{
+  margin:0;
+  opacity:.62;
+  line-height:1.65;
+  font-size:13px;
+}
+
+.cv-fo-actions b{
+  display:block;
+  margin-top:25px;
+  font-size:12px;
+}
+
+@media(max-width:1000px){
+
+  .cv-fo-kpis{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .cv-fo-actions{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+}
+
+@media(max-width:700px){
+
+  .cv-fo-home{
+    padding:14px;
+  }
+
+  .cv-fo-hero{
+    display:block;
+    padding:24px 20px;
+    border-radius:20px;
+  }
+
+  .cv-fo-hero h1{
+    font-size:38px;
+  }
+
+  .cv-fo-today{
+    text-align:right;
+    margin-top:24px;
+    min-width:0;
+  }
+
+  .cv-fo-kpis{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:8px;
+  }
+
+  .cv-fo-kpis button{
+    padding:16px;
+  }
+
+  .cv-fo-kpis strong{
+    font-size:30px;
+  }
+
+  .cv-fo-kpis button:last-child{
+    grid-column:1 / -1;
+  }
+
+  .cv-fo-actions{
+    grid-template-columns:1fr;
+  }
+
+  .cv-fo-actions > button{
+    min-height:180px;
+  }
+
+}
+
+</style>
+
+
+<style id="cv-factory-approvals-style">
+
+.cv-fa{
+  max-width:1180px;
+  margin:0 auto;
+  padding:34px;
+}
+
+.cv-fa-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:24px;
+  margin-bottom:26px;
+}
+
+.cv-fa-head small{
+  font-size:10px;
+  letter-spacing:.16em;
+  opacity:.5;
+}
+
+.cv-fa-head h2{
+  margin:8px 0 5px;
+  font-size:38px;
+  line-height:1;
+}
+
+.cv-fa-head p{
+  margin:0;
+  opacity:.6;
+}
+
+.cv-fa-refresh{
+  border:1px solid rgba(20,20,16,.14);
+  background:transparent;
+  border-radius:100px;
+  padding:11px 18px;
+  cursor:pointer;
+}
+
+.cv-fa-summary{
+  margin-bottom:20px;
+}
+
+.cv-fa-summary > div{
+  display:inline-grid;
+  min-width:180px;
+  padding:18px;
+  border:1px solid rgba(20,20,16,.12);
+}
+
+.cv-fa-summary small{
+  font-size:9px;
+  letter-spacing:.12em;
+  opacity:.5;
+}
+
+.cv-fa-summary strong{
+  font-size:30px;
+  margin:5px 0;
+}
+
+.cv-fa-summary span{
+  font-size:12px;
+  opacity:.6;
+}
+
+.cv-fa-list{
+  display:grid;
+  gap:18px;
+}
+
+.cv-fa-order{
+  display:grid;
+  grid-template-columns:280px 1fr;
+  border:1px solid rgba(20,20,16,.13);
+  background:#fff;
+  overflow:hidden;
+}
+
+.cv-fa-order-image{
+  position:relative;
+  min-height:100%;
+  background:#11110f;
+}
+
+.cv-fa-order-image img{
+  width:100%;
+  height:100%;
+  min-height:430px;
+  object-fit:cover;
+  display:block;
+}
+
+.cv-fa-no-image{
+  height:100%;
+  min-height:430px;
+  display:grid;
+  place-items:center;
+  color:#fff;
+  letter-spacing:.16em;
+  font-size:11px;
+}
+
+.cv-fa-order-image > span{
+  position:absolute;
+  top:15px;
+  left:15px;
+  background:#fff;
+  padding:7px 10px;
+  font-size:11px;
+}
+
+.cv-fa-order-content{
+  padding:26px;
+}
+
+.cv-fa-order-head{
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+  align-items:flex-start;
+}
+
+.cv-fa-order-head small{
+  font-size:9px;
+  letter-spacing:.14em;
+  opacity:.45;
+}
+
+.cv-fa-order-head h3{
+  margin:6px 0 0;
+  font-size:26px;
+}
+
+.cv-fa-pending{
+  background:#f3eee2;
+  padding:8px 11px;
+  font-size:11px;
+  white-space:nowrap;
+}
+
+.cv-fa-specs{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  margin-top:22px;
+  border-top:1px solid rgba(20,20,16,.1);
+  border-bottom:1px solid rgba(20,20,16,.1);
+}
+
+.cv-fa-specs > div{
+  padding:15px 12px;
+  border-inline-end:1px solid rgba(20,20,16,.1);
+}
+
+.cv-fa-specs small,
+.cv-fa-note small,
+.cv-fa-form label > span{
+  display:block;
+  font-size:9px;
+  letter-spacing:.1em;
+  opacity:.5;
+  margin-bottom:5px;
+}
+
+.cv-fa-specs strong{
+  font-size:12px;
+  font-weight:500;
+}
+
+.cv-fa-note{
+  margin-top:15px;
+  padding:14px;
+  background:#f7f6f2;
+}
+
+.cv-fa-note.important{
+  border-right:3px solid #171713;
+}
+
+.cv-fa-note p{
+  margin:0;
+  line-height:1.6;
+  font-size:13px;
+}
+
+.cv-fa-form{
+  display:grid;
+  grid-template-columns:220px 1fr;
+  gap:12px;
+  margin-top:20px;
+}
+
+.cv-fa-form input,
+.cv-fa-form textarea{
+  width:100%;
+  box-sizing:border-box;
+  border:1px solid rgba(20,20,16,.16);
+  background:#fff;
+  padding:13px;
+  font:inherit;
+  outline:none;
+}
+
+.cv-fa-form textarea{
+  resize:vertical;
+}
+
+.cv-fa-buttons{
+  display:flex;
+  gap:8px;
+  margin-top:16px;
+}
+
+.cv-fa-approve{
+  flex:1;
+  border:0;
+  background:#11110f;
+  color:#fff;
+  padding:15px 18px;
+  cursor:pointer;
+  text-align:right;
+}
+
+.cv-fa-approve small{
+  display:block;
+  opacity:.5;
+  font-size:8px;
+  letter-spacing:.12em;
+}
+
+.cv-fa-approve strong{
+  display:block;
+  margin-top:3px;
+  font-size:14px;
+}
+
+.cv-fa-reject{
+  border:1px solid rgba(20,20,16,.16);
+  background:transparent;
+  padding:0 20px;
+  cursor:pointer;
+}
+
+.cv-fa-buttons button:disabled{
+  opacity:.45;
+  cursor:wait;
+}
+
+.cv-fa-message{
+  min-height:18px;
+  margin-top:9px;
+  font-size:12px;
+}
+
+.cv-fa-empty{
+  padding:50px 20px;
+  border:1px solid rgba(20,20,16,.12);
+  text-align:center;
+}
+
+.cv-fa-empty strong,
+.cv-fa-empty span{
+  display:block;
+}
+
+.cv-fa-empty span{
+  margin-top:5px;
+  opacity:.55;
+}
+
+@media(max-width:700px){
+
+  .cv-fa{
+    padding:18px 14px 100px;
+  }
+
+  .cv-fa-head h2{
+    font-size:30px;
+  }
+
+  .cv-fa-order{
+    grid-template-columns:1fr;
+  }
+
+  .cv-fa-order-image img,
+  .cv-fa-no-image{
+    min-height:220px;
+    height:220px;
+  }
+
+  .cv-fa-order-content{
+    padding:18px;
+  }
+
+  .cv-fa-specs{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .cv-fa-form{
+    grid-template-columns:1fr;
+  }
+
+  .cv-fa-buttons{
+    display:grid;
+  }
+
+  .cv-fa-reject{
+    min-height:48px;
+  }
+
+}
+
+</style>
+
