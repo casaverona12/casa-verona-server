@@ -2385,7 +2385,21 @@ document.addEventListener("click",e=>{const n=e.target.closest("[data-page]"),o=
 
             renderCasaVeronaDate();
 
-            openPage("dashboard");
+            const loginRole =
+              String(
+                user?.role || ""
+              )
+              .trim()
+              .toUpperCase();
+
+            if(
+              loginRole ===
+              "FACTORY_OWNER"
+            ){
+              openPage("production");
+            }else{
+              openPage("dashboard");
+            }
 
             hideLogin();
 
