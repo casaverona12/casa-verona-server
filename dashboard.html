@@ -1964,8 +1964,14 @@ document.addEventListener("click",e=>{const n=e.target.closest("[data-page]"),o=
             const page =
               button.dataset.page;
 
+            const allowed =
+              allowedPages.has(page);
+
             button.hidden =
-              !allowedPages.has(page);
+              !allowed;
+
+            button.style.display =
+              allowed ? "" : "none";
 
           });
 
@@ -2038,6 +2044,7 @@ document.addEventListener("click",e=>{const n=e.target.closest("[data-page]"),o=
           )
           .forEach(button => {
             button.hidden = false;
+            button.style.display = "";
           });
 
 
