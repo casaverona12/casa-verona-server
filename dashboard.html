@@ -375,6 +375,71 @@ linear-gradient(90deg,rgba(12,12,11,.025) 1px,transparent 1px),
 }
 </style>
 
+
+<style id="cv-logout-style">
+
+.cv-logout-button{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+
+  min-height:38px;
+  padding:0 14px;
+
+  border:1px solid rgba(20,20,18,.12);
+  border-radius:999px;
+
+  background:rgba(255,255,255,.55);
+  color:#5f5a51;
+
+  font:inherit;
+  font-size:11px;
+  font-weight:700;
+
+  cursor:pointer;
+
+  transition:
+    background .2s ease,
+    color .2s ease,
+    border-color .2s ease,
+    transform .2s ease;
+}
+
+.cv-logout-button b{
+  font-size:13px;
+  font-weight:400;
+}
+
+.cv-logout-button:hover{
+  background:#171713;
+  color:#fff;
+  border-color:#171713;
+  transform:translateY(-1px);
+}
+
+.cv-logout-button:disabled{
+  opacity:.5;
+  cursor:wait;
+}
+
+@media(max-width:700px){
+
+  .cv-logout-button{
+    width:38px;
+    min-width:38px;
+    height:38px;
+    padding:0;
+  }
+
+  .cv-logout-button span{
+    display:none;
+  }
+
+}
+
+</style>
+
 </head>
 <body>
 
@@ -458,7 +523,25 @@ linear-gradient(90deg,rgba(12,12,11,.025) 1px,transparent 1px),
 <main class="cv-main">
 <button class="cv-mobile-menu-btn" id="cvMobileMenuBtn" type="button" aria-label="פתח תפריט">☰</button>
 <div class="cv-mobile-overlay" id="cvMobileOverlay"></div>
-<header class="cv-top"><div><span class="cv-top-kicker">CASA VERONA · PRIVATE OS</span><h2 id="pageTitle">Command Center</h2></div><div class="cv-user"><div class="cv-user-copy"><strong id="topbarUserName">Casa Verona</strong><span id="topbarUserRole">ADMIN</span></div><div id="topbarAvatar" class="cv-avatar">CV</div></div></header>
+<header class="cv-top"><div><span class="cv-top-kicker">CASA VERONA · PRIVATE OS</span><h2 id="pageTitle">Command Center</h2></div><div class="cv-user">
+  <button
+    type="button"
+    id="cvLogoutButton"
+    class="cv-logout-button"
+    aria-label="התנתקות"
+    title="התנתקות"
+  >
+    <span>התנתקות</span>
+    <b>↗</b>
+  </button>
+
+  <div class="cv-user-copy">
+    <strong id="topbarUserName">Casa Verona</strong>
+    <span id="topbarUserRole">ADMIN</span>
+  </div>
+
+  <div id="topbarAvatar" class="cv-avatar">CV</div>
+</div></header>
 
 <section id="dashboard" class="page active">
   <div class="cv-hero">
@@ -17665,6 +17748,87 @@ document.addEventListener(
     applyV8();
   }
 })();
+</script>
+
+
+<script id="cv-logout-client">
+
+(() => {
+
+  const button =
+    document.getElementById(
+      "cvLogoutButton"
+    );
+
+  if(!button) return;
+
+  button.addEventListener(
+    "click",
+    async () => {
+
+      if(button.disabled) return;
+
+      button.disabled = true;
+
+      const original =
+        button.innerHTML;
+
+      button.innerHTML =
+        "<span>מתנתק...</span><b>•••</b>";
+
+      try{
+
+        const response =
+          await fetch(
+            "/api/auth/logout",
+            {
+              method:"POST",
+              credentials:"include",
+              cache:"no-store"
+            }
+          );
+
+        const data =
+          await response
+            .json()
+            .catch(() => ({}));
+
+        if(
+          !response.ok ||
+          !data?.success
+        ){
+          throw new Error(
+            data?.error ||
+            "LOGOUT_FAILED"
+          );
+        }
+
+        window.casaVeronaUser = null;
+
+        window.location.replace(
+          "/dashboard"
+        );
+
+      }catch(error){
+
+        console.error(
+          "CASA VERONA LOGOUT:",
+          error
+        );
+
+        button.disabled = false;
+        button.innerHTML = original;
+
+        alert(
+          "לא הצלחנו להתנתק. נסה שוב."
+        );
+      }
+
+    }
+  );
+
+})();
+
 </script>
 
 </body>

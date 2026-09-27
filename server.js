@@ -5380,6 +5380,49 @@ if (
     return;
   }
 }
+
+// =====================================================
+// CASA VERONA — LOGOUT
+// =====================================================
+
+if (
+  req.method === "POST" &&
+  url.pathname === "/api/auth/logout"
+) {
+
+  const expiredAccessCookie =
+    "casa_verona_access_token=; " +
+    "HttpOnly; SameSite=Strict; Path=/; " +
+    "Max-Age=0";
+
+  const expiredRefreshCookie =
+    "casa_verona_refresh_token=; " +
+    "HttpOnly; SameSite=Strict; Path=/; " +
+    "Max-Age=0";
+
+  res.writeHead(200, {
+    "Content-Type":
+      "application/json; charset=utf-8",
+
+    "Cache-Control":
+      "no-store",
+
+    "Set-Cookie": [
+      expiredAccessCookie,
+      expiredRefreshCookie
+    ]
+  });
+
+  res.end(
+    JSON.stringify({
+      success: true
+    })
+  );
+
+  return;
+}
+
+
 if (
   req.method === "POST" &&
   url.pathname === "/api/auth/login"
