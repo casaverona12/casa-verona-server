@@ -14073,12 +14073,16 @@ document.addEventListener(
                   )}
                 </span>
 
-                <span class="cv-factory-open">
+                <button
+                  type="button"
+                  class="cv-factory-open"
+                  data-factory-open-order="${esc(order.id)}"
+                >
                   ${t(
                     "פתח הזמנה ←",
                     "فتح الطلب ←"
                   )}
-                </span>
+                </button>
 
               </div>
 
@@ -14756,6 +14760,29 @@ document.addEventListener(
       ){
 
         loadFactoryOrders();
+
+        return;
+      }
+
+
+      const openOrderButton =
+        event.target.closest(
+          "[data-factory-open-order]"
+        );
+
+      if(openOrderButton){
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        const orderId =
+          openOrderButton.dataset.factoryOpenOrder;
+
+        if(
+          typeof cvOpenOrderInquiry === "function"
+        ){
+          cvOpenOrderInquiry(orderId);
+        }
 
         return;
       }
