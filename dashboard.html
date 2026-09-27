@@ -8699,6 +8699,15 @@ document
         item =>
           String(item.id) ===
           String(orderId)
+      ) ||
+      (
+        typeof cvFactoryOrders !== "undefined"
+          ? cvFactoryOrders.find(
+              item =>
+                String(item.id) ===
+                String(orderId)
+            )
+          : null
       );
 
     if(!order || !cvOrderCommandBody){
