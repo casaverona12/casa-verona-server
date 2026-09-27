@@ -13279,6 +13279,25 @@ document
 
 </style>
 
+
+<script id="cv-order-inquiry-debug">
+document.addEventListener("click", function(event){
+
+  const card = event.target.closest("[data-order-inquiry]");
+
+  if(!card) return;
+
+  const orderId = card.dataset.orderInquiry;
+
+  alert(
+    "ORDER CLICK OK\n" +
+    "ID: " + orderId + "\n" +
+    "OPENER: " + typeof window.cvOpenOrderInquiry
+  );
+
+}, true);
+</script>
+
 <script id="cv-orders-v5-interaction">
 
 /*
