@@ -1924,6 +1924,133 @@ document.addEventListener("click",e=>{const n=e.target.closest("[data-page]"),o=
       window.casaVeronaUser =
         user;
 
+
+      // =================================================
+      // CASA VERONA — ROLE BASED UI
+      // =================================================
+
+      const role =
+        String(user.role || "")
+          .trim()
+          .toUpperCase();
+
+
+      if(role === "FACTORY_OWNER"){
+
+        document.body.classList.add(
+          "cv-role-factory-owner"
+        );
+
+        document.body.classList.remove(
+          "cv-role-admin"
+        );
+
+
+        const allowedPages =
+          new Set([
+            "orders",
+            "production",
+            "deliveries",
+            "ai-production"
+          ]);
+
+
+        document
+          .querySelectorAll(
+            '[data-page]'
+          )
+          .forEach(button => {
+
+            const page =
+              button.dataset.page;
+
+            button.hidden =
+              !allowedPages.has(page);
+
+          });
+
+
+        document
+          .querySelectorAll(
+            ".cv-nav-group"
+          )
+          .forEach(group => {
+
+            const visibleButton =
+              [...group.querySelectorAll(
+                "[data-page]"
+              )]
+              .some(button =>
+                button.hidden !== true
+              );
+
+            group.hidden =
+              !visibleButton;
+
+          });
+
+
+        const title =
+          document.getElementById(
+            "pageTitle"
+          );
+
+        if(title){
+          title.textContent =
+            "Factory Operations";
+        }
+
+
+        /*
+         * Do not show ADMIN Command Center
+         * to factory owner on login.
+         */
+        setTimeout(() => {
+
+          if(
+            typeof cvOpenPage ===
+            "function"
+          ){
+            cvOpenPage("production");
+          }else if(
+            typeof openPage ===
+            "function"
+          ){
+            openPage("production");
+          }
+
+        },0);
+
+      }else{
+
+        document.body.classList.add(
+          "cv-role-admin"
+        );
+
+        document.body.classList.remove(
+          "cv-role-factory-owner"
+        );
+
+
+        document
+          .querySelectorAll(
+            '[data-page]'
+          )
+          .forEach(button => {
+            button.hidden = false;
+          });
+
+
+        document
+          .querySelectorAll(
+            ".cv-nav-group"
+          )
+          .forEach(group => {
+            group.hidden = false;
+          });
+
+      }
+
     }
 
 
