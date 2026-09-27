@@ -1035,7 +1035,130 @@ linear-gradient(90deg,rgba(12,12,11,.025) 1px,transparent 1px),
 
 </section>
 
-<section id="production" class="page"></section>
+
+<section id="production" class="page">
+
+  <div class="cv-factory-os" id="cvFactoryOS">
+
+    <header class="cv-factory-head">
+
+      <div>
+        <small id="cvFactoryEyebrow">
+          CASA VERONA · FACTORY OS
+        </small>
+
+        <h2 id="cvFactoryTitle">
+          רצפת הייצור
+        </h2>
+
+        <p id="cvFactorySubtitle">
+          כל ההזמנות הפעילות במפעל במקום אחד.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="cv-factory-refresh"
+        id="cvFactoryRefresh"
+      >
+        <span>↻</span>
+        <strong id="cvFactoryRefreshText">רענון</strong>
+      </button>
+
+    </header>
+
+
+    <div class="cv-factory-kpis">
+
+      <article>
+        <small id="cvFactoryKpiAllLabel">סה״כ עבודות</small>
+        <strong id="cvFactoryKpiAll">0</strong>
+      </article>
+
+      <article>
+        <small id="cvFactoryKpiApprovalLabel">ממתינות לאישור</small>
+        <strong id="cvFactoryKpiApproval">0</strong>
+      </article>
+
+      <article>
+        <small id="cvFactoryKpiProgressLabel">בייצור</small>
+        <strong id="cvFactoryKpiProgress">0</strong>
+      </article>
+
+      <article>
+        <small id="cvFactoryKpiReadyLabel">מוכנות</small>
+        <strong id="cvFactoryKpiReady">0</strong>
+      </article>
+
+    </div>
+
+
+    <div class="cv-factory-toolbar">
+
+      <div class="cv-factory-search">
+        <span>⌕</span>
+
+        <input
+          id="cvFactorySearch"
+          type="search"
+          placeholder="חיפוש לפי הזמנה או דגם"
+          autocomplete="off"
+        >
+      </div>
+
+      <div class="cv-factory-filters">
+
+        <button
+          type="button"
+          class="active"
+          data-factory-filter="ALL"
+          id="cvFactoryFilterAll"
+        >
+          הכל
+        </button>
+
+        <button
+          type="button"
+          data-factory-filter="PENDING"
+          id="cvFactoryFilterPending"
+        >
+          לאישור
+        </button>
+
+        <button
+          type="button"
+          data-factory-filter="IN_PROGRESS"
+          id="cvFactoryFilterProgress"
+        >
+          בייצור
+        </button>
+
+        <button
+          type="button"
+          data-factory-filter="READY"
+          id="cvFactoryFilterReady"
+        >
+          מוכן
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div
+      class="cv-factory-orders"
+      id="cvFactoryOrders"
+    >
+      <div class="cv-factory-loading">
+        טוען את רצפת הייצור...
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
 <section id="deliveries" class="page"></section>
 <section id="catalog" class="page"></section>
 <section id="ai-sales-agent" class="page"></section>
@@ -1479,7 +1602,8 @@ document.addEventListener("click",e=>{const n=e.target.closest("[data-page]"),o=
 
       window.scrollTo({
         top: 0,
-        behavior: "smooth"
+        left: 0,
+        behavior: "auto"
       });
 
     }
@@ -2030,6 +2154,14 @@ document.addEventListener("click",e=>{const n=e.target.closest("[data-page]"),o=
                 user
               );
 
+              if (
+                typeof window.cvRequireFactoryLanguage === "function"
+              ) {
+                await window.cvRequireFactoryLanguage(
+                  user
+                );
+              }
+
             }
 
 
@@ -2085,6 +2217,381 @@ document.addEventListener("click",e=>{const n=e.target.closest("[data-page]"),o=
 
 
 </script>
+
+<script id="cv-factory-language-system">
+/* =====================================================
+   CASA VERONA — FACTORY LANGUAGE GATE
+   Appears after every real factory login.
+===================================================== */
+
+window.cvFactoryLanguage = "he";
+
+window.cvRequireFactoryLanguage = function(user){
+
+  return new Promise(resolve => {
+
+    const role =
+      String(user?.role || "").toUpperCase();
+
+    /* Admin does not get the language screen */
+    if(
+      role !== "FACTORY_OWNER" &&
+      role !== "FACTORY_WORKER"
+    ){
+      resolve("he");
+      return;
+    }
+
+    const old =
+      document.getElementById(
+        "cvFactoryLanguageGate"
+      );
+
+    if(old){
+      old.remove();
+    }
+
+    const gate =
+      document.createElement("div");
+
+    gate.id = "cvFactoryLanguageGate";
+
+    gate.innerHTML = `
+      <div class="cv-fl-panel">
+
+        <div class="cv-fl-brand">
+          <small>CASA VERONA</small>
+          <strong>FACTORY OS</strong>
+        </div>
+
+        <div class="cv-fl-copy">
+          <span>LANGUAGE · اللغة · שפה</span>
+          <h1>בחר שפה</h1>
+          <p>اختر اللغة للمتابعة</p>
+        </div>
+
+        <div class="cv-fl-actions">
+
+          <button
+            type="button"
+            data-cv-factory-language="he"
+          >
+            <span class="cv-fl-code">HE</span>
+
+            <span class="cv-fl-name">
+              <strong>עברית</strong>
+              <small>המשך למערכת המפעל</small>
+            </span>
+
+            <span class="cv-fl-arrow">←</span>
+          </button>
+
+          <button
+            type="button"
+            data-cv-factory-language="ar"
+          >
+            <span class="cv-fl-code">AR</span>
+
+            <span class="cv-fl-name" dir="rtl">
+              <strong>العربية</strong>
+              <small>الدخول إلى نظام المصنع</small>
+            </span>
+
+            <span class="cv-fl-arrow">←</span>
+          </button>
+
+        </div>
+
+        <div class="cv-fl-foot">
+          FACTORY ACCESS · CASA VERONA OPERATIONS
+        </div>
+
+      </div>
+    `;
+
+    document.body.appendChild(gate);
+
+    document.body.classList.add(
+      "cv-factory-language-open"
+    );
+
+    gate
+      .querySelectorAll(
+        "[data-cv-factory-language]"
+      )
+      .forEach(button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            const language =
+              button.dataset.cvFactoryLanguage;
+
+            window.cvFactoryLanguage =
+              language;
+
+            document.documentElement.setAttribute(
+              "data-factory-language",
+              language
+            );
+
+            /*
+              We intentionally do NOT save the choice.
+              Factory chooses every time after login.
+            */
+
+            gate.classList.add("closing");
+
+            setTimeout(() => {
+              gate.remove();
+
+              document.body.classList.remove(
+                "cv-factory-language-open"
+              );
+
+              window.dispatchEvent(
+                new CustomEvent(
+                  "cv:factory-language",
+                  {
+                    detail:{
+                      language
+                    }
+                  }
+                )
+              );
+
+              resolve(language);
+
+            }, 220);
+
+          }
+        );
+
+      });
+
+  });
+
+};
+</script>
+
+<style id="cv-factory-language-style">
+
+body.cv-factory-language-open{
+  overflow:hidden !important;
+}
+
+#cvFactoryLanguageGate{
+  position:fixed;
+  inset:0;
+  z-index:999999;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:
+    max(18px, env(safe-area-inset-top))
+    18px
+    max(18px, env(safe-area-inset-bottom));
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      #292826 0%,
+      #151514 42%,
+      #090909 100%
+    );
+  font-family:inherit;
+  animation:cvFlIn .28s ease both;
+}
+
+#cvFactoryLanguageGate.closing{
+  animation:cvFlOut .22s ease both;
+}
+
+.cv-fl-panel{
+  width:min(100%,460px);
+  background:#f2efe8;
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:0 35px 100px rgba(0,0,0,.55);
+  padding:34px 28px 24px;
+}
+
+.cv-fl-brand{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:20px;
+  padding-bottom:22px;
+  border-bottom:1px solid #d5d1c9;
+}
+
+.cv-fl-brand small{
+  font-size:10px;
+  letter-spacing:.22em;
+  color:#858078;
+}
+
+.cv-fl-brand strong{
+  font-size:12px;
+  letter-spacing:.12em;
+  color:#151514;
+}
+
+.cv-fl-copy{
+  padding:39px 0 28px;
+  text-align:right;
+}
+
+.cv-fl-copy span{
+  display:block;
+  margin-bottom:13px;
+  font-size:9px;
+  letter-spacing:.18em;
+  color:#918c84;
+}
+
+.cv-fl-copy h1{
+  margin:0;
+  color:#111;
+  font-size:42px;
+  font-weight:500;
+  letter-spacing:-.045em;
+  line-height:1;
+}
+
+.cv-fl-copy p{
+  margin:10px 0 0;
+  color:#76716a;
+  font-size:18px;
+  direction:rtl;
+}
+
+.cv-fl-actions{
+  display:grid;
+  gap:9px;
+}
+
+.cv-fl-actions button{
+  appearance:none;
+  width:100%;
+  min-height:82px;
+  display:grid;
+  grid-template-columns:48px 1fr 25px;
+  align-items:center;
+  gap:15px;
+  padding:14px 17px;
+  border:1px solid #d3cfc7;
+  background:#e7e3dc;
+  color:#151514;
+  text-align:right;
+  cursor:pointer;
+  font-family:inherit;
+  transition:
+    transform .16s ease,
+    background .16s ease,
+    color .16s ease;
+}
+
+.cv-fl-actions button:hover{
+  background:#151514;
+  color:#f5f2eb;
+  transform:translateY(-1px);
+}
+
+.cv-fl-code{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:44px;
+  height:44px;
+  border:1px solid currentColor;
+  font-size:10px;
+  letter-spacing:.12em;
+}
+
+.cv-fl-name{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+
+.cv-fl-name strong{
+  font-size:18px;
+  font-weight:600;
+}
+
+.cv-fl-name small{
+  font-size:11px;
+  opacity:.58;
+}
+
+.cv-fl-arrow{
+  font-size:20px;
+}
+
+.cv-fl-foot{
+  margin-top:26px;
+  padding-top:18px;
+  border-top:1px solid #d5d1c9;
+  color:#99948c;
+  font-size:8px;
+  letter-spacing:.17em;
+  text-align:center;
+}
+
+@keyframes cvFlIn{
+  from{
+    opacity:0;
+    transform:scale(1.01);
+  }
+  to{
+    opacity:1;
+    transform:scale(1);
+  }
+}
+
+@keyframes cvFlOut{
+  to{
+    opacity:0;
+    transform:scale(.99);
+  }
+}
+
+/* iPhone + Galaxy */
+@media(max-width:600px){
+
+  #cvFactoryLanguageGate{
+    align-items:flex-end;
+    padding:
+      max(12px,env(safe-area-inset-top))
+      0
+      0;
+  }
+
+  .cv-fl-panel{
+    width:100%;
+    padding:
+      28px 18px
+      calc(20px + env(safe-area-inset-bottom));
+    border-left:0;
+    border-right:0;
+    border-bottom:0;
+  }
+
+  .cv-fl-copy{
+    padding:32px 2px 24px;
+  }
+
+  .cv-fl-copy h1{
+    font-size:38px;
+  }
+
+  .cv-fl-actions button{
+    min-height:78px;
+  }
+
+}
+
+</style>
 
 <script>
 function cvSet(id,v){const e=document.getElementById(id);if(e)e.textContent=(v===null||v===undefined||v==="")?"—":String(v)}
@@ -2371,7 +2878,699 @@ if(
 }
 </script>
 
-</body></html><style>
+
+
+<style id="cv-factory-control-v1">
+
+.cv-factory-control{
+  margin-top:18px;
+  padding:20px;
+  background:#11110f;
+  border:1px solid #2d2d29;
+  color:#f5f2eb;
+}
+
+.cv-factory-control-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:20px;
+  padding-bottom:17px;
+  border-bottom:1px solid rgba(255,255,255,.1);
+}
+
+.cv-factory-control-head > div{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+}
+
+.cv-factory-control-head small{
+  font-size:8px;
+  letter-spacing:2px;
+  opacity:.45;
+}
+
+.cv-factory-control-head strong{
+  font-family:Georgia,serif;
+  font-size:22px;
+  font-weight:400;
+}
+
+.cv-factory-control-head > span{
+  font-size:10px;
+  opacity:.6;
+}
+
+.cv-factory-actions{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  margin-top:17px;
+}
+
+.cv-factory-action{
+  min-height:48px;
+  border:1px solid rgba(255,255,255,.16);
+  padding:12px 14px;
+  font:inherit;
+  font-size:11px;
+  cursor:pointer;
+}
+
+.cv-factory-action.primary{
+  background:#f4f1ea;
+  color:#111;
+}
+
+.cv-factory-action.secondary{
+  background:transparent;
+  color:#fff;
+}
+
+.cv-factory-action.danger{
+  background:transparent;
+  color:#fff;
+  border-color:rgba(255,255,255,.28);
+}
+
+.cv-factory-qc-button{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  background:#f4f1ea;
+  color:#111;
+  user-select:none;
+}
+
+.cv-factory-qc-button.loading{
+  opacity:.55;
+  pointer-events:none;
+}
+
+
+.cv-factory-complete{
+  min-height:48px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid rgba(255,255,255,.15);
+  font-size:11px;
+}
+
+@media(max-width:760px){
+
+  .cv-factory-control{
+    margin-left:-15px;
+    margin-right:-15px;
+    padding:18px 15px;
+  }
+
+  .cv-factory-actions{
+    grid-template-columns:1fr;
+  }
+
+  .cv-factory-action{
+    min-height:52px;
+    font-size:12px;
+  }
+
+}
+
+</style>
+
+
+<!-- =====================================================
+     CASA VERONA — FACTORY MOBILE QC SYSTEM
+===================================================== -->
+<style id="cv-factory-qc-mobile-style">
+
+.cv-qc-mobile-actions{
+  margin-top:18px;
+  border-top:1px solid rgba(0,0,0,.12);
+  padding-top:18px;
+}
+
+.cv-qc-mobile-box{
+  border:1px solid rgba(0,0,0,.12);
+  background:#f4f1ea;
+  padding:18px;
+  box-sizing:border-box;
+}
+
+.cv-qc-mobile-label{
+  display:block;
+  font-size:8px;
+  letter-spacing:2px;
+  opacity:.45;
+  margin-bottom:6px;
+}
+
+.cv-qc-mobile-title{
+  display:block;
+  font-family:Georgia,serif;
+  font-size:22px;
+  font-weight:400;
+  margin-bottom:5px;
+}
+
+.cv-qc-mobile-copy{
+  display:block;
+  font-size:10px;
+  line-height:1.6;
+  opacity:.55;
+  margin-bottom:15px;
+}
+
+.cv-qc-preview{
+  display:none;
+  width:100%;
+  margin-bottom:12px;
+  background:#111;
+  overflow:hidden;
+}
+
+.cv-qc-preview.active{
+  display:block;
+}
+
+.cv-qc-preview img{
+  display:block;
+  width:100%;
+  max-height:320px;
+  object-fit:cover;
+}
+
+.cv-qc-camera{
+  width:100%;
+  min-height:54px;
+  border:1px solid #111;
+  background:#fff;
+  color:#111;
+  padding:14px 16px;
+  font:inherit;
+  font-weight:600;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  box-sizing:border-box;
+}
+
+.cv-qc-camera input{
+  display:none;
+}
+
+.cv-qc-upload{
+  width:100%;
+  min-height:54px;
+  border:0;
+  background:#111;
+  color:#fff;
+  padding:14px 16px;
+  margin-top:8px;
+  font:inherit;
+  font-weight:600;
+  cursor:pointer;
+}
+
+.cv-qc-upload:disabled{
+  opacity:.35;
+  cursor:not-allowed;
+}
+
+.cv-qc-ready{
+  width:100%;
+  min-height:58px;
+  border:0;
+  background:#111;
+  color:#fff;
+  padding:15px 16px;
+  margin-top:8px;
+  font:inherit;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.cv-qc-ready:disabled{
+  background:#d8d4cc;
+  color:#8d8880;
+  cursor:not-allowed;
+}
+
+.cv-qc-status{
+  min-height:18px;
+  margin-top:10px;
+  font-size:10px;
+  line-height:1.5;
+}
+
+.cv-qc-success{
+  padding:12px;
+  background:#e3e4e0;
+  color:#222;
+  margin-bottom:10px;
+  font-size:11px;
+}
+
+.cv-qc-existing{
+  margin-bottom:12px;
+}
+
+.cv-qc-existing img{
+  width:100%;
+  max-height:300px;
+  object-fit:cover;
+  display:block;
+}
+
+@media(max-width:760px){
+
+  .cv-qc-mobile-box{
+    margin-left:-2px;
+    margin-right:-2px;
+    padding:16px;
+  }
+
+  .cv-qc-camera,
+  .cv-qc-upload,
+  .cv-qc-ready{
+    min-height:58px;
+    font-size:14px;
+  }
+
+  .cv-qc-preview img,
+  .cv-qc-existing img{
+    max-height:42vh;
+  }
+}
+
+</style>
+
+<script id="cv-factory-qc-mobile-system">
+(function(){
+
+  function productionOf(order){
+    const p = order?.production_orders;
+    return Array.isArray(p) ? (p[0] || {}) : (p || {});
+  }
+
+  function currentRole(){
+    return String(
+      window.casaVeronaUser?.role || ""
+    ).toUpperCase();
+  }
+
+  function canUseFactoryQC(){
+    return [
+      "ADMIN",
+      "FACTORY_OWNER",
+      "FACTORY_WORKER"
+    ].includes(currentRole());
+  }
+
+  window.cvFactoryQCMarkup = function(order){
+
+    if(!canUseFactoryQC()){
+      return "";
+    }
+
+    const production = productionOf(order);
+
+    if(!production?.id){
+      return "";
+    }
+
+    const image =
+      production.final_image_url || "";
+
+    const ready =
+      production.status === "READY";
+
+    return `
+      <div
+        class="cv-qc-mobile-actions"
+        data-cv-qc="${String(production.id)}"
+      >
+        <div class="cv-qc-mobile-box">
+
+          <small class="cv-qc-mobile-label">
+            FACTORY · QUALITY CONTROL
+          </small>
+
+          <strong class="cv-qc-mobile-title">
+            בקרת איכות
+          </strong>
+
+          <span class="cv-qc-mobile-copy">
+            לפני שהמוצר מסומן כמוכן יש לצלם
+            תמונה עדכנית שלו במפעל.
+          </span>
+
+          ${
+            image
+              ? `
+                <div class="cv-qc-success">
+                  ✓ תמונת QC שמורה במערכת
+                </div>
+
+                <div class="cv-qc-existing">
+                  <img
+                    src="${image}"
+                    alt="QC"
+                  >
+                </div>
+              `
+              : ""
+          }
+
+          <div
+            class="cv-qc-preview"
+            data-qc-preview
+          ></div>
+
+          <label class="cv-qc-camera">
+            <span>📷</span>
+            <span>
+              ${image ? "צלם תמונה חדשה" : "צלם תמונת QC"}
+            </span>
+
+            <input
+              type="file"
+              accept="image/*,.heic,.heif"
+              capture="environment"
+              data-qc-file
+            >
+          </label>
+
+          <button
+            type="button"
+            class="cv-qc-upload"
+            data-qc-upload
+            disabled
+          >
+            העלה ושמור תמונה
+          </button>
+
+          <button
+            type="button"
+            class="cv-qc-ready"
+            data-qc-ready
+            ${(!image || ready) ? "disabled" : ""}
+          >
+            ${
+              ready
+                ? "✓ המוצר מוכן"
+                : image
+                  ? "סמן את המוצר כמוכן"
+                  : "נדרש צילום QC לפני סיום"
+            }
+          </button>
+
+          <div
+            class="cv-qc-status"
+            data-qc-status
+          ></div>
+
+        </div>
+      </div>
+    `;
+  };
+
+
+  document.addEventListener(
+    "change",
+    function(event){
+
+      const input =
+        event.target.closest("[data-qc-file]");
+
+      if(!input) return;
+
+      const root =
+        input.closest("[data-cv-qc]");
+
+      if(!root) return;
+
+      const file =
+        input.files?.[0];
+
+      const preview =
+        root.querySelector("[data-qc-preview]");
+
+      const upload =
+        root.querySelector("[data-qc-upload]");
+
+      const status =
+        root.querySelector("[data-qc-status]");
+
+      if(!file){
+        upload.disabled = true;
+        return;
+      }
+
+      if(file.size > 10 * 1024 * 1024){
+        input.value = "";
+        upload.disabled = true;
+
+        if(status){
+          status.textContent =
+            "התמונה גדולה מ־10MB.";
+        }
+
+        return;
+      }
+
+      upload.disabled = false;
+
+      if(status){
+        status.textContent =
+          "התמונה מוכנה להעלאה.";
+      }
+
+      if(preview){
+
+        const url =
+          URL.createObjectURL(file);
+
+        preview.innerHTML =
+          `<img src="${url}" alt="QC preview">`;
+
+        preview.classList.add("active");
+      }
+    }
+  );
+
+
+  document.addEventListener(
+    "click",
+    async function(event){
+
+      const uploadButton =
+        event.target.closest("[data-qc-upload]");
+
+      if(uploadButton){
+
+        const root =
+          uploadButton.closest("[data-cv-qc]");
+
+        const productionId =
+          root?.dataset.cvQc;
+
+        const input =
+          root?.querySelector("[data-qc-file]");
+
+        const status =
+          root?.querySelector("[data-qc-status]");
+
+        const file =
+          input?.files?.[0];
+
+        if(!productionId || !file){
+          return;
+        }
+
+        try{
+
+          uploadButton.disabled = true;
+          uploadButton.textContent =
+            "מעלה תמונה...";
+
+          if(status){
+            status.textContent =
+              "שומר את תמונת ה־QC במערכת...";
+          }
+
+          const formData =
+            new FormData();
+
+          formData.append(
+            "image",
+            file,
+            file.name || "qc-image"
+          );
+
+          const response =
+            await fetch(
+              `/api/factory/qc-image/${encodeURIComponent(productionId)}`,
+              {
+                method:"POST",
+                credentials:"include",
+                body:formData
+              }
+            );
+
+          const data =
+            await response
+              .json()
+              .catch(() => ({}));
+
+          if(!response.ok || !data?.success){
+            throw new Error(
+              data?.message ||
+              data?.error ||
+              "QC_UPLOAD_FAILED"
+            );
+          }
+
+          if(status){
+            status.textContent =
+              "✓ התמונה נשמרה בהצלחה";
+          }
+
+          if(
+            typeof window.cvLoadOrders === "function"
+          ){
+            await window.cvLoadOrders();
+          }else{
+            window.location.reload();
+          }
+
+        }catch(error){
+
+          console.error(
+            "CASA VERONA QC UPLOAD:",
+            error
+          );
+
+          uploadButton.disabled = false;
+          uploadButton.textContent =
+            "נסה להעלות שוב";
+
+          if(status){
+            status.textContent =
+              "העלאת התמונה נכשלה: " +
+              (error.message || "שגיאה");
+          }
+        }
+
+        return;
+      }
+
+
+      const readyButton =
+        event.target.closest("[data-qc-ready]");
+
+      if(!readyButton || readyButton.disabled){
+        return;
+      }
+
+      const root =
+        readyButton.closest("[data-cv-qc]");
+
+      const productionId =
+        root?.dataset.cvQc;
+
+      const status =
+        root?.querySelector("[data-qc-status]");
+
+      if(!productionId){
+        return;
+      }
+
+      try{
+
+        readyButton.disabled = true;
+        readyButton.textContent =
+          "מעדכן...";
+
+        const response =
+          await fetch(
+            `/api/factory/production/${encodeURIComponent(productionId)}`,
+            {
+              method:"PATCH",
+              credentials:"include",
+              headers:{
+                "Content-Type":"application/json"
+              },
+              body:JSON.stringify({
+                status:"READY"
+              })
+            }
+          );
+
+        const data =
+          await response
+            .json()
+            .catch(() => ({}));
+
+        if(!response.ok || !data?.success){
+
+          if(data?.error === "QC_IMAGE_REQUIRED"){
+            throw new Error(
+              "יש להעלות תמונת QC לפני סימון המוצר כמוכן."
+            );
+          }
+
+          throw new Error(
+            data?.message ||
+            data?.error ||
+            "STATUS_UPDATE_FAILED"
+          );
+        }
+
+        if(status){
+          status.textContent =
+            "✓ המוצר סומן כמוכן";
+        }
+
+        readyButton.textContent =
+          "✓ המוצר מוכן";
+
+        if(
+          typeof window.cvLoadOrders === "function"
+        ){
+          await window.cvLoadOrders();
+        }else{
+          window.location.reload();
+        }
+
+      }catch(error){
+
+        console.error(
+          "CASA VERONA READY:",
+          error
+        );
+
+        readyButton.disabled = false;
+        readyButton.textContent =
+          "סמן את המוצר כמוכן";
+
+        if(status){
+          status.textContent =
+            error.message || "העדכון נכשל";
+        }
+      }
+
+    }
+  );
+
+})();
+</script>
+
+<style>
 .cv-login-foot{
   display:flex;
   flex-direction:column;
@@ -2904,13 +4103,13 @@ if(
   function openMobileMenu() {
     sidebar.classList.add("cv-mobile-open");
     overlay.classList.add("cv-mobile-open");
-    document.body.style.overflow = "hidden";
+    /* body scroll lock removed — modal handles its own scroll */
   }
 
   function closeMobileMenu() {
     sidebar.classList.remove("cv-mobile-open");
     overlay.classList.remove("cv-mobile-open");
-    document.body.style.overflow = "";
+    /* body scroll restore not required */
   }
 
   menuBtn.addEventListener("click", openMobileMenu);
@@ -5150,67 +6349,96 @@ document
 
     if(!list) return;
 
-    const role = String(
-      window.casaVeronaUser?.role || ""
-    ).toUpperCase();
-
-    const isAdmin =
-      role === "ADMIN";
-
-    const isFactory =
-      role === "FACTORY_OWNER" ||
-      role === "FACTORY_WORKER";
 
     const openOrders =
       cvOrdersData.filter(order => {
-        const status = cvOrderStatus(order);
+
+        const status =
+          cvOrderStatus(order);
+
         return status.key !== "delivered";
+
       });
+
 
     const pending =
       openOrders.filter(order =>
         cvOrderStatus(order).key === "approval"
       ).length;
 
+
     const productionCount =
       openOrders.filter(order =>
         cvOrderStatus(order).key === "production"
       ).length;
 
-    const ready =
+
+    const deliveryCount =
       openOrders.filter(order =>
-        cvOrderStatus(order).key === "ready"
+        ["delivery","ready"].includes(
+          cvOrderStatus(order).key
+        )
       ).length;
 
-    const delivery =
-      openOrders.filter(order =>
-        cvOrderStatus(order).key === "delivery"
-      ).length;
 
     const set = (id,value) => {
-      const el = document.getElementById(id);
-      if(el) el.textContent = value;
+
+      const el =
+        document.getElementById(id);
+
+      if(el){
+        el.textContent = value;
+      }
+
     };
 
-    set("cvOrdersActive", openOrders.length);
-    set("cvOrdersPendingFactory", pending);
-    set("cvOrdersProduction", productionCount);
-    set("cvOrdersDelivery", ready + delivery);
+
+    set(
+      "cvOrdersActive",
+      openOrders.length
+    );
+
+    set(
+      "cvOrdersPendingFactory",
+      pending
+    );
+
+    set(
+      "cvOrdersProduction",
+      productionCount
+    );
+
+    set(
+      "cvOrdersDelivery",
+      deliveryCount
+    );
+
 
     if(!openOrders.length){
 
       list.innerHTML = `
-        <div class="cv-v4-empty">
-          <span>CV</span>
-          <strong>אין הזמנות פעילות</strong>
-          <p>
-            הזמנות חדשות יופיעו כאן אוטומטית.
-          </p>
+        <div class="cv-orders-empty cv-v5-empty">
+
+          <span class="cv-v5-empty-mark">CV</span>
+
+          <small>
+            CASA VERONA · OPERATIONS
+          </small>
+
+          <strong>
+            אין כרגע הזמנות פתוחות
+          </strong>
+
+          <span>
+            הזמנה חדשה תופיע כאן אוטומטית.
+          </span>
+
         </div>
       `;
 
       return;
     }
+
 
     list.innerHTML =
       openOrders.map(order => {
@@ -5226,159 +6454,230 @@ document
             order.target_delivery_date
           );
 
-        let deadline = "ללא תאריך יעד";
+
+        let deadline =
+          "ללא תאריך יעד";
+
+        let deadlineClass =
+          "";
 
         if(days !== null){
 
           if(days < 0){
+
             deadline =
-              `${Math.abs(days)} ימים באיחור`;
+              `באיחור ${Math.abs(days)} ימים`;
+
+            deadlineClass =
+              "is-late";
+
           }else if(days === 0){
-            deadline = "אספקה היום";
-          }else if(days === 1){
-            deadline = "נותר יום אחד";
+
+            deadline =
+              "אספקה היום";
+
+            deadlineClass =
+              "is-today";
+
           }else{
-            deadline = `נותרו ${days} ימים`;
+
+            deadline =
+              `${days} ימים נותרו`;
+
           }
 
         }
 
-        const fabric =
-          [
-            order.fabric_company,
-            order.fabric_collection,
-            order.fabric_code
-          ]
-          .filter(Boolean)
-          .join(" · ");
 
-        const dimensions =
-          [
-            order.width
-              ? `${order.width}`
-              : null,
+        const orderItems =
+          Array.isArray(order.order_items)
+            ? order.order_items
+            : [];
 
-            order.depth
-              ? `${order.depth}`
-              : null,
+        const primaryItem =
+          orderItems[0] || {};
 
-            order.chaise_length
-              ? `שזלונג ${order.chaise_length}`
-              : null
-          ]
-          .filter(Boolean)
-          .join(" × ");
+        const orderImage =
+          primaryItem.model_image_url ||
+          primaryItem.reference_image_url ||
+          primaryItem.product_image_url ||
+          order.model_image_url ||
+          order.reference_image_url ||
+          "";
+
+        const itemCount =
+          orderItems.length || 1;
+
+        const itemNames =
+          orderItems.length
+            ? orderItems
+                .map(item =>
+                  item.product_name ||
+                  item.product_type ||
+                  item.category ||
+                  "פריט"
+                )
+                .filter(Boolean)
+            : [
+                order.product_name ||
+                "פריט"
+              ];
+
+        const itemSummary =
+          itemNames
+            .slice(0, 4)
+            .join(" · ");
+
+        const extraItems =
+          Math.max(
+            0,
+            itemNames.length - 4
+          );
+
 
         const factoryPrice =
           Number(
-            production.estimated_cost ||
-            order.product_cost ||
-            0
+            production.estimated_cost || 0
           );
 
-        const qcImage =
+
+        const hasFactoryPrice =
+          Number.isFinite(factoryPrice) &&
+          factoryPrice > 0;
+
+
+        const approvalText =
+          production.approval_status === "APPROVED"
+            ? "מאושרת"
+            : production.approval_status === "REJECTED"
+              ? "נדחתה"
+              : "ממתינה לאישור";
+
+
+        const finalImage =
+          production.final_image_url ||
           order.factory_final_image_url ||
           "";
 
-        const qcText =
-          qcImage
-            ? "תמונת מוצר התקבלה"
-            : "ללא תמונת מוצר";
 
-        const adminMeta =
-          isAdmin && factoryPrice
-            ? `
-              <span class="cv-v4-factory-price">
-                מפעל ₪${factoryPrice.toLocaleString("he-IL")}
-              </span>
-            `
-            : "";
+        const steps = [
+          {
+            label:"הזמנה",
+            done:true
+          },
+          {
+            label:"אישור",
+            done:
+              production.approval_status ===
+              "APPROVED"
+          },
+          {
+            label:"ייצור",
+            done:[
+              "IN_PROGRESS",
+              "READY"
+            ].includes(
+              production.status
+            )
+          },
+          {
+            label:"QC",
+            done:Boolean(finalImage)
+          }
+        ];
 
-        const factoryMeta =
-          isFactory
-            ? `
-              <span>
-                ${
-                  production.approval_status === "APPROVED"
-                    ? "מאושר לייצור"
-                    : "ממתין לאישור"
-                }
-              </span>
-            `
-            : "";
 
         return `
-
           <article
-            class="cv-v4-order-card"
+            class="cv-v5-order-card status-${cvOrderEscape(status.key)}"
+            data-order-inquiry="${cvOrderEscape(order.id)}"
             role="button"
             tabindex="0"
-            data-order-inquiry="${cvOrderEscape(order.id)}"
           >
 
-            <div class="cv-v4-order-accent"></div>
+            <div class="cv-v5-order-visual">
 
-            <div class="cv-v4-card-main">
+              ${
+                orderImage
+                  ? `
+                    <img
+                      src="${cvOrderEscape(orderImage)}"
+                      alt="${cvOrderEscape(
+                        order.product_name ||
+                        "Casa Verona"
+                      )}"
+                      loading="lazy"
+                    >
+                  `
+                  : `
+                    <div class="cv-v5-order-placeholder">
+                      <span>CV</span>
+                      <small>CASA VERONA</small>
+                    </div>
+                  `
+              }
 
-              <div class="cv-v4-card-head">
+              <span
+                class="cv-v5-status status-${cvOrderEscape(status.key)}"
+              >
+                ${cvOrderEscape(status.label)}
+              </span>
 
-                <div class="cv-v4-order-number">
-                  <small>ORDER</small>
-                  <strong>
-                    #${cvOrderEscape(
-                      order.order_number || "—"
+              <span class="cv-v5-order-number">
+                #${cvOrderEscape(
+                  order.order_number || "—"
+                )}
+              </span>
+
+            </div>
+
+
+            <div class="cv-v5-order-content">
+
+              <div class="cv-v5-order-heading">
+
+                <div>
+
+                  <small>
+                    CASA VERONA · ORDER
+                  </small>
+
+                  <div class="cv-v6-order-eyebrow">
+                    <span>
+                      ${itemCount}
+                      ${itemCount === 1 ? "פריט" : "פריטים"}
+                    </span>
+                  </div>
+
+                  <h3>
+                    ${cvOrderEscape(
+                      order.customer_name ||
+                      "לקוח"
                     )}
-                  </strong>
+                  </h3>
+
+                  <p class="cv-v6-item-summary">
+                    ${cvOrderEscape(itemSummary)}
+                    ${
+                      extraItems
+                        ? `<b> +${extraItems}</b>`
+                        : ""
+                    }
+                  </p>
+
                 </div>
 
-                <span
-                  class="cv-v4-status cv-v4-status-${cvOrderEscape(status.key)}"
-                >
-                  ${cvOrderEscape(status.label)}
+                <span class="cv-v5-arrow">
+                  ←
                 </span>
 
               </div>
 
 
-              <div class="cv-v4-product">
-
-                <h3>
-                  ${cvOrderEscape(
-                    order.product_name ||
-                    "ללא שם דגם"
-                  )}
-                </h3>
-
-                <div class="cv-v4-customer">
-
-                  <strong>
-                    ${cvOrderEscape(
-                      order.customer_name ||
-                      "ללא שם"
-                    )}
-                  </strong>
-
-                  ${
-                    isAdmin
-                      ? `
-                        <span>
-                          ${cvOrderEscape(
-                            order.customer_phone || ""
-                          )}
-                        </span>
-                      `
-                      : ""
-                  }
-
-                </div>
-
-              </div>
-
-
-              <div class="cv-v4-order-data">
+              <div class="cv-v5-order-meta">
 
                 <div>
-                  <small>יעד</small>
+                  <small>DELIVERY</small>
 
                   <strong>
                     ${cvOrderEscape(
@@ -5388,114 +6687,869 @@ document
                     )}
                   </strong>
 
-                  <span>${cvOrderEscape(deadline)}</span>
+                  <span class="${deadlineClass}">
+                    ${cvOrderEscape(deadline)}
+                  </span>
                 </div>
 
+
                 <div>
-                  <small>מפרט</small>
+                  <small>FACTORY</small>
 
                   <strong>
-                    ${cvOrderEscape(
-                      dimensions ||
-                      "מפרט בהזמנה"
-                    )}
+                    ${cvOrderEscape(approvalText)}
                   </strong>
 
                   <span>
-                    ${cvOrderEscape(
-                      fabric ||
-                      "ללא פרטי בד"
-                    )}
-                  </span>
-                </div>
-
-              </div>
-
-
-              <div class="cv-v4-progress">
-
-                <div class="done">
-                  <i></i>
-                  <span>התקבלה</span>
-                </div>
-
-                <div class="${
-                  production.approval_status === "APPROVED"
-                    ? "done"
-                    : ""
-                }">
-                  <i></i>
-                  <span>אישור</span>
-                </div>
-
-                <div class="${
-                  ["production","ready","delivery"]
-                    .includes(status.key)
-                    ? "done"
-                    : ""
-                }">
-                  <i></i>
-                  <span>ייצור</span>
-                </div>
-
-                <div class="${
-                  qcImage ? "done" : ""
-                }">
-                  <i></i>
-                  <span>תמונה</span>
-                </div>
-
-                <div class="${
-                  ["ready","delivery"]
-                    .includes(status.key)
-                    ? "done"
-                    : ""
-                }">
-                  <i></i>
-                  <span>מוכן</span>
-                </div>
-
-              </div>
-
-
-              <div class="cv-v4-card-footer">
-
-                <div class="cv-v4-card-meta">
-
-                  <span class="${
-                    qcImage
-                      ? "cv-v4-qc-ok"
-                      : "cv-v4-qc-missing"
-                  }">
                     ${
-                      qcImage
-                        ? "✓"
-                        : "!"
+                      hasFactoryPrice
+                        ? `₪${factoryPrice.toLocaleString("he-IL")}`
+                        : "מחיר טרם הוזן"
                     }
-                    ${qcText}
                   </span>
-
-                  ${adminMeta}
-                  ${factoryMeta}
-
                 </div>
 
-                <div class="cv-v4-open">
-                  <span>פתיחת הזמנה</span>
-                  <strong>←</strong>
+
+                <div>
+                  <small>QC</small>
+
+                  <strong>
+                    ${
+                      finalImage
+                        ? "תמונה התקבלה"
+                        : "ממתין לתמונה"
+                    }
+                  </strong>
+
+                  <span>
+                    ${
+                      finalImage
+                        ? "מוכן לבקרה"
+                        : "לפני יציאה מהמפעל"
+                    }
+                  </span>
                 </div>
+
+              </div>
+
+
+              <div class="cv-v5-progress">
+
+                ${
+                  steps.map(step => `
+                    <div
+                      class="${step.done ? "done" : ""}"
+                    >
+                      <i></i>
+                      <span>
+                        ${cvOrderEscape(step.label)}
+                      </span>
+                    </div>
+                  `).join("")
+                }
+
+              </div>
+
+
+              <div class="cv-v5-order-footer">
+
+                <span>
+                  ${
+                    production.status === "READY"
+                      ? "המוצר מוכן"
+                      : production.status === "IN_PROGRESS"
+                        ? "ההזמנה בייצור"
+                        : production.approval_status === "APPROVED"
+                          ? "אושרה למפעל"
+                          : "ממתינה לפעולה"
+                  }
+                </span>
+
+                <strong>
+                  פתח הזמנה
+                  <b>←</b>
+                </strong>
 
               </div>
 
             </div>
 
           </article>
-
         `;
 
       }).join("");
 
   }
+
+
+  /* =====================================================
+     CASA VERONA — FACTORY ORDER ACTIONS
+  ===================================================== */
+
+  function cvIsFactoryUser(){
+    const role = String(
+      window.casaVeronaUser?.role || ""
+    ).toUpperCase();
+
+    return [
+      "FACTORY_OWNER",
+      "FACTORY_WORKER"
+    ].includes(role);
+  }
+
+
+  function cvFactoryLanguage(){
+    return String(
+      window.cvFactoryLanguage ||
+      document.documentElement.dataset.factoryLanguage ||
+      "he"
+    ).toLowerCase();
+  }
+
+
+  function cvFactoryText(he, ar){
+    return cvFactoryLanguage() === "ar" ? ar : he;
+  }
+
+
+  async function cvFactoryRequest(url, options = {}){
+
+    const response = await fetch(url, {
+      credentials:"include",
+      cache:"no-store",
+      ...options,
+      headers:{
+        "Content-Type":"application/json",
+        ...(options.headers || {})
+      }
+    });
+
+    const data =
+      await response.json().catch(() => ({}));
+
+    if(!response.ok || !data?.success){
+      throw new Error(
+        data?.error ||
+        `FACTORY_REQUEST_FAILED_${response.status}`
+      );
+    }
+
+    return data;
+  }
+
+
+  function cvFactoryProductionId(order){
+
+    const production =
+      cvOrderProduction(order);
+
+    return production?.id || null;
+  }
+
+
+  async function cvFactoryApprove(orderId){
+
+    const order =
+      cvOrdersData.find(
+        item => String(item.id) === String(orderId)
+      );
+
+    if(!order) return;
+
+    const productionId =
+      cvFactoryProductionId(order);
+
+    if(!productionId){
+      alert(
+        cvFactoryText(
+          "לא נמצאה פקודת ייצור.",
+          "لم يتم العثور على أمر الإنتاج."
+        )
+      );
+      return;
+    }
+
+    const production =
+      cvOrderProduction(order);
+
+    const currentCost =
+      production.estimated_cost || "";
+
+    const cost = window.prompt(
+      cvFactoryText(
+        "הזן מחיר מפעל להזמנה:",
+        "أدخل سعر المصنع للطلب:"
+      ),
+      currentCost
+    );
+
+    if(cost === null) return;
+
+    const number = Number(
+      String(cost).replace(/,/g,"").trim()
+    );
+
+    if(
+      !Number.isFinite(number) ||
+      number < 0
+    ){
+      alert(
+        cvFactoryText(
+          "מחיר המפעל אינו תקין.",
+          "سعر المصنع غير صالح."
+        )
+      );
+      return;
+    }
+
+    const notes = window.prompt(
+      cvFactoryText(
+        "הערות מפעל — אפשר להשאיר ריק:",
+        "ملاحظات المصنع — يمكن تركها فارغة:"
+      ),
+      production.factory_notes || ""
+    );
+
+    if(notes === null) return;
+
+    try{
+
+      await cvFactoryRequest(
+        `/api/factory/approve/${encodeURIComponent(productionId)}`,
+        {
+          method:"PATCH",
+          body:JSON.stringify({
+            approval_status:"APPROVED",
+            estimated_cost:number,
+            factory_notes:notes
+          })
+        }
+      );
+
+      await cvLoadOrders();
+
+      cvShowOrderCommand(orderId);
+
+    }catch(error){
+
+      console.error(
+        "FACTORY APPROVE:",
+        error
+      );
+
+      alert(
+        cvFactoryText(
+          `לא ניתן לאשר את ההזמנה: ${error.message}`,
+          `تعذر تأكيد الطلب: ${error.message}`
+        )
+      );
+
+    }
+  }
+
+
+  async function cvFactoryReject(orderId){
+
+    const order =
+      cvOrdersData.find(
+        item => String(item.id) === String(orderId)
+      );
+
+    if(!order) return;
+
+    const productionId =
+      cvFactoryProductionId(order);
+
+    if(!productionId) return;
+
+    const notes = window.prompt(
+      cvFactoryText(
+        "רשום סיבת דחייה / הערה:",
+        "اكتب سبب الرفض / ملاحظة:"
+      ),
+      cvOrderProduction(order).factory_notes || ""
+    );
+
+    if(notes === null) return;
+
+    try{
+
+      await cvFactoryRequest(
+        `/api/factory/approve/${encodeURIComponent(productionId)}`,
+        {
+          method:"PATCH",
+          body:JSON.stringify({
+            approval_status:"REJECTED",
+            factory_notes:notes
+          })
+        }
+      );
+
+      await cvLoadOrders();
+
+      cvShowOrderCommand(orderId);
+
+    }catch(error){
+
+      console.error(
+        "FACTORY REJECT:",
+        error
+      );
+
+      alert(error.message);
+
+    }
+  }
+
+
+  async function cvFactorySetStatus(orderId, status){
+
+    const order =
+      cvOrdersData.find(
+        item => String(item.id) === String(orderId)
+      );
+
+    if(!order) return;
+
+    const productionId =
+      cvFactoryProductionId(order);
+
+    if(!productionId) return;
+
+    try{
+
+      await cvFactoryRequest(
+        `/api/factory/production/${encodeURIComponent(productionId)}`,
+        {
+          method:"PATCH",
+          body:JSON.stringify({
+            status
+          })
+        }
+      );
+
+      await cvLoadOrders();
+
+      cvShowOrderCommand(orderId);
+
+    }catch(error){
+
+      console.error(
+        "FACTORY STATUS:",
+        error
+      );
+
+      alert(error.message);
+
+    }
+  }
+
+
+  async function cvFactoryEditDetails(orderId){
+
+    const order =
+      cvOrdersData.find(
+        item => String(item.id) === String(orderId)
+      );
+
+    if(!order) return;
+
+    const production =
+      cvOrderProduction(order);
+
+    const productionId =
+      production.id;
+
+    if(!productionId) return;
+
+    const cost = window.prompt(
+      cvFactoryText(
+        "מחיר מפעל:",
+        "سعر المصنع:"
+      ),
+      production.estimated_cost || ""
+    );
+
+    if(cost === null) return;
+
+    const number =
+      Number(
+        String(cost)
+          .replace(/,/g,"")
+          .trim()
+      );
+
+    if(
+      !Number.isFinite(number) ||
+      number < 0
+    ){
+      alert(
+        cvFactoryText(
+          "מחיר לא תקין.",
+          "السعر غير صالح."
+        )
+      );
+      return;
+    }
+
+    const notes = window.prompt(
+      cvFactoryText(
+        "הערות מפעל:",
+        "ملاحظات المصنع:"
+      ),
+      production.factory_notes || ""
+    );
+
+    if(notes === null) return;
+
+    try{
+
+      await cvFactoryRequest(
+        `/api/factory/details/${encodeURIComponent(productionId)}`,
+        {
+          method:"PATCH",
+          body:JSON.stringify({
+            estimated_cost:number,
+            factory_notes:notes
+          })
+        }
+      );
+
+      await cvLoadOrders();
+
+      cvShowOrderCommand(orderId);
+
+    }catch(error){
+
+      console.error(
+        "FACTORY DETAILS:",
+        error
+      );
+
+      alert(error.message);
+
+    }
+  }
+
+
+  function cvFactoryActionsHTML(order){
+
+    if(!cvIsFactoryUser()){
+      return "";
+    }
+
+    const production =
+      cvOrderProduction(order);
+
+    const approval =
+      production.approval_status || "PENDING";
+
+    const status =
+      production.status || "WAITING";
+
+    let primary = "";
+
+    if(approval === "PENDING"){
+
+      primary = `
+        <button
+          type="button"
+          class="cv-factory-action primary"
+          data-factory-approve="${cvOrderEscape(order.id)}"
+        >
+          ${cvFactoryText(
+            "אישור הזמנה",
+            "تأكيد الطلب"
+          )}
+        </button>
+
+        <button
+          type="button"
+          class="cv-factory-action danger"
+          data-factory-reject="${cvOrderEscape(order.id)}"
+        >
+          ${cvFactoryText(
+            "דחיית הזמנה",
+            "رفض الطلب"
+          )}
+        </button>
+      `;
+
+    }else if(
+      approval === "APPROVED" &&
+      status === "WAITING"
+    ){
+
+      primary = `
+        <button
+          type="button"
+          class="cv-factory-action primary"
+          data-factory-status="IN_PROGRESS"
+          data-factory-order="${cvOrderEscape(order.id)}"
+        >
+          ${cvFactoryText(
+            "התחל ייצור",
+            "بدء الإنتاج"
+          )}
+        </button>
+      `;
+
+    }else if(status === "IN_PROGRESS"){
+
+      primary = `
+        <button
+          type="button"
+          class="cv-factory-action primary"
+          data-factory-status="READY"
+          data-factory-order="${cvOrderEscape(order.id)}"
+        >
+          ${cvFactoryText(
+            "סמן כמוכן",
+            "تحديد كجاهز"
+          )}
+        </button>
+      `;
+
+    }else if(status === "READY"){
+
+      primary = `
+        <span class="cv-factory-complete">
+          ✓
+          ${cvFactoryText(
+            "הייצור הושלם",
+            "تم اكتمال الإنتاج"
+          )}
+        </span>
+      `;
+    }
+
+    return `
+      <section class="cv-factory-control">
+
+        <div class="cv-factory-control-head">
+          <div>
+            <small>FACTORY CONTROL</small>
+            <strong>
+              ${cvFactoryText(
+                "ניהול ייצור",
+                "إدارة الإنتاج"
+              )}
+            </strong>
+          </div>
+
+          <span>
+            ${cvOrderEscape(
+              cvOrderStatusText(status)
+            )}
+          </span>
+        </div>
+
+        <div class="cv-factory-actions">
+          ${primary}
+
+          <button
+            type="button"
+            class="cv-factory-action secondary"
+            data-factory-details="${cvOrderEscape(order.id)}"
+          >
+            ${cvFactoryText(
+              "מחיר והערות",
+              "السعر والملاحظات"
+            )}
+          </button>
+
+
+          <label class="cv-factory-action cv-factory-qc-button">
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              data-factory-qc="${cvOrderEscape(order.id)}"
+              hidden
+            >
+
+            <span>
+              ${
+                production.final_image_url
+                  ? cvFactoryText(
+                      "החלף תמונת QC ✓",
+                      "تغيير صورة الجودة ✓"
+                    )
+                  : cvFactoryText(
+                      "צלם תמונת QC",
+                      "التقاط صورة الجودة"
+                    )
+              }
+            </span>
+          </label>
+        </div>
+
+      </section>
+    `;
+  }
+
+
+  document.addEventListener(
+    "change",
+    async event => {
+
+      const input =
+        event.target.closest(
+          "[data-factory-qc]"
+        );
+
+      if(!input || !input.files?.length){
+        return;
+      }
+
+      const orderId =
+        input.dataset.factoryQc;
+
+      const order =
+        cvOrdersData.find(
+          item =>
+            String(item.id) ===
+            String(orderId)
+        );
+
+      if(!order){
+        input.value = "";
+        return;
+      }
+
+      const production =
+        cvOrderProduction(order);
+
+      if(!production?.id){
+        alert(
+          cvFactoryText(
+            "לא נמצאה פקודת ייצור.",
+            "لم يتم العثور على أمر الإنتاج."
+          )
+        );
+
+        input.value = "";
+        return;
+      }
+
+      const file = input.files[0];
+
+      if(!file.type.startsWith("image/")){
+        alert(
+          cvFactoryText(
+            "יש לבחור תמונה בלבד.",
+            "يجب اختيار صورة فقط."
+          )
+        );
+
+        input.value = "";
+        return;
+      }
+
+      if(file.size > 10 * 1024 * 1024){
+        alert(
+          cvFactoryText(
+            "התמונה גדולה מדי. המקסימום הוא 10MB.",
+            "الصورة كبيرة جداً. الحد الأقصى 10MB."
+          )
+        );
+
+        input.value = "";
+        return;
+      }
+
+      /*
+        Storage upload is intentionally handled
+        by the server endpoint we install next.
+      */
+
+      const formData =
+        new FormData();
+
+      formData.append(
+        "image",
+        file
+      );
+
+      formData.append(
+        "production_id",
+        production.id
+      );
+
+      const label =
+        input.closest(
+          ".cv-factory-qc-button"
+        );
+
+      const oldHTML =
+        label?.querySelector("span")
+          ?.textContent || "";
+
+      try{
+
+        if(label){
+          label.classList.add("loading");
+
+          const span =
+            label.querySelector("span");
+
+          if(span){
+            span.textContent =
+              cvFactoryText(
+                "מעלה תמונה...",
+                "جارٍ رفع الصورة..."
+              );
+          }
+        }
+
+        const response =
+          await fetch(
+            `/api/factory/qc-image/${encodeURIComponent(production.id)}`,
+            {
+              method:"POST",
+              credentials:"include",
+              body:formData
+            }
+          );
+
+        const data =
+          await response
+            .json()
+            .catch(() => ({}));
+
+        if(
+          !response.ok ||
+          !data?.success
+        ){
+          throw new Error(
+            data?.error ||
+            `QC_UPLOAD_FAILED_${response.status}`
+          );
+        }
+
+        await cvLoadOrders();
+
+        cvShowOrderCommand(
+          orderId
+        );
+
+      }catch(error){
+
+        console.error(
+          "FACTORY QC UPLOAD:",
+          error
+        );
+
+        alert(
+          cvFactoryText(
+            "העלאת התמונה נכשלה. עדיין לא שוחרר QC.",
+            "فشل رفع الصورة. لم يتم اعتماد فحص الجودة."
+          )
+        );
+
+        if(label){
+          const span =
+            label.querySelector("span");
+
+          if(span){
+            span.textContent =
+              oldHTML;
+          }
+        }
+
+      }finally{
+
+        label?.classList.remove(
+          "loading"
+        );
+
+        input.value = "";
+
+      }
+
+    }
+  );
+
+
+
+  document.addEventListener(
+    "click",
+    async event => {
+
+      const approve =
+        event.target.closest(
+          "[data-factory-approve]"
+        );
+
+      if(approve){
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        await cvFactoryApprove(
+          approve.dataset.factoryApprove
+        );
+
+        return;
+      }
+
+
+      const reject =
+        event.target.closest(
+          "[data-factory-reject]"
+        );
+
+      if(reject){
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        await cvFactoryReject(
+          reject.dataset.factoryReject
+        );
+
+        return;
+      }
+
+
+      const statusButton =
+        event.target.closest(
+          "[data-factory-status]"
+        );
+
+      if(statusButton){
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        await cvFactorySetStatus(
+          statusButton.dataset.factoryOrder,
+          statusButton.dataset.factoryStatus
+        );
+
+        return;
+      }
+
+
+      const details =
+        event.target.closest(
+          "[data-factory-details]"
+        );
+
+      if(details){
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        await cvFactoryEditDetails(
+          details.dataset.factoryDetails
+        );
+
+      }
+
+    }
+  );
+
 
 
   async function cvLoadOrders(){
@@ -5626,6 +7680,58 @@ document
   }
 
 
+  function cvIsFactoryOwner(){
+
+    return cvCurrentOrderRole() === "FACTORY_OWNER";
+
+  }
+
+
+  function cvIsFactoryWorker(){
+
+    return cvCurrentOrderRole() === "FACTORY_WORKER";
+
+  }
+
+
+  function cvIsFactoryUser(){
+
+    return (
+      cvIsFactoryOwner() ||
+      cvIsFactoryWorker()
+    );
+
+  }
+
+
+  function cvCanSeeOrderFinance(){
+
+    return cvIsOrderAdmin();
+
+  }
+
+
+  function cvCanManageFactory(){
+
+    return (
+      cvIsOrderAdmin() ||
+      cvIsFactoryOwner()
+    );
+
+  }
+
+
+  function cvCanUpdateProduction(){
+
+    return (
+      cvIsOrderAdmin() ||
+      cvIsFactoryOwner() ||
+      cvIsFactoryWorker()
+    );
+
+  }
+
+
   function cvOrderMoney(value){
 
     const number = Number(value);
@@ -5672,7 +7778,7 @@ document
 
     cvOrderInquiryModal.hidden = false;
 
-    document.body.style.overflow = "hidden";
+    /* body scroll lock removed — modal handles its own scroll */
 
     if(cvOrderInquirySearch){
       cvOrderInquirySearch.value = "";
@@ -5695,7 +7801,7 @@ document
 
     cvOrderInquiryModal.hidden = true;
 
-    document.body.style.overflow = "";
+    /* body scroll restore not required */
 
   }
 
@@ -5881,7 +7987,9 @@ document
       order.ai_render_url || "";
 
     const factoryFinalImage =
-      order.factory_final_image_url || "";
+      production.final_image_url ||
+      order.factory_final_image_url ||
+      "";
 
     const visualCard = (
       label,
@@ -6352,6 +8460,12 @@ document
               `
           }
 
+          ${
+            typeof window.cvFactoryQCMarkup === "function"
+              ? window.cvFactoryQCMarkup(order)
+              : ""
+          }
+
         </section>
 
 
@@ -6392,6 +8506,8 @@ document
 
         </section>
 
+
+        ${cvFactoryActionsHTML(order)}
 
         ${financeHTML}
 
@@ -6498,7 +8614,7 @@ document
 
     modal.hidden = false;
 
-    document.body.style.overflow = "hidden";
+    /* body scroll lock removed — modal handles its own scroll */
   }
 
 
@@ -6508,7 +8624,7 @@ document
 
     modal.hidden = true;
 
-    document.body.style.overflow = "";
+    /* body scroll restore not required */
   }
 
 
@@ -8946,3 +11062,5416 @@ document
 }
 
 </style>
+
+<style>
+/* =========================================================
+   CASA VERONA — ORDERS V5 / BLACK × OFF-WHITE
+   Scoped ONLY to Orders
+========================================================= */
+
+#orders{
+  --o-black:#0d0d0c;
+  --o-black-2:#151514;
+  --o-black-3:#1d1d1b;
+  --o-off:#f5f2eb;
+  --o-off-2:#ebe8e1;
+  --o-grey:#a8a49d;
+  --o-grey-2:#6f6d68;
+  --o-line:rgba(255,255,255,.10);
+
+  min-height:100vh !important;
+  background:
+    radial-gradient(circle at 85% 0%,rgba(255,255,255,.055),transparent 26%),
+    #0d0d0c !important;
+}
+
+/* HERO */
+
+#orders .cv-orders-head{
+  padding:42px 38px 30px !important;
+  background:transparent !important;
+  color:#fff !important;
+  border:0 !important;
+}
+
+#orders .cv-orders-head:after{
+  content:"CASA VERONA" !important;
+  left:30px !important;
+  bottom:-13px !important;
+  font-size:60px !important;
+  letter-spacing:9px;
+  color:rgba(255,255,255,.018) !important;
+}
+
+#orders .cv-orders-head small{
+  color:#8e8b85 !important;
+}
+
+#orders .cv-orders-head h2{
+  margin-top:12px !important;
+  font-size:46px !important;
+  color:#f7f5ef !important;
+}
+
+#orders .cv-orders-head h2 em{
+  color:#f7f5ef !important;
+}
+
+#orders .cv-orders-head p{
+  color:#8f8c86 !important;
+}
+
+#orders .cv-order-new-btn{
+  border:1px solid #f1eee7 !important;
+  border-radius:40px !important;
+  background:#f1eee7 !important;
+  color:#111 !important;
+}
+
+/* KPI */
+
+#orders .cv-orders-stats{
+  padding:0 38px 35px !important;
+  gap:8px !important;
+  background:transparent !important;
+}
+
+#orders .cv-orders-stats > div{
+  min-height:118px !important;
+  border:1px solid var(--o-line);
+  border-radius:4px;
+  background:#171716 !important;
+}
+
+#orders .cv-orders-stats > div:first-child{
+  background:var(--o-off) !important;
+  color:#111 !important;
+}
+
+#orders .cv-orders-stats > div:first-child small,
+#orders .cv-orders-stats > div:first-child span{
+  color:#6e6a64 !important;
+}
+
+#orders .cv-orders-stats > div:not(:first-child) small{
+  color:#6f6d68 !important;
+}
+
+#orders .cv-orders-stats > div:not(:first-child) span{
+  color:#8f8c86 !important;
+}
+
+/* LIST HEADER */
+
+#orders .cv-orders-list-head{
+  padding:31px 38px 17px !important;
+  color:#fff;
+}
+
+#orders .cv-orders-list-head small{
+  color:#6f6d68 !important;
+}
+
+#orders .cv-orders-list-head h3{
+  color:#f4f1eb !important;
+}
+
+#orders .cv-orders-list-head > span{
+  border-color:#353532 !important;
+  color:#8f8c86 !important;
+}
+
+/* LIST */
+
+#orders .cv-orders-list{
+  padding:0 38px 80px !important;
+}
+
+/* ORDER CARD */
+
+#orders .cv-v4-order-card{
+  grid-template-columns:74px minmax(0,1fr) !important;
+  margin-bottom:11px !important;
+
+  border:0 !important;
+  border-radius:5px !important;
+
+  background:var(--o-off) !important;
+  color:#111 !important;
+
+  box-shadow:
+    0 10px 35px rgba(0,0,0,.22) !important;
+}
+
+#orders .cv-v4-order-accent{
+  position:relative;
+  background:#1a1a19 !important;
+}
+
+#orders .cv-v4-order-accent:after{
+  content:"CV";
+  position:absolute;
+  left:50%;
+  bottom:17px;
+  transform:translateX(-50%);
+
+  width:27px;
+  height:27px;
+
+  display:grid;
+  place-items:center;
+
+  border:1px solid rgba(255,255,255,.22);
+  border-radius:50%;
+
+  font-family:Georgia,serif;
+  font-size:7px;
+  color:#aaa69f;
+}
+
+#orders .cv-v4-card-main{
+  padding:20px 22px 0 !important;
+}
+
+/* ORDER NUMBER */
+
+#orders .cv-v4-order-number small{
+  color:#99958e !important;
+}
+
+#orders .cv-v4-order-number strong{
+  color:#151514 !important;
+}
+
+/* STATUS */
+
+#orders .cv-v4-status{
+  border:1px solid #d8d4cc !important;
+  background:#e8e5df !important;
+  color:#33312e !important;
+}
+
+#orders .cv-v4-status-approval{
+  background:#eee9df !important;
+}
+
+#orders .cv-v4-status-production{
+  background:#dde1e2 !important;
+}
+
+#orders .cv-v4-status-ready,
+#orders .cv-v4-status-delivery{
+  background:#e0e2dc !important;
+}
+
+/* PRODUCT */
+
+#orders .cv-v4-product h3{
+  color:#111 !important;
+  font-size:30px !important;
+}
+
+#orders .cv-v4-customer strong{
+  color:#3e3b37 !important;
+}
+
+#orders .cv-v4-customer span{
+  color:#8a867f !important;
+}
+
+/* DATA */
+
+#orders .cv-v4-order-data{
+  border-color:#d8d4cc !important;
+}
+
+#orders .cv-v4-order-data > div + div{
+  border-color:#d8d4cc !important;
+}
+
+#orders .cv-v4-order-data small{
+  color:#99958e !important;
+}
+
+#orders .cv-v4-order-data strong{
+  color:#24221f !important;
+}
+
+#orders .cv-v4-order-data span{
+  color:#817d76 !important;
+}
+
+/* TIMELINE */
+
+#orders .cv-v4-progress:before{
+  background:#cbc7bf !important;
+}
+
+#orders .cv-v4-progress > div{
+  color:#9d9992 !important;
+}
+
+#orders .cv-v4-progress i{
+  border-color:var(--o-off) !important;
+  background:#c6c2bb !important;
+  box-shadow:0 0 0 1px #c6c2bb !important;
+}
+
+#orders .cv-v4-progress .done{
+  color:#1d1c1a !important;
+}
+
+#orders .cv-v4-progress .done i{
+  background:#111 !important;
+  box-shadow:0 0 0 1px #111 !important;
+}
+
+/* FOOTER */
+
+#orders .cv-v4-card-footer{
+  border-color:#d8d4cc !important;
+  background:#eae7e0 !important;
+}
+
+#orders .cv-v4-card-meta{
+  color:#77736d !important;
+}
+
+#orders .cv-v4-qc-ok{
+  color:#444 !important;
+}
+
+#orders .cv-v4-qc-missing{
+  color:#68645e !important;
+}
+
+#orders .cv-v4-factory-price{
+  border-color:#cbc7bf !important;
+}
+
+#orders .cv-v4-open{
+  color:#111 !important;
+}
+
+#orders .cv-v4-open strong{
+  background:#111 !important;
+  color:#fff !important;
+}
+
+/* EMPTY */
+
+#orders .cv-v4-empty{
+  border:1px solid #282826 !important;
+  background:#151514 !important;
+  color:#fff !important;
+}
+
+#orders .cv-v4-empty p{
+  color:#77736d !important;
+}
+
+/* =========================================================
+   MOBILE — iPHONE + GALAXY
+========================================================= */
+
+@media(max-width:760px){
+
+  #orders .cv-orders-head{
+    padding:30px 17px 23px !important;
+  }
+
+  #orders .cv-orders-head h2{
+    font-size:38px !important;
+  }
+
+  #orders .cv-order-new-btn{
+    min-height:52px !important;
+  }
+
+  #orders .cv-orders-stats{
+    padding:0 12px 25px !important;
+    gap:5px !important;
+  }
+
+  #orders .cv-orders-stats > div{
+    min-height:88px !important;
+  }
+
+  #orders .cv-orders-stats > div:first-child{
+    min-height:118px !important;
+  }
+
+  #orders .cv-orders-list-head{
+    padding:28px 16px 14px !important;
+  }
+
+  #orders .cv-orders-list{
+    padding:0 9px 60px !important;
+  }
+
+  #orders .cv-v4-order-card{
+    grid-template-columns:44px minmax(0,1fr) !important;
+    border-radius:5px !important;
+  }
+
+  #orders .cv-v4-order-accent:after{
+    width:23px;
+    height:23px;
+    bottom:14px;
+    font-size:6px;
+  }
+
+  #orders .cv-v4-card-main{
+    padding:17px 14px 0 !important;
+  }
+
+  #orders .cv-v4-product h3{
+    font-size:25px !important;
+  }
+
+  #orders .cv-v4-card-footer{
+    margin-right:-14px !important;
+    margin-left:-14px !important;
+    padding-right:14px !important;
+    padding-left:14px !important;
+  }
+
+  #orders .cv-v4-open strong{
+    width:32px !important;
+    height:32px !important;
+  }
+}
+
+</style>
+
+<style>
+/* =========================================================
+   CASA VERONA — ORDER DETAILS V5
+   BLACK × OFF-WHITE × GREY
+========================================================= */
+
+.cv-order-details-v3{
+  background:#0d0d0c !important;
+  color:#f4f1eb !important;
+}
+
+.cv-order-details-v3 .cv-order-inquiry-shell{
+  background:#0d0d0c !important;
+}
+
+/* TOP BAR */
+
+.cv-order-details-nav{
+  height:72px !important;
+  padding:0 30px !important;
+  background:#111110 !important;
+  border-bottom:1px solid rgba(255,255,255,.09) !important;
+  color:#fff !important;
+}
+
+.cv-order-details-nav .cv-order-command-close{
+  color:#f3f0e9 !important;
+}
+
+.cv-order-details-brand span{
+  color:#f4f1eb !important;
+}
+
+.cv-order-details-brand small{
+  color:#77736d !important;
+}
+
+/* ORDER SELECTOR — DESKTOP */
+
+.cv-order-details-v3 .cv-order-inquiry-side{
+  background:#151514 !important;
+  color:#f5f2eb !important;
+  border-left:1px solid rgba(255,255,255,.08) !important;
+}
+
+.cv-order-side-head span{
+  color:#6e6b66 !important;
+}
+
+.cv-order-side-head strong{
+  color:#f5f2eb !important;
+}
+
+.cv-order-search-wrap{
+  border:1px solid #30302e !important;
+  background:#1b1b1a !important;
+}
+
+.cv-order-details-v3 .cv-order-inquiry-search{
+  color:#fff !important;
+}
+
+.cv-order-details-v3 .cv-order-inquiry-search::placeholder{
+  color:#686661 !important;
+}
+
+/* MAIN */
+
+.cv-order-details-v3 .cv-order-command{
+  background:#0d0d0c !important;
+}
+
+.cv-v3-order{
+  color:#f4f1eb !important;
+}
+
+/* HERO */
+
+.cv-v3-eyebrow > span:first-child{
+  color:#77736d !important;
+}
+
+.cv-v3-status{
+  border:1px solid #343431 !important;
+  background:#181817 !important;
+  color:#d7d3cc !important;
+}
+
+.cv-v3-hero h1{
+  color:#f4f1eb !important;
+}
+
+.cv-v3-customer{
+  color:#85817b !important;
+}
+
+.cv-v3-customer strong{
+  color:#e8e4dd !important;
+}
+
+.cv-v3-target{
+  color:#fff;
+}
+
+.cv-v3-target small{
+  color:#706d67 !important;
+}
+
+.cv-v3-target strong{
+  color:#f5f2eb !important;
+}
+
+/* TIMELINE */
+
+.cv-v3-timeline{
+  border:1px solid #292927 !important;
+  background:#151514 !important;
+}
+
+.cv-v3-timeline > div{
+  color:#625f5a !important;
+}
+
+.cv-v3-timeline > div:not(:last-child):after{
+  background:#343431 !important;
+}
+
+.cv-v3-timeline i{
+  background:#4b4945 !important;
+  box-shadow:0 0 0 5px #151514 !important;
+}
+
+.cv-v3-timeline .done{
+  color:#f5f2eb !important;
+}
+
+.cv-v3-timeline .done i{
+  background:#f5f2eb !important;
+}
+
+/* CONTENT CARDS */
+
+.cv-v3-section{
+  border:1px solid #d8d4cc !important;
+  background:#f4f1ea !important;
+  color:#151514 !important;
+  box-shadow:0 15px 45px rgba(0,0,0,.18);
+}
+
+.cv-v3-section-head small{
+  color:#99948c !important;
+}
+
+.cv-v3-section-head h3{
+  color:#171614 !important;
+}
+
+.cv-v3-section-head > span{
+  color:#8d8880 !important;
+}
+
+/* VISUAL LIBRARY */
+
+.cv-v3-visual{
+  background:#e4e1da !important;
+}
+
+.cv-v3-visual > span{
+  background:#111 !important;
+  color:#fff !important;
+}
+
+.cv-v3-visual-empty{
+  border:1px solid #d4d0c8;
+  background:#e9e6df !important;
+}
+
+.cv-v3-visual-empty small{
+  color:#99948c !important;
+}
+
+.cv-v3-visual-empty strong{
+  color:#5d5953 !important;
+}
+
+.cv-v3-qc-visual{
+  border-color:#292927 !important;
+  background:#171716 !important;
+}
+
+.cv-v3-qc-visual small,
+.cv-v3-qc-visual strong{
+  color:#fff !important;
+}
+
+/* SPEC */
+
+.cv-v3-spec-list{
+  border-color:#d8d4cc !important;
+}
+
+.cv-v3-spec-list > div{
+  border-color:#d8d4cc !important;
+}
+
+.cv-v3-spec-list span{
+  color:#8d8880 !important;
+}
+
+.cv-v3-spec-list strong{
+  color:#24221f !important;
+}
+
+/* FACTORY */
+
+.cv-v3-factory-grid{
+  border-color:#d8d4cc !important;
+}
+
+.cv-v3-factory-grid > div{
+  border-color:#d8d4cc !important;
+}
+
+.cv-v3-factory-grid small{
+  color:#99948c !important;
+}
+
+.cv-v3-factory-grid strong{
+  color:#1b1a18 !important;
+}
+
+.cv-v3-note{
+  background:#e7e4dd !important;
+  color:#22201e !important;
+}
+
+/* QC */
+
+.cv-v3-qc-required{
+  background:#dedbd4 !important;
+  color:#57534d !important;
+}
+
+.cv-v3-qc-ok{
+  background:#dedfdc !important;
+  color:#3f4740 !important;
+}
+
+.cv-v3-qc-warning{
+  background:#171716 !important;
+  color:#fff !important;
+}
+
+.cv-v3-qc-success{
+  background:#e3e4e0 !important;
+  color:#222 !important;
+}
+
+/* FINANCE — ADMIN */
+
+.cv-v3-finance{
+  border:1px solid #2e2e2b !important;
+  background:#151514 !important;
+  color:#fff !important;
+}
+
+.cv-v3-finance .cv-v3-section-head h3{
+  color:#f4f1eb !important;
+}
+
+.cv-v3-finance-grid{
+  border-color:#343431 !important;
+}
+
+/* MOBILE — iPHONE + GALAXY */
+
+@media(max-width:760px){
+
+  .cv-order-details-v3{
+    background:#0d0d0c !important;
+  }
+
+  .cv-order-details-nav{
+    height:62px !important;
+    padding:0 16px !important;
+  }
+
+  .cv-v3-order{
+    padding:25px 11px 65px !important;
+  }
+
+  .cv-v3-hero{
+    padding:13px 7px 5px;
+  }
+
+  .cv-v3-hero h1{
+    font-size:39px !important;
+  }
+
+  .cv-v3-target{
+    border-color:#2f2f2c !important;
+  }
+
+  .cv-v3-timeline{
+    margin-right:-11px !important;
+    margin-left:-11px !important;
+  }
+
+  .cv-v3-section{
+    padding:20px 15px !important;
+    border-radius:4px;
+  }
+
+  .cv-v3-visual-grid{
+    gap:6px !important;
+  }
+
+  .cv-v3-factory-grid{
+    gap:0;
+  }
+
+  .cv-v3-finance{
+    background:#151514 !important;
+  }
+}
+
+</style>
+
+<style id="cv-orders-v6-premium">
+
+/* =====================================================
+   CASA VERONA — ORDER CENTER V6
+   MONOCHROME LUXURY
+===================================================== */
+
+#orders{
+  --v6-black:#0b0b0b;
+  --v6-card:#121212;
+  --v6-card-hover:#161616;
+  --v6-line:#292929;
+  --v6-line-soft:#202020;
+  --v6-white:#f4f1ea;
+  --v6-off:#e7e3da;
+  --v6-grey:#8a8781;
+  --v6-grey-dark:#5f5d58;
+
+  min-height:100vh;
+  color:var(--v6-white);
+  background:
+    radial-gradient(circle at 80% 0%,rgba(255,255,255,.045),transparent 28%),
+    #0b0b0b;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+#orders .cv-orders-head{
+  padding:42px 0 30px;
+  margin:0;
+  border-bottom:1px solid var(--v6-line);
+}
+
+#orders .cv-orders-head small{
+  display:block;
+  color:#686660;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.22em;
+  margin-bottom:9px;
+}
+
+#orders .cv-orders-head h2{
+  margin:0;
+  color:var(--v6-white);
+  font-size:clamp(38px,5vw,68px);
+  line-height:.94;
+  font-weight:600;
+  letter-spacing:-.065em;
+}
+
+#orders .cv-orders-head h2 em{
+  color:#67645f;
+  font-style:normal;
+  font-weight:400;
+}
+
+#orders .cv-orders-head p{
+  margin:13px 0 0;
+  color:#85817a;
+  font-size:12px;
+}
+
+#orders .cv-order-new-btn{
+  min-height:48px;
+  padding:0 22px;
+  border:1px solid #e7e3da !important;
+  border-radius:0 !important;
+  background:#e7e3da !important;
+  color:#111 !important;
+  box-shadow:none !important;
+  font-weight:800;
+}
+
+/* =========================
+   KPI STRIP
+========================= */
+
+#orders .cv-orders-stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:0 !important;
+  margin:0 0 48px !important;
+  border:0 !important;
+  border-bottom:1px solid var(--v6-line) !important;
+  background:transparent !important;
+  border-radius:0 !important;
+  overflow:visible !important;
+}
+
+#orders .cv-orders-stats > div{
+  position:relative;
+  min-height:125px;
+  padding:28px 22px !important;
+  background:transparent !important;
+  border:0 !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+}
+
+#orders .cv-orders-stats > div:not(:last-child){
+  border-left:1px solid var(--v6-line) !important;
+}
+
+#orders .cv-orders-stats small{
+  display:block;
+  margin-bottom:14px;
+  color:#5f5c57 !important;
+  font-size:8px;
+  font-weight:800;
+  letter-spacing:.18em;
+}
+
+#orders .cv-orders-stats strong{
+  display:block;
+  color:#f0ede6 !important;
+  font-size:38px !important;
+  line-height:1;
+  font-weight:500;
+  letter-spacing:-.06em;
+}
+
+#orders .cv-orders-stats span{
+  display:block;
+  margin-top:9px;
+  color:#74716b !important;
+  font-size:10px;
+}
+
+/* =========================
+   PIPELINE
+========================= */
+
+#orders .cv-orders-list-head{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:20px;
+  padding:0 0 17px;
+  margin-bottom:18px;
+  border-bottom:1px solid var(--v6-line);
+  color:var(--v6-white);
+}
+
+#orders .cv-orders-list-head small{
+  display:block;
+  margin-bottom:6px;
+  color:#5e5b56;
+  font-size:8px;
+  font-weight:800;
+  letter-spacing:.2em;
+}
+
+#orders .cv-orders-list-head h3{
+  margin:0;
+  color:#efebe4;
+  font-size:22px;
+  font-weight:600;
+  letter-spacing:-.035em;
+}
+
+#orders .cv-orders-list-head > span{
+  padding:7px 10px;
+  border:1px solid #292929;
+  border-radius:0 !important;
+  background:#111 !important;
+  color:#77746e !important;
+  font-size:9px;
+}
+
+/* =========================
+   GRID
+========================= */
+
+#orders .cv-orders-list{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+}
+
+/* =========================
+   ORDER CARD
+========================= */
+
+#orders .cv-v5-order-card{
+  position:relative;
+  min-width:0;
+  overflow:hidden;
+  cursor:pointer;
+
+  border:1px solid var(--v6-line) !important;
+  border-radius:0 !important;
+  background:var(--v6-card) !important;
+  box-shadow:none !important;
+
+  transition:
+    transform .25s ease,
+    border-color .25s ease,
+    background .25s ease;
+
+  -webkit-tap-highlight-color:transparent;
+}
+
+#orders .cv-v5-order-card:hover{
+  transform:translateY(-3px);
+  border-color:#44413d !important;
+  background:var(--v6-card-hover) !important;
+}
+
+#orders .cv-v5-order-card:focus-visible{
+  outline:1px solid #f1eee7;
+  outline-offset:3px;
+}
+
+/* =========================
+   PRODUCT IMAGE
+========================= */
+
+#orders .cv-v5-order-visual{
+  position:relative;
+  height:270px;
+  overflow:hidden;
+  background:#191919 !important;
+  border-bottom:1px solid var(--v6-line);
+}
+
+#orders .cv-v5-order-visual img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  filter:saturate(.72) contrast(1.04);
+  transition:transform .5s ease;
+}
+
+#orders .cv-v5-order-card:hover .cv-v5-order-visual img{
+  transform:scale(1.025);
+}
+
+#orders .cv-v5-order-visual:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(
+      to top,
+      rgba(8,8,8,.78) 0%,
+      rgba(8,8,8,.15) 45%,
+      transparent 70%
+    );
+}
+
+#orders .cv-v5-order-placeholder{
+  width:100%;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  background:
+    radial-gradient(circle at 50% 20%,#252525,#151515 68%);
+}
+
+#orders .cv-v5-order-placeholder span{
+  color:#dedad2;
+  font-family:Georgia,serif;
+  font-size:58px;
+  line-height:1;
+  letter-spacing:-.09em;
+}
+
+#orders .cv-v5-order-placeholder small{
+  margin-top:12px;
+  color:#5f5c57;
+  font-size:8px;
+  letter-spacing:.25em;
+}
+
+/* =========================
+   FLOATING STATUS
+========================= */
+
+#orders .cv-v5-status{
+  position:absolute;
+  z-index:3;
+  top:14px;
+  right:14px;
+
+  padding:8px 11px;
+
+  border:1px solid rgba(255,255,255,.16);
+  border-radius:0 !important;
+
+  background:rgba(10,10,10,.82) !important;
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+
+  color:#f2efe8 !important;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.04em;
+}
+
+#orders .cv-v5-order-number{
+  position:absolute;
+  z-index:3;
+  left:18px;
+  bottom:16px;
+
+  color:#f2efe8 !important;
+  font-size:27px !important;
+  line-height:1;
+  font-weight:500 !important;
+  letter-spacing:-.055em;
+}
+
+/* =========================
+   CARD CONTENT
+========================= */
+
+#orders .cv-v5-order-content{
+  padding:0 !important;
+}
+
+#orders .cv-v5-order-heading{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+
+  padding:22px 20px 21px !important;
+  border-bottom:1px solid var(--v6-line-soft);
+}
+
+#orders .cv-v5-order-heading small{
+  display:block;
+  margin-bottom:7px;
+  color:#5f5c57 !important;
+  font-size:8px;
+  font-weight:800;
+  letter-spacing:.17em;
+}
+
+#orders .cv-v5-order-heading h3{
+  margin:0;
+  color:#f0ede6 !important;
+  font-size:25px !important;
+  line-height:1.05;
+  font-weight:600;
+  letter-spacing:-.045em;
+}
+
+#orders .cv-v5-order-heading p{
+  margin:8px 0 0;
+  color:#85817a !important;
+  font-size:11px;
+}
+
+#orders .cv-v5-arrow{
+  flex:0 0 42px;
+  width:42px;
+  height:42px;
+  display:grid;
+  place-items:center;
+
+  border:1px solid #30302e !important;
+  border-radius:50% !important;
+
+  color:#d8d4cc !important;
+  background:transparent !important;
+  font-size:16px;
+}
+
+/* =========================
+   META
+========================= */
+
+#orders .cv-v5-order-meta{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+
+  border:0 !important;
+  border-bottom:1px solid var(--v6-line-soft) !important;
+}
+
+#orders .cv-v5-order-meta > div{
+  min-width:0;
+  padding:17px 19px !important;
+}
+
+#orders .cv-v5-order-meta > div:not(:last-child){
+  border-left:1px solid var(--v6-line-soft) !important;
+}
+
+#orders .cv-v5-order-meta small{
+  display:block;
+  margin-bottom:8px;
+  color:#55534e !important;
+  font-size:7px;
+  font-weight:800;
+  letter-spacing:.17em;
+}
+
+#orders .cv-v5-order-meta strong{
+  display:block;
+  overflow:hidden;
+  color:#ddd9d1 !important;
+  font-size:12px !important;
+  font-weight:600;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+
+#orders .cv-v5-order-meta span{
+  display:block;
+  margin-top:6px;
+  color:#74716b !important;
+  font-size:9px !important;
+}
+
+#orders .cv-v5-order-meta .is-late{
+  color:#c49b95 !important;
+}
+
+#orders .cv-v5-order-meta .is-today{
+  color:#e1dbce !important;
+}
+
+/* =========================
+   PROGRESS
+========================= */
+
+#orders .cv-v5-progress{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+
+  padding:22px 17px 20px !important;
+  border-bottom:1px solid var(--v6-line-soft);
+}
+
+#orders .cv-v5-progress > div{
+  position:relative;
+  min-width:0;
+  text-align:center;
+  color:#53514c !important;
+  font-size:8px !important;
+  font-weight:600;
+}
+
+#orders .cv-v5-progress > div:not(:last-child):after{
+  content:"";
+  position:absolute;
+  z-index:0;
+  top:4px;
+  right:50%;
+  width:100%;
+  height:1px;
+  background:#30302e !important;
+}
+
+#orders .cv-v5-progress i{
+  position:relative;
+  z-index:2;
+
+  display:block;
+  width:8px;
+  height:8px;
+  margin:0 auto 9px;
+
+  border-radius:50%;
+  background:#3d3b38 !important;
+  box-shadow:0 0 0 5px var(--v6-card) !important;
+}
+
+#orders .cv-v5-progress .done{
+  color:#bbb7af !important;
+}
+
+#orders .cv-v5-progress .done i{
+  background:#e7e3da !important;
+}
+
+/* =========================
+   FOOTER
+========================= */
+
+#orders .cv-v5-order-footer{
+  min-height:58px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+
+  padding:0 20px !important;
+  border:0 !important;
+}
+
+#orders .cv-v5-order-footer > span{
+  color:#696660 !important;
+  font-size:9px !important;
+}
+
+#orders .cv-v5-order-footer strong{
+  color:#ddd9d1 !important;
+  font-size:10px !important;
+  font-weight:700;
+}
+
+#orders .cv-v5-order-footer b{
+  margin-right:7px;
+  color:#77736d;
+}
+
+/* =========================
+   EMPTY
+========================= */
+
+#orders .cv-v5-empty{
+  grid-column:1/-1;
+  min-height:420px;
+  display:grid;
+  place-items:center;
+
+  border:1px solid var(--v6-line) !important;
+  border-radius:0 !important;
+
+  background:#111 !important;
+  color:#efebe4 !important;
+}
+
+#orders .cv-v5-empty-mark{
+  display:block;
+  margin-bottom:16px;
+  font-family:Georgia,serif;
+  font-size:58px;
+}
+
+/* =====================================================
+   TABLET
+===================================================== */
+
+@media(max-width:1050px){
+
+  #orders .cv-orders-list{
+    grid-template-columns:1fr;
+  }
+
+  #orders .cv-v5-order-visual{
+    height:310px;
+  }
+
+}
+
+/* =====================================================
+   MOBILE — iPHONE + GALAXY
+===================================================== */
+
+@media(max-width:760px){
+
+  #orders{
+    margin-left:-14px;
+    margin-right:-14px;
+    padding:0 14px calc(80px + env(safe-area-inset-bottom));
+    min-height:100dvh;
+  }
+
+  #orders .cv-orders-head{
+    padding:28px 1px 23px;
+  }
+
+  #orders .cv-orders-head h2{
+    font-size:42px !important;
+  }
+
+  #orders .cv-orders-head p{
+    max-width:300px;
+    line-height:1.6;
+  }
+
+  #orders .cv-order-new-btn{
+    width:100%;
+    margin-top:18px;
+    min-height:51px;
+  }
+
+  #orders .cv-orders-stats{
+    grid-template-columns:1fr 1fr;
+    margin-bottom:35px !important;
+  }
+
+  #orders .cv-orders-stats > div{
+    min-height:102px;
+    padding:19px 14px !important;
+  }
+
+  #orders .cv-orders-stats > div:nth-child(2){
+    border-left:0 !important;
+  }
+
+  #orders .cv-orders-stats > div:nth-child(-n+2){
+    border-bottom:1px solid var(--v6-line) !important;
+  }
+
+  #orders .cv-orders-stats strong{
+    font-size:30px !important;
+  }
+
+  #orders .cv-orders-list-head{
+    margin-bottom:11px;
+  }
+
+  #orders .cv-orders-list{
+    grid-template-columns:1fr;
+    gap:11px;
+  }
+
+  #orders .cv-v5-order-card{
+    width:100%;
+    touch-action:pan-y;
+    overscroll-behavior:contain;
+  }
+
+  #orders .cv-v5-order-visual{
+    height:225px;
+  }
+
+  #orders .cv-v5-order-number{
+    left:15px;
+    bottom:14px;
+    font-size:24px !important;
+  }
+
+  #orders .cv-v5-status{
+    top:12px;
+    right:12px;
+  }
+
+  #orders .cv-v5-order-heading{
+    padding:19px 15px 18px !important;
+  }
+
+  #orders .cv-v5-order-heading h3{
+    font-size:22px !important;
+  }
+
+  #orders .cv-v5-arrow{
+    width:38px;
+    height:38px;
+    flex-basis:38px;
+  }
+
+  #orders .cv-v5-order-meta{
+    grid-template-columns:1fr 1fr;
+  }
+
+  #orders .cv-v5-order-meta > div{
+    padding:14px 13px !important;
+  }
+
+  #orders .cv-v5-order-meta > div:nth-child(3){
+    grid-column:1/-1;
+    border-top:1px solid var(--v6-line-soft);
+    border-left:0 !important;
+  }
+
+  #orders .cv-v5-progress{
+    padding:20px 8px 18px !important;
+  }
+
+  #orders .cv-v5-progress > div{
+    font-size:7px !important;
+  }
+
+  #orders .cv-v5-order-footer{
+    min-height:54px;
+    padding:0 15px !important;
+  }
+
+}
+
+/* =====================================================
+   SMALL iPHONE
+===================================================== */
+
+@media(max-width:390px){
+
+  #orders .cv-orders-head h2{
+    font-size:37px !important;
+  }
+
+  #orders .cv-v5-order-visual{
+    height:200px;
+  }
+
+  #orders .cv-v5-order-heading h3{
+    font-size:20px !important;
+  }
+
+  #orders .cv-v5-order-meta strong{
+    font-size:11px !important;
+  }
+
+}
+
+</style>
+
+<script id="cv-orders-v5-interaction">
+
+/*
+  Keyboard support.
+  Mobile taps are already handled by the existing
+  [data-order-inquiry] click listener.
+*/
+
+document.addEventListener(
+  "keydown",
+  function(event){
+
+    const card =
+      event.target.closest(
+        ".cv-v5-order-card[data-order-inquiry]"
+      );
+
+    if(!card){
+      return;
+    }
+
+    if(
+      event.key === "Enter" ||
+      event.key === " "
+    ){
+
+      event.preventDefault();
+
+      if(
+        typeof cvOpenOrderInquiry ===
+        "function"
+      ){
+        cvOpenOrderInquiry(
+          card.dataset.orderInquiry
+        );
+      }
+
+    }
+
+  }
+);
+
+</script>
+
+<style id="cv-factory-os-v1">
+
+/* =====================================================
+   CASA VERONA — FACTORY OS
+===================================================== */
+
+#production{
+  background:#0d0d0c;
+  min-height:100vh;
+}
+
+.cv-factory-os{
+  max-width:1500px;
+  margin:0 auto;
+  padding:38px 34px 90px;
+  color:#171614;
+}
+
+
+/* HEADER */
+
+.cv-factory-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:25px;
+  margin-bottom:28px;
+}
+
+.cv-factory-head small{
+  display:block;
+  margin-bottom:8px;
+  font-size:10px;
+  letter-spacing:.22em;
+  color:#8d8982;
+}
+
+.cv-factory-head h2{
+  margin:0;
+  color:#f5f2eb;
+  font-size:46px;
+  font-weight:500;
+  letter-spacing:-.04em;
+}
+
+.cv-factory-head p{
+  margin:9px 0 0;
+  color:#85817a;
+  font-size:13px;
+}
+
+.cv-factory-refresh{
+  height:46px;
+  padding:0 18px;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  border:1px solid #302f2c;
+  background:#171716;
+  color:#f5f2eb;
+  cursor:pointer;
+}
+
+.cv-factory-refresh span{
+  font-size:20px;
+}
+
+.cv-factory-refresh strong{
+  font-size:11px;
+  font-weight:500;
+}
+
+
+/* KPI */
+
+.cv-factory-kpis{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  border:1px solid #2c2b29;
+  background:#151514;
+  margin-bottom:14px;
+}
+
+.cv-factory-kpis article{
+  min-height:115px;
+  padding:22px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+
+.cv-factory-kpis article:not(:last-child){
+  border-inline-end:1px solid #2c2b29;
+}
+
+.cv-factory-kpis small{
+  color:#77736d;
+  font-size:10px;
+  letter-spacing:.04em;
+}
+
+.cv-factory-kpis strong{
+  color:#f5f2eb;
+  font-size:34px;
+  font-weight:500;
+}
+
+
+/* TOOLBAR */
+
+.cv-factory-toolbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:14px;
+  margin:14px 0;
+}
+
+.cv-factory-search{
+  height:48px;
+  min-width:310px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:0 15px;
+  background:#f2efe8;
+  border:1px solid #d4d0c8;
+}
+
+.cv-factory-search span{
+  color:#77736c;
+}
+
+.cv-factory-search input{
+  width:100%;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:#171614;
+  font:inherit;
+  font-size:12px;
+}
+
+.cv-factory-filters{
+  display:flex;
+  align-items:center;
+  border:1px solid #302f2c;
+  background:#151514;
+}
+
+.cv-factory-filters button{
+  height:46px;
+  padding:0 18px;
+  border:0;
+  border-inline-end:1px solid #302f2c;
+  background:transparent;
+  color:#77736d;
+  cursor:pointer;
+  font-size:11px;
+}
+
+.cv-factory-filters button:last-child{
+  border-inline-end:0;
+}
+
+.cv-factory-filters button.active{
+  background:#f2efe8;
+  color:#171614;
+}
+
+
+/* ORDERS */
+
+.cv-factory-orders{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+
+.cv-factory-card{
+  overflow:hidden;
+  border:1px solid #d6d2ca;
+  background:#f3f0e9;
+  color:#181715;
+  cursor:pointer;
+  transition:
+    transform .18s ease,
+    border-color .18s ease;
+}
+
+.cv-factory-card:hover{
+  transform:translateY(-2px);
+  border-color:#aaa59d;
+}
+
+.cv-factory-card-image{
+  position:relative;
+  height:220px;
+  background:#dfdcd5;
+  overflow:hidden;
+}
+
+.cv-factory-card-image img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.cv-factory-no-image{
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#96918a;
+  font-size:11px;
+  letter-spacing:.14em;
+}
+
+.cv-factory-order-number{
+  position:absolute;
+  top:12px;
+  inset-inline-start:12px;
+  padding:8px 10px;
+  background:#111;
+  color:#fff;
+  font-size:10px;
+  letter-spacing:.08em;
+}
+
+.cv-factory-card-body{
+  padding:18px;
+}
+
+.cv-factory-card-top{
+  display:flex;
+  justify-content:space-between;
+  gap:15px;
+  align-items:flex-start;
+  padding-bottom:16px;
+  border-bottom:1px solid #d8d4cc;
+}
+
+.cv-factory-card-top small{
+  display:block;
+  color:#99948c;
+  font-size:9px;
+  margin-bottom:5px;
+}
+
+.cv-factory-card-top h3{
+  margin:0;
+  font-size:22px;
+  font-weight:600;
+}
+
+.cv-factory-status{
+  padding:8px 10px;
+  background:#dedbd4;
+  color:#4f4b45;
+  font-size:9px;
+  white-space:nowrap;
+}
+
+.cv-factory-status.in-progress{
+  background:#191918;
+  color:#fff;
+}
+
+.cv-factory-status.ready{
+  background:#dadfd9;
+  color:#384139;
+}
+
+.cv-factory-card-specs{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  margin-top:16px;
+  border:1px solid #d8d4cc;
+}
+
+.cv-factory-card-specs > div{
+  padding:12px;
+  min-width:0;
+}
+
+.cv-factory-card-specs > div:not(:last-child){
+  border-inline-end:1px solid #d8d4cc;
+}
+
+.cv-factory-card-specs small{
+  display:block;
+  color:#99948c;
+  font-size:8px;
+  margin-bottom:5px;
+}
+
+.cv-factory-card-specs strong{
+  display:block;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:11px;
+}
+
+.cv-factory-card-footer{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-top:16px;
+}
+
+.cv-factory-deadline{
+  font-size:10px;
+  color:#77736d;
+}
+
+.cv-factory-open{
+  font-size:10px;
+  font-weight:600;
+}
+
+.cv-factory-loading,
+.cv-factory-empty{
+  grid-column:1/-1;
+  padding:60px 20px;
+  text-align:center;
+  border:1px solid #292927;
+  background:#151514;
+  color:#817d76;
+  font-size:11px;
+}
+
+
+/* MOBILE */
+
+@media(max-width:760px){
+
+  #production{
+    background:#0d0d0c;
+  }
+
+  .cv-factory-os{
+    padding:
+      25px
+      11px
+      calc(80px + env(safe-area-inset-bottom));
+  }
+
+  .cv-factory-head{
+    align-items:flex-start;
+  }
+
+  .cv-factory-head h2{
+    font-size:35px;
+  }
+
+  .cv-factory-head p{
+    max-width:240px;
+    line-height:1.6;
+  }
+
+  .cv-factory-refresh{
+    width:45px;
+    min-width:45px;
+    padding:0;
+    justify-content:center;
+  }
+
+  .cv-factory-refresh strong{
+    display:none;
+  }
+
+  .cv-factory-kpis{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .cv-factory-kpis article{
+    min-height:92px;
+    padding:15px;
+  }
+
+  .cv-factory-kpis article:nth-child(2){
+    border-inline-end:0;
+  }
+
+  .cv-factory-kpis article:nth-child(-n+2){
+    border-bottom:1px solid #2c2b29;
+  }
+
+  .cv-factory-kpis strong{
+    font-size:27px;
+  }
+
+  .cv-factory-toolbar{
+    display:block;
+  }
+
+  .cv-factory-search{
+    min-width:0;
+    width:100%;
+    box-sizing:border-box;
+    margin-bottom:8px;
+  }
+
+  .cv-factory-filters{
+    width:100%;
+    overflow-x:auto;
+  }
+
+  .cv-factory-filters button{
+    flex:1;
+    min-width:max-content;
+    padding:0 15px;
+  }
+
+  .cv-factory-orders{
+    grid-template-columns:1fr;
+  }
+
+  .cv-factory-card-image{
+    height:190px;
+  }
+
+  .cv-factory-card-top h3{
+    font-size:19px;
+  }
+
+  .cv-factory-card-specs{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+
+  .cv-factory-card-specs > div{
+    padding:10px 8px;
+  }
+
+}
+
+</style>
+
+<script id="cv-factory-os-script">
+
+(() => {
+
+  let cvFactoryOrders = [];
+  let cvFactoryFilter = "ALL";
+
+
+  const t = (he, ar) => {
+
+    const lang =
+      window.cvFactoryLanguage ||
+      document.documentElement.dataset.factoryLanguage ||
+      "he";
+
+    return lang === "ar" ? ar : he;
+
+  };
+
+
+  const esc = value =>
+    String(value ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+
+
+  const productionOf = order => {
+
+    const value =
+      order?.production_orders;
+
+    if(Array.isArray(value)){
+      return value[0] || {};
+    }
+
+    return value || {};
+
+  };
+
+
+  function statusLabel(production){
+
+    if(production.status === "READY"){
+      return t("מוכן","جاهز");
+    }
+
+    if(production.status === "IN_PROGRESS"){
+      return t("בייצור","قيد التصنيع");
+    }
+
+    if(production.approval_status === "PENDING"){
+      return t("ממתין לאישור","بانتظار الموافقة");
+    }
+
+    if(production.approval_status === "REJECTED"){
+      return t("נדחה","مرفوض");
+    }
+
+    return t("ממתין לייצור","بانتظار التصنيع");
+
+  }
+
+
+  function statusClass(production){
+
+    if(production.status === "READY"){
+      return "ready";
+    }
+
+    if(production.status === "IN_PROGRESS"){
+      return "in-progress";
+    }
+
+    return "";
+
+  }
+
+
+  function renderFactory(){
+
+    const container =
+      document.getElementById(
+        "cvFactoryOrders"
+      );
+
+    if(!container) return;
+
+
+    const search =
+      (
+        document.getElementById(
+          "cvFactorySearch"
+        )?.value || ""
+      )
+      .trim()
+      .toLowerCase();
+
+
+    const filtered =
+      cvFactoryOrders.filter(order => {
+
+        const production =
+          productionOf(order);
+
+        const haystack = [
+          order.order_number,
+          order.product_name,
+          order.fabric_company,
+          order.fabric_collection,
+          order.fabric_code,
+          order.color
+        ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+
+        const matchesSearch =
+          !search ||
+          haystack.includes(search);
+
+
+        let matchesFilter = true;
+
+        if(cvFactoryFilter === "PENDING"){
+          matchesFilter =
+            production.approval_status ===
+            "PENDING";
+        }
+
+        if(cvFactoryFilter === "IN_PROGRESS"){
+          matchesFilter =
+            production.status ===
+            "IN_PROGRESS";
+        }
+
+        if(cvFactoryFilter === "READY"){
+          matchesFilter =
+            production.status ===
+            "READY";
+        }
+
+
+        return (
+          matchesSearch &&
+          matchesFilter
+        );
+
+      });
+
+
+    if(!filtered.length){
+
+      container.innerHTML = `
+        <div class="cv-factory-empty">
+          ${t(
+            "לא נמצאו עבודות ייצור.",
+            "لم يتم العثور على طلبات تصنيع."
+          )}
+        </div>
+      `;
+
+      return;
+
+    }
+
+
+    container.innerHTML =
+      filtered.map(order => {
+
+        const production =
+          productionOf(order);
+
+        const image =
+          order.model_image_url ||
+          order.reference_image_url ||
+          "";
+
+        const dimensions = [
+          order.width
+            ? `${esc(order.width)} ${t("רוחב","عرض")}`
+            : null,
+
+          order.depth
+            ? `${esc(order.depth)} ${t("עומק","عمق")}`
+            : null,
+
+          order.chaise_length
+            ? `${esc(order.chaise_length)} ${t("שזלונג","شازلونج")}`
+            : null
+        ]
+        .filter(Boolean)
+        .join(" · ") || "—";
+
+
+        const fabric =
+          [
+            order.fabric_company,
+            order.fabric_collection,
+            order.fabric_code
+          ]
+          .filter(Boolean)
+          .join(" · ") || "—";
+
+
+        return `
+
+          <article
+            class="cv-factory-card"
+            data-factory-order="${esc(order.id)}"
+          >
+
+            <div class="cv-factory-card-image">
+
+              ${
+                image
+                  ? `
+                    <img
+                      src="${esc(image)}"
+                      alt=""
+                    >
+                  `
+                  : `
+                    <div class="cv-factory-no-image">
+                      CASA VERONA
+                    </div>
+                  `
+              }
+
+              <span class="cv-factory-order-number">
+                #${esc(order.order_number || "—")}
+              </span>
+
+            </div>
+
+
+            <div class="cv-factory-card-body">
+
+              <div class="cv-factory-card-top">
+
+                <div>
+                  <small>
+                    ${t("דגם","الموديل")}
+                  </small>
+
+                  <h3>
+                    ${esc(
+                      order.product_name ||
+                      t("ללא שם","بدون اسم")
+                    )}
+                  </h3>
+                </div>
+
+                <span
+                  class="cv-factory-status ${statusClass(production)}"
+                >
+                  ${statusLabel(production)}
+                </span>
+
+              </div>
+
+
+              <div class="cv-factory-card-specs">
+
+                <div>
+                  <small>
+                    ${t("מידות","المقاسات")}
+                  </small>
+
+                  <strong>
+                    ${dimensions}
+                  </strong>
+                </div>
+
+                <div>
+                  <small>
+                    ${t("בד","القماش")}
+                  </small>
+
+                  <strong>
+                    ${esc(fabric)}
+                  </strong>
+                </div>
+
+                <div>
+                  <small>
+                    ${t("צבע","اللون")}
+                  </small>
+
+                  <strong>
+                    ${esc(order.color || "—")}
+                  </strong>
+                </div>
+
+              </div>
+
+
+              <div class="cv-factory-card-footer">
+
+                <span class="cv-factory-deadline">
+                  ${t("יעד","موعد")}:
+                  ${esc(
+                    production.due_date ||
+                    order.target_delivery_date ||
+                    "—"
+                  )}
+                </span>
+
+                <span class="cv-factory-open">
+                  ${t(
+                    "פתח הזמנה ←",
+                    "فتح الطلب ←"
+                  )}
+                </span>
+
+              </div>
+
+            </div>
+
+          </article>
+        `;
+
+      }).join("");
+
+  }
+
+
+  function updateKpis(){
+
+    const productions =
+      cvFactoryOrders.map(
+        productionOf
+      );
+
+    const set = (id,value) => {
+
+      const element =
+        document.getElementById(id);
+
+      if(element){
+        element.textContent = value;
+      }
+
+    };
+
+
+    set(
+      "cvFactoryKpiAll",
+      cvFactoryOrders.length
+    );
+
+    set(
+      "cvFactoryKpiApproval",
+      productions.filter(
+        p =>
+          p.approval_status ===
+          "PENDING"
+      ).length
+    );
+
+    set(
+      "cvFactoryKpiProgress",
+      productions.filter(
+        p =>
+          p.status ===
+          "IN_PROGRESS"
+      ).length
+    );
+
+    set(
+      "cvFactoryKpiReady",
+      productions.filter(
+        p =>
+          p.status ===
+          "READY"
+      ).length
+    );
+
+  }
+
+
+  async function loadFactoryOrders(){
+
+    const container =
+      document.getElementById(
+        "cvFactoryOrders"
+      );
+
+    if(container){
+
+      container.innerHTML = `
+        <div class="cv-factory-loading">
+          ${t(
+            "טוען את רצפת הייצור...",
+            "جارٍ تحميل خط الإنتاج..."
+          )}
+        </div>
+      `;
+
+    }
+
+
+    try{
+
+      const response =
+        await fetch(
+          "/api/factory/orders",
+          {
+            credentials:"include",
+            cache:"no-store"
+          }
+        );
+
+
+      const data =
+        await response
+          .json()
+          .catch(() => ({}));
+
+
+      if(
+        !response.ok ||
+        !data?.success
+      ){
+        throw new Error(
+          data?.error ||
+          "FACTORY_LOAD_FAILED"
+        );
+      }
+
+
+      cvFactoryOrders =
+        Array.isArray(data.orders)
+          ? data.orders
+          : [];
+
+
+      updateKpis();
+      renderFactory();
+
+
+    }catch(error){
+
+      console.error(
+        "FACTORY OS:",
+        error
+      );
+
+
+      if(container){
+
+        container.innerHTML = `
+          <div class="cv-factory-empty">
+            ${t(
+              "לא ניתן לטעון כרגע את הייצור.",
+              "تعذر تحميل الإنتاج حالياً."
+            )}
+          </div>
+        `;
+
+      }
+
+    }
+
+  }
+
+
+  function applyFactoryLanguage(){
+
+    const values = {
+
+      cvFactoryEyebrow:[
+        "CASA VERONA · FACTORY OS",
+        "CASA VERONA · FACTORY OS"
+      ],
+
+      cvFactoryTitle:[
+        "רצפת הייצור",
+        "خط الإنتاج"
+      ],
+
+      cvFactorySubtitle:[
+        "כל ההזמנות הפעילות במפעל במקום אחד.",
+        "جميع طلبات المصنع في مكان واحد."
+      ],
+
+      cvFactoryRefreshText:[
+        "רענון",
+        "تحديث"
+      ],
+
+      cvFactoryKpiAllLabel:[
+        "סה״כ עבודות",
+        "إجمالي الطلبات"
+      ],
+
+      cvFactoryKpiApprovalLabel:[
+        "ממתינות לאישור",
+        "بانتظار الموافقة"
+      ],
+
+      cvFactoryKpiProgressLabel:[
+        "בייצור",
+        "قيد التصنيع"
+      ],
+
+      cvFactoryKpiReadyLabel:[
+        "מוכנות",
+        "جاهزة"
+      ],
+
+      cvFactoryFilterAll:[
+        "הכל",
+        "الكل"
+      ],
+
+      cvFactoryFilterPending:[
+        "לאישור",
+        "للموافقة"
+      ],
+
+      cvFactoryFilterProgress:[
+        "בייצור",
+        "قيد التصنيع"
+      ],
+
+      cvFactoryFilterReady:[
+        "מוכן",
+        "جاهز"
+      ]
+
+    };
+
+
+    const arabic =
+      (
+        window.cvFactoryLanguage ||
+        document.documentElement.dataset.factoryLanguage
+      ) === "ar";
+
+
+    Object.entries(values)
+      .forEach(([id,text]) => {
+
+        const element =
+          document.getElementById(id);
+
+        if(element){
+          element.textContent =
+            text[arabic ? 1 : 0];
+        }
+
+      });
+
+
+    const search =
+      document.getElementById(
+        "cvFactorySearch"
+      );
+
+    if(search){
+
+      search.placeholder =
+        arabic
+          ? "بحث برقم الطلب أو الموديل"
+          : "חיפוש לפי הזמנה או דגם";
+
+    }
+
+
+    const factory =
+      document.getElementById(
+        "cvFactoryOS"
+      );
+
+    if(factory){
+
+      factory.dir =
+        arabic
+          ? "rtl"
+          : "rtl";
+
+    }
+
+
+    renderFactory();
+
+  }
+
+
+  document.addEventListener(
+    "input",
+    event => {
+
+      if(
+        event.target?.id ===
+        "cvFactorySearch"
+      ){
+        renderFactory();
+      }
+
+    }
+  );
+
+
+  document.addEventListener(
+    "click",
+    event => {
+
+      const filter =
+        event.target.closest(
+          "[data-factory-filter]"
+        );
+
+      if(filter){
+
+        cvFactoryFilter =
+          filter.dataset.factoryFilter ||
+          "ALL";
+
+
+        document
+          .querySelectorAll(
+            "[data-factory-filter]"
+          )
+          .forEach(button => {
+
+            button.classList.toggle(
+              "active",
+              button === filter
+            );
+
+          });
+
+
+        renderFactory();
+
+        return;
+      }
+
+
+      if(
+        event.target.closest(
+          "#cvFactoryRefresh"
+        )
+      ){
+
+        loadFactoryOrders();
+
+        return;
+      }
+
+
+      const card =
+        event.target.closest(
+          "[data-factory-order]"
+        );
+
+      if(card){
+
+        const orderId =
+          card.dataset.factoryOrder;
+
+        if(
+          typeof window.cvOpenOrderInquiry ===
+          "function"
+        ){
+
+          window.cvOpenOrderInquiry(
+            orderId
+          );
+
+        }else if(
+          typeof cvOpenOrderInquiry ===
+          "function"
+        ){
+
+          cvOpenOrderInquiry(
+            orderId
+          );
+
+        }
+
+      }
+
+    }
+  );
+
+
+  window.cvLoadFactoryOrders =
+    loadFactoryOrders;
+
+  window.cvApplyFactoryLanguage =
+    applyFactoryLanguage;
+
+
+  const originalOpenPage =
+    window.openPage;
+
+  if(typeof originalOpenPage === "function"){
+
+    window.openPage = function(pageName){
+
+      const result =
+        originalOpenPage.apply(
+          this,
+          arguments
+        );
+
+      if(pageName === "production"){
+
+        applyFactoryLanguage();
+        loadFactoryOrders();
+
+      }
+
+      return result;
+
+    };
+
+  }
+
+
+  document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+      applyFactoryLanguage();
+    }
+  );
+
+})();
+
+</script>
+
+
+
+
+
+
+
+
+
+
+<style>
+/* =========================================================
+   CASA VERONA — OPERATIONS LUXURY SYSTEM V1
+   Orders · Factory · Delivery
+========================================================= */
+
+:root{
+  --cv-op-black:#0b0b0a;
+  --cv-op-black-2:#121210;
+  --cv-op-black-3:#181816;
+  --cv-op-ivory:#f3f0e9;
+  --cv-op-ivory-2:#e8e4dc;
+  --cv-op-line-dark:rgba(255,255,255,.10);
+  --cv-op-line-light:rgba(17,17,15,.11);
+  --cv-op-muted:#8e8a82;
+  --cv-op-text:#171614;
+}
+
+/* =========================
+   ORDERS — MAIN CANVAS
+========================= */
+
+#orders{
+  background:
+    radial-gradient(
+      circle at 82% -10%,
+      rgba(255,255,255,.055),
+      transparent 30%
+    ),
+    #0b0b0a;
+
+  color:#f3f0e9;
+  min-height:100vh;
+  padding:42px 36px 100px;
+  box-sizing:border-box;
+}
+
+/* =========================
+   ORDERS HEADER
+========================= */
+
+#orders .cv-orders-head{
+  max-width:1500px;
+  margin:0 auto 34px;
+  align-items:flex-end;
+}
+
+#orders .cv-orders-head small{
+  display:block;
+  color:#858179;
+  opacity:1;
+  font-size:9px;
+  letter-spacing:.28em;
+  text-transform:uppercase;
+}
+
+#orders .cv-orders-head h2{
+  margin:10px 0 8px;
+  color:#f6f2ea;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:clamp(42px,5vw,70px);
+  line-height:.95;
+  letter-spacing:-.045em;
+  font-weight:400;
+}
+
+#orders .cv-orders-head h2 em{
+  color:#aaa59c;
+  font-style:italic;
+  font-weight:400;
+}
+
+#orders .cv-orders-head p{
+  max-width:600px;
+  color:#8b877f;
+  opacity:1;
+  font-size:12px;
+  line-height:1.8;
+}
+
+/* =========================
+   PRIMARY ACTION
+========================= */
+
+#orders .cv-order-new-btn{
+  position:relative;
+  min-width:170px;
+  height:52px;
+  padding:0 24px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  border:1px solid #f1ede5;
+  background:#f1ede5;
+  color:#11110f;
+
+  font-size:11px;
+  letter-spacing:.04em;
+  font-weight:600;
+
+  transition:
+    transform .22s ease,
+    background .22s ease,
+    color .22s ease;
+}
+
+#orders .cv-order-new-btn:hover{
+  transform:translateY(-2px);
+  background:transparent;
+  color:#f1ede5;
+}
+
+/* =========================
+   KPI STRIP
+========================= */
+
+#orders .cv-orders-stats{
+  max-width:1500px;
+  margin:0 auto 42px;
+  gap:0;
+
+  border-top:1px solid var(--cv-op-line-dark);
+  border-bottom:1px solid var(--cv-op-line-dark);
+}
+
+#orders .cv-orders-stats > div{
+  min-height:128px;
+  padding:24px 26px;
+  border:0;
+  box-sizing:border-box;
+  justify-content:space-between;
+}
+
+#orders .cv-orders-stats > div:not(:last-child){
+  border-inline-end:1px solid var(--cv-op-line-dark);
+}
+
+#orders .cv-orders-stats small{
+  color:#706d67;
+  opacity:1;
+  font-size:8px;
+  letter-spacing:.2em;
+}
+
+#orders .cv-orders-stats strong{
+  margin:18px 0 4px;
+  color:#f5f1e9;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:42px;
+  line-height:1;
+  font-weight:400;
+  letter-spacing:-.04em;
+}
+
+#orders .cv-orders-stats span{
+  color:#858179;
+  opacity:1;
+  font-size:10px;
+}
+
+/* =========================
+   ORDER PIPELINE HEADING
+========================= */
+
+#orders .cv-orders-list-head{
+  max-width:1500px;
+  margin:0 auto 15px;
+  padding-top:8px;
+}
+
+#orders .cv-orders-list-head small{
+  color:#6f6c66;
+  opacity:1;
+  font-size:8px;
+  letter-spacing:.24em;
+}
+
+#orders .cv-orders-list-head h3{
+  margin-top:8px;
+  color:#f4f0e8;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:28px;
+  font-weight:400;
+  letter-spacing:-.025em;
+}
+
+#orders .cv-orders-list-head > span{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+
+  padding:7px 10px;
+
+  border:1px solid rgba(255,255,255,.11);
+  color:#8d8981;
+  opacity:1;
+
+  font-size:7px;
+  letter-spacing:.2em;
+}
+
+#orders .cv-orders-list-head > span::before{
+  content:"";
+  width:5px;
+  height:5px;
+  border-radius:50%;
+  background:#c6c1b8;
+}
+
+/* =========================
+   ORDERS LIST SURFACE
+========================= */
+
+#orders .cv-orders-list{
+  max-width:1500px;
+  margin:0 auto;
+  border-top:1px solid var(--cv-op-line-dark);
+}
+
+#orders .cv-orders-empty{
+  min-height:220px;
+  justify-content:center;
+  border-bottom:1px solid var(--cv-op-line-dark);
+}
+
+#orders .cv-orders-empty small{
+  color:#6f6c66;
+  opacity:1;
+}
+
+#orders .cv-orders-empty strong{
+  color:#eeeae2;
+  font-size:25px;
+}
+
+#orders .cv-orders-empty span{
+  color:#77736c;
+  opacity:1;
+}
+
+/* =========================
+   FACTORY — MATCH THE SYSTEM
+========================= */
+
+#production{
+  background:
+    radial-gradient(
+      circle at 80% -10%,
+      rgba(255,255,255,.05),
+      transparent 28%
+    ),
+    var(--cv-op-black);
+}
+
+#production .cv-factory-os{
+  padding-top:42px;
+}
+
+#production .cv-factory-head h2{
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:clamp(42px,5vw,64px);
+  font-weight:400;
+  line-height:1;
+}
+
+#production .cv-factory-head small{
+  letter-spacing:.26em;
+  font-size:9px;
+}
+
+#production .cv-factory-kpis{
+  border-color:var(--cv-op-line-dark);
+  background:transparent;
+}
+
+#production .cv-factory-kpis article{
+  min-height:128px;
+  padding:24px 26px;
+}
+
+#production .cv-factory-kpis article:not(:last-child){
+  border-inline-end-color:var(--cv-op-line-dark);
+}
+
+#production .cv-factory-kpis strong{
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:42px;
+  font-weight:400;
+}
+
+#production .cv-factory-refresh{
+  transition:
+    background .2s ease,
+    border-color .2s ease,
+    transform .2s ease;
+}
+
+#production .cv-factory-refresh:hover{
+  transform:translateY(-2px);
+  background:#22221f;
+  border-color:#57534d;
+}
+
+/* =========================
+   FACTORY PRODUCT CARDS
+========================= */
+
+#production .cv-factory-card{
+  background:#f1eee7;
+  border-color:#d4d0c7;
+  transition:
+    transform .25s ease,
+    box-shadow .25s ease,
+    border-color .25s ease;
+}
+
+#production .cv-factory-card:hover{
+  transform:translateY(-4px);
+  border-color:#aaa49a;
+  box-shadow:0 22px 55px rgba(0,0,0,.25);
+}
+
+#production .cv-factory-card-image{
+  height:250px;
+  background:#dad6ce;
+}
+
+#production .cv-factory-card-image img{
+  transition:transform .55s cubic-bezier(.2,.7,.2,1);
+}
+
+#production .cv-factory-card:hover .cv-factory-card-image img{
+  transform:scale(1.025);
+}
+
+#production .cv-factory-order-number{
+  top:14px;
+  inset-inline-start:14px;
+  padding:8px 11px;
+  background:rgba(13,13,12,.92);
+  backdrop-filter:blur(8px);
+  letter-spacing:.12em;
+}
+
+#production .cv-factory-card-body{
+  padding:21px;
+}
+
+#production .cv-factory-card-top h3{
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:25px;
+  font-weight:400;
+  letter-spacing:-.025em;
+}
+
+/* =========================
+   ORDER MODAL — ATELIER
+========================= */
+
+.cv-order-modal{
+  background:rgba(5,5,4,.82);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+}
+
+.cv-order-modal-card{
+  width:min(1050px,100%);
+  background:#f3f0e9;
+  color:#171614;
+  padding:34px 36px 42px;
+  box-shadow:0 35px 100px rgba(0,0,0,.42);
+}
+
+.cv-order-modal-head{
+  padding-bottom:25px;
+  border-bottom-color:rgba(17,17,15,.12);
+}
+
+.cv-order-modal-head small{
+  letter-spacing:.25em;
+}
+
+.cv-order-modal-head h3{
+  font-size:38px;
+  letter-spacing:-.035em;
+}
+
+#cvOrderModalClose{
+  width:42px;
+  height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  border:1px solid rgba(0,0,0,.12);
+  font-size:23px;
+
+  transition:
+    background .18s ease,
+    color .18s ease;
+}
+
+#cvOrderModalClose:hover{
+  background:#111;
+  color:#fff;
+}
+
+.cv-order-section-title{
+  margin-top:36px;
+}
+
+.cv-order-section-title > small{
+  font-size:25px;
+  color:#aaa59c;
+  opacity:1;
+}
+
+.cv-order-section-title strong{
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:18px;
+  font-weight:400;
+}
+
+.cv-order-grid input,
+.cv-order-grid select,
+.cv-order-full-field textarea{
+  min-height:48px;
+  border:1px solid rgba(0,0,0,.13);
+  background:#faf8f3;
+  transition:
+    border-color .18s ease,
+    background .18s ease,
+    box-shadow .18s ease;
+}
+
+.cv-order-grid input:focus,
+.cv-order-grid select:focus,
+.cv-order-full-field textarea:focus{
+  background:#fff;
+  border-color:#222;
+  box-shadow:0 0 0 1px #222;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:760px){
+
+  #orders{
+    padding:
+      26px
+      12px
+      calc(95px + env(safe-area-inset-bottom));
+  }
+
+  #orders .cv-orders-head{
+    align-items:flex-start;
+    flex-direction:column;
+    gap:22px;
+    margin-bottom:26px;
+  }
+
+  #orders .cv-orders-head h2{
+    font-size:44px;
+  }
+
+  #orders .cv-order-new-btn{
+    width:100%;
+  }
+
+  #orders .cv-orders-stats{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  #orders .cv-orders-stats > div{
+    min-height:105px;
+    padding:18px;
+  }
+
+  #orders .cv-orders-stats > div:nth-child(2){
+    border-inline-end:0;
+  }
+
+  #orders .cv-orders-stats > div:nth-child(-n+2){
+    border-bottom:1px solid var(--cv-op-line-dark);
+  }
+
+  #orders .cv-orders-stats strong{
+    font-size:34px;
+  }
+
+  .cv-order-modal{
+    padding:0;
+    overscroll-behavior:contain;
+  }
+
+  .cv-order-modal-card{
+    width:100%;
+    min-height:100dvh;
+    margin:0;
+    padding:
+      22px
+      15px
+      calc(95px + env(safe-area-inset-bottom));
+    box-shadow:none;
+  }
+
+  .cv-order-modal-head h3{
+    font-size:31px;
+  }
+
+  .cv-order-grid{
+    grid-template-columns:1fr;
+  }
+
+  #production .cv-factory-card-image{
+    height:210px;
+  }
+}
+</style>
+
+
+<style>
+/* =========================================================
+   CASA VERONA — ORDER CENTER V6
+   LUXURY OPERATIONS SYSTEM
+========================================================= */
+
+#orders .cv-v5-order-card{
+  position:relative;
+  display:grid;
+  grid-template-columns:300px minmax(0,1fr);
+  min-height:310px;
+  margin:0 0 18px;
+
+  background:#f2efe8;
+  color:#151513;
+
+  border:1px solid rgba(255,255,255,.13);
+  border-radius:2px;
+
+  overflow:hidden;
+  cursor:pointer;
+
+  box-shadow:
+    0 18px 60px rgba(0,0,0,.18);
+
+  transition:
+    transform .3s cubic-bezier(.2,.8,.2,1),
+    box-shadow .3s ease,
+    border-color .3s ease;
+}
+
+#orders .cv-v5-order-card:hover{
+  transform:translateY(-4px);
+  box-shadow:
+    0 28px 80px rgba(0,0,0,.3);
+  border-color:rgba(255,255,255,.25);
+}
+
+
+/* HERO IMAGE */
+
+#orders .cv-v5-order-visual{
+  position:relative;
+  min-height:310px;
+  overflow:hidden;
+  background:#d8d4cb;
+}
+
+#orders .cv-v5-order-visual::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0,0,0,.05),
+      transparent 45%,
+      rgba(0,0,0,.24)
+    );
+}
+
+#orders .cv-v5-order-visual img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+  transition:transform .7s cubic-bezier(.2,.8,.2,1);
+}
+
+#orders .cv-v5-order-card:hover .cv-v5-order-visual img{
+  transform:scale(1.035);
+}
+
+#orders .cv-v5-order-placeholder{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  gap:8px;
+
+  background:
+    radial-gradient(circle at 50% 35%,#ebe8e0,#d4d0c7);
+}
+
+#orders .cv-v5-order-placeholder span{
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:48px;
+  letter-spacing:-.08em;
+}
+
+#orders .cv-v5-order-placeholder small{
+  font-size:8px;
+  letter-spacing:.32em;
+  opacity:.48;
+}
+
+
+/* ORDER NUMBER */
+
+#orders .cv-v5-order-number{
+  position:absolute;
+  z-index:3;
+  top:17px;
+  left:17px;
+
+  padding:8px 11px;
+
+  background:rgba(12,12,11,.88);
+  color:#f5f2eb;
+
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+
+  font-size:9px;
+  letter-spacing:.16em;
+}
+
+
+/* STATUS */
+
+#orders .cv-v5-status{
+  position:absolute;
+  z-index:3;
+  right:17px;
+  top:17px;
+
+  padding:8px 11px;
+
+  background:rgba(244,241,234,.92);
+  color:#171614;
+
+  font-size:9px;
+  font-weight:700;
+
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+}
+
+
+/* CONTENT */
+
+#orders .cv-v5-order-content{
+  display:flex;
+  flex-direction:column;
+  padding:30px 32px 25px;
+  min-width:0;
+}
+
+#orders .cv-v5-order-heading{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:25px;
+
+  padding-bottom:22px;
+  border-bottom:1px solid rgba(20,19,17,.12);
+}
+
+#orders .cv-v5-order-heading > div{
+  min-width:0;
+}
+
+#orders .cv-v5-order-heading small{
+  display:block;
+  margin-bottom:10px;
+
+  color:#8d887f;
+  font-size:8px;
+  letter-spacing:.26em;
+}
+
+
+/* ITEM COUNT */
+
+#orders .cv-v6-order-eyebrow{
+  margin-bottom:8px;
+}
+
+#orders .cv-v6-order-eyebrow span{
+  display:inline-flex;
+  align-items:center;
+
+  padding:5px 8px;
+
+  border:1px solid rgba(20,19,17,.13);
+
+  color:#706b63;
+
+  font-size:8px;
+  font-weight:700;
+  letter-spacing:.08em;
+}
+
+
+/* CUSTOMER */
+
+#orders .cv-v5-order-heading h3{
+  margin:0;
+
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:clamp(28px,3vw,39px);
+  line-height:1;
+  font-weight:400;
+  letter-spacing:-.045em;
+
+  color:#151412;
+}
+
+
+/* PRODUCTS */
+
+#orders .cv-v6-item-summary{
+  margin:10px 0 0;
+
+  max-width:680px;
+
+  color:#767168;
+  font-size:12px;
+  line-height:1.7;
+
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+#orders .cv-v6-item-summary b{
+  color:#151412;
+  font-weight:700;
+}
+
+
+/* ARROW */
+
+#orders .cv-v5-arrow{
+  flex:0 0 auto;
+
+  width:42px;
+  height:42px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  border:1px solid rgba(20,19,17,.14);
+
+  font-size:17px;
+
+  transition:
+    background .2s ease,
+    color .2s ease,
+    transform .2s ease;
+}
+
+#orders .cv-v5-order-card:hover .cv-v5-arrow{
+  background:#171614;
+  color:#f4f1e9;
+  transform:translateX(-3px);
+}
+
+
+/* META */
+
+#orders .cv-v5-order-meta{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+
+  margin-top:22px;
+  border:1px solid rgba(20,19,17,.11);
+}
+
+#orders .cv-v5-order-meta > div{
+  min-width:0;
+  padding:15px 17px;
+}
+
+#orders .cv-v5-order-meta > div:not(:last-child){
+  border-left:1px solid rgba(20,19,17,.11);
+}
+
+#orders .cv-v5-order-meta small{
+  display:block;
+  margin-bottom:7px;
+
+  color:#9a958c;
+  font-size:7px;
+  letter-spacing:.22em;
+}
+
+#orders .cv-v5-order-meta strong{
+  display:block;
+
+  color:#1b1a17;
+  font-size:12px;
+  font-weight:700;
+}
+
+#orders .cv-v5-order-meta span{
+  display:block;
+  margin-top:5px;
+
+  color:#817c73;
+  font-size:9px;
+}
+
+#orders .cv-v5-order-meta .is-late{
+  color:#8e312c;
+  font-weight:700;
+}
+
+#orders .cv-v5-order-meta .is-today{
+  color:#6d5b22;
+  font-weight:700;
+}
+
+
+/* PROGRESS */
+
+#orders .cv-v5-progress{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  margin-top:22px;
+}
+
+#orders .cv-v5-progress > div{
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+}
+
+#orders .cv-v5-progress > div::before{
+  content:"";
+  position:absolute;
+  top:4px;
+  right:9px;
+  left:-9px;
+
+  height:1px;
+  background:#d3cfc6;
+}
+
+#orders .cv-v5-progress > div:last-child::before{
+  left:50%;
+}
+
+#orders .cv-v5-progress i{
+  position:relative;
+  z-index:2;
+
+  width:9px;
+  height:9px;
+
+  display:block;
+  border-radius:50%;
+
+  background:#d3cfc6;
+  border:2px solid #f2efe8;
+  box-shadow:0 0 0 1px #c8c3ba;
+}
+
+#orders .cv-v5-progress .done i{
+  background:#191816;
+  box-shadow:0 0 0 1px #191816;
+}
+
+#orders .cv-v5-progress span{
+  color:#99948b;
+  font-size:8px;
+  font-weight:600;
+}
+
+#orders .cv-v5-progress .done span{
+  color:#1c1b18;
+}
+
+
+/* FOOTER */
+
+#orders .cv-v5-order-footer{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+
+  margin-top:auto;
+  padding-top:20px;
+}
+
+#orders .cv-v5-order-footer > span{
+  color:#79746b;
+  font-size:10px;
+}
+
+#orders .cv-v5-order-footer strong{
+  display:flex;
+  align-items:center;
+  gap:10px;
+
+  color:#171614;
+
+  font-size:10px;
+  letter-spacing:.02em;
+}
+
+#orders .cv-v5-order-footer b{
+  font-size:16px;
+  font-weight:400;
+}
+
+
+/* ================================================
+   MOBILE — IPHONE + GALAXY
+================================================ */
+
+@media(max-width:760px){
+
+  #orders .cv-v5-order-card{
+    display:block;
+    margin-bottom:14px;
+    min-height:0;
+    border-radius:0;
+  }
+
+  #orders .cv-v5-order-visual{
+    height:230px;
+    min-height:230px;
+  }
+
+  #orders .cv-v5-order-content{
+    padding:22px 19px 20px;
+  }
+
+  #orders .cv-v5-order-heading{
+    gap:12px;
+    padding-bottom:18px;
+  }
+
+  #orders .cv-v5-order-heading h3{
+    font-size:30px;
+  }
+
+  #orders .cv-v6-item-summary{
+    white-space:normal;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+  }
+
+  #orders .cv-v5-arrow{
+    width:37px;
+    height:37px;
+  }
+
+  #orders .cv-v5-order-meta{
+    grid-template-columns:1fr;
+  }
+
+  #orders .cv-v5-order-meta > div{
+    padding:13px 14px;
+  }
+
+  #orders .cv-v5-order-meta > div:not(:last-child){
+    border-left:0;
+    border-bottom:1px solid rgba(20,19,17,.1);
+  }
+
+  #orders .cv-v5-progress{
+    margin-top:20px;
+  }
+
+  #orders .cv-v5-progress span{
+    font-size:7px;
+  }
+
+  #orders .cv-v5-order-footer{
+    padding-top:19px;
+  }
+}
+
+</style>
+
+
+<style id="cv-order-modal-single-scroll">
+/* =========================================================
+   CASA VERONA — SINGLE ORDER MODAL SCROLL SYSTEM
+   iPhone · Galaxy · Desktop
+========================================================= */
+
+#cvOrderModal.cv-order-modal{
+  position:fixed !important;
+  inset:0 !important;
+  z-index:999999 !important;
+
+  display:flex !important;
+  align-items:flex-start !important;
+  justify-content:center !important;
+
+  width:100% !important;
+  height:100dvh !important;
+
+  margin:0 !important;
+  padding:24px !important;
+
+  box-sizing:border-box !important;
+
+  overflow:hidden !important;
+
+  background:rgba(7,7,6,.82) !important;
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+}
+
+#cvOrderModal.cv-order-modal[hidden]{
+  display:none !important;
+}
+
+/*
+  IMPORTANT:
+  The CARD is the only scroll container.
+*/
+#cvOrderModal .cv-order-modal-card{
+  position:relative !important;
+  inset:auto !important;
+
+  width:min(1050px,100%) !important;
+
+  height:auto !important;
+  max-height:calc(100dvh - 48px) !important;
+  min-height:0 !important;
+
+  margin:0 !important;
+
+  box-sizing:border-box !important;
+
+  overflow-x:hidden !important;
+  overflow-y:auto !important;
+
+  -webkit-overflow-scrolling:touch !important;
+  overscroll-behavior-y:contain !important;
+
+  background:#f4f1e9 !important;
+  color:#171614 !important;
+
+  border:1px solid rgba(255,255,255,.18) !important;
+  border-radius:2px !important;
+
+  box-shadow:
+    0 40px 120px rgba(0,0,0,.48) !important;
+}
+
+#cvOrderModal .cv-order-modal-head{
+  position:relative !important;
+  top:auto !important;
+
+  padding:30px 32px 24px !important;
+
+  background:#f4f1e9 !important;
+
+  border-bottom:
+    1px solid rgba(20,19,17,.12) !important;
+}
+
+#cvOrderModal #cvNewOrderForm{
+  position:relative !important;
+
+  display:block !important;
+
+  width:100% !important;
+
+  height:auto !important;
+  min-height:0 !important;
+  max-height:none !important;
+
+  overflow:visible !important;
+
+  box-sizing:border-box !important;
+
+  padding:
+    8px
+    32px
+    80px
+    32px !important;
+}
+
+#cvOrderModal input,
+#cvOrderModal select,
+#cvOrderModal textarea{
+  touch-action:auto !important;
+}
+
+#cvOrderModal button,
+#cvOrderModal label{
+  touch-action:manipulation !important;
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:760px){
+
+  #cvOrderModal.cv-order-modal{
+    display:block !important;
+
+    height:100dvh !important;
+
+    padding:0 !important;
+
+    overflow:hidden !important;
+
+    background:#f4f1e9 !important;
+  }
+
+  #cvOrderModal.cv-order-modal[hidden]{
+    display:none !important;
+  }
+
+  #cvOrderModal .cv-order-modal-card{
+    position:relative !important;
+
+    width:100% !important;
+
+    height:100dvh !important;
+    max-height:100dvh !important;
+    min-height:0 !important;
+
+    margin:0 !important;
+
+    overflow-x:hidden !important;
+    overflow-y:scroll !important;
+
+    -webkit-overflow-scrolling:touch !important;
+    overscroll-behavior-y:auto !important;
+    touch-action:pan-y !important;
+
+    border:0 !important;
+    border-radius:0 !important;
+
+    box-shadow:none !important;
+  }
+
+  #cvOrderModal .cv-order-modal-head{
+    padding:
+      calc(20px + env(safe-area-inset-top))
+      18px
+      20px !important;
+  }
+
+  #cvOrderModal #cvNewOrderForm{
+    padding:
+      8px
+      18px
+      calc(180px + env(safe-area-inset-bottom))
+      18px !important;
+  }
+
+  #cvOrderModal .cv-order-grid,
+  #cvOrderModal .cv-order-ai-box{
+    grid-template-columns:1fr !important;
+  }
+
+  #cvOrderModal textarea{
+    min-height:110px;
+  }
+}
+</style>
+
+
+<!-- =========================================================
+     CASA VERONA — MULTI ITEM ORDER STUDIO V7
+========================================================== -->
+
+<style id="cv-order-studio-v7-css">
+
+#cvOrderModal{
+  --cv7-black:#0b0b0a;
+  --cv7-ink:#171614;
+  --cv7-paper:#f4f1e9;
+  --cv7-paper-2:#ebe7dd;
+  --cv7-line:rgba(23,22,20,.12);
+  --cv7-muted:#827d74;
+}
+
+#cvOrderModal.cv-order-modal{
+  position:fixed !important;
+  inset:0 !important;
+  z-index:999999 !important;
+  padding:0 !important;
+  overflow:hidden !important;
+  background:rgba(5,5,4,.82) !important;
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+}
+
+#cvOrderModal.cv-order-modal[hidden]{
+  display:none !important;
+}
+
+#cvOrderModal .cv-order-modal-card{
+  position:absolute !important;
+  inset:22px !important;
+
+  width:auto !important;
+  height:auto !important;
+  max-width:1180px !important;
+  max-height:none !important;
+
+  margin:auto !important;
+  padding:0 !important;
+
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+
+  -webkit-overflow-scrolling:touch !important;
+  overscroll-behavior:contain !important;
+
+  background:var(--cv7-paper) !important;
+  color:var(--cv7-ink) !important;
+
+  border:1px solid rgba(255,255,255,.14) !important;
+  border-radius:2px !important;
+
+  box-shadow:0 45px 140px rgba(0,0,0,.52) !important;
+}
+
+#cvOrderModal .cv-order-modal-head{
+  position:sticky !important;
+  top:0 !important;
+  z-index:30 !important;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  padding:25px 32px !important;
+
+  background:rgba(244,241,233,.96) !important;
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+
+  border-bottom:1px solid var(--cv7-line) !important;
+}
+
+#cvOrderModal .cv-order-modal-head small{
+  display:block;
+  margin-bottom:6px;
+  color:#9a9489;
+  font-size:8px;
+  letter-spacing:.28em;
+}
+
+#cvOrderModal .cv-order-modal-head h3{
+  margin:0;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:31px;
+  font-weight:400;
+  letter-spacing:-.035em;
+}
+
+#cvOrderModalClose{
+  flex:0 0 42px;
+  width:42px;
+  height:42px;
+
+  border:1px solid var(--cv7-line);
+  background:transparent;
+  color:#171614;
+
+  font-size:23px;
+  cursor:pointer;
+}
+
+#cvNewOrderForm{
+  display:block !important;
+  padding:0 32px 90px !important;
+}
+
+.cv7-section{
+  padding:34px 0;
+  border-bottom:1px solid var(--cv7-line);
+}
+
+.cv7-section-head{
+  display:flex;
+  align-items:flex-start;
+  gap:17px;
+  margin-bottom:23px;
+}
+
+.cv7-section-index{
+  flex:0 0 auto;
+  padding-top:3px;
+
+  color:#aaa398;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:24px;
+}
+
+.cv7-section-head small{
+  display:block;
+  margin-bottom:5px;
+
+  color:#9b958b;
+  font-size:8px;
+  letter-spacing:.22em;
+}
+
+.cv7-section-head h4{
+  margin:0;
+
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:23px;
+  font-weight:400;
+}
+
+.cv7-section-head p{
+  margin:5px 0 0;
+  color:#777168;
+  font-size:12px;
+}
+
+.cv7-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+}
+
+.cv7-grid.three{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+
+.cv7-field{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.cv7-field.full{
+  grid-column:1/-1;
+}
+
+.cv7-field > span{
+  color:#69645c;
+  font-size:10px;
+  font-weight:600;
+}
+
+.cv7-field input,
+.cv7-field select,
+.cv7-field textarea{
+  width:100%;
+  min-width:0;
+  min-height:49px;
+
+  box-sizing:border-box;
+
+  padding:12px 13px;
+
+  border:1px solid var(--cv7-line);
+  border-radius:0;
+
+  outline:none;
+
+  background:#fbf9f4;
+  color:#171614;
+
+  font:inherit;
+
+  transition:
+    border-color .18s ease,
+    background .18s ease,
+    box-shadow .18s ease;
+}
+
+.cv7-field textarea{
+  min-height:105px;
+  resize:vertical;
+}
+
+.cv7-field input:focus,
+.cv7-field select:focus,
+.cv7-field textarea:focus{
+  border-color:#171614;
+  background:#fff;
+  box-shadow:0 0 0 1px #171614;
+}
+
+/* ITEMS */
+
+#cv7Items{
+  display:grid;
+  gap:18px;
+}
+
+.cv7-item{
+  position:relative;
+
+  border:1px solid var(--cv7-line);
+  background:#eeebe3;
+}
+
+.cv7-item-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+
+  padding:18px 20px;
+
+  border-bottom:1px solid var(--cv7-line);
+}
+
+.cv7-item-head small{
+  display:block;
+  margin-bottom:4px;
+
+  color:#999287;
+  font-size:8px;
+  letter-spacing:.22em;
+}
+
+.cv7-item-head strong{
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:21px;
+  font-weight:400;
+}
+
+.cv7-remove-item{
+  border:0;
+  background:transparent;
+  color:#8a312b;
+
+  font-size:11px;
+  cursor:pointer;
+}
+
+.cv7-item-body{
+  padding:20px;
+}
+
+.cv7-item-fields{
+  margin-top:16px;
+}
+
+.cv7-product-select{
+  font-weight:600 !important;
+}
+
+.cv7-add-item{
+  width:100%;
+  margin-top:15px;
+  min-height:55px;
+
+  border:1px dashed rgba(23,22,20,.25);
+
+  background:transparent;
+  color:#171614;
+
+  font-weight:600;
+  cursor:pointer;
+
+  transition:.2s ease;
+}
+
+.cv7-add-item:hover{
+  background:#171614;
+  color:#fff;
+  border-color:#171614;
+}
+
+/* IMAGE PLACEHOLDERS */
+
+.cv7-images{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  margin-top:16px;
+}
+
+.cv7-upload{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:13px;
+
+  min-height:76px;
+  padding:13px;
+
+  box-sizing:border-box;
+
+  border:1px dashed rgba(23,22,20,.22);
+  background:#f8f5ee;
+
+  cursor:pointer;
+}
+
+.cv7-upload > b{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  width:38px;
+  height:38px;
+
+  border:1px solid var(--cv7-line);
+
+  font-size:18px;
+  font-weight:400;
+}
+
+.cv7-upload strong{
+  display:block;
+  margin-bottom:3px;
+  font-size:11px;
+}
+
+.cv7-upload small{
+  color:#8b857c;
+  font-size:9px;
+}
+
+.cv7-upload input{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  opacity:0;
+  cursor:pointer;
+}
+
+.cv7-upload.has-image{
+  border-style:solid;
+}
+
+.cv7-upload-preview{
+  width:50px;
+  height:50px;
+  object-fit:cover;
+}
+
+/* FACTORY STRIP */
+
+.cv7-factory-strip{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+
+  margin-top:28px;
+  padding:20px;
+
+  background:#171614;
+  color:#f5f1e8;
+}
+
+.cv7-factory-strip small{
+  display:block;
+  margin-bottom:5px;
+
+  color:#969087;
+  font-size:8px;
+  letter-spacing:.22em;
+}
+
+.cv7-factory-strip strong{
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:18px;
+  font-weight:400;
+}
+
+.cv7-factory-strip span{
+  color:#a9a39a;
+  font-size:11px;
+}
+
+#cvOrderFormError{
+  min-height:20px;
+  margin-top:18px;
+  color:#8a312b;
+  font-size:12px;
+}
+
+.cv7-submit{
+  width:100%;
+  min-height:61px;
+  margin-top:8px;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  padding:0 21px;
+
+  border:1px solid #171614;
+  background:#171614;
+  color:#fff;
+
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:.02em;
+
+  cursor:pointer;
+}
+
+.cv7-submit:disabled{
+  opacity:.55;
+  cursor:wait;
+}
+
+@media(max-width:760px){
+
+  #cvOrderModal .cv-order-modal-card{
+    inset:0 !important;
+
+    width:100% !important;
+    height:100dvh !important;
+
+    margin:0 !important;
+
+    border:0 !important;
+    border-radius:0 !important;
+
+    overflow-y:auto !important;
+    -webkit-overflow-scrolling:touch !important;
+    touch-action:pan-y !important;
+  }
+
+  #cvOrderModal .cv-order-modal-head{
+    padding:
+      calc(17px + env(safe-area-inset-top))
+      17px
+      17px !important;
+  }
+
+  #cvOrderModal .cv-order-modal-head h3{
+    font-size:26px;
+  }
+
+  #cvNewOrderForm{
+    padding:
+      0
+      16px
+      calc(150px + env(safe-area-inset-bottom))
+      !important;
+  }
+
+  .cv7-section{
+    padding:27px 0;
+  }
+
+  .cv7-grid,
+  .cv7-grid.three,
+  .cv7-images{
+    grid-template-columns:1fr;
+  }
+
+  .cv7-item-head,
+  .cv7-item-body{
+    padding:16px;
+  }
+
+  .cv7-factory-strip{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+}
+
+</style>
+
+
+<script id="cv-order-studio-v7-js">
+(() => {
+
+  const PRODUCT_TYPES = [
+    ["SOFA","ספה"],
+    ["ARMCHAIR","כורסה"],
+    ["BED","מיטה"],
+    ["DINING_TABLE","שולחן אוכל"],
+    ["COFFEE_TABLE","שולחן סלון"],
+    ["CHAIRS","כיסאות"],
+    ["BAR_CHAIRS","כיסאות בר"],
+    ["WARDROBE","ארונות"],
+    ["OTHER","אחר"]
+  ];
+
+  const FABRIC_TYPES =
+    new Set([
+      "SOFA",
+      "ARMCHAIR",
+      "BED",
+      "CHAIRS",
+      "BAR_CHAIRS"
+    ]);
+
+  const CHAISE_TYPES =
+    new Set(["SOFA"]);
+
+  const WOOD_IMAGE_TYPES =
+    new Set([
+      "DINING_TABLE",
+      "COFFEE_TABLE",
+      "CHAIRS",
+      "BAR_CHAIRS",
+      "WARDROBE"
+    ]);
+
+  let itemCounter = 0;
+
+
+  function esc(value){
+    return String(value ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+
+  function numberOrNull(value){
+    if(value === "" || value == null){
+      return null;
+    }
+
+    const n = Number(value);
+
+    return Number.isFinite(n)
+      ? n
+      : null;
+  }
+
+
+  function productOptions(){
+    return PRODUCT_TYPES
+      .map(([value,label]) =>
+        `<option value="${value}">${label}</option>`
+      )
+      .join("");
+  }
+
+
+  function itemFields(type){
+
+    const showFabric =
+      FABRIC_TYPES.has(type);
+
+    const showChaise =
+      CHAISE_TYPES.has(type);
+
+    const showWood =
+      WOOD_IMAGE_TYPES.has(type);
+
+    return `
+      <div class="cv7-grid three">
+
+        <label class="cv7-field">
+          <span>שם דגם / תיאור *</span>
+          <input
+            data-item-field="product_name"
+            placeholder="לדוגמה Mon Cheri"
+            required
+          >
+        </label>
+
+        <label class="cv7-field">
+          <span>כמות</span>
+          <input
+            data-item-field="quantity"
+            type="number"
+            min="1"
+            step="1"
+            value="1"
+          >
+        </label>
+
+        <label class="cv7-field">
+          <span>מידות חופשיות</span>
+          <input
+            data-item-field="dimensions"
+            placeholder='לדוגמה 240×110×75'
+          >
+        </label>
+
+        <label class="cv7-field">
+          <span>רוחב ס"מ</span>
+          <input
+            data-item-field="width"
+            type="number"
+            min="0"
+            step="any"
+            inputmode="decimal"
+          >
+        </label>
+
+        <label class="cv7-field">
+          <span>עומק ס"מ</span>
+          <input
+            data-item-field="depth"
+            type="number"
+            min="0"
+            step="any"
+            inputmode="decimal"
+          >
+        </label>
+
+        <label class="cv7-field">
+          <span>גובה ס"מ</span>
+          <input
+            data-item-field="height"
+            type="number"
+            min="0"
+            step="any"
+            inputmode="decimal"
+          >
+        </label>
+
+        ${
+          showChaise
+          ? `
+            <label class="cv7-field">
+              <span>אורך שזלונג ס"מ</span>
+              <input
+                data-item-field="chaise_length"
+                type="number"
+                min="0"
+                step="any"
+              >
+            </label>
+
+            <label class="cv7-field">
+              <span>צד שזלונג</span>
+              <select data-item-field="chaise_side">
+                <option value="">ללא</option>
+                <option value="RIGHT">ימין</option>
+                <option value="LEFT">שמאל</option>
+              </select>
+            </label>
+          `
+          : ""
+        }
+
+        ${
+          showFabric
+          ? `
+            <label class="cv7-field">
+              <span>חברת בד</span>
+              <input
+                data-item-field="fabric_company"
+                placeholder="לדוגמה Rafael"
+              >
+            </label>
+
+            <label class="cv7-field">
+              <span>קולקציה</span>
+              <input
+                data-item-field="fabric_collection"
+              >
+            </label>
+
+            <label class="cv7-field">
+              <span>קוד בד</span>
+              <input
+                data-item-field="fabric_code"
+              >
+            </label>
+
+            <label class="cv7-field">
+              <span>צבע בד</span>
+              <input
+                data-item-field="fabric_color"
+              >
+            </label>
+          `
+          : ""
+        }
+
+        <label class="cv7-field full">
+          <span>הערות ייצור לפריט</span>
+          <textarea
+            data-item-field="production_notes"
+            placeholder="כל פרט שהמפעל חייב לדעת..."
+          ></textarea>
+        </label>
+
+      </div>
+
+      <div class="cv7-images">
+
+        <label class="cv7-upload">
+          <b>＋</b>
+          <span>
+            <strong>תמונת הדגם</strong>
+            <small>אופציונלי · JPG / PNG / WEBP</small>
+          </span>
+
+          <input
+            type="file"
+            accept="image/*"
+            data-item-image="model"
+          >
+        </label>
+
+        ${
+          showWood
+          ? `
+            <label class="cv7-upload">
+              <b>＋</b>
+              <span>
+                <strong>תמונת גוון העץ</strong>
+                <small>אופציונלי</small>
+              </span>
+
+              <input
+                type="file"
+                accept="image/*"
+                data-item-image="wood"
+              >
+            </label>
+          `
+          : ""
+        }
+
+      </div>
+    `;
+  }
+
+
+  function createItem(type = "SOFA"){
+
+    itemCounter += 1;
+
+    const article =
+      document.createElement("article");
+
+    article.className = "cv7-item";
+    article.dataset.itemId = itemCounter;
+
+    article.innerHTML = `
+      <div class="cv7-item-head">
+
+        <div>
+          <small>
+            CASA VERONA · ITEM
+          </small>
+
+          <strong>
+            פריט ${String(itemCounter).padStart(2,"0")}
+          </strong>
+        </div>
+
+        <button
+          type="button"
+          class="cv7-remove-item"
+        >
+          הסר פריט
+        </button>
+
+      </div>
+
+      <div class="cv7-item-body">
+
+        <div class="cv7-grid">
+
+          <label class="cv7-field">
+            <span>סוג מוצר *</span>
+
+            <select
+              class="cv7-product-select"
+              data-item-field="product_type"
+            >
+              ${productOptions()}
+            </select>
+          </label>
+
+        </div>
+
+        <div class="cv7-item-fields"></div>
+
+      </div>
+    `;
+
+    const select =
+      article.querySelector(
+        '[data-item-field="product_type"]'
+      );
+
+    select.value = type;
+
+    renderItemFields(article);
+
+    return article;
+  }
+
+
+  function renderItemFields(article){
+
+    const type =
+      article.querySelector(
+        '[data-item-field="product_type"]'
+      )?.value || "OTHER";
+
+    const holder =
+      article.querySelector(".cv7-item-fields");
+
+    if(holder){
+      holder.innerHTML = itemFields(type);
+    }
+  }
+
+
+  function previewImage(input){
+
+    const file = input.files?.[0];
+
+    if(!file || !file.type.startsWith("image/")){
+      return;
+    }
+
+    const label =
+      input.closest(".cv7-upload");
+
+    if(!label) return;
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+
+      label.classList.add("has-image");
+
+      const old =
+        label.querySelector(".cv7-upload-preview");
+
+      old?.remove();
+
+      const img =
+        document.createElement("img");
+
+      img.className =
+        "cv7-upload-preview";
+
+      img.src = reader.result;
+
+      label.prepend(img);
+    };
+
+    reader.readAsDataURL(file);
+  }
+
+
+  function collectItem(article){
+
+    const get = name =>
+      article.querySelector(
+        `[data-item-field="${name}"]`
+      )?.value?.trim() || "";
+
+    return {
+      product_type:
+        get("product_type") || "OTHER",
+
+      product_name:
+        get("product_name"),
+
+      quantity:
+        Math.max(
+          1,
+          parseInt(get("quantity"),10) || 1
+        ),
+
+      width:
+        numberOrNull(get("width")),
+
+      depth:
+        numberOrNull(get("depth")),
+
+      height:
+        numberOrNull(get("height")),
+
+      chaise_length:
+        numberOrNull(get("chaise_length")),
+
+      chaise_side:
+        get("chaise_side") || null,
+
+      dimensions:
+        get("dimensions") || null,
+
+      fabric_company:
+        get("fabric_company") || null,
+
+      fabric_collection:
+        get("fabric_collection") || null,
+
+      fabric_code:
+        get("fabric_code") || null,
+
+      fabric_color:
+        get("fabric_color") || null,
+
+      comfort:
+        null,
+
+      model_image_url:
+        null,
+
+      wood_color_image_url:
+        null,
+
+      production_notes:
+        get("production_notes") || null,
+
+      special_requests:
+        null
+    };
+  }
+
+
+  function buildStudio(form){
+
+    form.innerHTML = `
+
+      <section class="cv7-section">
+
+        <div class="cv7-section-head">
+          <span class="cv7-section-index">01</span>
+
+          <div>
+            <small>CLIENT</small>
+            <h4>פרטי הלקוח</h4>
+            <p>פרטי העסקה והאספקה</p>
+          </div>
+        </div>
+
+        <div class="cv7-grid">
+
+          <label class="cv7-field">
+            <span>שם לקוח *</span>
+            <input
+              id="cvOrderCustomerName"
+              required
+              autocomplete="name"
+            >
+          </label>
+
+          <label class="cv7-field">
+            <span>טלפון *</span>
+            <input
+              id="cvOrderCustomerPhone"
+              type="tel"
+              required
+              autocomplete="tel"
+            >
+          </label>
+
+          <label class="cv7-field">
+            <span>מחיר מכירה כולל ₪</span>
+            <input
+              id="cvOrderSalePrice"
+              type="number"
+              min="0"
+              step="any"
+              inputmode="decimal"
+            >
+          </label>
+
+        </div>
+
+      </section>
+
+
+      <section class="cv7-section">
+
+        <div class="cv7-section-head">
+          <span class="cv7-section-index">02</span>
+
+          <div>
+            <small>ORDER ITEMS</small>
+            <h4>פריטי ההזמנה</h4>
+            <p>
+              ניתן להוסיף כמה מוצרים תחת אותה הזמנה
+            </p>
+          </div>
+        </div>
+
+        <div id="cv7Items"></div>
+
+        <button
+          type="button"
+          id="cv7AddItem"
+          class="cv7-add-item"
+        >
+          ＋ הוסף פריט נוסף
+        </button>
+
+      </section>
+
+
+      <section class="cv7-section">
+
+        <div class="cv7-section-head">
+          <span class="cv7-section-index">03</span>
+
+          <div>
+            <small>DELIVERY</small>
+            <h4>מועד ואספקה</h4>
+            <p>יעד ברירת מחדל: 14 יום</p>
+          </div>
+        </div>
+
+        <div class="cv7-grid">
+
+          <label class="cv7-field">
+            <span>תאריך הזמנה *</span>
+            <input
+              id="cvOrderDate"
+              type="date"
+              required
+            >
+          </label>
+
+          <label class="cv7-field">
+            <span>תאריך אספקה יעד *</span>
+            <input
+              id="cvOrderTargetDate"
+              type="date"
+              required
+            >
+          </label>
+
+          <label class="cv7-field full">
+            <span>בקשות מיוחדות / הערות כלליות</span>
+            <textarea
+              id="cvOrderSpecialRequests"
+              placeholder="הערות שחלות על כל ההזמנה..."
+            ></textarea>
+          </label>
+
+        </div>
+
+      </section>
+
+
+      <div class="cv7-factory-strip">
+
+        <div>
+          <small>FACTORY WORKFLOW</small>
+          <strong>
+            ההזמנה תעבור לאישור המפעל
+          </strong>
+        </div>
+
+        <span>
+          כל הפריטים יישמרו תחת מספר הזמנה אחד
+        </span>
+
+      </div>
+
+
+      <div
+        id="cvOrderFormError"
+        class="cv-order-error"
+      ></div>
+
+
+      <button
+        type="submit"
+        class="cv7-submit"
+      >
+        <span>שמור ושלח למפעל</span>
+        <span>←</span>
+      </button>
+    `;
+
+
+    const items =
+      form.querySelector("#cv7Items");
+
+    items.appendChild(
+      createItem("SOFA")
+    );
+
+
+    form
+      .querySelector("#cv7AddItem")
+      ?.addEventListener(
+        "click",
+        () => {
+
+          items.appendChild(
+            createItem("SOFA")
+          );
+
+          const card =
+            document.querySelector(
+              "#cvOrderModal .cv-order-modal-card"
+            );
+
+          requestAnimationFrame(() => {
+            card?.scrollTo({
+              top:card.scrollHeight,
+              behavior:"smooth"
+            });
+          });
+        }
+      );
+
+
+    items.addEventListener(
+      "change",
+      event => {
+
+        const select =
+          event.target.closest(
+            ".cv7-product-select"
+          );
+
+        if(select){
+          renderItemFields(
+            select.closest(".cv7-item")
+          );
+          return;
+        }
+
+        const image =
+          event.target.closest(
+            "[data-item-image]"
+          );
+
+        if(image){
+          previewImage(image);
+        }
+      }
+    );
+
+
+    items.addEventListener(
+      "click",
+      event => {
+
+        const remove =
+          event.target.closest(
+            ".cv7-remove-item"
+          );
+
+        if(!remove) return;
+
+        const all =
+          items.querySelectorAll(".cv7-item");
+
+        if(all.length <= 1){
+          return;
+        }
+
+        remove
+          .closest(".cv7-item")
+          ?.remove();
+      }
+    );
+  }
+
+
+  function setDates(){
+
+    const orderDate =
+      document.getElementById("cvOrderDate");
+
+    const targetDate =
+      document.getElementById(
+        "cvOrderTargetDate"
+      );
+
+    if(!orderDate || !targetDate){
+      return;
+    }
+
+    const today = new Date();
+    const target = new Date(today);
+
+    target.setDate(
+      target.getDate() + 14
+    );
+
+    const fmt = date => {
+      const y = date.getFullYear();
+      const m =
+        String(date.getMonth()+1)
+          .padStart(2,"0");
+      const d =
+        String(date.getDate())
+          .padStart(2,"0");
+
+      return `${y}-${m}-${d}`;
+    };
+
+    orderDate.value = fmt(today);
+    targetDate.value = fmt(target);
+  }
+
+
+  function init(){
+
+    const oldForm =
+      document.getElementById(
+        "cvNewOrderForm"
+      );
+
+    if(!oldForm) return;
+
+    /*
+      Clone removes every old submit/change listener
+      attached directly to the old form.
+    */
+    const form =
+      oldForm.cloneNode(false);
+
+    oldForm.replaceWith(form);
+
+    buildStudio(form);
+    setDates();
+
+
+    form.addEventListener(
+      "change",
+      event => {
+
+        if(
+          event.target.id !==
+          "cvOrderDate"
+        ){
+          return;
+        }
+
+        const target =
+          document.getElementById(
+            "cvOrderTargetDate"
+          );
+
+        if(
+          !event.target.value ||
+          !target
+        ){
+          return;
+        }
+
+        const date =
+          new Date(
+            event.target.value +
+            "T12:00:00"
+          );
+
+        date.setDate(
+          date.getDate() + 14
+        );
+
+        const y =
+          date.getFullYear();
+
+        const m =
+          String(date.getMonth()+1)
+            .padStart(2,"0");
+
+        const d =
+          String(date.getDate())
+            .padStart(2,"0");
+
+        target.value =
+          `${y}-${m}-${d}`;
+      }
+    );
+
+
+    form.addEventListener(
+      "submit",
+      async event => {
+
+        event.preventDefault();
+
+        const errorBox =
+          document.getElementById(
+            "cvOrderFormError"
+          );
+
+        const button =
+          form.querySelector(
+            'button[type="submit"]'
+          );
+
+        if(errorBox){
+          errorBox.textContent = "";
+        }
+
+
+        const customerName =
+          document.getElementById(
+            "cvOrderCustomerName"
+          )?.value?.trim() || "";
+
+        const customerPhone =
+          document.getElementById(
+            "cvOrderCustomerPhone"
+          )?.value?.trim() || "";
+
+        const salePrice =
+          numberOrNull(
+            document.getElementById(
+              "cvOrderSalePrice"
+            )?.value || ""
+          );
+
+        const orderDate =
+          document.getElementById(
+            "cvOrderDate"
+          )?.value || "";
+
+        const targetDate =
+          document.getElementById(
+            "cvOrderTargetDate"
+          )?.value || "";
+
+        const specialRequests =
+          document.getElementById(
+            "cvOrderSpecialRequests"
+          )?.value?.trim() || "";
+
+
+        const itemNodes =
+          [
+            ...form.querySelectorAll(
+              ".cv7-item"
+            )
+          ];
+
+        const items =
+          itemNodes.map(collectItem);
+
+
+        if(
+          !customerName ||
+          !customerPhone
+        ){
+          if(errorBox){
+            errorBox.textContent =
+              "יש למלא שם לקוח וטלפון.";
+          }
+          return;
+        }
+
+
+        if(
+          !items.length ||
+          items.some(
+            item => !item.product_name
+          )
+        ){
+          if(errorBox){
+            errorBox.textContent =
+              "יש להזין שם דגם / תיאור לכל פריט.";
+          }
+          return;
+        }
+
+
+        const payload = {
+          customer_name:
+            customerName,
+
+          customer_phone:
+            customerPhone,
+
+          sale_price:
+            salePrice,
+
+          order_date:
+            orderDate,
+
+          target_delivery_date:
+            targetDate,
+
+          special_requests:
+            specialRequests || null,
+
+          production_notes:
+            null,
+
+          items
+        };
+
+
+        try {
+
+          if(button){
+            button.disabled = true;
+            button.innerHTML =
+              "<span>שומר הזמנה...</span><span>•••</span>";
+          }
+
+
+          const response =
+            await fetch(
+              "/api/orders",
+              {
+                method:"POST",
+                credentials:"include",
+                cache:"no-store",
+                headers:{
+                  "Content-Type":
+                    "application/json"
+                },
+                body:
+                  JSON.stringify(payload)
+              }
+            );
+
+
+          const data =
+            await response
+              .json()
+              .catch(() => ({}));
+
+
+          if(
+            !response.ok ||
+            !data?.success
+          ){
+            throw new Error(
+              data?.error ||
+              `ORDER_CREATE_FAILED_${response.status}`
+            );
+          }
+
+
+          if(errorBox){
+            errorBox.style.color =
+              "#315c3a";
+
+            errorBox.textContent =
+              `הזמנה #${data.order?.order_number || ""} נוצרה ונשלחה למפעל ✓`;
+          }
+
+
+          if(
+            typeof window.cvLoadOrders ===
+            "function"
+          ){
+            await window.cvLoadOrders();
+          }
+
+
+          setTimeout(() => {
+
+            const modal =
+              document.getElementById(
+                "cvOrderModal"
+              );
+
+            if(modal){
+              modal.hidden = true;
+            }
+
+            form.reset();
+
+            const itemsHolder =
+              form.querySelector(
+                "#cv7Items"
+              );
+
+            if(itemsHolder){
+              itemsHolder.innerHTML = "";
+              itemsHolder.appendChild(
+                createItem("SOFA")
+              );
+            }
+
+            setDates();
+
+            if(errorBox){
+              errorBox.textContent = "";
+              errorBox.style.color = "";
+            }
+
+          },900);
+
+
+        } catch(error) {
+
+          console.error(
+            "CASA VERONA ORDER V7:",
+            error
+          );
+
+          if(errorBox){
+            errorBox.style.color =
+              "#8a312b";
+
+            errorBox.textContent =
+              error.message ||
+              "שמירת ההזמנה נכשלה";
+          }
+
+        } finally {
+
+          if(button){
+            button.disabled = false;
+            button.innerHTML =
+              "<span>שמור ושלח למפעל</span><span>←</span>";
+          }
+        }
+      }
+    );
+
+    console.log(
+      "✅ Casa Verona Multi Item Order Studio V7 loaded"
+    );
+  }
+
+
+  if(
+    document.readyState === "loading"
+  ){
+    document.addEventListener(
+      "DOMContentLoaded",
+      init,
+      {once:true}
+    );
+  }else{
+    init();
+  }
+
+})();
+</script>
+
+</body>
+</html>

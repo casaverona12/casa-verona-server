@@ -3,6 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const { createClient } = require("@supabase/supabase-js");
 const webpush = require("web-push");
+const Busboy = require("busboy");
 // ======================================================
 // ENV
 // ======================================================
@@ -3020,15 +3021,10 @@ if (
   try {
     body = JSON.parse(bodyText || "{}");
   } catch {
-    res.writeHead(400, {
-      "Content-Type": "application/json; charset=utf-8"
-    });
-
-    res.end(JSON.stringify({
+    sendJSON(res, 400, {
       success: false,
       error: "INVALID_JSON"
-    }));
-
+    });
     return;
   }
 
@@ -3038,26 +3034,176 @@ if (
   const customerPhone =
     String(body.customer_phone || "").trim();
 
-  const productName =
-    String(body.product_name || "").trim();
+  /*
+   * NEW STRUCTURE:
+   * One order can contain multiple items.
+   *
+   * Backwards compatibility:
+   * If the old dashboard sends no items[],
+   * create one item from the old order fields.
+   */
 
-  if (!customerName || !customerPhone || !productName) {
-    res.writeHead(400, {
-      "Content-Type": "application/json; charset=utf-8"
-    });
+  let items =
+    Array.isArray(body.items)
+      ? body.items
+      : [];
 
-    res.end(JSON.stringify({
+  if (!items.length) {
+    items = [{
+      product_type:
+        body.product_type || "OTHER",
+
+      product_name:
+        body.product_name || "",
+
+      quantity: 1,
+
+      width: body.width,
+      depth: body.depth,
+      height: body.height,
+
+      chaise_length:
+        body.chaise_length,
+
+      chaise_side:
+        body.chaise_side,
+
+      dimensions:
+        body.dimensions,
+
+      fabric_company:
+        body.fabric_company,
+
+      fabric_collection:
+        body.fabric_collection,
+
+      fabric_code:
+        body.fabric_code,
+
+      fabric_color:
+        body.color,
+
+      comfort:
+        body.comfort,
+
+      model_image_url:
+        body.model_image_url ||
+        body.reference_image_url,
+
+      wood_color_image_url:
+        body.wood_color_image_url,
+
+      production_notes:
+        body.production_notes,
+
+      special_requests:
+        body.special_requests
+    }];
+  }
+
+  items = items
+    .map((item, index) => ({
+      item_number: index + 1,
+
+      product_type:
+        String(
+          item?.product_type || "OTHER"
+        ).trim(),
+
+      product_name:
+        String(
+          item?.product_name || ""
+        ).trim(),
+
+      quantity:
+        Math.max(
+          1,
+          Number.parseInt(
+            item?.quantity,
+            10
+          ) || 1
+        ),
+
+      width:
+        item?.width || null,
+
+      depth:
+        item?.depth || null,
+
+      height:
+        item?.height || null,
+
+      chaise_length:
+        item?.chaise_length || null,
+
+      chaise_side:
+        item?.chaise_side || null,
+
+      dimensions:
+        item?.dimensions || null,
+
+      fabric_company:
+        item?.fabric_company || null,
+
+      fabric_collection:
+        item?.fabric_collection || null,
+
+      fabric_code:
+        item?.fabric_code || null,
+
+      fabric_color:
+        item?.fabric_color || null,
+
+      comfort:
+        item?.comfort || null,
+
+      model_image_url:
+        item?.model_image_url || null,
+
+      wood_color_image_url:
+        item?.wood_color_image_url || null,
+
+      production_notes:
+        item?.production_notes || null,
+
+      special_requests:
+        item?.special_requests || null,
+
+      status: "NEW"
+    }))
+    .filter(item =>
+      item.product_name ||
+      item.product_type !== "OTHER"
+    );
+
+  if (
+    !customerName ||
+    !customerPhone ||
+    !items.length
+  ) {
+    sendJSON(res, 400, {
       success: false,
       error: "MISSING_REQUIRED_ORDER_FIELDS"
-    }));
+    });
+    return;
+  }
 
+  const firstItem = items[0];
+
+  if (!firstItem.product_name) {
+    sendJSON(res, 400, {
+      success: false,
+      error: "MISSING_FIRST_ITEM_NAME"
+    });
     return;
   }
 
   const db = requireSupabase();
 
   const today =
-    new Date().toISOString().slice(0, 10);
+    new Date()
+      .toISOString()
+      .slice(0, 10);
 
   const targetDate =
     body.target_delivery_date || (() => {
@@ -3066,96 +3212,183 @@ if (
       return d.toISOString().slice(0, 10);
     })();
 
-  // 1. Create the Casa Verona order.
-  // order_number is generated automatically by Postgres.
-  const {
-    data: order,
-    error: orderError
-  } = await db
-    .from("orders")
-    .insert({
-      customer_name: customerName,
-      customer_phone: customerPhone,
-      product_name: productName,
+  let order = null;
 
-      width: body.width || null,
-      depth: body.depth || null,
-      chaise_length: body.chaise_length || null,
-      chaise_side: body.chaise_side || null,
+  try {
 
-      fabric_type: body.fabric_type || null,
-      fabric_company: body.fabric_company || null,
-      fabric_collection: body.fabric_collection || null,
-      fabric_code: body.fabric_code || null,
-      color: body.color || null,
-      comfort: body.comfort || null,
+    /*
+     * 1. Create master order.
+     *
+     * Keep first item mirrored in legacy columns
+     * so existing Factory / QC / cards continue working.
+     */
 
-      special_requests:
-        body.special_requests || null,
-
-      production_notes:
-        body.production_notes || null,
-
-      reference_image_url:
-        body.reference_image_url || null,
-
-      model_image_url:
-        body.model_image_url || null,
-
-      sale_price:
-        body.sale_price || null,
-
-      status: "NEW",
-      order_date: body.order_date || today,
-      target_delivery_date: targetDate
-    })
-    .select("*")
-    .single();
-
-  if (orderError) {
-    throw new Error(
-      `SUPABASE CREATE ORDER ERROR: ${orderError.message}`
-    );
-  }
-
-  // 2. Automatically create the factory production job.
-  const {
-    data: production,
-    error: productionError
-  } = await db
-    .from("production_orders")
-    .insert({
-      order_id: order.id,
-      status: "WAITING",
-      due_date: targetDate,
-      approval_status: "PENDING"
-    })
-    .select("*")
-    .single();
-
-  if (productionError) {
-    // Avoid leaving an orphan order if production creation fails.
-    await db
+    const {
+      data: createdOrder,
+      error: orderError
+    } = await db
       .from("orders")
-      .delete()
-      .eq("id", order.id);
+      .insert({
+        customer_name:
+          customerName,
 
-    throw new Error(
-      `SUPABASE CREATE PRODUCTION ERROR: ${productionError.message}`
-    );
+        customer_phone:
+          customerPhone,
+
+        product_name:
+          firstItem.product_name,
+
+        width:
+          firstItem.width,
+
+        depth:
+          firstItem.depth,
+
+        chaise_length:
+          firstItem.chaise_length,
+
+        chaise_side:
+          firstItem.chaise_side,
+
+        fabric_company:
+          firstItem.fabric_company,
+
+        fabric_collection:
+          firstItem.fabric_collection,
+
+        fabric_code:
+          firstItem.fabric_code,
+
+        color:
+          firstItem.fabric_color,
+
+        comfort:
+          firstItem.comfort,
+
+        special_requests:
+          body.special_requests ||
+          firstItem.special_requests ||
+          null,
+
+        production_notes:
+          body.production_notes ||
+          firstItem.production_notes ||
+          null,
+
+        reference_image_url:
+          firstItem.model_image_url ||
+          null,
+
+        model_image_url:
+          firstItem.model_image_url ||
+          null,
+
+        sale_price:
+          body.sale_price || null,
+
+        status:
+          "NEW",
+
+        order_date:
+          body.order_date || today,
+
+        target_delivery_date:
+          targetDate
+      })
+      .select("*")
+      .single();
+
+    if (orderError) {
+      throw new Error(
+        `SUPABASE CREATE ORDER ERROR: ${orderError.message}`
+      );
+    }
+
+    order = createdOrder;
+
+    /*
+     * 2. Save every product belonging to the order.
+     */
+
+    const itemRows =
+      items.map(item => ({
+        order_id:
+          order.id,
+
+        ...item
+      }));
+
+    const {
+      data: savedItems,
+      error: itemsError
+    } = await db
+      .from("order_items")
+      .insert(itemRows)
+      .select("*");
+
+    if (itemsError) {
+      throw new Error(
+        `SUPABASE CREATE ORDER ITEMS ERROR: ${itemsError.message}`
+      );
+    }
+
+    /*
+     * 3. Create ONE production job for the complete order.
+     */
+
+    const {
+      data: production,
+      error: productionError
+    } = await db
+      .from("production_orders")
+      .insert({
+        order_id:
+          order.id,
+
+        status:
+          "WAITING",
+
+        due_date:
+          targetDate,
+
+        approval_status:
+          "PENDING"
+      })
+      .select("*")
+      .single();
+
+    if (productionError) {
+      throw new Error(
+        `SUPABASE CREATE PRODUCTION ERROR: ${productionError.message}`
+      );
+    }
+
+    sendJSON(res, 201, {
+      success: true,
+      order,
+      items: savedItems || [],
+      production
+    });
+
+    return;
+
+  } catch (error) {
+
+    /*
+     * Rollback:
+     * deleting the order also deletes order_items
+     * because order_items.order_id uses ON DELETE CASCADE.
+     */
+
+    if (order?.id) {
+      await db
+        .from("orders")
+        .delete()
+        .eq("id", order.id);
+    }
+
+    throw error;
   }
-
-  res.writeHead(201, {
-    "Content-Type": "application/json; charset=utf-8"
-  });
-
-  res.end(JSON.stringify({
-    success: true,
-    order,
-    production
-  }));
-
-  return;
 }
 
 if (
@@ -3177,6 +3410,7 @@ if (
       .from("orders")
       .select(`
         *,
+        order_items (*),
         production_orders (*),
         deliveries (*)
       `)
@@ -3256,6 +3490,15 @@ let ordersQuery =
         id,
         status,
         assigned_worker_id,
+        due_date,
+        estimated_cost,
+        approval_status,
+        approved_at,
+        approved_by,
+        factory_notes,
+        final_image_url,
+        started_at,
+        ready_at,
         created_at,
         updated_at
       )
@@ -3381,7 +3624,7 @@ const {
   error: currentProductionError
 } = await db
   .from("production_orders")
-  .select("id, order_id, status, assigned_worker_id")
+  .select("id, order_id, status, assigned_worker_id, final_image_url")
   .eq("id", productionId)
   .single();
 
@@ -3408,6 +3651,29 @@ if (
 }
 
 const oldStatus = currentProduction.status;
+
+// =====================================================
+// QC SAFETY LOCK
+// Production cannot become READY without a final QC image.
+// =====================================================
+if (
+  body.status === "READY" &&
+  !String(currentProduction.final_image_url || "").trim()
+) {
+  res.writeHead(409, {
+    "Content-Type": "application/json; charset=utf-8"
+  });
+
+  res.end(
+    JSON.stringify({
+      success: false,
+      error: "QC_IMAGE_REQUIRED",
+      message: "יש להעלות תמונת QC לפני סימון ההזמנה כמוכנה."
+    })
+  );
+
+  return;
+}
 
 // Update production status
 const { data, error } =
@@ -3625,6 +3891,999 @@ if (
 
   return;
 }
+
+// =====================================================
+// FACTORY API — UPDATE PRODUCTION DETAILS
+// =====================================================
+
+if (
+  req.method === "PATCH" &&
+  url.pathname.startsWith("/api/factory/details/")
+) {
+  const auth = await requireAuth(req, res, [
+    USER_ROLES.FACTORY_OWNER,
+    USER_ROLES.FACTORY_WORKER,
+    USER_ROLES.ADMIN
+  ]);
+
+  if (!auth) return;
+
+  const productionId =
+    url.pathname.split("/").filter(Boolean).pop();
+
+  if (!productionId) {
+    res.writeHead(400, {
+      "Content-Type": "application/json; charset=utf-8"
+    });
+    res.end(JSON.stringify({
+      success: false,
+      error: "MISSING_PRODUCTION_ID"
+    }));
+    return;
+  }
+
+  const bodyText = await readRequestBody(req);
+  let body;
+
+  try {
+    body = JSON.parse(bodyText || "{}");
+  } catch {
+    res.writeHead(400, {
+      "Content-Type": "application/json; charset=utf-8"
+    });
+    res.end(JSON.stringify({
+      success: false,
+      error: "INVALID_JSON"
+    }));
+    return;
+  }
+
+  const db = requireSupabase();
+
+  const {
+    data: currentProduction,
+    error: currentProductionError
+  } = await db
+    .from("production_orders")
+    .select(`
+      id,
+      order_id,
+      status,
+      assigned_worker_id,
+      approval_status,
+      estimated_cost,
+      factory_notes,
+      final_image_url
+    `)
+    .eq("id", productionId)
+    .single();
+
+  if (currentProductionError || !currentProduction) {
+    res.writeHead(404, {
+      "Content-Type": "application/json; charset=utf-8"
+    });
+    res.end(JSON.stringify({
+      success: false,
+      error: "PRODUCTION_ORDER_NOT_FOUND"
+    }));
+    return;
+  }
+
+  const role =
+    String(auth.profile.role || "").toUpperCase();
+
+  if (
+    role === USER_ROLES.FACTORY_WORKER &&
+    currentProduction.assigned_worker_id !== auth.user.id
+  ) {
+    sendForbidden(res);
+    return;
+  }
+
+  const updates = {
+    updated_at: new Date().toISOString()
+  };
+
+  if (
+    Object.prototype.hasOwnProperty.call(
+      body,
+      "factory_notes"
+    )
+  ) {
+    updates.factory_notes =
+      String(body.factory_notes || "").trim() || null;
+  }
+
+  if (
+    Object.prototype.hasOwnProperty.call(
+      body,
+      "final_image_url"
+    )
+  ) {
+    updates.final_image_url =
+      String(body.final_image_url || "").trim() || null;
+  }
+
+  if (
+    Object.prototype.hasOwnProperty.call(
+      body,
+      "estimated_cost"
+    )
+  ) {
+    if (
+      role !== USER_ROLES.FACTORY_OWNER &&
+      role !== USER_ROLES.ADMIN
+    ) {
+      sendForbidden(res);
+      return;
+    }
+
+    const cost = Number(body.estimated_cost);
+
+    if (!Number.isFinite(cost) || cost < 0) {
+      res.writeHead(400, {
+        "Content-Type": "application/json; charset=utf-8"
+      });
+      res.end(JSON.stringify({
+        success: false,
+        error: "INVALID_ESTIMATED_COST"
+      }));
+      return;
+    }
+
+    updates.estimated_cost = cost;
+  }
+
+  if (
+    Object.prototype.hasOwnProperty.call(
+      body,
+      "approval_status"
+    )
+  ) {
+    if (
+      role !== USER_ROLES.FACTORY_OWNER &&
+      role !== USER_ROLES.ADMIN
+    ) {
+      sendForbidden(res);
+      return;
+    }
+
+    const approvalStatus =
+      String(body.approval_status || "")
+        .trim()
+        .toUpperCase();
+
+    if (
+      !["PENDING", "APPROVED", "REJECTED"]
+        .includes(approvalStatus)
+    ) {
+      res.writeHead(400, {
+        "Content-Type": "application/json; charset=utf-8"
+      });
+      res.end(JSON.stringify({
+        success: false,
+        error: "INVALID_APPROVAL_STATUS"
+      }));
+      return;
+    }
+
+    updates.approval_status = approvalStatus;
+
+    if (approvalStatus === "APPROVED") {
+      updates.approved_at = new Date().toISOString();
+      updates.approved_by = auth.user.id;
+    } else {
+      updates.approved_at = null;
+      updates.approved_by = null;
+    }
+  }
+
+  if (Object.keys(updates).length === 1) {
+    res.writeHead(400, {
+      "Content-Type": "application/json; charset=utf-8"
+    });
+    res.end(JSON.stringify({
+      success: false,
+      error: "NO_FACTORY_FIELDS_TO_UPDATE"
+    }));
+    return;
+  }
+
+  const {
+    data: productionOrder,
+    error: updateError
+  } = await db
+    .from("production_orders")
+    .update(updates)
+    .eq("id", productionId)
+    .select("*")
+    .single();
+
+  if (updateError) {
+    throw new Error(
+      `SUPABASE FACTORY DETAILS ERROR: ${updateError.message}`
+    );
+  }
+
+  const { error: activityError } =
+    await db
+      .from("production_activity")
+      .insert({
+        production_order_id: productionId,
+        user_id: auth.user.id,
+        action: "FACTORY_DETAILS_UPDATED"
+      });
+
+  if (activityError) {
+    console.error(
+      "FACTORY DETAILS ACTIVITY ERROR:",
+      activityError.message
+    );
+  }
+
+  res.writeHead(200, {
+    "Content-Type": "application/json; charset=utf-8"
+  });
+
+  res.end(JSON.stringify({
+    success: true,
+    production_order: productionOrder
+  }));
+
+  return;
+}
+
+// =====================================================
+// FACTORY API — APPROVE / PRICE / NOTES
+// FACTORY_OWNER / ADMIN ONLY
+// =====================================================
+
+if (
+  req.method === "PATCH" &&
+  url.pathname.startsWith("/api/factory/approval/")
+) {
+  const auth = await requireAuth(req, res, [
+    USER_ROLES.FACTORY_OWNER,
+    USER_ROLES.ADMIN
+  ]);
+
+  if (!auth) {
+    return;
+  }
+
+  const productionId =
+    url.pathname.split("/").filter(Boolean).pop();
+
+  if (!productionId) {
+    sendJSON(res, 400, {
+      success: false,
+      error: "MISSING_PRODUCTION_ID"
+    });
+    return;
+  }
+
+  const bodyText = await readRequestBody(req);
+
+  let body;
+
+  try {
+    body = JSON.parse(bodyText || "{}");
+  } catch {
+    sendJSON(res, 400, {
+      success: false,
+      error: "INVALID_JSON"
+    });
+    return;
+  }
+
+  const approvalStatus =
+    String(body.approval_status || "")
+      .trim()
+      .toUpperCase();
+
+  if (
+    ![
+      "PENDING",
+      "APPROVED",
+      "REJECTED"
+    ].includes(approvalStatus)
+  ) {
+    sendJSON(res, 400, {
+      success: false,
+      error: "INVALID_APPROVAL_STATUS"
+    });
+    return;
+  }
+
+  let estimatedCost = null;
+
+  if (
+    body.estimated_cost !== undefined &&
+    body.estimated_cost !== null &&
+    body.estimated_cost !== ""
+  ) {
+    estimatedCost = Number(body.estimated_cost);
+
+    if (
+      !Number.isFinite(estimatedCost) ||
+      estimatedCost < 0
+    ) {
+      sendJSON(res, 400, {
+        success: false,
+        error: "INVALID_ESTIMATED_COST"
+      });
+      return;
+    }
+  }
+
+  const factoryNotes =
+    typeof body.factory_notes === "string"
+      ? body.factory_notes.trim().slice(0, 3000)
+      : null;
+
+  const db = requireSupabase();
+
+  const {
+    data: currentProduction,
+    error: currentError
+  } = await db
+    .from("production_orders")
+    .select(`
+      id,
+      order_id,
+      approval_status,
+      estimated_cost,
+      factory_notes
+    `)
+    .eq("id", productionId)
+    .single();
+
+  if (currentError || !currentProduction) {
+    sendJSON(res, 404, {
+      success: false,
+      error: "PRODUCTION_ORDER_NOT_FOUND"
+    });
+    return;
+  }
+
+  /*
+    We require a factory price before approval.
+    REJECTED/PENDING may exist without a price.
+  */
+  const finalCost =
+    estimatedCost !== null
+      ? estimatedCost
+      : currentProduction.estimated_cost;
+
+  if (
+    approvalStatus === "APPROVED" &&
+    (
+      finalCost === null ||
+      finalCost === undefined ||
+      !Number.isFinite(Number(finalCost))
+    )
+  ) {
+    sendJSON(res, 400, {
+      success: false,
+      error: "FACTORY_COST_REQUIRED"
+    });
+    return;
+  }
+
+  const now = new Date().toISOString();
+
+  const updateData = {
+    approval_status: approvalStatus,
+    updated_at: now
+  };
+
+  if (estimatedCost !== null) {
+    updateData.estimated_cost = estimatedCost;
+  }
+
+  if (factoryNotes !== null) {
+    updateData.factory_notes = factoryNotes;
+  }
+
+  if (approvalStatus === "APPROVED") {
+    updateData.approved_at = now;
+    updateData.approved_by = auth.user.id;
+  } else {
+    updateData.approved_at = null;
+    updateData.approved_by = null;
+  }
+
+  const {
+    data: productionOrder,
+    error: updateError
+  } = await db
+    .from("production_orders")
+    .update(updateData)
+    .eq("id", productionId)
+    .select(`
+      id,
+      order_id,
+      status,
+      approval_status,
+      estimated_cost,
+      factory_notes,
+      approved_at,
+      approved_by,
+      assigned_worker_id,
+      due_date,
+      final_image_url,
+      started_at,
+      ready_at,
+      created_at,
+      updated_at
+    `)
+    .single();
+
+  if (updateError) {
+    throw new Error(
+      `SUPABASE FACTORY APPROVAL ERROR: ${updateError.message}`
+    );
+  }
+
+  const {
+    error: activityError
+  } = await db
+    .from("production_activity")
+    .insert({
+      production_order_id: productionId,
+      user_id: auth.user.id,
+      action:
+        approvalStatus === "APPROVED"
+          ? "ORDER_APPROVED"
+          : approvalStatus === "REJECTED"
+            ? "ORDER_REJECTED"
+            : "APPROVAL_UPDATED"
+    });
+
+  if (activityError) {
+    console.error(
+      "FACTORY APPROVAL ACTIVITY ERROR:",
+      activityError.message
+    );
+  }
+
+  sendJSON(res, 200, {
+    success: true,
+    production_order: productionOrder
+  });
+
+  return;
+}
+
+
+// =====================================================
+// FACTORY API — SAVE FINAL PRODUCT IMAGE URL
+// Image upload/storage will be connected separately.
+// =====================================================
+
+if (
+  req.method === "PATCH" &&
+  url.pathname.startsWith("/api/factory/final-image/")
+) {
+  const auth = await requireAuth(req, res, [
+    USER_ROLES.FACTORY_OWNER,
+    USER_ROLES.FACTORY_WORKER,
+    USER_ROLES.ADMIN
+  ]);
+
+  if (!auth) {
+    return;
+  }
+
+  const productionId =
+    url.pathname.split("/").filter(Boolean).pop();
+
+  const bodyText = await readRequestBody(req);
+
+  let body;
+
+  try {
+    body = JSON.parse(bodyText || "{}");
+  } catch {
+    sendJSON(res, 400, {
+      success: false,
+      error: "INVALID_JSON"
+    });
+    return;
+  }
+
+  const finalImageUrl =
+    typeof body.final_image_url === "string"
+      ? body.final_image_url.trim()
+      : "";
+
+  if (!productionId || !finalImageUrl) {
+    sendJSON(res, 400, {
+      success: false,
+      error: "FINAL_IMAGE_REQUIRED"
+    });
+    return;
+  }
+
+  const db = requireSupabase();
+
+  const {
+    data: currentProduction,
+    error: currentError
+  } = await db
+    .from("production_orders")
+    .select("id, assigned_worker_id")
+    .eq("id", productionId)
+    .single();
+
+  if (currentError || !currentProduction) {
+    sendJSON(res, 404, {
+      success: false,
+      error: "PRODUCTION_ORDER_NOT_FOUND"
+    });
+    return;
+  }
+
+  if (
+    auth.profile.role === USER_ROLES.FACTORY_WORKER &&
+    currentProduction.assigned_worker_id !== auth.user.id
+  ) {
+    sendForbidden(res);
+    return;
+  }
+
+  const {
+    data: productionOrder,
+    error
+  } = await db
+    .from("production_orders")
+    .update({
+      final_image_url: finalImageUrl,
+      updated_at: new Date().toISOString()
+    })
+    .eq("id", productionId)
+    .select("*")
+    .single();
+
+  if (error) {
+    throw new Error(
+      `SUPABASE FINAL IMAGE ERROR: ${error.message}`
+    );
+  }
+
+  const { error: activityError } =
+    await db
+      .from("production_activity")
+      .insert({
+        production_order_id: productionId,
+        user_id: auth.user.id,
+        action: "FINAL_IMAGE_ADDED"
+      });
+
+  if (activityError) {
+    console.error(
+      "FINAL IMAGE ACTIVITY ERROR:",
+      activityError.message
+    );
+  }
+
+  sendJSON(res, 200, {
+    success: true,
+    production_order: productionOrder
+  });
+
+  return;
+}
+
+
+
+// =====================================================
+// FACTORY API — QC IMAGE UPLOAD
+// FACTORY_OWNER / FACTORY_WORKER / ADMIN
+// =====================================================
+
+if (
+  req.method === "POST" &&
+  url.pathname.startsWith("/api/factory/qc-image/")
+) {
+
+  const auth = await requireAuth(req, res, [
+    USER_ROLES.FACTORY_OWNER,
+    USER_ROLES.FACTORY_WORKER,
+    USER_ROLES.ADMIN
+  ]);
+
+  if (!auth) {
+    return;
+  }
+
+  const productionId =
+    url.pathname
+      .split("/")
+      .filter(Boolean)
+      .pop();
+
+  if (!productionId) {
+    sendJSON(res, 400, {
+      success: false,
+      error: "MISSING_PRODUCTION_ID"
+    });
+    return;
+  }
+
+  const db = requireSupabase();
+
+  // ---------------------------------------------------
+  // Verify production order + worker ownership
+  // ---------------------------------------------------
+
+  const {
+    data: productionOrder,
+    error: productionError
+  } = await db
+    .from("production_orders")
+    .select(`
+      id,
+      order_id,
+      status,
+      assigned_worker_id,
+      final_image_url
+    `)
+    .eq("id", productionId)
+    .single();
+
+  if (
+    productionError ||
+    !productionOrder
+  ) {
+    sendJSON(res, 404, {
+      success: false,
+      error: "PRODUCTION_ORDER_NOT_FOUND"
+    });
+    return;
+  }
+
+  if (
+    auth.profile.role === USER_ROLES.FACTORY_WORKER &&
+    productionOrder.assigned_worker_id !== auth.user.id
+  ) {
+    sendForbidden(res);
+    return;
+  }
+
+  // ---------------------------------------------------
+  // Read multipart image
+  // ---------------------------------------------------
+
+  let busboy;
+
+  try {
+    busboy = Busboy({
+      headers: req.headers,
+      limits: {
+        files: 1,
+        fileSize: 10 * 1024 * 1024,
+        fields: 10
+      }
+    });
+  } catch (error) {
+    sendJSON(res, 400, {
+      success: false,
+      error: "INVALID_MULTIPART_REQUEST"
+    });
+    return;
+  }
+
+  let uploadBuffer = null;
+  let uploadMime = "";
+  let originalName = "";
+  let uploadTooLarge = false;
+
+  const uploadPromise =
+    new Promise((resolve, reject) => {
+
+      busboy.on(
+        "file",
+        (
+          fieldName,
+          file,
+          info
+        ) => {
+
+          if (fieldName !== "image") {
+            file.resume();
+            return;
+          }
+
+          originalName =
+            info?.filename || "qc-image";
+
+          uploadMime =
+            info?.mimeType || "";
+
+          if (
+            !uploadMime.startsWith("image/")
+          ) {
+            file.resume();
+
+            reject(
+              new Error(
+                "INVALID_IMAGE_TYPE"
+              )
+            );
+
+            return;
+          }
+
+          const chunks = [];
+
+          file.on("data", chunk => {
+            chunks.push(chunk);
+          });
+
+          file.on("limit", () => {
+            uploadTooLarge = true;
+          });
+
+          file.on("end", () => {
+
+            if (uploadTooLarge) {
+              return;
+            }
+
+            uploadBuffer =
+              Buffer.concat(chunks);
+          });
+        }
+      );
+
+      busboy.on(
+        "error",
+        reject
+      );
+
+      busboy.on(
+        "finish",
+        resolve
+      );
+
+      req.pipe(busboy);
+    });
+
+  try {
+    await uploadPromise;
+  } catch (error) {
+
+    sendJSON(res, 400, {
+      success: false,
+      error:
+        error.message ||
+        "IMAGE_UPLOAD_PARSE_FAILED"
+    });
+
+    return;
+  }
+
+  if (uploadTooLarge) {
+    sendJSON(res, 413, {
+      success: false,
+      error: "IMAGE_TOO_LARGE"
+    });
+    return;
+  }
+
+  if (
+    !uploadBuffer ||
+    !uploadBuffer.length
+  ) {
+    sendJSON(res, 400, {
+      success: false,
+      error: "IMAGE_REQUIRED"
+    });
+    return;
+  }
+
+  // ---------------------------------------------------
+  // Ensure Storage bucket exists
+  // ---------------------------------------------------
+
+  const bucketName =
+    "factory-qc";
+
+  const {
+    data: bucketList,
+    error: bucketListError
+  } =
+    await db.storage
+      .listBuckets();
+
+  if (bucketListError) {
+    throw new Error(
+      `SUPABASE STORAGE LIST ERROR: ${bucketListError.message}`
+    );
+  }
+
+  const bucketExists =
+    (bucketList || []).some(
+      bucket =>
+        bucket.name === bucketName ||
+        bucket.id === bucketName
+    );
+
+  if (!bucketExists) {
+
+    const {
+      error: createBucketError
+    } =
+      await db.storage
+        .createBucket(
+          bucketName,
+          {
+            public: true,
+            fileSizeLimit:
+              10 * 1024 * 1024,
+            allowedMimeTypes: [
+              "image/jpeg",
+              "image/png",
+              "image/webp",
+              "image/heic",
+              "image/heif"
+            ]
+          }
+        );
+
+    if (createBucketError) {
+      throw new Error(
+        `SUPABASE STORAGE BUCKET ERROR: ${createBucketError.message}`
+      );
+    }
+  }
+
+  // ---------------------------------------------------
+  // Build safe filename
+  // ---------------------------------------------------
+
+  const mimeExtensions = {
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/webp": "webp",
+    "image/heic": "heic",
+    "image/heif": "heif"
+  };
+
+  const originalExtension =
+    String(originalName)
+      .split(".")
+      .pop()
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, "");
+
+  const extension =
+    mimeExtensions[uploadMime] ||
+    originalExtension ||
+    "jpg";
+
+  const storagePath =
+    `${productionOrder.order_id}/${productionId}/${Date.now()}-${Math.random().toString(36).slice(2,10)}.${extension}`;
+
+  // ---------------------------------------------------
+  // Upload to Supabase Storage
+  // ---------------------------------------------------
+
+  const {
+    error: storageError
+  } =
+    await db.storage
+      .from(bucketName)
+      .upload(
+        storagePath,
+        uploadBuffer,
+        {
+          contentType: uploadMime,
+          upsert: false,
+          cacheControl: "3600"
+        }
+      );
+
+  if (storageError) {
+    throw new Error(
+      `SUPABASE QC STORAGE ERROR: ${storageError.message}`
+    );
+  }
+
+  const {
+    data: publicUrlData
+  } =
+    db.storage
+      .from(bucketName)
+      .getPublicUrl(storagePath);
+
+  const finalImageUrl =
+    publicUrlData?.publicUrl || null;
+
+  if (!finalImageUrl) {
+    throw new Error(
+      "QC_PUBLIC_URL_NOT_CREATED"
+    );
+  }
+
+  // ---------------------------------------------------
+  // Save URL on production order
+  // ---------------------------------------------------
+
+  const {
+    data: updatedProduction,
+    error: updateError
+  } =
+    await db
+      .from("production_orders")
+      .update({
+        final_image_url:
+          finalImageUrl,
+        updated_at:
+          new Date().toISOString()
+      })
+      .eq("id", productionId)
+      .select(`
+        id,
+        order_id,
+        status,
+        approval_status,
+        final_image_url,
+        updated_at
+      `)
+      .single();
+
+  if (updateError) {
+
+    // Roll back uploaded file if DB save fails.
+    await db.storage
+      .from(bucketName)
+      .remove([storagePath])
+      .catch(() => {});
+
+    throw new Error(
+      `SUPABASE QC UPDATE ERROR: ${updateError.message}`
+    );
+  }
+
+  // ---------------------------------------------------
+  // Activity log
+  // ---------------------------------------------------
+
+  const {
+    error: activityError
+  } =
+    await db
+      .from("production_activity")
+      .insert({
+        production_order_id:
+          productionId,
+        user_id:
+          auth.user.id,
+        action:
+          "QC_IMAGE_UPLOADED"
+      });
+
+  if (activityError) {
+    console.error(
+      "QC ACTIVITY LOG ERROR:",
+      activityError
+    );
+  }
+
+  sendJSON(res, 200, {
+    success: true,
+    final_image_url:
+      finalImageUrl,
+    production_order:
+      updatedProduction
+  });
+
+  return;
+}
+
+
 // -----------------------------------------------
 // API - CREATE ORDER
 // -----------------------------------------------
