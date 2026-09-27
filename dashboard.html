@@ -14785,9 +14785,11 @@ document.addEventListener(
           openOrderButton.dataset.factoryOpenOrder;
 
         if(
-          typeof cvOpenOrderInquiry === "function"
+          typeof window.cvOpenOrderInquiry === "function"
         ){
-          cvOpenOrderInquiry(orderId);
+          window.cvOpenOrderInquiry(orderId);
+        }else{
+          alert("ORDER OPENER NOT AVAILABLE");
         }
 
         return;
