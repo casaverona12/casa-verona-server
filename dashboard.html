@@ -15439,6 +15439,60 @@ document.addEventListener(
 
 </script>
 
+<script id="cv-factory-global-order-opener">
+(() => {
+
+  document.addEventListener(
+    "click",
+    function(event){
+
+      const openButton =
+        event.target.closest(
+          "[data-factory-open-order]"
+        );
+
+      const factoryCard =
+        event.target.closest(
+          ".cv-factory-card[data-factory-order]"
+        );
+
+      const target =
+        openButton || factoryCard;
+
+      if(!target){
+        return;
+      }
+
+      const orderId =
+        openButton
+          ? openButton.dataset.factoryOpenOrder
+          : factoryCard.dataset.factoryOrder;
+
+      if(!orderId){
+        alert("FACTORY ORDER ID MISSING");
+        return;
+      }
+
+      if(
+        typeof window.cvOpenOrderInquiry !== "function"
+      ){
+        alert("ORDER OPENER NOT AVAILABLE");
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      window.cvOpenOrderInquiry(orderId);
+
+    },
+    true
+  );
+
+})();
+</script>
+
+
 
 
 
