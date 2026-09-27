@@ -4305,6 +4305,10 @@ if (
   if (approvalStatus === "APPROVED") {
     updateData.approved_at = now;
     updateData.approved_by = auth.user.id;
+
+    // Approved factory order enters the production floor.
+    updateData.status = "IN_PROGRESS";
+    updateData.started_at = now;
   } else {
     updateData.approved_at = null;
     updateData.approved_by = null;
