@@ -1606,6 +1606,14 @@ document.addEventListener("click",e=>{const n=e.target.closest("[data-page]"),o=
         behavior: "auto"
       });
 
+      /* CASA VERONA — load page data */
+      if (
+        pageName === "orders" &&
+        typeof window.cvLoadOrders === "function"
+      ) {
+        window.cvLoadOrders();
+      }
+
     }
 
 
@@ -15924,14 +15932,189 @@ document.addEventListener(
 
   function itemFields(type){
 
-    const showFabric =
-      FABRIC_TYPES.has(type);
+    const isSofa =
+      type === "SOFA";
 
-    const showChaise =
-      CHAISE_TYPES.has(type);
+    const isArmchair =
+      type === "ARMCHAIR";
+
+    const isBed =
+      type === "BED";
+
+    const isTable =
+      type === "DINING_TABLE" ||
+      type === "COFFEE_TABLE";
+
+    const isChair =
+      type === "CHAIRS" ||
+      type === "BAR_CHAIRS";
+
+    const isWardrobe =
+      type === "WARDROBE";
+
+    const showFabric =
+      isSofa ||
+      isArmchair ||
+      isBed;
 
     const showWood =
-      WOOD_IMAGE_TYPES.has(type);
+      isTable ||
+      isChair ||
+      isWardrobe;
+
+    const standardField = (name, label, extra = "") => `
+      <label class="cv7-field">
+        <span>${label}</span>
+        <input
+          data-item-field="${name}"
+          ${extra}
+        >
+      </label>
+    `;
+
+    const numberField = (name, label) =>
+      standardField(
+        name,
+        label,
+        'type="number" min="0" step="any" inputmode="decimal"'
+      );
+
+    let specificFields = "";
+
+    /* SOFA */
+    if(isSofa){
+      specificFields = `
+        ${numberField("width","רוחב ס״מ")}
+        ${numberField("depth","עומק ס״מ")}
+        ${numberField("height","גובה ס״מ")}
+        ${numberField("chaise_length","אורך שזלונג ס״מ")}
+
+        <label class="cv7-field">
+          <span>צד שזלונג</span>
+          <select data-item-field="chaise_side">
+            <option value="">ללא</option>
+            <option value="RIGHT">ימין</option>
+            <option value="LEFT">שמאל</option>
+          </select>
+        </label>
+      `;
+    }
+
+    /* ARMCHAIR */
+    else if(isArmchair){
+      specificFields = `
+        ${numberField("width","רוחב ס״מ")}
+        ${numberField("depth","עומק ס״מ")}
+        ${numberField("height","גובה ס״מ")}
+      `;
+    }
+
+    /* BED */
+    else if(isBed){
+      specificFields = `
+        ${numberField("width","רוחב / מידת מזרן ס״מ")}
+        ${numberField("depth","אורך / מידת מזרן ס״מ")}
+        ${numberField("height","גובה ראש מיטה ס״מ")}
+
+        ${standardField(
+          "dimensions",
+          "מידות חיצוניות / הערת מידה",
+          'placeholder="לדוגמה מזרן 160×200"'
+        )}
+      `;
+    }
+
+    /* DINING + COFFEE TABLE */
+    else if(isTable){
+      specificFields = `
+        ${numberField("width","אורך ס״מ")}
+        ${numberField("depth","רוחב ס״מ")}
+        ${numberField("height","גובה ס״מ")}
+        ${numberField("diameter","קוטר ס״מ — לשולחן עגול")}
+        ${standardField(
+          "wood_color",
+          "צבע / גוון עץ",
+          'placeholder="לדוגמה אלון טבעי"'
+        )}
+
+        ${standardField(
+          "formica",
+          "פורמיקה",
+          'placeholder="קוד / גוון / דגם פורמיקה"'
+        )}
+      `;
+    }
+
+    /* CHAIRS */
+    else if(isChair){
+      specificFields = `
+        ${standardField(
+          "wood_color",
+          "צבע עץ",
+          'placeholder="לדוגמה אגוז / שחור / אלון"'
+        )}
+
+        ${standardField(
+          "fabric_color",
+          "צבע בד",
+          'placeholder="לדוגמה שמנת"'
+        )}
+      `;
+    }
+
+    /* WARDROBE */
+    else if(isWardrobe){
+      specificFields = `
+        ${numberField("width","רוחב ס״מ")}
+        ${numberField("depth","עומק ס״מ")}
+        ${numberField("height","גובה ס״מ")}
+
+        ${standardField(
+          "wood_color",
+          "צבע / גוון",
+          'placeholder="לדוגמה אלון טבעי"'
+        )}
+      `;
+    }
+
+    /* OTHER */
+    else{
+      specificFields = `
+        ${standardField(
+          "dimensions",
+          "מידות / מפרט",
+          'placeholder="רשום את המידות הנדרשות"'
+        )}
+      `;
+    }
+
+    const fabricFields =
+      showFabric
+      ? `
+        <label class="cv7-field">
+          <span>חברת בד</span>
+          <input
+            data-item-field="fabric_company"
+            placeholder="לדוגמה Rafael"
+          >
+        </label>
+
+        <label class="cv7-field">
+          <span>קולקציה</span>
+          <input data-item-field="fabric_collection">
+        </label>
+
+        <label class="cv7-field">
+          <span>קוד בד</span>
+          <input data-item-field="fabric_code">
+        </label>
+
+        <label class="cv7-field">
+          <span>צבע בד</span>
+          <input data-item-field="fabric_color">
+        </label>
+      `
+      : "";
 
     return `
       <div class="cv7-grid three">
@@ -15956,106 +16139,8 @@ document.addEventListener(
           >
         </label>
 
-        <label class="cv7-field">
-          <span>מידות חופשיות</span>
-          <input
-            data-item-field="dimensions"
-            placeholder='לדוגמה 240×110×75'
-          >
-        </label>
-
-        <label class="cv7-field">
-          <span>רוחב ס"מ</span>
-          <input
-            data-item-field="width"
-            type="number"
-            min="0"
-            step="any"
-            inputmode="decimal"
-          >
-        </label>
-
-        <label class="cv7-field">
-          <span>עומק ס"מ</span>
-          <input
-            data-item-field="depth"
-            type="number"
-            min="0"
-            step="any"
-            inputmode="decimal"
-          >
-        </label>
-
-        <label class="cv7-field">
-          <span>גובה ס"מ</span>
-          <input
-            data-item-field="height"
-            type="number"
-            min="0"
-            step="any"
-            inputmode="decimal"
-          >
-        </label>
-
-        ${
-          showChaise
-          ? `
-            <label class="cv7-field">
-              <span>אורך שזלונג ס"מ</span>
-              <input
-                data-item-field="chaise_length"
-                type="number"
-                min="0"
-                step="any"
-              >
-            </label>
-
-            <label class="cv7-field">
-              <span>צד שזלונג</span>
-              <select data-item-field="chaise_side">
-                <option value="">ללא</option>
-                <option value="RIGHT">ימין</option>
-                <option value="LEFT">שמאל</option>
-              </select>
-            </label>
-          `
-          : ""
-        }
-
-        ${
-          showFabric
-          ? `
-            <label class="cv7-field">
-              <span>חברת בד</span>
-              <input
-                data-item-field="fabric_company"
-                placeholder="לדוגמה Rafael"
-              >
-            </label>
-
-            <label class="cv7-field">
-              <span>קולקציה</span>
-              <input
-                data-item-field="fabric_collection"
-              >
-            </label>
-
-            <label class="cv7-field">
-              <span>קוד בד</span>
-              <input
-                data-item-field="fabric_code"
-              >
-            </label>
-
-            <label class="cv7-field">
-              <span>צבע בד</span>
-              <input
-                data-item-field="fabric_color"
-              >
-            </label>
-          `
-          : ""
-        }
+        ${specificFields}
+        ${fabricFields}
 
         <label class="cv7-field full">
           <span>הערות ייצור לפריט</span>
@@ -16097,6 +16182,26 @@ document.addEventListener(
                 type="file"
                 accept="image/*"
                 data-item-image="wood"
+              >
+            </label>
+          `
+          : ""
+        }
+
+        ${
+          isTable
+          ? `
+            <label class="cv7-upload">
+              <b>＋</b>
+              <span>
+                <strong>תמונת פורמיקה</strong>
+                <small>אופציונלי · צילום / דוגמה</small>
+              </span>
+
+              <input
+                type="file"
+                accept="image/*"
+                data-item-image="formica"
               >
             </label>
           `
@@ -16230,6 +16335,56 @@ document.addEventListener(
   }
 
 
+  async function uploadItemImage(file, imageType){
+
+    if(!file){
+      return null;
+    }
+
+    const formData =
+      new FormData();
+
+    formData.append(
+      "image",
+      file
+    );
+
+    formData.append(
+      "image_type",
+      imageType
+    );
+
+    const response =
+      await fetch(
+        "/api/order-item-image",
+        {
+          method:"POST",
+          credentials:"include",
+          cache:"no-store",
+          body:formData
+        }
+      );
+
+    const data =
+      await response
+        .json()
+        .catch(() => ({}));
+
+    if(
+      !response.ok ||
+      !data?.success ||
+      !data?.image_url
+    ){
+      throw new Error(
+        data?.error ||
+        `IMAGE_UPLOAD_FAILED_${response.status}`
+      );
+    }
+
+    return data.image_url;
+  }
+
+
   function collectItem(article){
 
     const get = name =>
@@ -16258,6 +16413,15 @@ document.addEventListener(
 
       height:
         numberOrNull(get("height")),
+
+      diameter:
+        numberOrNull(get("diameter")),
+
+      wood_color:
+        get("wood_color") || null,
+
+      formica:
+        get("formica") || null,
 
       chaise_length:
         numberOrNull(get("chaise_length")),
@@ -16774,6 +16938,68 @@ document.addEventListener(
           if(button){
             button.disabled = true;
             button.innerHTML =
+              "<span>מעלה תמונות...</span><span>•••</span>";
+          }
+
+
+          for(
+            let index = 0;
+            index < itemNodes.length;
+            index += 1
+          ){
+
+            const article =
+              itemNodes[index];
+
+            const item =
+              items[index];
+
+            const modelFile =
+              article.querySelector(
+                '[data-item-image="model"]'
+              )?.files?.[0] || null;
+
+            const woodFile =
+              article.querySelector(
+                '[data-item-image="wood"]'
+              )?.files?.[0] || null;
+
+            const formicaFile =
+              article.querySelector(
+                '[data-item-image="formica"]'
+              )?.files?.[0] || null;
+
+
+            if(modelFile){
+              item.model_image_url =
+                await uploadItemImage(
+                  modelFile,
+                  "model"
+                );
+            }
+
+
+            if(woodFile){
+              item.wood_color_image_url =
+                await uploadItemImage(
+                  woodFile,
+                  "wood"
+                );
+            }
+
+
+            if(formicaFile){
+              item.formica_image_url =
+                await uploadItemImage(
+                  formicaFile,
+                  "formica"
+                );
+            }
+          }
+
+
+          if(button){
+            button.innerHTML =
               "<span>שומר הזמנה...</span><span>•••</span>";
           }
 
@@ -16909,6 +17135,535 @@ document.addEventListener(
     init();
   }
 
+})();
+</script>
+
+
+<style id="cv-order-atelier-v8-css">
+/* =========================================================
+   CASA VERONA — ORDER ATELIER V8
+   QUIET EUROPEAN LUXURY
+========================================================= */
+
+#cvOrderModal{
+  --v8-ink:#161512;
+  --v8-soft:#706b62;
+  --v8-muted:#9c968b;
+  --v8-paper:#f3f0e8;
+  --v8-paper2:#faf8f3;
+  --v8-line:rgba(22,21,18,.12);
+  --v8-dark:#11110f;
+}
+
+#cvOrderModal.cv-order-modal{
+  position:fixed !important;
+  inset:0 !important;
+  z-index:999999 !important;
+  padding:0 !important;
+  background:rgba(8,8,7,.86) !important;
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  overflow:hidden !important;
+}
+
+#cvOrderModal.cv-order-modal[hidden]{
+  display:none !important;
+}
+
+#cvOrderModal .cv-order-modal-card{
+  position:absolute !important;
+  inset:18px !important;
+  width:min(1180px,calc(100% - 36px)) !important;
+  height:calc(100dvh - 36px) !important;
+  max-width:1180px !important;
+  max-height:none !important;
+  margin:auto !important;
+  padding:0 !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  background:var(--v8-paper) !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+  border-radius:22px !important;
+  box-shadow:0 50px 150px rgba(0,0,0,.5) !important;
+  -webkit-overflow-scrolling:touch !important;
+}
+
+#cvOrderModal .cv-order-modal-head{
+  position:sticky !important;
+  top:0 !important;
+  z-index:50 !important;
+  min-height:92px;
+  padding:22px 30px !important;
+  box-sizing:border-box;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  background:rgba(243,240,232,.94) !important;
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--v8-line) !important;
+}
+
+#cvOrderModal .cv-order-modal-head small{
+  display:block;
+  margin:0 0 5px;
+  color:var(--v8-muted);
+  font-size:8px;
+  font-weight:700;
+  letter-spacing:.28em;
+  text-transform:uppercase;
+}
+
+#cvOrderModal .cv-order-modal-head h3{
+  margin:0;
+  color:var(--v8-ink);
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:30px;
+  line-height:1;
+  font-weight:400;
+  letter-spacing:-.04em;
+}
+
+#cvOrderModalClose{
+  width:43px !important;
+  height:43px !important;
+  min-width:43px;
+  display:grid;
+  place-items:center;
+  padding:0 !important;
+  border:1px solid var(--v8-line) !important;
+  border-radius:50% !important;
+  background:rgba(255,255,255,.38) !important;
+  color:var(--v8-ink) !important;
+  font-size:23px !important;
+  line-height:1;
+}
+
+#cvNewOrderForm{
+  padding:0 30px 80px !important;
+}
+
+/* ATELIER INTRO */
+
+#cvNewOrderForm::before{
+  content:"ORDER ATELIER  /  CASA VERONA";
+  display:block;
+  padding:27px 0 14px;
+  color:var(--v8-muted);
+  font-size:8px;
+  font-weight:700;
+  letter-spacing:.3em;
+  border-bottom:1px solid var(--v8-line);
+}
+
+/* SECTION — NO BOXES */
+
+#cvOrderModal .cv7-section{
+  position:relative;
+  padding:38px 0 42px !important;
+  margin:0 !important;
+  background:transparent !important;
+  border:0 !important;
+  border-bottom:1px solid var(--v8-line) !important;
+  box-shadow:none !important;
+  border-radius:0 !important;
+}
+
+#cvOrderModal .cv7-section-head{
+  display:grid !important;
+  grid-template-columns:54px 1fr !important;
+  gap:18px !important;
+  align-items:start !important;
+  margin:0 0 27px !important;
+}
+
+#cvOrderModal .cv7-section-index{
+  display:flex !important;
+  align-items:center;
+  justify-content:center;
+  width:44px;
+  height:44px;
+  border:1px solid var(--v8-line);
+  border-radius:50%;
+  color:var(--v8-muted) !important;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:15px !important;
+}
+
+#cvOrderModal .cv7-section-head small{
+  margin:1px 0 5px !important;
+  color:var(--v8-muted) !important;
+  font-size:8px !important;
+  font-weight:700;
+  letter-spacing:.24em !important;
+}
+
+#cvOrderModal .cv7-section-head h4{
+  margin:0 !important;
+  color:var(--v8-ink) !important;
+  font-family:Georgia,"Times New Roman",serif !important;
+  font-size:27px !important;
+  font-weight:400 !important;
+  letter-spacing:-.035em;
+}
+
+#cvOrderModal .cv7-section-head p{
+  max-width:620px;
+  margin:7px 0 0 !important;
+  color:var(--v8-soft) !important;
+  font-size:11px !important;
+  line-height:1.7;
+}
+
+/* FIELDS */
+
+#cvOrderModal .cv7-grid{
+  display:grid !important;
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  gap:18px 22px !important;
+}
+
+#cvOrderModal .cv7-grid.three{
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+}
+
+#cvOrderModal .cv7-field{
+  gap:8px !important;
+}
+
+#cvOrderModal .cv7-field > span{
+  color:#625e56 !important;
+  font-size:9px !important;
+  font-weight:700 !important;
+  letter-spacing:.02em;
+}
+
+#cvOrderModal .cv7-field input,
+#cvOrderModal .cv7-field select,
+#cvOrderModal .cv7-field textarea{
+  min-height:54px !important;
+  padding:13px 2px !important;
+  border:0 !important;
+  border-bottom:1px solid rgba(22,21,18,.22) !important;
+  border-radius:0 !important;
+  background:transparent !important;
+  box-shadow:none !important;
+  color:var(--v8-ink) !important;
+  font-size:14px !important;
+}
+
+#cvOrderModal .cv7-field textarea{
+  min-height:100px !important;
+  padding-top:15px !important;
+  border:1px solid var(--v8-line) !important;
+  padding-inline:14px !important;
+  background:rgba(255,255,255,.26) !important;
+}
+
+#cvOrderModal .cv7-field input:focus,
+#cvOrderModal .cv7-field select:focus{
+  border-bottom-color:var(--v8-ink) !important;
+  outline:none !important;
+}
+
+#cvOrderModal .cv7-field textarea:focus{
+  border-color:var(--v8-ink) !important;
+  outline:none !important;
+}
+
+/* PRODUCT ATELIER */
+
+#cv7Items{
+  display:grid !important;
+  gap:20px !important;
+}
+
+#cvOrderModal .cv7-item{
+  overflow:hidden;
+  margin:0 !important;
+  border:1px solid var(--v8-line) !important;
+  border-radius:18px !important;
+  background:rgba(255,255,255,.28) !important;
+  box-shadow:none !important;
+}
+
+#cvOrderModal .cv7-item-head{
+  min-height:76px;
+  padding:18px 21px !important;
+  background:var(--v8-dark) !important;
+  color:#f4f0e7 !important;
+  border:0 !important;
+}
+
+#cvOrderModal .cv7-item-head small{
+  color:#89847b !important;
+  font-size:8px !important;
+  letter-spacing:.22em !important;
+}
+
+#cvOrderModal .cv7-item-head strong{
+  color:#f4f0e7 !important;
+  font-family:Georgia,"Times New Roman",serif !important;
+  font-size:22px !important;
+  font-weight:400 !important;
+}
+
+#cvOrderModal .cv7-remove-item{
+  padding:9px 12px !important;
+  border:1px solid rgba(255,255,255,.13) !important;
+  border-radius:999px !important;
+  background:transparent !important;
+  color:#c9c3b8 !important;
+  font-size:9px !important;
+}
+
+#cvOrderModal .cv7-item-body{
+  padding:24px !important;
+  background:transparent !important;
+}
+
+#cvOrderModal .cv7-item-fields{
+  margin-top:22px !important;
+}
+
+#cvOrderModal .cv7-add-item{
+  min-height:64px !important;
+  margin-top:18px !important;
+  border:1px solid rgba(22,21,18,.22) !important;
+  border-radius:999px !important;
+  background:transparent !important;
+  color:var(--v8-ink) !important;
+  font-size:10px !important;
+  font-weight:700 !important;
+  letter-spacing:.08em;
+}
+
+#cvOrderModal .cv7-add-item:hover{
+  background:var(--v8-dark) !important;
+  color:white !important;
+}
+
+/* UPLOADS */
+
+#cvOrderModal .cv7-images{
+  gap:12px !important;
+  margin-top:22px !important;
+}
+
+#cvOrderModal .cv7-upload{
+  min-height:94px !important;
+  padding:15px !important;
+  border:1px dashed rgba(22,21,18,.22) !important;
+  border-radius:14px !important;
+  background:rgba(255,255,255,.3) !important;
+}
+
+#cvOrderModal .cv7-upload > b{
+  width:42px !important;
+  height:42px !important;
+  border-radius:50% !important;
+  background:var(--v8-dark);
+  color:white;
+  border:0 !important;
+}
+
+/* FACTORY */
+
+#cvOrderModal .cv7-factory-strip{
+  margin:32px 0 0 !important;
+  padding:25px !important;
+  border-radius:18px !important;
+  background:var(--v8-dark) !important;
+  color:#f5f1e8 !important;
+}
+
+#cvOrderModal .cv7-factory-strip strong{
+  font-family:Georgia,"Times New Roman",serif !important;
+  font-size:21px !important;
+  font-weight:400 !important;
+}
+
+#cvOrderModal .cv7-submit{
+  min-height:66px !important;
+  margin-top:12px !important;
+  padding:0 24px !important;
+  border:0 !important;
+  border-radius:999px !important;
+  background:var(--v8-dark) !important;
+  color:white !important;
+  box-shadow:0 14px 35px rgba(17,17,15,.18);
+}
+
+#cvOrderModal .cv7-submit span:last-child{
+  width:31px;
+  height:31px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  background:#f2eee5;
+  color:#11110f;
+}
+
+#cvOrderFormError{
+  margin-top:20px !important;
+}
+
+/* MOBILE */
+
+@media(max-width:760px){
+
+  #cvOrderModal.cv-order-modal{
+    background:var(--v8-paper) !important;
+  }
+
+  #cvOrderModal .cv-order-modal-card{
+    inset:0 !important;
+    width:100% !important;
+    height:100dvh !important;
+    border:0 !important;
+    border-radius:0 !important;
+    box-shadow:none !important;
+  }
+
+  #cvOrderModal .cv-order-modal-head{
+    min-height:83px;
+    padding:
+      calc(15px + env(safe-area-inset-top))
+      17px
+      15px !important;
+  }
+
+  #cvOrderModal .cv-order-modal-head h3{
+    font-size:25px !important;
+  }
+
+  #cvOrderModalClose{
+    width:39px !important;
+    height:39px !important;
+    min-width:39px;
+  }
+
+  #cvNewOrderForm{
+    padding:
+      0
+      17px
+      calc(125px + env(safe-area-inset-bottom))
+      !important;
+  }
+
+  #cvNewOrderForm::before{
+    padding-top:22px;
+    font-size:7px;
+  }
+
+  #cvOrderModal .cv7-section{
+    padding:30px 0 34px !important;
+  }
+
+  #cvOrderModal .cv7-section-head{
+    grid-template-columns:39px 1fr !important;
+    gap:13px !important;
+    margin-bottom:24px !important;
+  }
+
+  #cvOrderModal .cv7-section-index{
+    width:34px;
+    height:34px;
+    font-size:12px !important;
+  }
+
+  #cvOrderModal .cv7-section-head h4{
+    font-size:23px !important;
+  }
+
+  #cvOrderModal .cv7-section-head p{
+    font-size:10px !important;
+  }
+
+  #cvOrderModal .cv7-grid,
+  #cvOrderModal .cv7-grid.three,
+  #cvOrderModal .cv7-images{
+    grid-template-columns:1fr !important;
+  }
+
+  #cvOrderModal .cv7-field input,
+  #cvOrderModal .cv7-field select{
+    min-height:51px !important;
+    font-size:16px !important;
+  }
+
+  #cvOrderModal .cv7-item{
+    border-radius:16px !important;
+  }
+
+  #cvOrderModal .cv7-item-head{
+    min-height:68px;
+    padding:15px 16px !important;
+  }
+
+  #cvOrderModal .cv7-item-head strong{
+    font-size:19px !important;
+  }
+
+  #cvOrderModal .cv7-item-body{
+    padding:18px 16px 20px !important;
+  }
+
+  #cvOrderModal .cv7-add-item{
+    min-height:58px !important;
+  }
+
+  #cvOrderModal .cv7-factory-strip{
+    padding:20px !important;
+    border-radius:15px !important;
+  }
+
+  #cvOrderModal .cv7-submit{
+    min-height:62px !important;
+  }
+}
+</style>
+
+<script id="cv-order-atelier-v8-js">
+(() => {
+  function applyV8(){
+    const modal = document.getElementById("cvOrderModal");
+    const form = document.getElementById("cvNewOrderForm");
+
+    if(!modal || !form) return;
+
+    modal.dataset.atelierVersion = "8";
+
+    const title = modal.querySelector(".cv-order-modal-head h3");
+    const eyebrow = modal.querySelector(".cv-order-modal-head small");
+
+    if(title) title.textContent = "יצירת הזמנה";
+    if(eyebrow) eyebrow.textContent = "CASA VERONA · ORDER ATELIER";
+
+    const observer = new MutationObserver(() => {
+      if(!modal.hidden){
+        requestAnimationFrame(() => {
+          const card = modal.querySelector(".cv-order-modal-card");
+          if(card && card.scrollTop < 0){
+            card.scrollTop = 0;
+          }
+        });
+      }
+    });
+
+    observer.observe(modal,{
+      attributes:true,
+      attributeFilter:["hidden"]
+    });
+
+    console.log("✅ Casa Verona Order Atelier V8 loaded");
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded",applyV8,{once:true});
+  }else{
+    applyV8();
+  }
 })();
 </script>
 

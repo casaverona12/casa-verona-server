@@ -3133,6 +3133,15 @@ if (
       height:
         item?.height || null,
 
+      diameter:
+        item?.diameter || null,
+
+      wood_color:
+        item?.wood_color || null,
+
+      formica:
+        item?.formica || null,
+
       chaise_length:
         item?.chaise_length || null,
 
@@ -3162,6 +3171,9 @@ if (
 
       wood_color_image_url:
         item?.wood_color_image_url || null,
+
+      formica_image_url:
+        item?.formica_image_url || null,
 
       production_notes:
         item?.production_notes || null,
@@ -3419,9 +3431,14 @@ if (
       });
 
   if (error) {
-    throw new Error(
-      `SUPABASE LOAD ORDERS ERROR: ${error.message}`
-    );
+    console.error("SUPABASE LOAD ORDERS ERROR:", error);
+
+    sendJSON(res, 500, {
+      success: false,
+      error: `SUPABASE LOAD ORDERS ERROR: ${error.message}`
+    });
+
+    return;
   }
 
   res.writeHead(200, {
@@ -4475,6 +4492,262 @@ if (
   return;
 }
 
+
+
+
+// =====================================================
+// CASA VERONA — ORDER ITEM IMAGE UPLOAD
+// ADMIN ONLY
+// =====================================================
+
+if (
+  req.method === "POST" &&
+  url.pathname === "/api/order-item-image"
+) {
+
+  const auth = await requireAuth(req, res, [
+    USER_ROLES.ADMIN
+  ]);
+
+  if (!auth) {
+    return;
+  }
+
+  let busboy;
+
+  try {
+    busboy = Busboy({
+      headers: req.headers,
+      limits: {
+        files: 1,
+        fileSize: 10 * 1024 * 1024,
+        fields: 10
+      }
+    });
+  } catch (error) {
+    sendJSON(res, 400, {
+      success: false,
+      error: "INVALID_MULTIPART_REQUEST"
+    });
+    return;
+  }
+
+  let uploadBuffer = null;
+  let uploadMime = "";
+  let originalName = "";
+  let uploadTooLarge = false;
+
+  const fields = {};
+
+  const uploadPromise =
+    new Promise((resolve, reject) => {
+
+      busboy.on("field", (name, value) => {
+        fields[name] = value;
+      });
+
+      busboy.on(
+        "file",
+        (fieldName, file, info) => {
+
+          if (fieldName !== "image") {
+            file.resume();
+            return;
+          }
+
+          originalName =
+            info?.filename || "order-item-image";
+
+          uploadMime =
+            info?.mimeType || "";
+
+          if (!uploadMime.startsWith("image/")) {
+            file.resume();
+            reject(
+              new Error("INVALID_IMAGE_TYPE")
+            );
+            return;
+          }
+
+          const chunks = [];
+
+          file.on("data", chunk => {
+            chunks.push(chunk);
+          });
+
+          file.on("limit", () => {
+            uploadTooLarge = true;
+          });
+
+          file.on("end", () => {
+            if (!uploadTooLarge) {
+              uploadBuffer =
+                Buffer.concat(chunks);
+            }
+          });
+        }
+      );
+
+      busboy.on("error", reject);
+      busboy.on("finish", resolve);
+
+      req.pipe(busboy);
+    });
+
+  try {
+    await uploadPromise;
+  } catch (error) {
+    sendJSON(res, 400, {
+      success: false,
+      error:
+        error.message ||
+        "IMAGE_UPLOAD_PARSE_FAILED"
+    });
+    return;
+  }
+
+  if (uploadTooLarge) {
+    sendJSON(res, 413, {
+      success: false,
+      error: "IMAGE_TOO_LARGE"
+    });
+    return;
+  }
+
+  if (!uploadBuffer?.length) {
+    sendJSON(res, 400, {
+      success: false,
+      error: "IMAGE_REQUIRED"
+    });
+    return;
+  }
+
+  const allowedTypes =
+    new Set(["model", "wood", "formica"]);
+
+  const imageType =
+    allowedTypes.has(fields.image_type)
+      ? fields.image_type
+      : "model";
+
+  const db = requireSupabase();
+
+  const bucketName =
+    "order-item-images";
+
+  const {
+    data: bucketList,
+    error: bucketListError
+  } =
+    await db.storage.listBuckets();
+
+  if (bucketListError) {
+    throw new Error(
+      `ORDER IMAGE BUCKET LIST ERROR: ${bucketListError.message}`
+    );
+  }
+
+  const bucketExists =
+    (bucketList || []).some(
+      bucket =>
+        bucket.name === bucketName ||
+        bucket.id === bucketName
+    );
+
+  if (!bucketExists) {
+    const {
+      error: createBucketError
+    } =
+      await db.storage.createBucket(
+        bucketName,
+        {
+          public: true,
+          fileSizeLimit: 10 * 1024 * 1024,
+          allowedMimeTypes: [
+            "image/jpeg",
+            "image/png",
+            "image/webp",
+            "image/heic",
+            "image/heif"
+          ]
+        }
+      );
+
+    if (createBucketError) {
+      throw new Error(
+        `ORDER IMAGE BUCKET ERROR: ${createBucketError.message}`
+      );
+    }
+  }
+
+  const mimeExtensions = {
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/webp": "webp",
+    "image/heic": "heic",
+    "image/heif": "heif"
+  };
+
+  const originalExtension =
+    String(originalName)
+      .split(".")
+      .pop()
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, "");
+
+  const extension =
+    mimeExtensions[uploadMime] ||
+    originalExtension ||
+    "jpg";
+
+  const storagePath =
+    `${auth.user.id}/${Date.now()}-${imageType}-${Math.random().toString(36).slice(2,10)}.${extension}`;
+
+  const {
+    error: storageError
+  } =
+    await db.storage
+      .from(bucketName)
+      .upload(
+        storagePath,
+        uploadBuffer,
+        {
+          contentType: uploadMime,
+          upsert: false,
+          cacheControl: "3600"
+        }
+      );
+
+  if (storageError) {
+    throw new Error(
+      `ORDER IMAGE STORAGE ERROR: ${storageError.message}`
+    );
+  }
+
+  const {
+    data: publicUrlData
+  } =
+    db.storage
+      .from(bucketName)
+      .getPublicUrl(storagePath);
+
+  const imageUrl =
+    publicUrlData?.publicUrl || null;
+
+  if (!imageUrl) {
+    throw new Error(
+      "ORDER_IMAGE_PUBLIC_URL_NOT_CREATED"
+    );
+  }
+
+  sendJSON(res, 200, {
+    success: true,
+    image_type: imageType,
+    image_url: imageUrl
+  });
+
+  return;
+}
 
 
 // =====================================================
