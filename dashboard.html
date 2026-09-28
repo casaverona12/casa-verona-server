@@ -14482,43 +14482,6 @@ document.addEventListener(
           .json()
           .catch(() => ({}));
 
-      if(approvalDebug){
-        approvalDebug.style.display = "block";
-        approvalDebug.textContent =
-          "API: HTTP " + response.status +
-          " | success=" + String(data?.success) +
-          " | orders=" +
-          (
-            Array.isArray(data?.orders)
-              ? data.orders.length
-              : "NO_ARRAY"
-          ) +
-          " | error=" +
-          String(data?.error || "NONE");
-      }
-
-      console.log("🔥 FACTORY API DEBUG", {
-        status: response.status,
-        ok: response.ok,
-        data
-      });
-
-      if(debugBox){
-        debugBox.textContent =
-          "HTTP " + response.status +
-          " · success=" + String(data?.success) +
-          " · orders=" +
-          String(
-            Array.isArray(data?.orders)
-              ? data.orders.length
-              : "NO ARRAY"
-          ) +
-          (data?.error
-            ? " · ERROR=" + data.error
-            : "");
-      }
-
-
       if(
         !response.ok ||
         !data?.success
