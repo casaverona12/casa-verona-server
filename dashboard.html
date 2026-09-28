@@ -3473,20 +3473,19 @@ async function cvEnablePushNotifications(){
     let subscription =
       await registration.pushManager.getSubscription();
 
-    // Remove old subscription created with the previous VAPID key.
-    if(subscription){
-      await subscription.unsubscribe();
-    }
+    // Keep an existing subscription.
+    // Create a new one only when this device is not subscribed yet.
+    if(!subscription){
 
-    // Create a fresh subscription with the current VAPID key.
-    subscription =
-      await registration.pushManager.subscribe({
-        userVisibleOnly:true,
-        applicationServerKey:
-          cvUrlBase64ToUint8Array(
-            CV_VAPID_PUBLIC_KEY
-          )
-      });
+      subscription =
+        await registration.pushManager.subscribe({
+          userVisibleOnly:true,
+          applicationServerKey:
+            cvUrlBase64ToUint8Array(
+              CV_VAPID_PUBLIC_KEY
+            )
+        });
+    }
 
     const response =
       await fetch(
@@ -3545,27 +3544,59 @@ async function cvEnablePushNotifications(){
 
 async function cvCheckPushStatus(){
 
+  const role =
+    String(window.casaVeronaUser?.role || "")
+      .trim()
+      .toUpperCase();
+
+  const isFactoryOwner =
+    role === "FACTORY_OWNER";
+
   const button =
-    document.getElementById("cvEnablePush");
+    document.getElementById(
+      isFactoryOwner
+        ? "cvFactoryEnablePush"
+        : "cvEnablePush"
+    );
 
   const status =
-    document.getElementById("cvPushStatus");
+    document.getElementById(
+      isFactoryOwner
+        ? "cvFactoryPushStatus"
+        : "cvPushStatus"
+    );
 
   const card =
-    document.getElementById("cvPushCard");
+    isFactoryOwner
+      ? button?.closest(".cv-push-card")
+      : document.getElementById("cvPushCard");
 
   if(!button || !status) return;
 
   if(
     !("Notification" in window) ||
-    !("serviceWorker" in navigator)
+    !("serviceWorker" in navigator) ||
+    !("PushManager" in window)
   ){
+    status.textContent =
+      "הדפדפן אינו תומך בהתראות";
     return;
   }
 
-  if(
-    Notification.permission !== "granted"
-  ){
+  if(Notification.permission === "denied"){
+    status.textContent =
+      "ההתראות חסומות בהגדרות המכשיר";
+    button.textContent = "חסום";
+    button.disabled = true;
+    card?.classList.remove("active");
+    return;
+  }
+
+  if(Notification.permission !== "granted"){
+    status.textContent = "התראות כבויות";
+    button.textContent = "הפעל";
+    button.disabled = false;
+    card?.classList.remove("active");
     return;
   }
 
@@ -3575,14 +3606,24 @@ async function cvCheckPushStatus(){
       await navigator.serviceWorker.ready;
 
     const subscription =
-      await registration
-        .pushManager
-        .getSubscription();
+      await registration.pushManager.getSubscription();
 
-    if(subscription){
+    if(!subscription){
 
-      // Sync an existing browser subscription with Casa Verona server.
-      const response = await fetch(
+      status.textContent =
+        "יש להפעיל התראות במכשיר";
+
+      button.textContent = "הפעל";
+      button.disabled = false;
+
+      card?.classList.remove("active");
+      return;
+    }
+
+    // Keep the existing device subscription alive
+    // and sync it to the currently authenticated user.
+    const response =
+      await fetch(
         "/api/admin/push/subscribe",
         {
           method:"POST",
@@ -3592,35 +3633,39 @@ async function cvCheckPushStatus(){
             "Content-Type":"application/json"
           },
           body:JSON.stringify({
-            subscription:subscription.toJSON()
+            subscription:
+              subscription.toJSON()
           })
         }
       );
 
-      const data =
-        await response.json().catch(()=>({}));
+    const data =
+      await response
+        .json()
+        .catch(() => ({}));
 
-      if(!response.ok || !data?.success){
-        throw new Error(
-          data?.error ||
-          "PUSH_SUBSCRIPTION_SYNC_FAILED"
-        );
-      }
-
-      status.textContent =
-        "התראות פעילות ✓";
-
-      button.textContent =
-        "פעיל";
-
-      button.disabled = true;
-
-      card?.classList.add("active");
-
-      console.log(
-        "Casa Verona Push subscription synced"
+    if(
+      !response.ok ||
+      !data?.success
+    ){
+      throw new Error(
+        data?.error ||
+        "PUSH_SUBSCRIPTION_SYNC_FAILED"
       );
     }
+
+    status.textContent =
+      "התראות פעילות ✓";
+
+    button.textContent = "פעיל";
+    button.disabled = true;
+
+    card?.classList.add("active");
+
+    console.log(
+      "Casa Verona Push active:",
+      role
+    );
 
   }catch(error){
 
@@ -3630,17 +3675,16 @@ async function cvCheckPushStatus(){
     );
 
     status.textContent =
-      "שגיאת סנכרון: " +
-      (error.message || "UNKNOWN_ERROR");
+      "שגיאת סנכרון";
 
-    button.textContent = "נסה שוב";
+    button.textContent =
+      "נסה שוב";
+
     button.disabled = false;
 
     card?.classList.remove("active");
   }
-
 }
-
 [
   "cvEnablePush",
   "cvFactoryEnablePush"
@@ -8725,6 +8769,10 @@ document
     if(!order || !cvOrderCommandBody){
       return;
     }
+
+    // Keep the exact order currently opened in the command center.
+    // The admin editor can use this directly.
+    window.cvCurrentOpenOrder = order;
 
     const production =
       cvOrderProduction(order);
@@ -22670,11 +22718,17 @@ document.addEventListener(
     ];
 
     const order =
-      source.find(
-        item =>
-          String(item.id) ===
-          String(orderId)
-      );
+      (
+        window.cvCurrentOpenOrder &&
+        String(window.cvCurrentOpenOrder.id) ===
+        String(orderId)
+      )
+        ? window.cvCurrentOpenOrder
+        : source.find(
+            item =>
+              String(item.id) ===
+              String(orderId)
+          );
 
     if(!order){
       alert("לא ניתן למצוא את ההזמנה.");
