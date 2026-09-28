@@ -15499,12 +15499,6 @@ document.addEventListener(
           ? openButton.dataset.factoryOpenOrder
           : factoryCard.dataset.factoryOrder;
 
-      alert(
-        "FACTORY CLICK DETECTED\n" +
-        "ORDER ID: " + orderId + "\n" +
-        "OPENER: " + typeof window.cvOpenOrderInquiry
-      );
-
       if(!orderId){
         alert("FACTORY ORDER ID MISSING");
         return;
