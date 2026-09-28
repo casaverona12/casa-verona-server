@@ -22943,8 +22943,11 @@ document.addEventListener(
         event.preventDefault();
         event.stopPropagation();
 
-        openEditor(
-          edit.dataset.adminEditOrder
+        alert(
+          "ADMIN EDIT CLICK DETECTED\n" +
+          "TAG: " + event.target.tagName + "\n" +
+          "CLASS: " + (event.target.className || "NONE") + "\n" +
+          "EDIT ID: " + edit.dataset.adminEditOrder
         );
 
         return;
