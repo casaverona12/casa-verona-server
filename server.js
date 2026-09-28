@@ -4582,6 +4582,52 @@ if (
       );
     }
 
+    // ---------------------------------------------------
+    // FACTORY OWNER -> ADMIN
+    // Delivery completed successfully.
+    // ---------------------------------------------------
+    if (
+      role === USER_ROLES.FACTORY_OWNER &&
+      body.status === "DELIVERED"
+    ) {
+
+      const customerName =
+        deliveryOrder?.customer_name || "הלקוח";
+
+      const pushResult =
+        await sendPushToRole(
+          USER_ROLES.ADMIN,
+          {
+            title:
+              `📦 Casa Verona | הזמנה #${orderNumber} סופקה!`,
+
+            body:
+              `ההזמנה של ${customerName} נמסרה ללקוח בהצלחה.`,
+
+            tag:
+              `delivery-delivered-${delivery.id}`,
+
+            url:
+              "/dashboard.html",
+
+            delivery_id:
+              delivery.id,
+
+            order_id:
+              delivery.order_id,
+
+            requireInteraction:
+              true
+          }
+        );
+
+      console.log(
+        "DELIVERY COMPLETED ADMIN PUSH:",
+        orderNumber,
+        pushResult
+      );
+    }
+
   } catch (pushError) {
 
     console.error(
@@ -7739,6 +7785,472 @@ await saveMessage({
 
           return;
         }
+
+
+        // =====================================================
+        // CASA VERONA — CLOUD REMINDER ENGINE
+        // POST /api/system/run-reminders
+        //
+        // 1) Production deadline reminders:
+        //    7, 5, 4, 3, 2, 1 days before target_delivery_date.
+        //
+        // 2) READY orders:
+        //    Daily reminder while delivery is still WAITING
+        //    and no delivery date has been selected.
+        //
+        // Protected by REMINDER_CRON_SECRET.
+        // =====================================================
+
+        if (
+          req.method === "POST" &&
+          url.pathname === "/api/system/run-reminders"
+        ) {
+
+          const expectedSecret =
+            String(
+              process.env.REMINDER_CRON_SECRET || ""
+            ).trim();
+
+          const providedSecret =
+            String(
+              req.headers["x-cron-secret"] || ""
+            ).trim();
+
+          if (
+            !expectedSecret ||
+            providedSecret !== expectedSecret
+          ) {
+            sendJSON(res, 401, {
+              success: false,
+              error: "UNAUTHORIZED_REMINDER_CRON"
+            });
+            return;
+          }
+
+          const db = requireSupabase();
+
+          // ---------------------------------------------
+          // Israel date helper.
+          // We only compare calendar dates here, not hours.
+          // ---------------------------------------------
+
+          function israelDateString(date = new Date()) {
+            const parts =
+              new Intl.DateTimeFormat(
+                "en-CA",
+                {
+                  timeZone: "Asia/Jerusalem",
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit"
+                }
+              ).formatToParts(date);
+
+            const values = {};
+
+            for (const part of parts) {
+              if (part.type !== "literal") {
+                values[part.type] = part.value;
+              }
+            }
+
+            return (
+              values.year +
+              "-" +
+              values.month +
+              "-" +
+              values.day
+            );
+          }
+
+          function dateOnlyToUTC(dateString) {
+            const match =
+              String(dateString || "")
+                .match(/^(\d{4})-(\d{2})-(\d{2})$/);
+
+            if (!match) {
+              return null;
+            }
+
+            return Date.UTC(
+              Number(match[1]),
+              Number(match[2]) - 1,
+              Number(match[3])
+            );
+          }
+
+          function daysUntil(dateString) {
+            const todayUTC =
+              dateOnlyToUTC(
+                israelDateString()
+              );
+
+            const targetUTC =
+              dateOnlyToUTC(dateString);
+
+            if (
+              todayUTC === null ||
+              targetUTC === null
+            ) {
+              return null;
+            }
+
+            return Math.round(
+              (targetUTC - todayUTC) /
+              86400000
+            );
+          }
+
+          async function reminderAlreadySent(
+            orderId,
+            reminderType,
+            reminderKey
+          ) {
+
+            const {
+              data,
+              error
+            } = await db
+              .from("notification_reminders")
+              .select("id")
+              .eq("order_id", orderId)
+              .eq(
+                "reminder_type",
+                reminderType
+              )
+              .eq(
+                "reminder_key",
+                reminderKey
+              )
+              .maybeSingle();
+
+            if (error) {
+              throw new Error(
+                "REMINDER LOOKUP ERROR: " +
+                error.message
+              );
+            }
+
+            return Boolean(data);
+          }
+
+          async function markReminderSent(
+            orderId,
+            reminderType,
+            reminderKey
+          ) {
+
+            const { error } =
+              await db
+                .from("notification_reminders")
+                .insert({
+                  order_id: orderId,
+                  reminder_type:
+                    reminderType,
+                  reminder_key:
+                    reminderKey
+                });
+
+            if (error) {
+
+              // Unique constraint means another run
+              // already recorded the same reminder.
+              if (
+                error.code === "23505"
+              ) {
+                return false;
+              }
+
+              throw new Error(
+                "REMINDER INSERT ERROR: " +
+                error.message
+              );
+            }
+
+            return true;
+          }
+
+          const result = {
+            deadline_checked: 0,
+            deadline_sent: 0,
+            ready_checked: 0,
+            ready_sent: 0,
+            push_sent: 0,
+            push_failed: 0
+          };
+
+          // =================================================
+          // 1. ORDER DEADLINE REMINDERS
+          // =================================================
+
+          const {
+            data: deadlineOrders,
+            error: deadlineError
+          } = await db
+            .from("orders")
+            .select(`
+              id,
+              order_number,
+              customer_name,
+              product_name,
+              target_delivery_date,
+              status
+            `)
+            .not(
+              "target_delivery_date",
+              "is",
+              null
+            );
+
+          if (deadlineError) {
+            throw new Error(
+              "DEADLINE ORDERS ERROR: " +
+              deadlineError.message
+            );
+          }
+
+          const reminderDays =
+            new Set([7, 5, 4, 3, 2, 1]);
+
+          for (
+            const order of deadlineOrders || []
+          ) {
+
+            result.deadline_checked++;
+
+            const remaining =
+              daysUntil(
+                order.target_delivery_date
+              );
+
+            if (
+              !reminderDays.has(remaining)
+            ) {
+              continue;
+            }
+
+            // If the order has already been delivered,
+            // do not send production deadline reminders.
+            const {
+              data: delivered
+            } = await db
+              .from("deliveries")
+              .select("id")
+              .eq("order_id", order.id)
+              .eq("status", "DELIVERED")
+              .maybeSingle();
+
+            if (delivered) {
+              continue;
+            }
+
+            const reminderKey =
+              "D" + remaining;
+
+            const alreadySent =
+              await reminderAlreadySent(
+                order.id,
+                "ORDER_DUE",
+                reminderKey
+              );
+
+            if (alreadySent) {
+              continue;
+            }
+
+            const dayWord =
+              remaining === 1
+                ? "יום"
+                : "ימים";
+
+            const pushResult =
+              await sendPushToRole(
+                USER_ROLES.FACTORY_OWNER,
+                {
+                  title:
+                    `⏰ ישבאב 👋 נשארו ${remaining} ${dayWord} להזמנה #${order.order_number || "—"}`,
+
+                  body:
+                    `${order.customer_name || "לקוח"} — ${order.product_name || "הזמנה"}. תאריך יעד: ${order.target_delivery_date}.`,
+
+                  tag:
+                    `order-due-${order.id}-${reminderKey}`,
+
+                  url:
+                    "/dashboard.html",
+
+                  order_id:
+                    order.id,
+
+                  requireInteraction:
+                    true
+                }
+              );
+
+            result.push_sent +=
+              Number(pushResult?.sent || 0);
+
+            result.push_failed +=
+              Number(pushResult?.failed || 0);
+
+            // Mark it after the push attempt.
+            // This prevents repeated notifications
+            // every time the cron runs that day.
+            await markReminderSent(
+              order.id,
+              "ORDER_DUE",
+              reminderKey
+            );
+
+            result.deadline_sent++;
+          }
+
+          // =================================================
+          // 2. READY BUT DELIVERY NOT YET SCHEDULED
+          // =================================================
+
+          const {
+            data: waitingDeliveries,
+            error: waitingError
+          } = await db
+            .from("deliveries")
+            .select(`
+              id,
+              order_id,
+              status,
+              delivery_date,
+              delivery_time,
+              created_at,
+              orders (
+                id,
+                order_number,
+                customer_name,
+                product_name,
+                production_orders (
+                  id,
+                  status,
+                  ready_at
+                )
+              )
+            `)
+            .eq("status", "WAITING");
+
+          if (waitingError) {
+            throw new Error(
+              "READY DELIVERY LOAD ERROR: " +
+              waitingError.message
+            );
+          }
+
+          const todayKey =
+            israelDateString();
+
+          for (
+            const delivery of waitingDeliveries || []
+          ) {
+
+            result.ready_checked++;
+
+            // Once a date has been selected,
+            // this reminder stops.
+            if (delivery.delivery_date) {
+              continue;
+            }
+
+            const order =
+              Array.isArray(delivery.orders)
+                ? delivery.orders[0]
+                : delivery.orders;
+
+            const productions =
+              Array.isArray(
+                order?.production_orders
+              )
+                ? order.production_orders
+                : order?.production_orders
+                  ? [order.production_orders]
+                  : [];
+
+            const isReady =
+              productions.some(
+                production =>
+                  production?.status ===
+                  "READY"
+              );
+
+            if (!isReady) {
+              continue;
+            }
+
+            // One READY reminder per calendar day.
+            const alreadySent =
+              await reminderAlreadySent(
+                delivery.order_id,
+                "READY_WAITING",
+                todayKey
+              );
+
+            if (alreadySent) {
+              continue;
+            }
+
+            const pushResult =
+              await sendPushToRole(
+                USER_ROLES.FACTORY_OWNER,
+                {
+                  title:
+                    `🚚 ישבאב 👋 הזמנה #${order?.order_number || "—"} מוכנה ומחכה לאספקה`,
+
+                  body:
+                    `${order?.customer_name || "הלקוח"} — המוצר כבר מוכן. עדיין לא נקבע תאריך אספקה.`,
+
+                  tag:
+                    `ready-waiting-${delivery.id}-${todayKey}`,
+
+                  url:
+                    "/dashboard.html",
+
+                  delivery_id:
+                    delivery.id,
+
+                  order_id:
+                    delivery.order_id,
+
+                  requireInteraction:
+                    true
+                }
+              );
+
+            result.push_sent +=
+              Number(pushResult?.sent || 0);
+
+            result.push_failed +=
+              Number(pushResult?.failed || 0);
+
+            await markReminderSent(
+              delivery.order_id,
+              "READY_WAITING",
+              todayKey
+            );
+
+            result.ready_sent++;
+          }
+
+          console.log(
+            "🔔 REMINDER ENGINE RESULT:",
+            result
+          );
+
+          sendJSON(res, 200, {
+            success: true,
+            date:
+              israelDateString(),
+            ...result
+          });
+
+          return;
+        }
+
 
         // -----------------------------------------------
         // 404
