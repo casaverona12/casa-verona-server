@@ -22613,14 +22613,29 @@ document.addEventListener(
 
   function openEditor(orderId){
 
-    const source =
+    const adminOrders =
+      (
+        typeof cvOrdersData !== "undefined" &&
+        Array.isArray(cvOrdersData)
+      )
+        ? cvOrdersData
+        : [];
+
+    const windowOrders =
       Array.isArray(window.cvOrdersData)
         ? window.cvOrdersData
-        : (
-            typeof cvOrdersData !== "undefined"
-              ? cvOrdersData
-              : []
-          );
+        : [];
+
+    const factoryOrders =
+      Array.isArray(window.cvFactoryOrdersBridge)
+        ? window.cvFactoryOrdersBridge
+        : [];
+
+    const source = [
+      ...adminOrders,
+      ...windowOrders,
+      ...factoryOrders
+    ];
 
     const order =
       source.find(
@@ -22951,6 +22966,30 @@ document.addEventListener(
     );
 
 })();
+</script>
+
+
+<script>
+/* CASA VERONA — FACTORY CANCEL CLICK GUARD V1 */
+document.addEventListener(
+  "click",
+  function(event){
+
+    const cancel =
+      event.target.closest(
+        "[data-cancel-factory-approval]"
+      );
+
+    if(!cancel){
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+  },
+  true
+);
 </script>
 
 </body>
