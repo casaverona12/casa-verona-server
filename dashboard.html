@@ -583,7 +583,6 @@ body.cv-role-factory-owner #cvFactoryOwnerNav button{
       type="button"
       id="cvFactoryEnablePush"
       class="cv-push-btn"
-      onclick="cvEnablePushNotifications()"
     >
       <span>🔔</span>
       הפעל
@@ -3411,14 +3410,29 @@ function cvUrlBase64ToUint8Array(base64String){
 
 async function cvEnablePushNotifications(){
 
+  const isFactoryOwner =
+    String(window.casaVeronaUser?.role || "")
+      .trim()
+      .toUpperCase() === "FACTORY_OWNER";
+
   const button =
-    document.getElementById("cvEnablePush");
+    document.getElementById(
+      isFactoryOwner
+        ? "cvFactoryEnablePush"
+        : "cvEnablePush"
+    );
 
   const card =
-    document.getElementById("cvPushCard");
+    isFactoryOwner
+      ? button?.closest(".cv-push-card")
+      : document.getElementById("cvPushCard");
 
   const status =
-    document.getElementById("cvPushStatus");
+    document.getElementById(
+      isFactoryOwner
+        ? "cvFactoryPushStatus"
+        : "cvPushStatus"
+    );
 
   if(!button || !status) return;
 
@@ -3627,12 +3641,17 @@ async function cvCheckPushStatus(){
 
 }
 
-document
-  .getElementById("cvEnablePush")
-  ?.addEventListener(
-    "click",
-    cvEnablePushNotifications
-  );
+[
+  "cvEnablePush",
+  "cvFactoryEnablePush"
+].forEach(id => {
+  document
+    .getElementById(id)
+    ?.addEventListener(
+      "click",
+      cvEnablePushNotifications
+    );
+});
 
 if(
   document.readyState === "loading"
