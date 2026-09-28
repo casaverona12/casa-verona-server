@@ -22956,28 +22956,7 @@ document.addEventListener(
 </script>
 
 
-<script>
-/* CASA VERONA — FACTORY CANCEL CLICK GUARD V1 */
-document.addEventListener(
-  "click",
-  function(event){
 
-    const cancel =
-      event.target.closest(
-        "[data-cancel-factory-approval]"
-      );
-
-    if(!cancel){
-      return;
-    }
-
-    event.preventDefault();
-    event.stopPropagation();
-
-  },
-  true
-);
-</script>
 
 </body>
 </html>
