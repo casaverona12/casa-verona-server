@@ -3456,6 +3456,422 @@ if (
   return;
 }
 
+
+// =====================================================
+// CASA VERONA — ADMIN ORDER EDIT API V1
+// PATCH /api/orders/:id
+// =====================================================
+if (
+  req.method === "PATCH" &&
+  url.pathname.startsWith("/api/orders/")
+) {
+
+  const auth = await requireAuth(req, res, [
+    USER_ROLES.ADMIN
+  ]);
+
+  if (!auth) {
+    return;
+  }
+
+  const orderId =
+    decodeURIComponent(
+      url.pathname
+        .replace("/api/orders/", "")
+        .split("/")[0]
+    );
+
+  if (!orderId) {
+    sendJSON(res, 400, {
+      success: false,
+      error: "ORDER_ID_REQUIRED"
+    });
+    return;
+  }
+
+  try {
+
+    const body =
+      await readJSONBody(req);
+
+    const items =
+      Array.isArray(body.items)
+        ? body.items
+        : [];
+
+    if (!items.length) {
+      sendJSON(res, 400, {
+        success: false,
+        error: "ORDER_ITEMS_REQUIRED"
+      });
+      return;
+    }
+
+    const db = requireSupabase();
+
+    const { data: existingOrder, error: orderError } =
+      await db
+        .from("orders")
+        .select(`
+          id,
+          order_number,
+          product_name,
+          production_orders (
+            id,
+            approval_status,
+            status
+          )
+        `)
+        .eq("id", orderId)
+        .single();
+
+    if (orderError || !existingOrder) {
+      sendJSON(res, 404, {
+        success: false,
+        error: "ORDER_NOT_FOUND"
+      });
+      return;
+    }
+
+    const normalizedItems =
+      items.map((item, index) => ({
+        id:
+          item.id || null,
+
+        item_number:
+          Number(item.item_number) ||
+          index + 1,
+
+        product_type:
+          String(
+            item.product_type || "OTHER"
+          ).trim(),
+
+        product_name:
+          String(
+            item.product_name || ""
+          ).trim(),
+
+        quantity:
+          Math.max(
+            1,
+            Number.parseInt(
+              item.quantity,
+              10
+            ) || 1
+          ),
+
+        width:
+          item.width || null,
+
+        depth:
+          item.depth || null,
+
+        height:
+          item.height || null,
+
+        diameter:
+          item.diameter || null,
+
+        wood_color:
+          item.wood_color || null,
+
+        formica:
+          item.formica || null,
+
+        chaise_length:
+          item.chaise_length || null,
+
+        chaise_side:
+          item.chaise_side || null,
+
+        dimensions:
+          item.dimensions || null,
+
+        fabric_company:
+          item.fabric_company || null,
+
+        fabric_collection:
+          item.fabric_collection || null,
+
+        fabric_code:
+          item.fabric_code || null,
+
+        fabric_color:
+          item.fabric_color || null,
+
+        comfort:
+          item.comfort || null,
+
+        model_image_url:
+          item.model_image_url || null,
+
+        wood_color_image_url:
+          item.wood_color_image_url || null,
+
+        formica_image_url:
+          item.formica_image_url || null,
+
+        production_notes:
+          item.production_notes || null,
+
+        special_requests:
+          item.special_requests || null
+      }));
+
+    if (
+      normalizedItems.some(
+        item => !item.product_name
+      )
+    ) {
+      sendJSON(res, 400, {
+        success: false,
+        error: "PRODUCT_NAME_REQUIRED"
+      });
+      return;
+    }
+
+    const firstItem =
+      normalizedItems[0];
+
+    // -----------------------------------------------------
+    // Update the legacy/main order fields used elsewhere
+    // -----------------------------------------------------
+
+    const orderUpdates = {
+      product_name:
+        firstItem.product_name,
+
+      dimensions:
+        firstItem.dimensions,
+
+      width:
+        firstItem.width,
+
+      depth:
+        firstItem.depth,
+
+      chaise_length:
+        firstItem.chaise_length,
+
+      chaise_side:
+        firstItem.chaise_side,
+
+      fabric_company:
+        firstItem.fabric_company,
+
+      fabric_collection:
+        firstItem.fabric_collection,
+
+      fabric_code:
+        firstItem.fabric_code,
+
+      color:
+        firstItem.fabric_color,
+
+      comfort:
+        firstItem.comfort,
+
+      production_notes:
+        firstItem.production_notes,
+
+      special_requests:
+        firstItem.special_requests,
+
+      model_image_url:
+        firstItem.model_image_url
+    };
+
+    const { error: updateOrderError } =
+      await db
+        .from("orders")
+        .update(orderUpdates)
+        .eq("id", orderId);
+
+    if (updateOrderError) {
+      throw new Error(
+        "ORDER_UPDATE_FAILED: " +
+        updateOrderError.message
+      );
+    }
+
+    // -----------------------------------------------------
+    // Update each order item
+    // -----------------------------------------------------
+
+    for (const item of normalizedItems) {
+
+      const itemUpdates = {
+        item_number:
+          item.item_number,
+
+        product_type:
+          item.product_type,
+
+        product_name:
+          item.product_name,
+
+        quantity:
+          item.quantity,
+
+        width:
+          item.width,
+
+        depth:
+          item.depth,
+
+        height:
+          item.height,
+
+        diameter:
+          item.diameter,
+
+        wood_color:
+          item.wood_color,
+
+        formica:
+          item.formica,
+
+        chaise_length:
+          item.chaise_length,
+
+        chaise_side:
+          item.chaise_side,
+
+        dimensions:
+          item.dimensions,
+
+        fabric_company:
+          item.fabric_company,
+
+        fabric_collection:
+          item.fabric_collection,
+
+        fabric_code:
+          item.fabric_code,
+
+        fabric_color:
+          item.fabric_color,
+
+        comfort:
+          item.comfort,
+
+        model_image_url:
+          item.model_image_url,
+
+        wood_color_image_url:
+          item.wood_color_image_url,
+
+        formica_image_url:
+          item.formica_image_url,
+
+        production_notes:
+          item.production_notes,
+
+        special_requests:
+          item.special_requests
+      };
+
+      if (item.id) {
+
+        const { error } =
+          await db
+            .from("order_items")
+            .update(itemUpdates)
+            .eq("id", item.id)
+            .eq("order_id", orderId);
+
+        if (error) {
+          throw new Error(
+            "ORDER_ITEM_UPDATE_FAILED: " +
+            error.message
+          );
+        }
+
+      } else {
+
+        const { error } =
+          await db
+            .from("order_items")
+            .insert({
+              order_id: orderId,
+              ...itemUpdates,
+              status: "NEW"
+            });
+
+        if (error) {
+          throw new Error(
+            "ORDER_ITEM_INSERT_FAILED: " +
+            error.message
+          );
+        }
+      }
+    }
+
+    // -----------------------------------------------------
+    // Any admin specification change requires factory
+    // approval again.
+    // -----------------------------------------------------
+
+    const production =
+      Array.isArray(
+        existingOrder.production_orders
+      )
+        ? existingOrder.production_orders[0]
+        : existingOrder.production_orders;
+
+    if (production?.id) {
+
+      const { error: productionError } =
+        await db
+          .from("production_orders")
+          .update({
+            approval_status: "PENDING",
+            approved_at: null,
+            approved_by: null,
+            status: "WAITING",
+            updated_at:
+              new Date().toISOString()
+          })
+          .eq("id", production.id);
+
+      if (productionError) {
+        throw new Error(
+          "PRODUCTION_RESET_FAILED: " +
+          productionError.message
+        );
+      }
+    }
+
+    sendJSON(res, 200, {
+      success: true,
+      order_id: orderId,
+      order_number:
+        existingOrder.order_number,
+      approval_status: "PENDING",
+      message:
+        "ORDER_UPDATED_AND_SENT_FOR_REAPPROVAL"
+    });
+
+  } catch (error) {
+
+    console.error(
+      "ADMIN ORDER EDIT:",
+      error
+    );
+
+    sendJSON(res, 500, {
+      success: false,
+      error:
+        error?.message ||
+        "ORDER_UPDATE_FAILED"
+    });
+  }
+
+  return;
+}
+
+
 // =====================================================
 // CASA VERONA — DELIVERIES API
 // =====================================================
