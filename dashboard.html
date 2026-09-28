@@ -1405,25 +1405,9 @@ body.cv-role-factory-owner #cvFactoryOwnerNav button{
 ===================================================== -->
 
 <section id="factory-approvals" class="page">
-<div id="cvFactoryApprovalDebug"
-     style="display:none;margin:12px;padding:14px;background:#111;color:#fff;font:12px monospace;direction:ltr;text-align:left;word-break:break-all">
-</div>
 
-<div
-  id="cvFactoryApiDebug"
-  style="
-    margin:12px;
-    padding:12px;
-    background:#111;
-    color:#fff;
-    font-size:12px;
-    direction:ltr;
-    text-align:left;
-    overflow-wrap:anywhere;
-  "
->
-  FACTORY API: waiting...
-</div>
+
+
 
   <div class="cv-fa">
 
@@ -14498,9 +14482,6 @@ document.addEventListener(
           .json()
           .catch(() => ({}));
 
-      const approvalDebug =
-        document.getElementById("cvFactoryApprovalDebug");
-
       if(approvalDebug){
         approvalDebug.style.display = "block";
         approvalDebug.textContent =
@@ -14521,9 +14502,6 @@ document.addEventListener(
         ok: response.ok,
         data
       });
-
-      const debugBox =
-        document.getElementById("cvFactoryApiDebug");
 
       if(debugBox){
         debugBox.textContent =
@@ -14856,7 +14834,6 @@ document.addEventListener(
       return;
     }
 
-
     const pending =
       cvFactoryOrders.filter(order => {
 
@@ -14870,17 +14847,14 @@ document.addEventListener(
 
       });
 
-
     const count =
       document.getElementById(
         "cvFaPendingCount"
       );
 
     if(count){
-      count.textContent =
-        pending.length;
+      count.textContent = pending.length;
     }
-
 
     if(!pending.length){
 
@@ -14894,7 +14868,6 @@ document.addEventListener(
       return;
     }
 
-
     container.innerHTML =
       pending.map(order => {
 
@@ -14904,43 +14877,62 @@ document.addEventListener(
         const productionId =
           production.id;
 
-        const image =
-          order.model_image_url ||
-          order.reference_image_url ||
-          "";
+        /*
+         * New orders use order_items.
+         * Old orders fall back to the legacy order fields.
+         */
+        let items =
+          Array.isArray(order.order_items) &&
+          order.order_items.length
+            ? [...order.order_items]
+            : [{
+                item_number:1,
+                product_type:null,
+                product_name:order.product_name,
+                quantity:1,
+                width:order.width,
+                depth:order.depth,
+                height:null,
+                diameter:null,
+                wood_color:null,
+                formica:null,
+                chaise_length:order.chaise_length,
+                chaise_side:order.chaise_side,
+                dimensions:order.dimensions,
+                fabric_company:order.fabric_company,
+                fabric_collection:order.fabric_collection,
+                fabric_code:order.fabric_code,
+                fabric_color:order.color,
+                comfort:order.comfort,
+                model_image_url:
+                  order.model_image_url ||
+                  order.reference_image_url,
+                wood_color_image_url:null,
+                formica_image_url:null,
+                production_notes:
+                  order.production_notes,
+                special_requests:
+                  order.special_requests
+              }];
 
+        items.sort(
+          (a,b) =>
+            Number(a.item_number || 0) -
+            Number(b.item_number || 0)
+        );
 
-        const dimensions = [
-          order.width
-            ? `רוחב ${esc(order.width)}`
-            : null,
+        const totalUnits =
+          items.reduce(
+            (sum,item) =>
+              sum + Math.max(
+                1,
+                Number(item.quantity || 1)
+              ),
+            0
+          );
 
-          order.depth
-            ? `עומק ${esc(order.depth)}`
-            : null,
-
-          order.chaise_length
-            ? `שזלונג ${esc(order.chaise_length)}`
-            : null,
-
-          order.chaise_side
-            ? `צד ${esc(order.chaise_side)}`
-            : null
-        ]
-        .filter(Boolean)
-        .join(" · ") || "—";
-
-
-        const fabric = [
-          order.fabric_type,
-          order.fabric_company,
-          order.fabric_collection,
-          order.fabric_code
-        ]
-        .filter(Boolean)
-        .map(esc)
-        .join(" · ") || "—";
-
+        const itemCount =
+          items.length;
 
         let deliveryDate = "—";
 
@@ -14951,11 +14943,7 @@ document.addEventListener(
               order.target_delivery_date
             );
 
-          if(
-            !Number.isNaN(
-              date.getTime()
-            )
-          ){
+          if(!Number.isNaN(date.getTime())){
 
             deliveryDate =
               new Intl.DateTimeFormat(
@@ -14971,21 +14959,251 @@ document.addEventListener(
 
         }
 
+        const firstImage =
+          items.find(item =>
+            item.model_image_url
+          )?.model_image_url ||
+          order.model_image_url ||
+          order.reference_image_url ||
+          "";
+
+        const itemNames =
+          items
+            .map(item =>
+              item.product_name ||
+              item.product_type ||
+              "פריט"
+            )
+            .filter(Boolean)
+            .join(" · ");
+
+        const itemsHTML =
+          items.map((item,index) => {
+
+            const quantity =
+              Math.max(
+                1,
+                Number(item.quantity || 1)
+              );
+
+            const dimensions = [
+              item.dimensions
+                ? esc(item.dimensions)
+                : null,
+
+              item.width
+                ? `רוחב ${esc(item.width)}`
+                : null,
+
+              item.depth
+                ? `עומק ${esc(item.depth)}`
+                : null,
+
+              item.height
+                ? `גובה ${esc(item.height)}`
+                : null,
+
+              item.diameter
+                ? `קוטר ${esc(item.diameter)}`
+                : null,
+
+              item.chaise_length
+                ? `שזלונג ${esc(item.chaise_length)}`
+                : null,
+
+              item.chaise_side
+                ? `צד ${esc(item.chaise_side)}`
+                : null
+            ]
+            .filter(Boolean)
+            .join(" · ") || "—";
+
+            const fabric = [
+              item.fabric_company,
+              item.fabric_collection,
+              item.fabric_code
+            ]
+            .filter(Boolean)
+            .map(esc)
+            .join(" · ") || "—";
+
+            const mainImage =
+              item.model_image_url || "";
+
+            const extraImages = [
+              item.wood_color_image_url
+                ? {
+                    url:item.wood_color_image_url,
+                    label:"צבע עץ"
+                  }
+                : null,
+
+              item.formica_image_url
+                ? {
+                    url:item.formica_image_url,
+                    label:"פורמייקה"
+                  }
+                : null
+            ].filter(Boolean);
+
+            return `
+              <section class="cv-fa-v2-item">
+
+                <div class="cv-fa-v2-item-head">
+
+                  <div>
+                    <small>
+                      ITEM ${String(
+                        item.item_number ||
+                        index + 1
+                      ).padStart(2,"0")}
+                    </small>
+
+                    <h4>
+                      ${esc(
+                        item.product_name ||
+                        item.product_type ||
+                        "פריט ללא שם"
+                      )}
+                    </h4>
+                  </div>
+
+                  <strong class="cv-fa-v2-qty">
+                    ×${quantity}
+                  </strong>
+
+                </div>
+
+                ${
+                  mainImage
+                    ? `
+                      <div class="cv-fa-v2-main-image">
+                        <img
+                          src="${esc(mainImage)}"
+                          alt=""
+                          loading="lazy"
+                        >
+                      </div>
+                    `
+                    : ""
+                }
+
+                <div class="cv-fa-v2-spec-grid">
+
+                  <div>
+                    <small>סוג מוצר</small>
+                    <strong>
+                      ${esc(item.product_type || "—")}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <small>מידות</small>
+                    <strong>${dimensions}</strong>
+                  </div>
+
+                  <div>
+                    <small>בד</small>
+                    <strong>${fabric}</strong>
+                  </div>
+
+                  <div>
+                    <small>צבע בד</small>
+                    <strong>
+                      ${esc(item.fabric_color || "—")}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <small>נוחות</small>
+                    <strong>
+                      ${esc(item.comfort || "—")}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <small>צבע עץ</small>
+                    <strong>
+                      ${esc(item.wood_color || "—")}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <small>פורמייקה</small>
+                    <strong>
+                      ${esc(item.formica || "—")}
+                    </strong>
+                  </div>
+
+                </div>
+
+                ${
+                  extraImages.length
+                    ? `
+                      <div class="cv-fa-v2-extra-images">
+                        ${
+                          extraImages.map(image => `
+                            <figure>
+                              <img
+                                src="${esc(image.url)}"
+                                alt=""
+                                loading="lazy"
+                              >
+                              <figcaption>
+                                ${esc(image.label)}
+                              </figcaption>
+                            </figure>
+                          `).join("")
+                        }
+                      </div>
+                    `
+                    : ""
+                }
+
+                ${
+                  item.production_notes
+                    ? `
+                      <div class="cv-fa-note">
+                        <small>הערות ייצור</small>
+                        <p>
+                          ${esc(item.production_notes)}
+                        </p>
+                      </div>
+                    `
+                    : ""
+                }
+
+                ${
+                  item.special_requests
+                    ? `
+                      <div class="cv-fa-note important">
+                        <small>בקשות מיוחדות</small>
+                        <p>
+                          ${esc(item.special_requests)}
+                        </p>
+                      </div>
+                    `
+                    : ""
+                }
+
+              </section>
+            `;
+
+          }).join("");
 
         return `
-
           <article
-            class="cv-fa-order"
+            class="cv-fa-order cv-fa-order-v2"
             data-fa-production="${esc(productionId)}"
           >
 
             <div class="cv-fa-order-image">
 
               ${
-                image
+                firstImage
                   ? `
                     <img
-                      src="${esc(image)}"
+                      src="${esc(firstImage)}"
                       alt=""
                     >
                   `
@@ -15005,20 +15223,33 @@ document.addEventListener(
 
             </div>
 
-
             <div class="cv-fa-order-content">
 
               <header class="cv-fa-order-head">
 
                 <div>
-                  <small>NEW FACTORY ORDER</small>
+                  <small>
+                    CASA VERONA · FACTORY ORDER
+                  </small>
 
                   <h3>
-                    ${esc(
-                      order.product_name ||
-                      "ללא שם"
+                    הזמנה #${esc(
+                      order.order_number ||
+                      "—"
                     )}
                   </h3>
+
+                  <p class="cv-fa-v2-summary">
+                    ${itemCount}
+                    ${itemCount === 1 ? "פריט" : "פריטים"}
+                    ·
+                    ${totalUnits}
+                    ${totalUnits === 1 ? "יחידה" : "יחידות"}
+                  </p>
+
+                  <p class="cv-fa-v2-names">
+                    ${esc(itemNames)}
+                  </p>
                 </div>
 
                 <span class="cv-fa-pending">
@@ -15027,74 +15258,28 @@ document.addEventListener(
 
               </header>
 
-
-              <div class="cv-fa-specs">
-
-                <div>
-                  <small>מידות</small>
-                  <strong>${dimensions}</strong>
-                </div>
-
-                <div>
-                  <small>בד</small>
-                  <strong>${fabric}</strong>
-                </div>
-
-                <div>
-                  <small>צבע</small>
-                  <strong>
-                    ${esc(order.color || "—")}
-                  </strong>
-                </div>
-
-                <div>
-                  <small>נוחות</small>
-                  <strong>
-                    ${esc(order.comfort || "—")}
-                  </strong>
-                </div>
+              <div class="cv-fa-v2-order-meta">
 
                 <div>
                   <small>יעד אספקה</small>
-                  <strong>
-                    ${deliveryDate}
-                  </strong>
+                  <strong>${deliveryDate}</strong>
+                </div>
+
+                <div>
+                  <small>מספר פריטים</small>
+                  <strong>${itemCount}</strong>
+                </div>
+
+                <div>
+                  <small>סה״כ יחידות</small>
+                  <strong>${totalUnits}</strong>
                 </div>
 
               </div>
 
-
-              ${
-                order.production_notes
-                  ? `
-                    <div class="cv-fa-note">
-                      <small>הערות ייצור</small>
-                      <p>
-                        ${esc(
-                          order.production_notes
-                        )}
-                      </p>
-                    </div>
-                  `
-                  : ""
-              }
-
-
-              ${
-                order.special_requests
-                  ? `
-                    <div class="cv-fa-note important">
-                      <small>בקשות מיוחדות</small>
-                      <p>
-                        ${esc(
-                          order.special_requests
-                        )}
-                      </p>
-                    </div>
-                  `
-                  : ""
-              }
-
+              <div class="cv-fa-v2-items">
+                ${itemsHTML}
+              </div>
 
               <div class="cv-fa-form">
 
@@ -15117,7 +15302,6 @@ document.addEventListener(
                   >
                 </label>
 
-
                 <label>
                   <span>
                     הערות המפעל
@@ -15135,7 +15319,6 @@ document.addEventListener(
 
               </div>
 
-
               <div class="cv-fa-buttons">
 
                 <button
@@ -15148,7 +15331,6 @@ document.addEventListener(
                   <strong>אשר הזמנה</strong>
                 </button>
 
-
                 <button
                   type="button"
                   class="cv-fa-reject"
@@ -15159,7 +15341,6 @@ document.addEventListener(
                 </button>
 
               </div>
-
 
               <div
                 class="cv-fa-message"
@@ -15174,7 +15355,6 @@ document.addEventListener(
       }).join("");
 
   }
-
 
   async function submitFactoryApproval(
     productionId,
@@ -21735,3 +21915,171 @@ document.addEventListener(
 
 </body>
 </html>
+
+<style id="cv-factory-approval-v2-style">
+
+/* CASA VERONA — FACTORY APPROVAL V2 */
+
+.cv-fa-v2-summary{
+  margin:8px 0 0;
+  font-size:12px;
+  font-weight:700;
+}
+
+.cv-fa-v2-names{
+  margin:5px 0 0;
+  font-size:11px;
+  opacity:.58;
+}
+
+.cv-fa-v2-order-meta{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:1px;
+  margin:20px 0;
+  background:#dedbd3;
+  border:1px solid #dedbd3;
+}
+
+.cv-fa-v2-order-meta > div{
+  background:#f8f7f3;
+  padding:15px;
+}
+
+.cv-fa-v2-order-meta small,
+.cv-fa-v2-spec-grid small{
+  display:block;
+  margin-bottom:5px;
+  font-size:9px;
+  letter-spacing:.08em;
+  opacity:.48;
+}
+
+.cv-fa-v2-order-meta strong{
+  font-size:13px;
+}
+
+.cv-fa-v2-items{
+  display:grid;
+  gap:16px;
+  margin:20px 0;
+}
+
+.cv-fa-v2-item{
+  padding:18px;
+  border:1px solid #d9d6ce;
+  background:#fff;
+}
+
+.cv-fa-v2-item-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:15px;
+  margin-bottom:15px;
+}
+
+.cv-fa-v2-item-head small{
+  font-size:9px;
+  letter-spacing:.14em;
+  opacity:.45;
+}
+
+.cv-fa-v2-item-head h4{
+  margin:4px 0 0;
+  font-size:18px;
+}
+
+.cv-fa-v2-qty{
+  min-width:42px;
+  text-align:center;
+  padding:8px 10px;
+  background:#111;
+  color:#fff;
+  font-size:13px;
+}
+
+.cv-fa-v2-main-image{
+  width:100%;
+  margin-bottom:16px;
+  overflow:hidden;
+  background:#eee;
+}
+
+.cv-fa-v2-main-image img{
+  display:block;
+  width:100%;
+  max-height:360px;
+  object-fit:cover;
+}
+
+.cv-fa-v2-spec-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  border-top:1px solid #e4e1da;
+  border-left:1px solid #e4e1da;
+  margin-bottom:15px;
+}
+
+.cv-fa-v2-spec-grid > div{
+  min-width:0;
+  padding:12px;
+  border-right:1px solid #e4e1da;
+  border-bottom:1px solid #e4e1da;
+}
+
+.cv-fa-v2-spec-grid strong{
+  display:block;
+  font-size:12px;
+  overflow-wrap:anywhere;
+}
+
+.cv-fa-v2-extra-images{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  margin:14px 0;
+}
+
+.cv-fa-v2-extra-images figure{
+  margin:0;
+}
+
+.cv-fa-v2-extra-images img{
+  width:100%;
+  height:140px;
+  object-fit:cover;
+  display:block;
+}
+
+.cv-fa-v2-extra-images figcaption{
+  padding-top:5px;
+  font-size:9px;
+  opacity:.55;
+}
+
+@media(max-width:760px){
+
+  .cv-fa-v2-order-meta{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .cv-fa-v2-order-meta > div:first-child{
+    grid-column:1/-1;
+  }
+
+  .cv-fa-v2-spec-grid{
+    grid-template-columns:1fr;
+  }
+
+  .cv-fa-v2-item{
+    padding:14px;
+  }
+
+  .cv-fa-v2-main-image img{
+    max-height:280px;
+  }
+
+}
+
+</style>
