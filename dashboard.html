@@ -13286,23 +13286,7 @@ document
 </style>
 
 
-<script id="cv-order-inquiry-debug">
-document.addEventListener("click", function(event){
 
-  const card = event.target.closest("[data-order-inquiry]");
-
-  if(!card) return;
-
-  const orderId = card.dataset.orderInquiry;
-
-  alert(
-    "ORDER CLICK OK\n" +
-    "ID: " + orderId + "\n" +
-    "OPENER: " + typeof window.cvOpenOrderInquiry
-  );
-
-}, true);
-</script>
 
 <script id="cv-orders-v5-interaction">
 
@@ -22645,14 +22629,7 @@ document.addEventListener(
       );
 
     if(!order){
-      alert(
-        "לא ניתן למצוא את ההזמנה.\n\n" +
-        "ORDER ID: " + orderId + "\n" +
-        "ADMIN: " + adminOrders.length + "\n" +
-        "WINDOW: " + windowOrders.length + "\n" +
-        "FACTORY: " + factoryOrders.length
-      );
-      console.trace("OPEN EDITOR ORDER NOT FOUND", orderId);
+      alert("לא ניתן למצוא את ההזמנה.");
       return;
     }
 
