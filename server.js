@@ -2227,13 +2227,13 @@ async function requireAuth(req, res, allowedRoles = []) {
 }
 
 // -----------------------------------------------
-// API - ADMIN PUSH SUBSCRIPTION
-// ADMIN ONLY
+// API - PUSH SUBSCRIPTION
+// ANY AUTHENTICATED USER
 // -----------------------------------------------
 
 async function handlePushSubscription(req, res) {
 
-  const auth = await requireAuth(req, res, ["ADMIN"]);
+  const auth = await requireAuth(req, res);
 
   if (!auth) {
     return;
@@ -2323,6 +2323,153 @@ async function handlePushSubscription(req, res) {
     success: true
   }));
 }
+
+
+// =====================================================
+// CASA VERONA — PUSH NOTIFICATIONS BY ROLE
+// =====================================================
+
+async function sendPushToRole(role, payload) {
+
+  if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
+    console.error("PUSH SKIPPED: VAPID NOT CONFIGURED");
+    return {
+      sent: 0,
+      failed: 0
+    };
+  }
+
+  const db = requireSupabase();
+
+  // ---------------------------------------------------
+  // Find active users with requested role
+  // ---------------------------------------------------
+
+  const {
+    data: users,
+    error: usersError
+  } = await db
+    .from("user_profiles")
+    .select("id")
+    .eq("role", role)
+    .eq("is_active", true);
+
+  if (usersError) {
+    throw new Error(
+      "PUSH ROLE USERS ERROR: " +
+      usersError.message
+    );
+  }
+
+  const userIds =
+    (users || [])
+      .map(user => user.id)
+      .filter(Boolean);
+
+  if (!userIds.length) {
+    console.log(
+      "PUSH: NO ACTIVE USERS FOR ROLE",
+      role
+    );
+
+    return {
+      sent: 0,
+      failed: 0
+    };
+  }
+
+  // ---------------------------------------------------
+  // Load every registered device for those users
+  // ---------------------------------------------------
+
+  const {
+    data: subscriptions,
+    error: subscriptionsError
+  } = await db
+    .from("push_subscriptions")
+    .select("id, user_id, endpoint, p256dh, auth")
+    .in("user_id", userIds);
+
+  if (subscriptionsError) {
+    throw new Error(
+      "PUSH SUBSCRIPTIONS LOAD ERROR: " +
+      subscriptionsError.message
+    );
+  }
+
+  let sent = 0;
+  let failed = 0;
+
+  const message =
+    JSON.stringify(payload || {});
+
+  for (const row of subscriptions || []) {
+
+    const subscription = {
+      endpoint: row.endpoint,
+      keys: {
+        p256dh: row.p256dh,
+        auth: row.auth
+      }
+    };
+
+    try {
+
+      await webpush.sendNotification(
+        subscription,
+        message
+      );
+
+      sent++;
+
+    } catch (error) {
+
+      failed++;
+
+      console.error(
+        "PUSH SEND ERROR:",
+        error?.statusCode || "",
+        error?.message || error
+      );
+
+      // Subscription no longer exists on the device.
+      // Remove it so we do not keep retrying forever.
+      if (
+        error?.statusCode === 404 ||
+        error?.statusCode === 410
+      ) {
+
+        const { error: deleteError } =
+          await db
+            .from("push_subscriptions")
+            .delete()
+            .eq("endpoint", row.endpoint);
+
+        if (deleteError) {
+          console.error(
+            "PUSH CLEANUP ERROR:",
+            deleteError.message
+          );
+        }
+      }
+    }
+  }
+
+  console.log(
+    "PUSH ROLE RESULT:",
+    role,
+    {
+      sent,
+      failed
+    }
+  );
+
+  return {
+    sent,
+    failed
+  };
+}
+
 
 const server =
   http.createServer(
@@ -3491,8 +3638,11 @@ if (
 
   try {
 
+    const bodyText =
+      await readRequestBody(req);
+
     const body =
-      await readJSONBody(req);
+      JSON.parse(bodyText || "{}");
 
     const items =
       Array.isArray(body.items)
@@ -3809,8 +3959,9 @@ if (
     }
 
     // -----------------------------------------------------
-    // Any admin specification change requires factory
-    // approval again.
+    // ADMIN EDIT:
+    // Keep current factory approval + production status.
+    // The factory will be notified separately about changes.
     // -----------------------------------------------------
 
     const production =
@@ -3822,25 +3973,69 @@ if (
 
     if (production?.id) {
 
-      const { error: productionError } =
+      const { error: activityError } =
         await db
-          .from("production_orders")
-          .update({
-            approval_status: "PENDING",
-            approved_at: null,
-            approved_by: null,
-            status: "WAITING",
-            updated_at:
-              new Date().toISOString()
-          })
-          .eq("id", production.id);
+          .from("production_activity")
+          .insert({
+            production_order_id:
+              production.id,
+            user_id:
+              auth.user.id,
+            action:
+              "ORDER_UPDATED_BY_ADMIN"
+          });
 
-      if (productionError) {
-        throw new Error(
-          "PRODUCTION_RESET_FAILED: " +
-          productionError.message
+      if (activityError) {
+        console.error(
+          "ADMIN ORDER EDIT ACTIVITY ERROR:",
+          activityError.message
         );
       }
+    }
+
+    // -----------------------------------------------------
+    // Notify factory owner about the updated order.
+    // Push failure must NOT fail the order update itself.
+    // -----------------------------------------------------
+
+    try {
+
+      const pushResult =
+        await sendPushToRole(
+          USER_ROLES.FACTORY_OWNER,
+          {
+            title:
+              `ישבאב 👋 היה שינוי בהזמנה #${existingOrder.order_number || "—"}`,
+
+            body:
+              "ההזמנה עודכנה על ידי ההנהלה. לחץ לצפייה בהזמנה.",
+
+            tag:
+              `order-update-${orderId}`,
+
+            url:
+              "/dashboard.html",
+
+            order_id:
+              orderId,
+
+            requireInteraction:
+              true
+          }
+        );
+
+      console.log(
+        "ADMIN ORDER EDIT PUSH:",
+        existingOrder.order_number,
+        pushResult
+      );
+
+    } catch (pushError) {
+
+      console.error(
+        "ADMIN ORDER EDIT PUSH ERROR:",
+        pushError?.message || pushError
+      );
     }
 
     sendJSON(res, 200, {
@@ -3848,9 +4043,12 @@ if (
       order_id: orderId,
       order_number:
         existingOrder.order_number,
-      approval_status: "PENDING",
+      approval_status:
+        production?.approval_status || null,
+      production_status:
+        production?.status || null,
       message:
-        "ORDER_UPDATED_AND_SENT_FOR_REAPPROVAL"
+        "ORDER_UPDATED"
     });
 
   } catch (error) {
