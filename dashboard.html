@@ -8434,6 +8434,20 @@ document
   const cvOrderInquiryModal =
     document.getElementById("cvOrderInquiryModal");
 
+  /*
+    ORDER DETAILS GLOBAL MODAL
+    The modal originally lives inside #orders.
+    Since inactive .page elements use display:none,
+    Factory OS could open the modal logically but it remained invisible.
+    Move it directly under <body> so every dashboard module can use it.
+  */
+  if(
+    cvOrderInquiryModal &&
+    cvOrderInquiryModal.parentElement !== document.body
+  ){
+    document.body.appendChild(cvOrderInquiryModal);
+  }
+
   const cvOrderInquiryClose =
     document.getElementById("cvOrderInquiryClose");
 
@@ -8558,46 +8572,20 @@ document
 
   function cvOpenOrderInquiry(orderId = null){
 
-    try{
+    if(!cvOrderInquiryModal){
+      return;
+    }
 
-      if(!cvOrderInquiryModal){
-        alert("DEBUG 1: MODAL NOT FOUND");
-        return;
-      }
+    cvOrderInquiryModal.hidden = false;
 
-      cvOrderInquiryModal.hidden = false;
+    if(cvOrderInquirySearch){
+      cvOrderInquirySearch.value = "";
+    }
 
-      alert(
-        "DEBUG 2: MODAL OPENED" +
-        "\\nhidden=" + cvOrderInquiryModal.hidden +
-        "\\ndisplay=" + getComputedStyle(cvOrderInquiryModal).display
-      );
+    cvRenderOrderInquiryResults();
 
-      if(cvOrderInquirySearch){
-        cvOrderInquirySearch.value = "";
-      }
-
-      try{
-        cvRenderOrderInquiryResults();
-        alert("DEBUG 3: RESULTS OK");
-      }catch(error){
-        alert("DEBUG RESULTS ERROR: " + error.message);
-        throw error;
-      }
-
-      if(orderId){
-        try{
-          cvShowOrderCommand(orderId);
-          alert("DEBUG 4: ORDER COMMAND OK");
-        }catch(error){
-          alert("DEBUG COMMAND ERROR: " + error.message);
-          throw error;
-        }
-      }
-
-    }catch(error){
-      alert("DEBUG FINAL ERROR: " + error.message);
-      console.error(error);
+    if(orderId){
+      cvShowOrderCommand(orderId);
     }
 
   }
