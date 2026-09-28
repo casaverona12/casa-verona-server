@@ -5284,6 +5284,75 @@ if (
     );
   }
 
+  // -----------------------------------------------------
+  // Notify all admins when the factory approves an order.
+  // Push failure must NOT fail the approval itself.
+  // -----------------------------------------------------
+  if (approvalStatus === "APPROVED") {
+
+    try {
+
+      const {
+        data: approvedOrder,
+        error: approvedOrderError
+      } = await db
+        .from("orders")
+        .select("id, order_number, customer_name")
+        .eq("id", currentProduction.order_id)
+        .single();
+
+      if (approvedOrderError) {
+        console.error(
+          "APPROVED ORDER LOAD ERROR:",
+          approvedOrderError.message
+        );
+      }
+
+      const orderNumber =
+        approvedOrder?.order_number || "—";
+
+      const pushResult =
+        await sendPushToRole(
+          USER_ROLES.ADMIN,
+          {
+            title:
+              `ישבאב 👋 הזמנה #${orderNumber} אושרה`,
+
+            body:
+              "ההזמנה אושרה על ידי המפעל ונכנסה לייצור. לחץ לצפייה בהזמנה.",
+
+            tag:
+              `factory-approved-${currentProduction.order_id}`,
+
+            url:
+              "/dashboard.html",
+
+            order_id:
+              currentProduction.order_id,
+
+            production_id:
+              productionId,
+
+            requireInteraction:
+              true
+          }
+        );
+
+      console.log(
+        "FACTORY APPROVAL ADMIN PUSH:",
+        orderNumber,
+        pushResult
+      );
+
+    } catch (pushError) {
+
+      console.error(
+        "FACTORY APPROVAL ADMIN PUSH ERROR:",
+        pushError?.message || pushError
+      );
+    }
+  }
+
   sendJSON(res, 200, {
     success: true,
     production_order: productionOrder
