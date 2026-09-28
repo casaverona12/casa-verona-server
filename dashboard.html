@@ -15765,6 +15765,17 @@ document.addEventListener(
     "click",
     function(event){
 
+      const cancelButton =
+        event.target.closest(
+          "[data-cancel-factory-approval]"
+        );
+
+      // Never treat "Cancel approval" as an order-card click.
+      // Its own handler must receive the event.
+      if(cancelButton){
+        return;
+      }
+
       const openButton =
         event.target.closest(
           "[data-factory-open-order]"
