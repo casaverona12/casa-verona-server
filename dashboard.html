@@ -290,6 +290,30 @@ linear-gradient(90deg,rgba(12,12,11,.025) 1px,transparent 1px),
 @media(max-width:1160px){:root{--side:260px}.cv-kpis{grid-template-columns:1fr 1fr}.cv-grid{grid-template-columns:1fr}.cv-lower{grid-template-columns:1fr 1fr}.cv-hero{grid-template-columns:1fr 250px}}
 @media(max-width:760px){.cv-login{display:flex;flex-direction:column;overflow:auto}.cv-login-art{order:1;width:100%}.cv-login-panel{order:2;width:100%}.cv-login-art{min-height:34vh}.cv-login-art-copy{left:24px;bottom:22px}.cv-login-art-copy h1{font-size:34px}.cv-login-panel{min-height:66vh;padding:25px 28px}.cv-login-panel:before{inset:8px}.cv-login-box{margin:35px auto}.cv-login-box h2{font-size:43px}.cv-app{display:block}.cv-side{position:static;width:100%}.cv-nav{display:grid;grid-template-columns:1fr 1fr}.cv-main{margin-right:0;padding:18px}.cv-user-copy{display:none}.cv-hero{grid-template-columns:1fr;min-height:330px;padding:27px 23px}.cv-hero h1{font-size:41px}.cv-kpis{grid-template-columns:1fr 1fr}.cv-lower,.cv-modules{grid-template-columns:1fr}}
 @media(max-width:430px){.cv-kpis,.cv-nav{grid-template-columns:1fr}}
+
+/* CASA VERONA — ORDER DETAILS BACK BUTTON FIX */
+.cv-order-details-v3 .cv-order-details-nav{
+  position:relative !important;
+  z-index:50 !important;
+}
+
+.cv-order-details-v3 .cv-order-command-close{
+  position:relative !important;
+  z-index:60 !important;
+  flex:0 0 auto !important;
+  margin:0 !important;
+  padding:10px 14px !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+  border-radius:10px !important;
+  background:#1b1b19 !important;
+  white-space:nowrap !important;
+}
+
+.cv-order-details-v3 .cv-order-inquiry-side{
+  position:relative !important;
+  z-index:10 !important;
+}
+
 </style>
 
 <style>
@@ -2035,6 +2059,14 @@ document
 
 
 function cvOpenPage(id){
+
+  // When navigating to another module, close an open order card.
+  if(
+    id !== "orders" &&
+    typeof cvCloseOrderInquiry === "function"
+  ){
+    cvCloseOrderInquiry();
+  }
 
   const target = document.getElementById(id);
 
@@ -4391,8 +4423,36 @@ async function cvCheckPushStatus(){
           typeof window.cvLoadOrders === "function"
         ){
           await window.cvLoadOrders();
+        }
+
+        // READY -> refresh production, close card and open deliveries
+        if(typeof window.cvLoadFactoryOrders === "function"){
+          await window.cvLoadFactoryOrders();
+        }
+
+        if(typeof window.cvCloseOrderInquiry === "function"){
+          window.cvCloseOrderInquiry();
+        }else if(typeof cvCloseOrderInquiry === "function"){
+          cvCloseOrderInquiry();
+        }
+
+        if(typeof cvOpenPage === "function"){
+          cvOpenPage("deliveries");
         }else{
-          window.location.reload();
+          document
+            .querySelector('[data-page="deliveries"]')
+            ?.click();
+        }
+
+        // Reload deliveries so the READY order appears immediately
+        if(typeof window.cvLoadDeliveries === "function"){
+          await window.cvLoadDeliveries();
+        }else{
+          setTimeout(() => {
+            document
+              .getElementById("cvDeliveryRefresh")
+              ?.click();
+          }, 150);
         }
 
       }catch(error){
@@ -7776,6 +7836,30 @@ document
 
       await cvLoadOrders();
 
+      if(status === "READY"){
+
+        // Refresh factory data so the completed production card disappears.
+        if(typeof window.cvLoadFactoryOrders === "function"){
+          await window.cvLoadFactoryOrders();
+        }
+
+        // Close the full order card.
+        if(typeof window.cvCloseOrderInquiry === "function"){
+          window.cvCloseOrderInquiry();
+        }
+
+        // Go directly to Deliveries.
+        cvOpenPage("deliveries");
+
+        // READY creates the delivery on the server.
+        // Reload it immediately so the new card appears.
+        if(typeof window.cvLoadDeliveries === "function"){
+          await window.cvLoadDeliveries();
+        }
+
+        return;
+      }
+
       cvShowOrderCommand(orderId);
 
     }catch(error){
@@ -7878,7 +7962,26 @@ document
 
       await cvLoadOrders();
 
-      cvShowOrderCommand(orderId);
+      if(status === "READY"){
+
+        // Production finished -> move directly to deliveries.
+        if(typeof cvCloseOrderInquiry === "function"){
+          cvCloseOrderInquiry();
+        }
+
+        cvOpenPage("deliveries");
+
+        setTimeout(() => {
+          document
+            .getElementById("cvDeliveryRefresh")
+            ?.click();
+        }, 150);
+
+      }else{
+
+        cvShowOrderCommand(orderId);
+
+      }
 
     }catch(error){
 
@@ -8666,6 +8769,9 @@ document
     /* body scroll restore not required */
 
   }
+
+  // Allow other dashboard modules to close the full order card.
+  window.cvCloseOrderInquiry = cvCloseOrderInquiry;
 
 
   function cvRenderOrderInquiryResults(){
@@ -13986,6 +14092,12 @@ document.addEventListener(
         const production =
           productionOf(order);
 
+        // READY means production is finished.
+        // It now belongs in Deliveries, not Production.
+        if(production.status === "READY"){
+          return false;
+        }
+
         const haystack = [
           order.order_number,
           order.product_name,
@@ -14406,13 +14518,11 @@ document.addEventListener(
       ).length
     );
 
+    // READY orders have left the production queue,
+    // so they should not be counted in the active production KPI.
     set(
       "cvFactoryKpiReady",
-      productions.filter(
-        p =>
-          p.status ===
-          "READY"
-      ).length
+      0
     );
 
 
@@ -21679,8 +21789,22 @@ document.addEventListener(
       .trim()
       .toLowerCase();
 
+    const currentRole =
+      String(window.casaVeronaUser?.role || "")
+        .trim()
+        .toUpperCase();
+
     const filtered =
       deliveries.filter(delivery => {
+
+        // Completed deliveries stay in management history,
+        // but disappear from the factory owner's work queue.
+        if(
+          currentRole === "FACTORY_OWNER" &&
+          delivery.status === "DELIVERED"
+        ){
+          return false;
+        }
 
         const order = orderOf(delivery);
 
@@ -22215,6 +22339,13 @@ document.addEventListener(
       }
 
       await load(true);
+
+      if(
+        payload.status === "DELIVERED" &&
+        typeof window.cvCloseOrderInquiry === "function"
+      ){
+        window.cvCloseOrderInquiry();
+      }
 
     }catch(error){
 
