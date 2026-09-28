@@ -1643,6 +1643,13 @@ body.cv-role-factory-owner #cvFactoryOwnerNav button{
         <strong id="cvDeliveryKpiWaiting">0</strong>
       </button>
 
+<button
+        type="button"
+        data-delivery-filter="PENDING_APPROVAL"
+      >
+          ממתין לאישור
+        </button>
+
       <button
         type="button"
         data-delivery-filter="SCHEDULED"
@@ -21611,12 +21618,14 @@ document.addEventListener(
 
   const statusText = status => ({
     WAITING:"ממתין לתיאום",
+    PENDING_APPROVAL:"ממתין לאישור",
     SCHEDULED:"מתוכנן",
     OUT_FOR_DELIVERY:"בדרך ללקוח",
     DELIVERED:"נמסר"
   }[status] || status || "ממתין");
 
   const statusClass = status => ({
+    PENDING_APPROVAL:"waiting",
     SCHEDULED:"scheduled",
     OUT_FOR_DELIVERY:"road",
     DELIVERED:"delivered"
@@ -21633,7 +21642,11 @@ document.addEventListener(
 
     set(
       "cvDeliveryKpiWaiting",
-      deliveries.filter(x => x.status === "WAITING").length
+      deliveries.filter(
+        x =>
+          x.status === "WAITING" ||
+          x.status === "PENDING_APPROVAL"
+      ).length
     );
 
     set(
@@ -21771,129 +21784,317 @@ document.addEventListener(
 
               </div>
 
-              <div class="cv-delivery-form">
+              ${
+                String(window.casaVeronaUser?.role || "")
+                  .trim()
+                  .toUpperCase() === "FACTORY_OWNER"
+                ? `
+                  <div class="cv-delivery-form">
 
-                <label class="cv-delivery-field full">
-                  <span>כתובת אספקה</span>
-                  <input
-                    data-delivery-field="delivery_address"
-                    value="${esc(delivery.delivery_address || "")}"
-                    placeholder="עיר, רחוב, מספר, קומה..."
-                  >
-                </label>
+                    ${
+                      delivery.status === "WAITING"
+                        ? `
+                          <label class="cv-delivery-field">
+                            <span>יום אספקה מוצע</span>
+                            <input
+                              type="date"
+                              data-delivery-field="delivery_date"
+                              value="${esc(delivery.delivery_date || "")}"
+                            >
+                          </label>
 
-                <label class="cv-delivery-field">
-                  <span>תאריך</span>
-                  <input
-                    type="date"
-                    data-delivery-field="delivery_date"
-                    value="${esc(delivery.delivery_date || "")}"
-                  >
-                </label>
+                          <label class="cv-delivery-field">
+                            <span>שעת אספקה מוצעת</span>
+                            <input
+                              type="time"
+                              data-delivery-field="delivery_time"
+                              value="${esc(delivery.delivery_time || "")}"
+                            >
+                          </label>
+                        `
+                        : ""
+                    }
 
-                <label class="cv-delivery-field">
-                  <span>שעה</span>
-                  <input
-                    type="time"
-                    data-delivery-field="delivery_time"
-                    value="${esc(delivery.delivery_time || "")}"
-                  >
-                </label>
+                    ${
+                      delivery.status === "PENDING_APPROVAL"
+                        ? `
+                          <div class="cv-delivery-field full">
+                            <span>המועד שנשלח לאישור</span>
+                            <strong>
+                              ${esc(delivery.delivery_date || "—")}
+                              ·
+                              ${esc(delivery.delivery_time || "—")}
+                            </strong>
+                          </div>
 
-                <label class="cv-delivery-field">
-                  <span>נהג / מוביל</span>
-                  <input
-                    data-delivery-field="driver_name"
-                    value="${esc(delivery.driver_name || "")}"
-                    placeholder="שם הנהג"
-                  >
-                </label>
+                          <div class="cv-delivery-field full">
+                            <span>סטטוס</span>
+                            <strong>ממתין לאישור ההנהלה</strong>
+                          </div>
+                        `
+                        : ""
+                    }
 
-                <label class="cv-delivery-field">
-                  <span>טלפון נהג</span>
-                  <input
-                    type="tel"
-                    data-delivery-field="driver_phone"
-                    value="${esc(delivery.driver_phone || "")}"
-                    placeholder="05..."
-                  >
-                </label>
+                    ${
+                      ["SCHEDULED","OUT_FOR_DELIVERY","DELIVERED"]
+                        .includes(delivery.status)
+                        ? `
+                          <div class="cv-delivery-field full">
+                            <span>כתובת אספקה</span>
+                            <strong>
+                              ${esc(delivery.delivery_address || "—")}
+                            </strong>
+                          </div>
 
-                <label class="cv-delivery-field full">
-                  <span>הערות</span>
-                  <textarea
-                    data-delivery-field="notes"
-                    placeholder="תיאום, קומה, מעלית, הערות למוביל..."
-                  >${esc(delivery.notes || "")}</textarea>
-                </label>
+                          <div class="cv-delivery-field">
+                            <span>תאריך</span>
+                            <strong>
+                              ${esc(delivery.delivery_date || "—")}
+                            </strong>
+                          </div>
 
-              </div>
+                          <div class="cv-delivery-field">
+                            <span>שעה</span>
+                            <strong>
+                              ${esc(delivery.delivery_time || "—")}
+                            </strong>
+                          </div>
+                        `
+                        : ""
+                    }
 
-              <div class="cv-delivery-actions">
+                  </div>
 
-                <button
-                  type="button"
-                  class="cv-delivery-action"
-                  data-delivery-save="${esc(delivery.id)}"
-                >
-                  שמור פרטים
-                </button>
+                  <div class="cv-delivery-actions">
 
-                ${
-                  delivery.status === "WAITING"
-                    ? `
-                      <button
-                        type="button"
-                        class="cv-delivery-action primary"
-                        data-delivery-status="SCHEDULED"
-                        data-delivery-id="${esc(delivery.id)}"
+                    ${
+                      delivery.status === "WAITING"
+                        ? `
+                          <button
+                            type="button"
+                            class="cv-delivery-action primary"
+                            data-delivery-status="PENDING_APPROVAL"
+                            data-delivery-id="${esc(delivery.id)}"
+                          >
+                            שלח לאישור ההנהלה
+                          </button>
+                        `
+                        : ""
+                    }
+
+                    ${
+                      delivery.status === "PENDING_APPROVAL"
+                        ? `
+                          <span class="cv-delivery-action">
+                            ממתין לאישור ההנהלה
+                          </span>
+                        `
+                        : ""
+                    }
+
+                    ${
+                      delivery.status === "SCHEDULED"
+                        ? `
+                          <div class="cv-delivery-field full">
+                            <span>פרטי הלקוח לאספקה</span>
+                            <strong>
+                              ${esc(order.customer_name || "—")}
+                            </strong>
+                          </div>
+
+                          <div class="cv-delivery-field full">
+                            <span>טלפון לקוח</span>
+                            <strong>
+                              ${esc(order.customer_phone || "—")}
+                            </strong>
+                          </div>
+
+                          <div class="cv-delivery-field full">
+                            <span>כתובת אספקה</span>
+                            <strong>
+                              ${esc(delivery.delivery_address || "—")}
+                            </strong>
+                          </div>
+
+                          ${
+                            delivery.location_url
+                              ? `
+                                <a
+                                  class="cv-delivery-action primary"
+                                  href="${esc(delivery.location_url)}"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  📍 פתח ניווט
+                                </a>
+                              `
+                              : ""
+                          }
+
+                          <button
+                            type="button"
+                            class="cv-delivery-action primary"
+                            data-delivery-status="OUT_FOR_DELIVERY"
+                            data-delivery-id="${esc(delivery.id)}"
+                          >
+                            יצא לאספקה
+                          </button>
+                        `
+                        : ""
+                    }
+
+                    ${
+                      delivery.status === "OUT_FOR_DELIVERY"
+                        ? `
+                          <button
+                            type="button"
+                            class="cv-delivery-action primary"
+                            data-delivery-status="DELIVERED"
+                            data-delivery-id="${esc(delivery.id)}"
+                          >
+                            נמסר ללקוח ✓
+                          </button>
+                        `
+                        : ""
+                    }
+
+                    ${
+                      delivery.status === "DELIVERED"
+                        ? `
+                          <span class="cv-delivery-action">
+                            ✓ האספקה הושלמה
+                          </span>
+                        `
+                        : ""
+                    }
+
+                  </div>
+                `
+                : `
+                  <div class="cv-delivery-form">
+
+                    <label class="cv-delivery-field full">
+                      <span>כתובת אספקה</span>
+                      <input
+                        data-delivery-field="delivery_address"
+                        value="${esc(delivery.delivery_address || "")}"
+                        placeholder="עיר, רחוב, מספר, קומה..."
                       >
-                        אשר תיאום אספקה
-                      </button>
-                    `
-                    : ""
-                }
+                    </label>
 
-                ${
-                  delivery.status === "SCHEDULED"
-                    ? `
-                      <button
-                        type="button"
-                        class="cv-delivery-action primary"
-                        data-delivery-status="OUT_FOR_DELIVERY"
-                        data-delivery-id="${esc(delivery.id)}"
+                    <label class="cv-delivery-field full">
+                      <span>מיקום לניווט</span>
+                      <input
+                        type="url"
+                        data-delivery-field="location_url"
+                        value="${esc(delivery.location_url || "")}"
+                        placeholder="הדבק קישור מ-Google Maps או Waze"
                       >
-                        יצא לאספקה
-                      </button>
-                    `
-                    : ""
-                }
+                    </label>
 
-                ${
-                  delivery.status === "OUT_FOR_DELIVERY"
-                    ? `
-                      <button
-                        type="button"
-                        class="cv-delivery-action primary"
-                        data-delivery-status="DELIVERED"
-                        data-delivery-id="${esc(delivery.id)}"
+                    ${
+                      delivery.location_url
+                        ? `
+                          <div class="cv-delivery-field full">
+                            <a
+                              class="cv-delivery-action primary"
+                              href="${esc(delivery.location_url)}"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              📍 פתח ניווט
+                            </a>
+                          </div>
+                        `
+                        : ""
+                    }
+
+                    <label class="cv-delivery-field">
+                      <span>תאריך</span>
+                      <input
+                        type="date"
+                        data-delivery-field="delivery_date"
+                        value="${esc(delivery.delivery_date || "")}"
                       >
-                        נמסר ללקוח ✓
-                      </button>
-                    `
-                    : ""
-                }
+                    </label>
 
-                ${
-                  delivery.status === "DELIVERED"
-                    ? `
-                      <span class="cv-delivery-action">
-                        ✓ האספקה הושלמה
-                      </span>
-                    `
-                    : ""
-                }
+                    <label class="cv-delivery-field">
+                      <span>שעה</span>
+                      <input
+                        type="time"
+                        data-delivery-field="delivery_time"
+                        value="${esc(delivery.delivery_time || "")}"
+                      >
+                    </label>
 
+                    <label class="cv-delivery-field full">
+                      <span>הערות</span>
+                      <textarea
+                        data-delivery-field="notes"
+                        placeholder="קומה, מעלית, תיאום או הערות לאספקה..."
+                      >${esc(delivery.notes || "")}</textarea>
+                    </label>
+
+                  </div>
+
+                  <div class="cv-delivery-actions">
+
+                    <button
+                      type="button"
+                      class="cv-delivery-action"
+                      data-delivery-save="${esc(delivery.id)}"
+                    >
+                      שמור פרטים
+                    </button>
+
+                    ${
+                      delivery.status === "PENDING_APPROVAL"
+                        ? `
+                          <button
+                            type="button"
+                            class="cv-delivery-action primary"
+                            data-delivery-status="SCHEDULED"
+                            data-delivery-id="${esc(delivery.id)}"
+                          >
+                            אשר אספקה
+                          </button>
+                        `
+                        : ""
+                    }
+
+                    ${
+                      delivery.status === "SCHEDULED"
+                        ? `
+                          <span class="cv-delivery-action">
+                            ✓ האספקה אושרה
+                          </span>
+                        `
+                        : ""
+                    }
+
+                    ${
+                      delivery.status === "OUT_FOR_DELIVERY"
+                        ? `
+                          <span class="cv-delivery-action">
+                            האספקה בדרך ללקוח
+                          </span>
+                        `
+                        : ""
+                    }
+
+                    ${
+                      delivery.status === "DELIVERED"
+                        ? `
+                          <span class="cv-delivery-action">
+                            ✓ נמסר ללקוח
+                          </span>
+                        `
+                        : ""
+                    }
+
+                  </div>
+                `
+              }
               </div>
 
             </div>

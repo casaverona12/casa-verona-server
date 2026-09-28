@@ -4104,6 +4104,7 @@ if (
       driver_name,
       driver_phone,
       delivery_address,
+      location_url,
       notes,
       delivered_at,
       created_at,
@@ -4209,6 +4210,7 @@ if (
 
   const allowedStatuses = [
     "WAITING",
+    "PENDING_APPROVAL",
     "SCHEDULED",
     "OUT_FOR_DELIVERY",
     "DELIVERED"
@@ -4232,36 +4234,153 @@ if (
     return;
   }
 
+  const role =
+    String(auth.profile.role || "")
+      .trim()
+      .toUpperCase();
+
   const updateData = {
     updated_at: new Date().toISOString()
   };
 
-  const editableFields = [
-    "delivery_date",
-    "delivery_time",
-    "driver_name",
-    "driver_phone",
-    "delivery_address",
-    "notes"
-  ];
+  // ===================================================
+  // FACTORY OWNER
+  // May only propose delivery date + time.
+  // ===================================================
+  if (role === USER_ROLES.FACTORY_OWNER) {
 
-  for (const field of editableFields) {
-    if (body[field] !== undefined) {
-      updateData[field] =
-        body[field] === ""
-          ? null
-          : body[field];
+    if (
+      body.status !== undefined &&
+      ![
+        "PENDING_APPROVAL",
+        "OUT_FOR_DELIVERY",
+        "DELIVERED"
+      ].includes(body.status)
+    ) {
+      res.writeHead(403, {
+        "Content-Type": "application/json; charset=utf-8"
+      });
+
+      res.end(JSON.stringify({
+        success: false,
+        error: "FACTORY_DELIVERY_STATUS_FORBIDDEN"
+      }));
+
+      return;
     }
-  }
 
-  if (body.status !== undefined) {
-    updateData.status = body.status;
+    if (body.status === "PENDING_APPROVAL") {
 
-    if (body.status === "DELIVERED") {
+      const deliveryDate =
+        String(body.delivery_date || "").trim();
+
+      const deliveryTime =
+        String(body.delivery_time || "").trim();
+
+      if (!deliveryDate || !deliveryTime) {
+        res.writeHead(400, {
+          "Content-Type": "application/json; charset=utf-8"
+        });
+
+        res.end(JSON.stringify({
+          success: false,
+          error: "DELIVERY_DATE_AND_TIME_REQUIRED"
+        }));
+
+        return;
+      }
+
+      updateData.delivery_date = deliveryDate;
+      updateData.delivery_time = deliveryTime;
+      updateData.status = "PENDING_APPROVAL";
+      updateData.delivered_at = null;
+
+    } else if (body.status === "OUT_FOR_DELIVERY") {
+
+      updateData.status = "OUT_FOR_DELIVERY";
+      updateData.delivered_at = null;
+
+    } else if (body.status === "DELIVERED") {
+
+      updateData.status = "DELIVERED";
       updateData.delivered_at =
         new Date().toISOString();
+
     } else {
-      updateData.delivered_at = null;
+
+      // Saving a proposal without changing status.
+      if (body.delivery_date !== undefined) {
+        updateData.delivery_date =
+          body.delivery_date === ""
+            ? null
+            : body.delivery_date;
+      }
+
+      if (body.delivery_time !== undefined) {
+        updateData.delivery_time =
+          body.delivery_time === ""
+            ? null
+            : body.delivery_time;
+      }
+    }
+
+  } else {
+
+    // =================================================
+    // ADMIN
+    // Full delivery management.
+    // =================================================
+
+    // Delivery cannot be approved without an address.
+    if (body.status === "SCHEDULED") {
+
+      const deliveryAddress =
+        String(body.delivery_address || "").trim();
+
+      if (!deliveryAddress) {
+
+        res.writeHead(400, {
+          "Content-Type": "application/json; charset=utf-8"
+        });
+
+        res.end(JSON.stringify({
+          success: false,
+          error: "DELIVERY_ADDRESS_REQUIRED",
+          message: "יש להזין כתובת אספקה לפני האישור."
+        }));
+
+        return;
+      }
+    }
+
+    const editableFields = [
+      "delivery_date",
+      "delivery_time",
+      "driver_name",
+      "driver_phone",
+      "delivery_address",
+      "location_url",
+      "notes"
+    ];
+
+    for (const field of editableFields) {
+      if (body[field] !== undefined) {
+        updateData[field] =
+          body[field] === ""
+            ? null
+            : body[field];
+      }
+    }
+
+    if (body.status !== undefined) {
+      updateData.status = body.status;
+
+      if (body.status === "DELIVERED") {
+        updateData.delivered_at =
+          new Date().toISOString();
+      } else {
+        updateData.delivered_at = null;
+      }
     }
   }
 
@@ -4283,6 +4402,7 @@ if (
       driver_name,
       driver_phone,
       delivery_address,
+      location_url,
       notes,
       delivered_at,
       created_at,
@@ -4293,6 +4413,180 @@ if (
   if (error) {
     throw new Error(
       `SUPABASE UPDATE DELIVERY ERROR: ${error.message}`
+    );
+  }
+
+  // =====================================================
+  // DELIVERY PUSH FLOW
+  // Push failure must never fail the delivery update.
+  // =====================================================
+  try {
+
+    const {
+      data: deliveryOrder,
+      error: deliveryOrderError
+    } = await db
+      .from("orders")
+      .select("id, order_number, customer_name")
+      .eq("id", delivery.order_id)
+      .single();
+
+    if (deliveryOrderError) {
+      console.error(
+        "DELIVERY PUSH ORDER LOAD ERROR:",
+        deliveryOrderError.message
+      );
+    }
+
+    const orderNumber =
+      deliveryOrder?.order_number || "—";
+
+    const dateText =
+      delivery.delivery_date || "ללא תאריך";
+
+    const timeText =
+      delivery.delivery_time || "ללא שעה";
+
+    // ---------------------------------------------------
+    // FACTORY -> ADMIN
+    // Factory proposed a delivery date/time.
+    // ---------------------------------------------------
+    if (
+      role === USER_ROLES.FACTORY_OWNER &&
+      body.status === "PENDING_APPROVAL"
+    ) {
+
+      const pushResult =
+        await sendPushToRole(
+          USER_ROLES.ADMIN,
+          {
+            title:
+              `ישבאב 👋 אספקה #${orderNumber} מחכה לאישור`,
+
+            body:
+              `המפעל ביקש אספקה בתאריך ${dateText} בשעה ${timeText}. לחץ לבדיקה ואישור.`,
+
+            tag:
+              `delivery-approval-${delivery.id}`,
+
+            url:
+              "/dashboard.html",
+
+            delivery_id:
+              delivery.id,
+
+            order_id:
+              delivery.order_id,
+
+            requireInteraction:
+              true
+          }
+        );
+
+      console.log(
+        "DELIVERY APPROVAL ADMIN PUSH:",
+        orderNumber,
+        pushResult
+      );
+    }
+
+    // ---------------------------------------------------
+    // ADMIN -> FACTORY OWNER
+    // Management approved the delivery.
+    // ---------------------------------------------------
+    if (
+      role === USER_ROLES.ADMIN &&
+      body.status === "SCHEDULED"
+    ) {
+
+      const pushResult =
+        await sendPushToRole(
+          USER_ROLES.FACTORY_OWNER,
+          {
+            title:
+              `ישבאב 👋 אספקה #${orderNumber} אושרה`,
+
+            body:
+              `האספקה אושרה ל-${dateText} בשעה ${timeText}. פרטי הלקוח והכתובת זמינים במערכת.`,
+
+            tag:
+              `delivery-scheduled-${delivery.id}`,
+
+            url:
+              "/dashboard.html",
+
+            delivery_id:
+              delivery.id,
+
+            order_id:
+              delivery.order_id,
+
+            requireInteraction:
+              true
+          }
+        );
+
+      console.log(
+        "DELIVERY APPROVED FACTORY PUSH:",
+        orderNumber,
+        pushResult
+      );
+    }
+
+    // ---------------------------------------------------
+    // ADMIN -> FACTORY OWNER
+    // Location added/updated after delivery was approved.
+    // ---------------------------------------------------
+    if (
+      role === USER_ROLES.ADMIN &&
+      body.location_url !== undefined &&
+      String(body.location_url || "").trim() &&
+      body.status !== "SCHEDULED" &&
+      [
+        "SCHEDULED",
+        "OUT_FOR_DELIVERY"
+      ].includes(delivery.status)
+    ) {
+
+      const pushResult =
+        await sendPushToRole(
+          USER_ROLES.FACTORY_OWNER,
+          {
+            title:
+              `ישבאב 👋 עודכן מיקום לאספקה #${orderNumber} 📍`,
+
+            body:
+              `המיקום לניווט נוסף או עודכן. לחץ לצפייה בפרטי האספקה.`,
+
+            tag:
+              `delivery-location-${delivery.id}`,
+
+            url:
+              "/dashboard.html",
+
+            delivery_id:
+              delivery.id,
+
+            order_id:
+              delivery.order_id,
+
+            requireInteraction:
+              true
+          }
+        );
+
+      console.log(
+        "DELIVERY LOCATION FACTORY PUSH:",
+        orderNumber,
+        pushResult
+      );
+    }
+
+  } catch (pushError) {
+
+    console.error(
+      "DELIVERY PUSH ERROR:",
+      pushError?.message || pushError
     );
   }
 
