@@ -3911,27 +3911,9 @@ if (
 const oldStatus = currentProduction.status;
 
 // =====================================================
-// QC SAFETY LOCK
-// Production cannot become READY without a final QC image.
+// QC IMAGE IS OPTIONAL
+// Production may become READY with or without a QC image.
 // =====================================================
-if (
-  body.status === "READY" &&
-  !String(currentProduction.final_image_url || "").trim()
-) {
-  res.writeHead(409, {
-    "Content-Type": "application/json; charset=utf-8"
-  });
-
-  res.end(
-    JSON.stringify({
-      success: false,
-      error: "QC_IMAGE_REQUIRED",
-      message: "יש להעלות תמונת QC לפני סימון ההזמנה כמוכנה."
-    })
-  );
-
-  return;
-}
 
 // Update production status
 const { data, error } =

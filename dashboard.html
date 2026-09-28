@@ -3991,8 +3991,8 @@ if(
           </strong>
 
           <span class="cv-qc-mobile-copy">
-            לפני שהמוצר מסומן כמוכן יש לצלם
-            תמונה עדכנית שלו במפעל.
+            אפשר לצרף תמונת QC מהמצלמה או מהגלריה.
+            ניתן גם לסמן כמוכן ללא תמונה.
           </span>
 
           ${
@@ -4026,7 +4026,6 @@ if(
             <input
               type="file"
               accept="image/*,.heic,.heif"
-              capture="environment"
               data-qc-file
             >
           </label>
@@ -4044,14 +4043,12 @@ if(
             type="button"
             class="cv-qc-ready"
             data-qc-ready
-            ${(!image || ready) ? "disabled" : ""}
+            ${ready ? "disabled" : ""}
           >
             ${
               ready
                 ? "✓ המוצר מוכן"
-                : image
-                  ? "סמן את המוצר כמוכן"
-                  : "נדרש צילום QC לפני סיום"
+                : "סמן את המוצר כמוכן"
             }
           </button>
 
@@ -7962,39 +7959,19 @@ document
 
     }else if(status === "IN_PROGRESS"){
 
-      if(production.final_image_url){
-
-        primary = `
-          <button
-            type="button"
-            class="cv-factory-action primary"
-            data-factory-status="READY"
-            data-factory-order="${cvOrderEscape(order.id)}"
-          >
-            ${cvFactoryText(
-              "סמן כמוכן לאספקה",
-              "تحديد كجاهز للتسليم"
-            )}
-          </button>
-        `;
-
-      }else{
-
-        primary = `
-          <button
-            type="button"
-            class="cv-factory-action primary"
-            disabled
-            style="opacity:.45;cursor:not-allowed;"
-          >
-            ${cvFactoryText(
-              "נדרשת תמונת QC",
-              "مطلوب صورة فحص الجودة"
-            )}
-          </button>
-        `;
-
-      }
+      primary = `
+        <button
+          type="button"
+          class="cv-factory-action primary"
+          data-factory-status="READY"
+          data-factory-order="${cvOrderEscape(order.id)}"
+        >
+          ${cvFactoryText(
+            "סמן כמוכן לאספקה",
+            "تحديد كجاهز للتسليم"
+          )}
+        </button>
+      `;
 
     }else if(status === "READY"){
 
@@ -8049,7 +8026,6 @@ document
             <input
               type="file"
               accept="image/*"
-              capture="environment"
               data-factory-qc="${cvOrderEscape(order.id)}"
               hidden
             >
