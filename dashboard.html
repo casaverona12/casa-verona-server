@@ -22645,7 +22645,14 @@ document.addEventListener(
       );
 
     if(!order){
-      alert("לא ניתן למצוא את ההזמנה.");
+      alert(
+        "לא ניתן למצוא את ההזמנה.\n\n" +
+        "ORDER ID: " + orderId + "\n" +
+        "ADMIN: " + adminOrders.length + "\n" +
+        "WINDOW: " + windowOrders.length + "\n" +
+        "FACTORY: " + factoryOrders.length
+      );
+      console.trace("OPEN EDITOR ORDER NOT FOUND", orderId);
       return;
     }
 
