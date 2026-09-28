@@ -4599,6 +4599,16 @@ if (
     // Approved factory order enters the production floor.
     updateData.status = "IN_PROGRESS";
     updateData.started_at = now;
+
+  } else if (approvalStatus === "PENDING") {
+
+    // Approval was cancelled / returned for correction.
+    updateData.approved_at = null;
+    updateData.approved_by = null;
+    updateData.status = "WAITING";
+    updateData.started_at = null;
+    updateData.ready_at = null;
+
   } else {
     updateData.approved_at = null;
     updateData.approved_by = null;
@@ -4648,7 +4658,9 @@ if (
           ? "ORDER_APPROVED"
           : approvalStatus === "REJECTED"
             ? "ORDER_REJECTED"
-            : "APPROVAL_UPDATED"
+            : currentProduction.approval_status === "APPROVED"
+              ? "ORDER_APPROVAL_CANCELLED"
+              : "APPROVAL_UPDATED"
     });
 
   if (activityError) {

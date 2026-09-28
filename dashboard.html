@@ -14067,16 +14067,39 @@ document.addEventListener(
                   )}
                 </span>
 
-                <button
-                  type="button"
-                  class="cv-factory-open"
-                  data-factory-open-order="${esc(order.id)}"
-                >
-                  ${t(
-                    "פתח הזמנה ←",
-                    "فتح الطلب ←"
-                  )}
-                </button>
+                <div class="cv-factory-footer-actions">
+
+                  ${
+                    production.approval_status === "APPROVED" &&
+                    production.status !== "READY"
+                      ? `
+                        <button
+                          type="button"
+                          class="cv-factory-cancel-approval"
+                          data-cancel-factory-approval="${esc(production.id)}"
+                          data-cancel-order-number="${esc(order.order_number || "")}"
+                        >
+                          ${t(
+                            "בטל אישור",
+                            "إلغاء الموافقة"
+                          )}
+                        </button>
+                      `
+                      : ""
+                  }
+
+                  <button
+                    type="button"
+                    class="cv-factory-open"
+                    data-factory-open-order="${esc(order.id)}"
+                  >
+                    ${t(
+                      "פתח הזמנה ←",
+                      "فتح الطلب ←"
+                    )}
+                  </button>
+
+                </div>
 
               </div>
 
@@ -14088,6 +14111,134 @@ document.addEventListener(
       }).join("");
 
   }
+
+
+
+  async function cancelFactoryApproval(
+    productionId,
+    orderNumber,
+    button
+  ){
+
+    if(!productionId){
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `לבטל את אישור הזמנה #${orderNumber || "—"} ולהחזיר אותה לאישור מחדש?
+
+השתמש באפשרות הזאת אם אושרה הזמנה בטעות או אם צריך לתקן בד, צבע, מידה או פרט אחר.`
+    );
+
+    if(!confirmed){
+      return;
+    }
+
+    const reason = window.prompt(
+      "מה הסיבה להחזרת ההזמנה לאישור?\nלדוגמה: שינוי בד / צבע / מידה / אושר בטעות",
+      ""
+    );
+
+    if(reason === null){
+      return;
+    }
+
+    const cleanReason =
+      String(reason || "").trim();
+
+    if(button){
+      button.disabled = true;
+      button.textContent = "מחזיר לאישור...";
+    }
+
+    try{
+
+      const response =
+        await fetch(
+          `/api/factory/approval/${encodeURIComponent(productionId)}`,
+          {
+            method:"PATCH",
+            credentials:"include",
+            cache:"no-store",
+
+            headers:{
+              "Content-Type":"application/json"
+            },
+
+            body:JSON.stringify({
+              approval_status:"PENDING",
+              factory_notes:
+                cleanReason
+                  ? `הוחזר לאישור: ${cleanReason}`
+                  : "הוחזר לאישור מחדש"
+            })
+          }
+        );
+
+      const data =
+        await response
+          .json()
+          .catch(() => ({}));
+
+      if(
+        !response.ok ||
+        !data?.success
+      ){
+        throw new Error(
+          data?.error ||
+          "לא ניתן לבטל את האישור."
+        );
+      }
+
+      await loadFactoryOrders();
+
+      alert(
+        `הזמנה #${orderNumber || "—"} הוחזרה לאישור מחדש ✓`
+      );
+
+    }catch(error){
+
+      console.error(
+        "CANCEL FACTORY APPROVAL:",
+        error
+      );
+
+      alert(
+        error?.message ||
+        "לא ניתן לבטל את האישור."
+      );
+
+      if(button){
+        button.disabled = false;
+        button.textContent = "בטל אישור";
+      }
+    }
+  }
+
+
+  document.addEventListener(
+    "click",
+    event => {
+
+      const button =
+        event.target.closest(
+          "[data-cancel-factory-approval]"
+        );
+
+      if(!button){
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      cancelFactoryApproval(
+        button.dataset.cancelFactoryApproval,
+        button.dataset.cancelOrderNumber,
+        button
+      );
+    }
+  );
 
 
   function updateKpis(){
@@ -21875,6 +22026,54 @@ document.addEventListener(
 
 })();
 </script>
+
+
+<style id="cv-cancel-factory-approval-style">
+
+.cv-factory-footer-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.cv-factory-cancel-approval{
+  appearance:none;
+  border:1px solid rgba(160,40,40,.24);
+  background:rgba(160,40,40,.06);
+  color:#8f2929;
+  border-radius:12px;
+  padding:11px 15px;
+  font:inherit;
+  font-weight:800;
+  cursor:pointer;
+  transition:.18s ease;
+}
+
+.cv-factory-cancel-approval:hover{
+  background:rgba(160,40,40,.11);
+  border-color:rgba(160,40,40,.38);
+}
+
+.cv-factory-cancel-approval:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
+
+@media(max-width:700px){
+
+  .cv-factory-footer-actions{
+    width:100%;
+  }
+
+  .cv-factory-footer-actions button{
+    flex:1;
+    min-width:130px;
+  }
+
+}
+
+</style>
 
 </body>
 </html>
