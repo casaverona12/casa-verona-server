@@ -2437,6 +2437,27 @@ document.addEventListener("click",e=>{const n=e.target.closest("[data-page]"),o=
       window.casaVeronaUser =
         user;
 
+      // -------------------------------------------------
+      // PUSH STATUS
+      // User is now known, so restore the correct
+      // notification state for ADMIN / FACTORY_OWNER.
+      // -------------------------------------------------
+      if (
+        typeof cvCheckPushStatus === "function"
+      ) {
+        setTimeout(
+          () => {
+            cvCheckPushStatus().catch(error => {
+              console.error(
+                "PUSH STATUS AFTER USER LOAD:",
+                error
+              );
+            });
+          },
+          0
+        );
+      }
+
 
       // =================================================
       // CASA VERONA — ROLE BASED UI
@@ -3697,16 +3718,8 @@ async function cvCheckPushStatus(){
     );
 });
 
-if(
-  document.readyState === "loading"
-){
-  document.addEventListener(
-    "DOMContentLoaded",
-    cvCheckPushStatus
-  );
-}else{
-  cvCheckPushStatus();
-}
+// Push status is checked only after
+// the authenticated user has been loaded.
 </script>
 
 
