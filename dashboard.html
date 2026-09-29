@@ -747,9 +747,19 @@ body.cv-role-factory-owner #cvFactoryOwnerNav button{
         class="attention"
         data-factory-home-open="production"
       >
-        <small>NEEDS ATTENTION</small>
+        <small>OVERDUE</small>
+        <strong id="cvFoLate">0</strong>
+        <span>באיחור</span>
+      </button>
+
+      <button
+        type="button"
+        class="attention"
+        data-factory-home-open="production"
+      >
+        <small>DEADLINE SOON</small>
         <strong id="cvFoRisk">0</strong>
-        <span>דורשות טיפול</span>
+        <span>1–3 ימים לדדליין</span>
       </button>
 
       <button
@@ -14564,50 +14574,78 @@ document.addEventListener(
       new Date();
 
 
+    const deadlineDays = order => {
+
+      const p =
+        productionOf(order);
+
+      if(p.status === "READY"){
+        return null;
+      }
+
+      const rawDate =
+        p.due_date ||
+        order.target_delivery_date;
+
+      if(!rawDate){
+        return null;
+      }
+
+      const due =
+        new Date(rawDate);
+
+      if(Number.isNaN(due.getTime())){
+        return null;
+      }
+
+      // Compare calendar days instead of raw hours.
+      const today =
+        new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate()
+        );
+
+      const dueDay =
+        new Date(
+          due.getFullYear(),
+          due.getMonth(),
+          due.getDate()
+        );
+
+      return Math.round(
+        (dueDay.getTime() - today.getTime()) /
+        (1000 * 60 * 60 * 24)
+      );
+
+    };
+
+
+    const lateOrders =
+      cvFactoryOrders.filter(order => {
+
+        const days =
+          deadlineDays(order);
+
+        return (
+          days !== null &&
+          days < 0
+        );
+
+      });
+
+
     const riskOrders =
       cvFactoryOrders.filter(order => {
 
-        const p =
-          productionOf(order);
-
-        if(
-          p.status === "READY"
-        ){
-          return false;
-        }
-
-        const rawDate =
-          p.due_date ||
-          order.target_delivery_date;
-
-        if(!rawDate){
-          return false;
-        }
-
-        const due =
-          new Date(rawDate);
-
-        if(
-          Number.isNaN(
-            due.getTime()
-          )
-        ){
-          return false;
-        }
-
-        const diff =
-          due.getTime() -
-          now.getTime();
-
         const days =
-          diff /
-          (1000 * 60 * 60 * 24);
+          deadlineDays(order);
 
-        /*
-          Risk =
-          already late OR due within 3 days.
-        */
-        return days <= 3;
+        return (
+          days !== null &&
+          days >= 0 &&
+          days <= 3
+        );
 
       });
 
@@ -14620,6 +14658,11 @@ document.addEventListener(
     set(
       "cvFoProgress",
       progressOrders.length
+    );
+
+    set(
+      "cvFoLate",
+      lateOrders.length
     );
 
     set(
