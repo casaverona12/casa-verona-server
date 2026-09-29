@@ -9454,7 +9454,26 @@ await saveMessage({
                 payload?.data?.channelId ||
                 payload?.data?.channel?.id ||
                 payload?.channelId ||
-                null
+                null,
+              messageId:
+                payload?.data?.id || null,
+              contentType:
+                payload?.data?.type || null,
+              contentKeys:
+                payload?.data?.content &&
+                typeof payload.data.content === "object"
+                  ? Object.keys(payload.data.content)
+                  : [],
+              contactKeys:
+                payload?.data?.contact &&
+                typeof payload.data.contact === "object"
+                  ? Object.keys(payload.data.contact)
+                  : [],
+              chatKeys:
+                payload?.data?.chat &&
+                typeof payload.data.chat === "object"
+                  ? Object.keys(payload.data.chat)
+                  : []
             }
           );
 
