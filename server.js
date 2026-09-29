@@ -9312,7 +9312,7 @@ await saveMessage({
                   Authorization: `Bearer ${HEYY_API_KEY}`
                 },
                 body: JSON.stringify({
-                  to: "+972542009065",
+                  phoneNumber: "+972542009065",
                   type: "DOCUMENT",
                   fileId
                 })
