@@ -9438,55 +9438,181 @@ await saveMessage({
             return;
           }
 
+          const heyyMessage = payload?.data || {};
+
+          const sender =
+            String(heyyMessage.sender || "").toLowerCase();
+
+          const messageId =
+            String(heyyMessage.id || "").trim();
+
+          const phone =
+            String(
+              heyyMessage?.contact?.phoneNumber || ""
+            ).trim();
+
+          const customerMessage =
+            String(
+              heyyMessage?.content?.body || ""
+            ).trim();
+
+          const channelId =
+            String(
+              heyyMessage?.channel?.id || ""
+            ).trim();
+
           console.log(
             "📩 HEYY WEBHOOK RECEIVED",
             {
               received_at: new Date().toISOString(),
-              keys:
-                payload && typeof payload === "object"
-                  ? Object.keys(payload)
-                  : [],
-              data_keys:
-                payload?.data && typeof payload.data === "object"
-                  ? Object.keys(payload.data)
-                  : [],
-              channelId:
-                payload?.data?.channelId ||
-                payload?.data?.channel?.id ||
-                payload?.channelId ||
-                null,
-              messageId:
-                payload?.data?.id || null,
-              sender:
-                payload?.data?.sender || null,
-              contentType:
-                payload?.data?.type || null,
-              contentKeys:
-                payload?.data?.content &&
-                typeof payload.data.content === "object"
-                  ? Object.keys(payload.data.content)
-                  : [],
-              contactKeys:
-                payload?.data?.contact &&
-                typeof payload.data.contact === "object"
-                  ? Object.keys(payload.data.contact)
-                  : [],
-              chatKeys:
-                payload?.data?.chat &&
-                typeof payload.data.chat === "object"
-                  ? Object.keys(payload.data.chat)
-                  : []
+              sender,
+              messageId,
+              channelId,
+              has_phone: Boolean(phone),
+              has_text: Boolean(customerMessage)
             }
           );
 
+          // Only customer-originated messages are allowed
+          // into the sales engine.
+          if (sender !== "inbound") {
+            sendJSON(res, 200, {
+              success: true,
+              received: true,
+              ignored: "NOT_INBOUND"
+            });
+            return;
+          }
+
+          // Analyze-only currently handles text.
+          // Attachments/media will be added separately.
+          if (!customerMessage) {
+            sendJSON(res, 200, {
+              success: true,
+              received: true,
+              ignored: "NO_TEXT"
+            });
+            return;
+          }
+
+          if (!phone || !messageId) {
+            console.error(
+              "HEYY MESSAGE MISSING REQUIRED DATA",
+              {
+                has_phone: Boolean(phone),
+                has_message_id: Boolean(messageId)
+              }
+            );
+
+            sendJSON(res, 200, {
+              success: true,
+              received: true,
+              ignored: "MISSING_REQUIRED_DATA"
+            });
+            return;
+          }
+
+          const lead =
+            await getOrCreateLead(phone);
+
+          // Durable dedupe:
+          // whatsapp_message_id is unique in Supabase.
+          const savedIncomingMessage =
+            await saveMessage({
+              leadId: lead.id,
+              direction: "INCOMING",
+              sender: "CUSTOMER",
+              content: customerMessage,
+              whatsappMessageId: messageId
+            });
+
+          if (!savedIncomingMessage) {
+            console.log(
+              "♻️ DUPLICATE HEYY MESSAGE:",
+              messageId
+            );
+
+            sendJSON(res, 200, {
+              success: true,
+              received: true,
+              duplicate: true
+            });
+            return;
+          }
+
+          const customerBrain =
+            await loadCustomerBrain(lead.id);
+
+          const fullConversation =
+            await loadConversation(lead.id, 15);
+
+          // Current incoming message is already stored,
+          // so remove it from prior conversation context.
+          const conversation =
+            fullConversation.slice(0, -1);
+
+          // EXACTLY ONE AI CALL.
+          const result =
+            await runSalesEngine(
+              customerMessage,
+              conversation,
+              customerBrain
+            );
+
+          const analysis =
+            result.analysis;
+
+          await updateLeadFromAnalysis(
+            lead.id,
+            analysis
+          );
+
+          await saveAIState(
+            lead.id,
+            analysis
+          );
+
+          await scheduleSmartFollowup(
+            lead.id,
+            analysis
+          );
+
+          await saveCallbackRequest(
+            lead.id,
+            analysis
+          );
+
+          console.log(
+            "🧠 HEYY SALES AGENT ANALYZED",
+            {
+              lead_id: lead.id,
+              message_id: messageId,
+              stage: analysis?.stage || null,
+              temperature:
+                analysis?.temperature || null,
+              next_action:
+                analysis?.next_action || null,
+              quote_ready:
+                analysis?.quote_ready === true,
+              needs_human:
+                analysis?.needs_human === true,
+              should_offer_catalog:
+                analysis?.should_offer_catalog === true
+            }
+          );
+
+          // IMPORTANT:
+          // Analyze-only mode.
+          // result.reply is intentionally NOT sent yet.
           sendJSON(res, 200, {
             success: true,
-            received: true
+            received: true,
+            analyzed: true,
+            mode: "ANALYZE_ONLY"
           });
 
           return;
         }
-
 
         // -----------------------------------------------
         // 404
