@@ -257,6 +257,174 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}bu
   .cv-leads-kpis{grid-template-columns:1fr}
 }
 
+
+/* CASA VERONA — LEAD CONTROL MODAL */
+.cv-lead-row{
+  cursor:pointer;
+}
+
+.cv-lead-modal{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+}
+
+.cv-lead-modal.open{
+  display:flex;
+}
+
+.cv-lead-modal-backdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(11,11,10,.55);
+  backdrop-filter:blur(7px);
+}
+
+.cv-lead-modal-card{
+  position:relative;
+  z-index:1;
+  width:min(720px,100%);
+  max-height:88vh;
+  overflow:auto;
+  background:#fff;
+  border:1px solid #dedad1;
+  box-shadow:0 30px 90px rgba(0,0,0,.22);
+  padding:30px;
+}
+
+.cv-lead-modal-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:20px;
+  padding-bottom:22px;
+  border-bottom:1px solid #ece9e2;
+}
+
+.cv-lead-modal-head small,
+.cv-lead-ai-control small,
+.cv-lead-modal-grid small{
+  display:block;
+  color:#8a847b;
+  font-size:7px;
+  letter-spacing:1.6px;
+  margin-bottom:7px;
+}
+
+.cv-lead-modal-head h3{
+  margin:0 0 6px;
+  font:400 28px Georgia,serif;
+}
+
+.cv-lead-modal-head > div > span{
+  color:#777168;
+  font-size:10px;
+}
+
+.cv-lead-modal-x{
+  width:38px;
+  height:38px;
+  border:1px solid #dedad1;
+  background:#fff;
+  cursor:pointer;
+  font-size:22px;
+}
+
+.cv-lead-ai-control{
+  margin-top:22px;
+  padding:20px;
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:14px;
+  align-items:center;
+  background:#f7f5ef;
+  border:1px solid #e4e0d7;
+}
+
+.cv-lead-ai-control strong{
+  display:block;
+  font:400 18px Georgia,serif;
+}
+
+#cvLeadAITimer{
+  display:block;
+  margin-top:5px;
+  color:#6f1d2c;
+  font-size:9px;
+}
+
+.cv-lead-pause-btn,
+.cv-lead-resume-btn{
+  min-height:42px;
+  padding:0 16px;
+  border:1px solid #0b0b0a;
+  cursor:pointer;
+  font-size:9px;
+  font-weight:650;
+}
+
+.cv-lead-pause-btn{
+  background:#0b0b0a;
+  color:#fff;
+}
+
+.cv-lead-resume-btn{
+  background:#fff;
+  color:#0b0b0a;
+}
+
+.cv-lead-modal-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:1px;
+  margin-top:22px;
+  background:#e5e1d8;
+  border:1px solid #e5e1d8;
+}
+
+.cv-lead-modal-grid article{
+  min-height:110px;
+  padding:18px;
+  background:#fff;
+}
+
+.cv-lead-modal-grid p{
+  margin:0;
+  color:#39352f;
+  font-size:10px;
+  line-height:1.7;
+}
+
+@media(max-width:600px){
+  .cv-lead-modal{
+    padding:0;
+    align-items:flex-end;
+  }
+
+  .cv-lead-modal-card{
+    width:100%;
+    max-height:92vh;
+    padding:22px 18px 28px;
+  }
+
+  .cv-lead-ai-control{
+    grid-template-columns:1fr;
+  }
+
+  .cv-lead-pause-btn,
+  .cv-lead-resume-btn{
+    width:100%;
+  }
+
+  .cv-lead-modal-grid{
+    grid-template-columns:1fr;
+  }
+}
+
 /* MODULE PAGES */
 .cv-section-head{margin-bottom:22px}.cv-section-head small{display:block;color:var(--wine);font:400 8px Georgia,serif;letter-spacing:2.5px;margin-bottom:8px}.cv-section-head h1{margin:0;font:400 40px Georgia,serif;letter-spacing:-1.5px}.cv-section-head p{margin:8px 0 0;color:var(--muted);font-size:11px}
 .cv-modules{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.cv-module{min-height:220px;padding:22px;border:1px solid var(--line);background:#fff}.cv-module.dark{background:#171613;color:#fff;border-color:#171613}.cv-module small{font-size:7px;letter-spacing:2px;color:var(--wine)}.cv-module.dark small{color:#d7d2c8}.cv-module h3{margin:28px 0 10px;font:400 22px Georgia,serif}.cv-module p{margin:0;color:var(--muted);font-size:10px;line-height:1.8}.cv-module.dark p{color:rgba(255,255,255,.48)}.cv-empty{margin-top:14px;min-height:170px;display:grid;place-items:center;border:1px dashed #d5d0c6;background:rgba(255,255,255,.4);color:#8b857c;font-size:10px}
@@ -974,6 +1142,80 @@ body.cv-role-factory-owner #cvFactoryOwnerNav button{
       <div class="cv-leads-loading">
         טוען את הלידים של Casa Verona...
       </div>
+    </div>
+  </div>
+
+  <!-- CASA VERONA — LEAD CONTROL MODAL -->
+  <div class="cv-lead-modal" id="cvLeadModal">
+    <div class="cv-lead-modal-backdrop" data-lead-close></div>
+
+    <div class="cv-lead-modal-card">
+
+      <div class="cv-lead-modal-head">
+        <div>
+          <small>CASA VERONA · SALES INTELLIGENCE</small>
+          <h3 id="cvLeadModalPhone">פרטי ליד</h3>
+          <span id="cvLeadModalProduct">—</span>
+        </div>
+
+        <button
+          type="button"
+          class="cv-lead-modal-x"
+          data-lead-close
+        >×</button>
+      </div>
+
+      <div class="cv-lead-ai-control">
+
+        <div>
+          <small>SALES AGENT</small>
+          <strong id="cvLeadAIStatus">🤖 AI פעיל</strong>
+          <span id="cvLeadAITimer"></span>
+        </div>
+
+        <button
+          type="button"
+          id="cvLeadPauseAI"
+          class="cv-lead-pause-btn"
+        >
+          👤 אני מטפל — 4 דקות
+        </button>
+
+        <button
+          type="button"
+          id="cvLeadResumeAI"
+          class="cv-lead-resume-btn"
+          hidden
+        >
+          🤖 החזר ל-AI עכשיו
+        </button>
+
+      </div>
+
+      <div class="cv-lead-modal-grid">
+
+        <article>
+          <small>סיכום AI</small>
+          <p id="cvLeadModalSummary">—</p>
+        </article>
+
+        <article>
+          <small>פעולה הבאה</small>
+          <p id="cvLeadModalNextAction">—</p>
+        </article>
+
+        <article>
+          <small>שלב</small>
+          <p id="cvLeadModalStage">—</p>
+        </article>
+
+        <article>
+          <small>כוונת רכישה</small>
+          <p id="cvLeadModalIntent">—</p>
+        </article>
+
+      </div>
+
     </div>
   </div>
 
@@ -1927,7 +2169,10 @@ function cvRenderLeads(){
     else if(needsHuman) badgeClass = "human";
 
     return `
-      <article class="cv-lead-row">
+      <article
+        class="cv-lead-row"
+        data-cv-lead-id="${cvEscapeHTML(lead.id)}"
+      >
 
         <div>
           <strong class="cv-lead-phone">
@@ -1994,6 +2239,253 @@ function cvUpdateLeadsKPIs(){
   cvSet("cvLeadsHot",hot);
   cvSet("cvLeadsHuman",human);
   cvSet("cvLeadsQuote",quote);
+}
+
+
+let cvActiveLeadId = null;
+let cvLeadAITimerInterval = null;
+
+function cvFindLead(leadId){
+  return cvLeadsData.find(
+    lead => String(lead.id) === String(leadId)
+  ) || null;
+}
+
+function cvIsAIPaused(lead){
+  const ai = cvLeadAIState(lead);
+  const pausedUntil = ai?.ai_paused_until;
+
+  if(!pausedUntil) return false;
+
+  return new Date(pausedUntil).getTime() > Date.now();
+}
+
+function cvFormatPauseTime(ms){
+  const totalSeconds = Math.max(
+    0,
+    Math.ceil(ms / 1000)
+  );
+
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+
+  return `${String(minutes).padStart(2,"0")}:${String(seconds).padStart(2,"0")}`;
+}
+
+function cvRenderLeadAIControl(){
+  if(!cvActiveLeadId) return;
+
+  const lead = cvFindLead(cvActiveLeadId);
+  if(!lead) return;
+
+  const ai = cvLeadAIState(lead);
+
+  const status =
+    document.getElementById("cvLeadAIStatus");
+
+  const timer =
+    document.getElementById("cvLeadAITimer");
+
+  const pauseBtn =
+    document.getElementById("cvLeadPauseAI");
+
+  const resumeBtn =
+    document.getElementById("cvLeadResumeAI");
+
+  if(cvLeadAITimerInterval){
+    clearInterval(cvLeadAITimerInterval);
+    cvLeadAITimerInterval = null;
+  }
+
+  const update = ()=>{
+    const pausedUntil =
+      ai?.ai_paused_until
+        ? new Date(ai.ai_paused_until).getTime()
+        : 0;
+
+    const remaining =
+      pausedUntil - Date.now();
+
+    if(remaining > 0){
+      if(status) status.textContent = "👤 נציג מטפל";
+      if(timer){
+        timer.textContent =
+          `ה-AI חוזר בעוד ${cvFormatPauseTime(remaining)}`;
+      }
+
+      if(pauseBtn) pauseBtn.hidden = true;
+      if(resumeBtn) resumeBtn.hidden = false;
+      return;
+    }
+
+    if(status) status.textContent = "🤖 AI פעיל";
+    if(timer) timer.textContent = "";
+
+    if(pauseBtn) pauseBtn.hidden = false;
+    if(resumeBtn) resumeBtn.hidden = true;
+
+    if(cvLeadAITimerInterval){
+      clearInterval(cvLeadAITimerInterval);
+      cvLeadAITimerInterval = null;
+    }
+  };
+
+  update();
+
+  if(cvIsAIPaused(lead)){
+    cvLeadAITimerInterval =
+      setInterval(update,1000);
+  }
+}
+
+function cvOpenLeadModal(leadId){
+  const lead = cvFindLead(leadId);
+  if(!lead) return;
+
+  cvActiveLeadId = lead.id;
+
+  const ai = cvLeadAIState(lead);
+
+  cvSet(
+    "cvLeadModalPhone",
+    cvLeadText(lead.phone,"פרטי ליד")
+  );
+
+  cvSet(
+    "cvLeadModalProduct",
+    cvLeadText(
+      lead.product_interest,
+      "ללא מוצר שנבחר"
+    )
+  );
+
+  cvSet(
+    "cvLeadModalSummary",
+    cvLeadText(
+      lead.summary || ai.summary,
+      "אין עדיין סיכום AI"
+    )
+  );
+
+  cvSet(
+    "cvLeadModalNextAction",
+    cvLeadText(ai.next_action)
+  );
+
+  cvSet(
+    "cvLeadModalStage",
+    cvLeadText(
+      lead.stage ||
+      lead.temperature ||
+      lead.intent
+    )
+  );
+
+  cvSet(
+    "cvLeadModalIntent",
+    cvLeadText(
+      lead.intent ||
+      ai.intent
+    )
+  );
+
+  document
+    .getElementById("cvLeadModal")
+    ?.classList.add("open");
+
+  cvRenderLeadAIControl();
+}
+
+function cvCloseLeadModal(){
+  document
+    .getElementById("cvLeadModal")
+    ?.classList.remove("open");
+
+  cvActiveLeadId = null;
+
+  if(cvLeadAITimerInterval){
+    clearInterval(cvLeadAITimerInterval);
+    cvLeadAITimerInterval = null;
+  }
+}
+
+async function cvPauseLeadAI(){
+  if(!cvActiveLeadId) return;
+
+  const button =
+    document.getElementById("cvLeadPauseAI");
+
+  if(button) button.disabled = true;
+
+  try{
+    const response = await fetch(
+      `/api/admin/leads/${encodeURIComponent(cvActiveLeadId)}/pause-ai`,
+      {
+        method:"POST",
+        credentials:"include",
+        cache:"no-store"
+      }
+    );
+
+    const data = await response.json();
+
+    if(!response.ok || !data?.success){
+      throw new Error("לא הצלחנו להשהות את ה-AI.");
+    }
+
+    const lead = cvFindLead(cvActiveLeadId);
+    const ai = cvLeadAIState(lead);
+
+    ai.ai_paused_until =
+      data.ai_paused_until;
+
+    cvRenderLeadAIControl();
+
+  }catch(error){
+    console.error("CASA VERONA AI PAUSE:",error);
+    alert(error.message || "שגיאה בהשהיית ה-AI.");
+  }finally{
+    if(button) button.disabled = false;
+  }
+}
+
+async function cvResumeLeadAI(){
+  if(!cvActiveLeadId) return;
+
+  const button =
+    document.getElementById("cvLeadResumeAI");
+
+  if(button) button.disabled = true;
+
+  try{
+    const response = await fetch(
+      `/api/admin/leads/${encodeURIComponent(cvActiveLeadId)}/resume-ai`,
+      {
+        method:"POST",
+        credentials:"include",
+        cache:"no-store"
+      }
+    );
+
+    const data = await response.json();
+
+    if(!response.ok || !data?.success){
+      throw new Error("לא הצלחנו להחזיר את ה-AI.");
+    }
+
+    const lead = cvFindLead(cvActiveLeadId);
+    const ai = cvLeadAIState(lead);
+
+    ai.ai_paused_until = null;
+
+    cvRenderLeadAIControl();
+
+  }catch(error){
+    console.error("CASA VERONA AI RESUME:",error);
+    alert(error.message || "שגיאה בהחזרת ה-AI.");
+  }finally{
+    if(button) button.disabled = false;
+  }
 }
 
 async function cvLoadLeads(force=false){
@@ -2066,6 +2558,40 @@ document
 document
   .getElementById("cvLeadsRefresh")
   ?.addEventListener("click",()=>cvLoadLeads(true));
+
+// Open lead control card.
+document
+  .getElementById("cvLeadsList")
+  ?.addEventListener("click",(event)=>{
+    const row = event.target.closest("[data-cv-lead-id]");
+    if(!row) return;
+
+    cvOpenLeadModal(row.dataset.cvLeadId);
+  });
+
+// Close lead control card.
+document
+  .querySelectorAll("[data-lead-close]")
+  .forEach(element=>{
+    element.addEventListener("click",cvCloseLeadModal);
+  });
+
+// Pause AI for 4 minutes.
+document
+  .getElementById("cvLeadPauseAI")
+  ?.addEventListener("click",cvPauseLeadAI);
+
+// Resume AI immediately.
+document
+  .getElementById("cvLeadResumeAI")
+  ?.addEventListener("click",cvResumeLeadAI);
+
+// ESC closes lead card.
+document.addEventListener("keydown",(event)=>{
+  if(event.key === "Escape"){
+    cvCloseLeadModal();
+  }
+});
 
 
 function cvOpenPage(id){

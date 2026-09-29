@@ -539,6 +539,88 @@ async function saveAIState(
   }
 }
 // ======================================================
+// CASA VERONA — HUMAN AI PAUSE CONTROL
+// ======================================================
+
+async function pauseAIForLead(leadId, minutes = 4) {
+  const db = requireSupabase();
+
+  const safeMinutes = Math.max(
+    1,
+    Math.min(Number(minutes) || 4, 30)
+  );
+
+  const pausedUntil = new Date(
+    Date.now() + safeMinutes * 60 * 1000
+  ).toISOString();
+
+  const { error } = await db
+    .from("lead_ai_state")
+    .upsert(
+      {
+        lead_id: leadId,
+        ai_paused_until: pausedUntil
+      },
+      {
+        onConflict: "lead_id"
+      }
+    );
+
+  if (error) {
+    throw new Error(
+      `SUPABASE PAUSE AI ERROR: ${error.message}`
+    );
+  }
+
+  return pausedUntil;
+}
+
+async function resumeAIForLead(leadId) {
+  const db = requireSupabase();
+
+  const { error } = await db
+    .from("lead_ai_state")
+    .update({
+      ai_paused_until: null
+    })
+    .eq("lead_id", leadId);
+
+  if (error) {
+    throw new Error(
+      `SUPABASE RESUME AI ERROR: ${error.message}`
+    );
+  }
+}
+
+async function getAIPauseState(leadId) {
+  const db = requireSupabase();
+
+  const { data, error } = await db
+    .from("lead_ai_state")
+    .select("ai_paused_until")
+    .eq("lead_id", leadId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(
+      `SUPABASE AI PAUSE CHECK ERROR: ${error.message}`
+    );
+  }
+
+  const pausedUntil =
+    data?.ai_paused_until || null;
+
+  const paused =
+    Boolean(pausedUntil) &&
+    new Date(pausedUntil).getTime() > Date.now();
+
+  return {
+    paused,
+    paused_until: pausedUntil
+  };
+}
+
+// ======================================================
 // CASA VERONA — SMART FOLLOW-UP ENGINE
 // ======================================================
 
@@ -3944,6 +4026,72 @@ if (
 
 
 // -----------------------------------------------
+// API - AI PAUSE / RESUME
+// ADMIN ONLY
+// -----------------------------------------------
+
+const aiPauseMatch =
+  url.pathname.match(
+    /^\/api\/admin\/leads\/([^/]+)\/pause-ai$/
+  );
+
+if (
+  req.method === "POST" &&
+  aiPauseMatch
+) {
+  const auth = await requireAuth(req, res, ["ADMIN"]);
+
+  if (!auth) {
+    return;
+  }
+
+  const leadId =
+    decodeURIComponent(aiPauseMatch[1]);
+
+  const pausedUntil =
+    await pauseAIForLead(leadId, 4);
+
+  sendJSON(res, 200, {
+    success: true,
+    lead_id: leadId,
+    ai_paused: true,
+    ai_paused_until: pausedUntil
+  });
+
+  return;
+}
+
+const aiResumeMatch =
+  url.pathname.match(
+    /^\/api\/admin\/leads\/([^/]+)\/resume-ai$/
+  );
+
+if (
+  req.method === "POST" &&
+  aiResumeMatch
+) {
+  const auth = await requireAuth(req, res, ["ADMIN"]);
+
+  if (!auth) {
+    return;
+  }
+
+  const leadId =
+    decodeURIComponent(aiResumeMatch[1]);
+
+  await resumeAIForLead(leadId);
+
+  sendJSON(res, 200, {
+    success: true,
+    lead_id: leadId,
+    ai_paused: false,
+    ai_paused_until: null
+  });
+
+  return;
+}
+
+// -----------------------------------------------
 
 // API - ADMIN LEADS CENTER
 // ADMIN ONLY
@@ -3994,6 +4142,7 @@ if (
         should_offer_callback,
         callback_requested,
         requested_callback_time,
+        ai_paused_until,
         summary,
         updated_at
       )
@@ -9542,6 +9691,33 @@ await saveMessage({
               received: true,
               duplicate: true
             });
+            return;
+          }
+
+          // Human pause guard:
+          // Always save the customer message first,
+          // but do not run the AI while a representative is handling the lead.
+          const aiPauseState =
+            await getAIPauseState(lead.id);
+
+          if (aiPauseState.paused) {
+            console.log(
+              "👤 HEYY AI PAUSED FOR HUMAN",
+              {
+                lead_id: lead.id,
+                message_id: messageId,
+                paused_until: aiPauseState.paused_until
+              }
+            );
+
+            sendJSON(res, 200, {
+              success: true,
+              received: true,
+              analyzed: false,
+              ai_paused: true,
+              ai_paused_until: aiPauseState.paused_until
+            });
+
             return;
           }
 
