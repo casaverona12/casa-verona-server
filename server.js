@@ -8252,6 +8252,71 @@ await saveMessage({
         }
 
 
+
+        // =====================================================
+        // HEYY — INCOMING WHATSAPP WEBHOOK
+        // Test mode: receive only. No AI replies yet.
+        // =====================================================
+
+        if (
+          req.method === "POST" &&
+          url.pathname === "/api/heyy/webhook"
+        ) {
+          const expectedSecret =
+            String(process.env.HEYY_WEBHOOK_SECRET || "").trim();
+
+          const providedSecret =
+            String(url.searchParams.get("secret") || "").trim();
+
+          if (
+            !expectedSecret ||
+            providedSecret !== expectedSecret
+          ) {
+            sendJSON(res, 401, {
+              success: false,
+              error: "UNAUTHORIZED_HEYY_WEBHOOK"
+            });
+            return;
+          }
+
+          let body = "";
+
+          for await (const chunk of req) {
+            body += chunk;
+          }
+
+          let payload;
+
+          try {
+            payload = JSON.parse(body || "{}");
+          } catch {
+            sendJSON(res, 400, {
+              success: false,
+              error: "INVALID_HEYY_PAYLOAD"
+            });
+            return;
+          }
+
+          console.log(
+            "📩 HEYY WEBHOOK RECEIVED",
+            {
+              received_at: new Date().toISOString(),
+              keys:
+                payload && typeof payload === "object"
+                  ? Object.keys(payload)
+                  : []
+            }
+          );
+
+          sendJSON(res, 200, {
+            success: true,
+            received: true
+          });
+
+          return;
+        }
+
+
         // -----------------------------------------------
         // 404
         // -----------------------------------------------
