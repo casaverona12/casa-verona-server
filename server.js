@@ -9179,6 +9179,104 @@ await saveMessage({
         // =====================================================
 
         // =====================================================
+        // HEYY — UPLOAD CUSTOMER CATALOG
+        // =====================================================
+        async function uploadCatalogToHeyy() {
+          if (!HEYY_API_KEY) {
+            throw new Error("HEYY_API_KEY is not configured");
+          }
+
+          const catalogPath = path.join(
+            __dirname,
+            "casa-verona-catalog.pdf"
+          );
+
+          const fileBuffer = fs.readFileSync(catalogPath);
+
+          const form = new FormData();
+
+          form.append(
+            "file",
+            new Blob(
+              [fileBuffer],
+              { type: "application/pdf" }
+            ),
+            "casa-verona-catalog.pdf"
+          );
+
+          form.append("format", "DOCUMENT");
+
+          const response = await fetch(
+            "https://api.heyy.io/api/v2.0/upload_file",
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${HEYY_API_KEY}`
+              },
+              body: form
+            }
+          );
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            console.error("HEYY UPLOAD ERROR:", data);
+            throw new Error(
+              data?.error?.message ||
+              "Heyy catalog upload failed"
+            );
+          }
+
+          return data;
+        }
+
+        // =====================================================
+        // HEYY — TEST CATALOG UPLOAD
+        // =====================================================
+        if (
+          req.method === "POST" &&
+          url.pathname === "/api/heyy/test-catalog-upload"
+        ) {
+          const expectedSecret =
+            String(process.env.HEYY_WEBHOOK_SECRET || "").trim();
+
+          const providedSecret =
+            String(req.headers["x-heyy-secret"] || "").trim();
+
+          if (
+            !expectedSecret ||
+            providedSecret !== expectedSecret
+          ) {
+            sendJSON(res, 401, {
+              success: false,
+              error: "UNAUTHORIZED"
+            });
+            return;
+          }
+
+          try {
+            const result = await uploadCatalogToHeyy();
+
+            sendJSON(res, 200, {
+              success: true,
+              heyy: result
+            });
+          } catch (error) {
+            console.error(
+              "HEYY CATALOG TEST ERROR:",
+              error
+            );
+
+            sendJSON(res, 500, {
+              success: false,
+              error: error.message
+            });
+          }
+
+          return;
+        }
+
+        // =====================================================
         // HEYY — CONNECTION CHECK
         // =====================================================
         if (
