@@ -9168,9 +9168,32 @@ await saveMessage({
 
 
         // =====================================================
+        // =====================================================
+        // HEYY — API CONFIG
+        // =====================================================
+        const HEYY_API_KEY =
+          String(process.env.HEYY_API_KEY || "").trim();
+
         // HEYY — INCOMING WHATSAPP WEBHOOK
         // Test mode: receive only. No AI replies yet.
         // =====================================================
+
+        // =====================================================
+        // HEYY — CONNECTION CHECK
+        // =====================================================
+        if (
+          req.method === "GET" &&
+          url.pathname === "/api/heyy/status"
+        ) {
+          sendJSON(res, 200, {
+            success: true,
+            api_key_configured: Boolean(HEYY_API_KEY),
+            webhook_secret_configured: Boolean(
+              String(process.env.HEYY_WEBHOOK_SECRET || "").trim()
+            )
+          });
+          return;
+        }
 
         if (
           req.method === "POST" &&
