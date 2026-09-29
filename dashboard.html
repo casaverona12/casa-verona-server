@@ -14691,20 +14691,36 @@ document.addEventListener(
     if(attention){
 
       const priorityOrders = [
-        ...pendingOrders.map(order => ({
-          type: "PENDING",
+
+        // 1. OVERDUE — highest priority
+        ...lateOrders.map(order => ({
+          type: "LATE",
           order
         })),
 
+        // 2. New orders waiting for factory approval
+        ...pendingOrders
+          .filter(
+            order =>
+              !lateOrders.includes(order)
+          )
+          .map(order => ({
+            type: "PENDING",
+            order
+          })),
+
+        // 3. Deadline approaching
         ...riskOrders
           .filter(
             order =>
-              !pendingOrders.includes(order)
+              !pendingOrders.includes(order) &&
+              !lateOrders.includes(order)
           )
           .map(order => ({
             type: "RISK",
             order
           }))
+
       ];
 
 
@@ -14735,25 +14751,27 @@ document.addEventListener(
                   "—"
                 );
 
+              const customer =
+                esc(
+                  order.customer_name ||
+                  "לקוח"
+                );
+
               const product =
                 esc(
                   order.product_name ||
                   "ללא שם"
                 );
 
-
               let message = "";
+              let badge = "";
 
-              if(
-                item.type ===
-                "PENDING"
-              ){
+
+              if(item.type === "PENDING"){
 
                 const created =
                   p.created_at
-                    ? new Date(
-                        p.created_at
-                      )
+                    ? new Date(p.created_at)
                     : null;
 
                 let waiting = "";
@@ -14772,25 +14790,30 @@ document.addEventListener(
                         (
                           Date.now() -
                           created.getTime()
-                        ) /
-                        60000
+                        ) / 60000
                       )
                     );
 
                   if(minutes < 60){
                     waiting =
-                      ` · ממתינה ${minutes} דקות`;
+                      ` · ${minutes} דקות`;
                   }else{
                     waiting =
-                      ` · ממתינה ${Math.floor(minutes / 60)} שעות`;
+                      ` · ${Math.floor(minutes / 60)} שעות`;
                   }
 
                 }
 
+                badge =
+                  "הזמנה חדשה";
+
                 message =
-                  `הזמנה חדשה ממתינה לאישור${waiting}`;
+                  `ממתינה לאישור${waiting}`;
 
               }else{
+
+                const days =
+                  deadlineDays(order);
 
                 const rawDate =
                   p.due_date ||
@@ -14822,10 +14845,37 @@ document.addEventListener(
 
                 }
 
-                message =
-                  dateText
-                    ? `דורשת טיפול · יעד ${dateText}`
-                    : "דורשת טיפול";
+
+                if(item.type === "LATE"){
+
+                  const lateBy =
+                    Math.abs(days || 0);
+
+                  badge =
+                    "באיחור";
+
+                  message =
+                    lateBy === 1
+                      ? `באיחור של יום · יעד ${dateText}`
+                      : `באיחור של ${lateBy} ימים · יעד ${dateText}`;
+
+                }else{
+
+                  badge =
+                    "דדליין קרוב";
+
+                  if(days === 0){
+                    message =
+                      `היעד היום · ${dateText}`;
+                  }else if(days === 1){
+                    message =
+                      `נשאר יום אחד · יעד ${dateText}`;
+                  }else{
+                    message =
+                      `נשארו ${days} ימים · יעד ${dateText}`;
+                  }
+
+                }
 
               }
 
@@ -14834,27 +14884,26 @@ document.addEventListener(
                 <button
                   type="button"
                   class="cv-fo-priority"
-                  data-factory-home-open="${
-                    item.type === "PENDING"
-                      ? "production"
-                      : "production"
-                  }"
+                  data-factory-home-open="production"
                 >
                   <div>
+
                     <small>
-                      #${number}
+                      ${badge} · #${number}
                     </small>
 
                     <strong>
-                      ${product}
+                      ${customer}
                     </strong>
 
                     <span>
-                      ${message}
+                      ${product} · ${message}
                     </span>
+
                   </div>
 
                   <b>←</b>
+
                 </button>
               `;
 
