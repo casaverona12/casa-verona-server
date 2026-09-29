@@ -9299,7 +9299,7 @@ await saveMessage({
           }
 
           try {
-            const channelId = "1052531870728381";
+            const channelId = "1361956700327621";
             const fileId =
               "805d708b-f913-4d56-b6e7-6b78c88edfac";
 
@@ -9355,7 +9355,7 @@ await saveMessage({
           url.pathname === "/api/heyy/test-channel"
         ) {
           try {
-            const channelId = "1052531870728381";
+            const channelId = "1361956700327621";
 
             const response = await fetch(
               `https://api.heyy.io/api/v2.0/channels/${channelId}`,
