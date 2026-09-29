@@ -9348,6 +9348,41 @@ await saveMessage({
         }
 
         // =====================================================
+        // HEYY — TEST CHANNEL
+        // =====================================================
+        if (
+          req.method === "GET" &&
+          url.pathname === "/api/heyy/test-channel"
+        ) {
+          try {
+            const channelId = "1052531870728381";
+
+            const response = await fetch(
+              `https://api.heyy.io/api/v2.0/channels/${channelId}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${HEYY_API_KEY}`
+                }
+              }
+            );
+
+            const data = await response.json();
+
+            sendJSON(res, response.status, {
+              success: response.ok,
+              heyy: data
+            });
+          } catch (error) {
+            sendJSON(res, 500, {
+              success: false,
+              error: error.message
+            });
+          }
+
+          return;
+        }
+
+        // =====================================================
         // HEYY — CONNECTION CHECK
         // =====================================================
         if (
