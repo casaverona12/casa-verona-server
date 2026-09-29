@@ -3454,6 +3454,43 @@ if (
 
 
         // -----------------------------------------------
+
+// =====================================================
+// CASA VERONA — CUSTOMER CATALOG PDF
+// =====================================================
+if (
+  req.method === "GET" &&
+  url.pathname === "/casa-verona-catalog.pdf"
+) {
+  try {
+    const catalogPath = path.join(
+      __dirname,
+      "casa-verona-catalog.pdf"
+    );
+
+    const stat = fs.statSync(catalogPath);
+
+    res.writeHead(200, {
+      "Content-Type": "application/pdf",
+      "Content-Length": stat.size,
+      "Content-Disposition": 'inline; filename="casa-verona-catalog.pdf"',
+      "Cache-Control": "public, max-age=3600"
+    });
+
+    fs.createReadStream(catalogPath).pipe(res);
+  } catch (error) {
+    console.error("CATALOG PDF ERROR:", error);
+
+    res.writeHead(404, {
+      "Content-Type": "text/plain; charset=utf-8"
+    });
+
+    res.end("Catalog not found");
+  }
+
+  return;
+}
+
 // CASA VERONA PWA MANIFEST
 if (req.method === "GET" && url.pathname === "/manifest.json") {
   try {
