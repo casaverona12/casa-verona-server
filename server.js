@@ -9457,6 +9457,8 @@ await saveMessage({
                 null,
               messageId:
                 payload?.data?.id || null,
+              sender:
+                payload?.data?.sender || null,
               contentType:
                 payload?.data?.type || null,
               contentKeys:
