@@ -9277,6 +9277,77 @@ await saveMessage({
         }
 
         // =====================================================
+        // HEYY — TEST CATALOG SEND
+        // Temporary: sends only to the fixed test number.
+        // =====================================================
+        if (
+          req.method === "POST" &&
+          url.pathname === "/api/heyy/test-catalog-send"
+        ) {
+          const expectedSecret =
+            String(process.env.HEYY_WEBHOOK_SECRET || "").trim();
+
+          const providedSecret =
+            String(req.headers["x-heyy-secret"] || "").trim();
+
+          if (!expectedSecret || providedSecret !== expectedSecret) {
+            sendJSON(res, 401, {
+              success: false,
+              error: "UNAUTHORIZED"
+            });
+            return;
+          }
+
+          try {
+            const channelId = "1052531870728381";
+            const fileId =
+              "805d708b-f913-4d56-b6e7-6b78c88edfac";
+
+            const response = await fetch(
+              `https://api.heyy.io/api/v2.0/${channelId}/whatsapp_messages/send`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${HEYY_API_KEY}`
+                },
+                body: JSON.stringify({
+                  to: "+972542009065",
+                  type: "DOCUMENT",
+                  fileId
+                })
+              }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+              console.error("HEYY TEST SEND ERROR:", data);
+
+              sendJSON(res, response.status, {
+                success: false,
+                heyy: data
+              });
+              return;
+            }
+
+            sendJSON(res, 200, {
+              success: true,
+              heyy: data
+            });
+          } catch (error) {
+            console.error("HEYY TEST SEND ERROR:", error);
+
+            sendJSON(res, 500, {
+              success: false,
+              error: error.message
+            });
+          }
+
+          return;
+        }
+
+        // =====================================================
         // HEYY — CONNECTION CHECK
         // =====================================================
         if (
