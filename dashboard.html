@@ -14633,13 +14633,10 @@ document.addEventListener(
     );
 
     /*
-      Delivery scheduling will be connected
-      when the delivery module is built.
+      DELIVERY KPI
+      Real live count is loaded from /api/deliveries.
+      Do not overwrite it here with a fake zero.
     */
-    set(
-      "cvFoDeliveries",
-      0
-    );
 
 
     const attention =
@@ -14828,6 +14825,87 @@ document.addEventListener(
   }
 
 
+
+  async function loadFactoryHomeDeliveries(){
+
+    try{
+
+      const response =
+        await fetch(
+          "/api/deliveries",
+          {
+            credentials:"include",
+            cache:"no-store"
+          }
+        );
+
+      const data =
+        await response
+          .json()
+          .catch(() => ({}));
+
+      if(
+        !response.ok ||
+        !data?.success
+      ){
+        return;
+      }
+
+      const deliveries =
+        Array.isArray(data.deliveries)
+          ? data.deliveries
+          : [];
+
+      const activeDeliveries =
+        deliveries.filter(delivery =>
+          [
+            "PENDING_APPROVAL",
+            "SCHEDULED",
+            "OUT_FOR_DELIVERY"
+          ].includes(
+            String(delivery.status || "")
+              .toUpperCase()
+          )
+        );
+
+      const readyWaiting =
+        deliveries.filter(delivery =>
+          String(delivery.status || "")
+            .toUpperCase() === "WAITING"
+        );
+
+      const deliveryKpi =
+        document.getElementById(
+          "cvFoDeliveries"
+        );
+
+      if(deliveryKpi){
+        deliveryKpi.textContent =
+          activeDeliveries.length;
+      }
+
+      const readyKpi =
+        document.getElementById(
+          "cvFoReady"
+        );
+
+      if(readyKpi){
+        readyKpi.textContent =
+          readyWaiting.length;
+      }
+
+    }catch(error){
+
+      console.error(
+        "FACTORY HOME DELIVERIES:",
+        error
+      );
+
+    }
+
+  }
+
+
   async function loadFactoryOrders(){
 
     const container =
@@ -14889,6 +14967,7 @@ document.addEventListener(
       updateKpis();
       renderFactory();
       renderFactoryApprovals();
+      await loadFactoryHomeDeliveries();
 
 
     }catch(error){
