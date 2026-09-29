@@ -9445,7 +9445,16 @@ await saveMessage({
               keys:
                 payload && typeof payload === "object"
                   ? Object.keys(payload)
-                  : []
+                  : [],
+              data_keys:
+                payload?.data && typeof payload.data === "object"
+                  ? Object.keys(payload.data)
+                  : [],
+              channelId:
+                payload?.data?.channelId ||
+                payload?.data?.channel?.id ||
+                payload?.channelId ||
+                null
             }
           );
 
