@@ -589,6 +589,9 @@ async function saveAIState(
           requested_callback_time:
             analysis.requested_callback_time || null,
 
+          requested_callback_at:
+            analysis.requested_callback_at || null,
+
           media_action:
             analysis.media_action || null,
 
@@ -1008,6 +1011,9 @@ async function saveCallbackRequest(
 
   const db = requireSupabase();
 
+  const scheduledAt =
+    analysis.requested_callback_at || null;
+
   const { error } =
     await db
       .from("callback_requests")
@@ -1017,6 +1023,8 @@ async function saveCallbackRequest(
         requested_time_text:
           analysis.requested_callback_time ||
           null,
+
+        scheduled_at: scheduledAt,
 
         status: "REQUESTED",
 
@@ -1028,6 +1036,31 @@ async function saveCallbackRequest(
     throw new Error(
       `SUPABASE CALLBACK ERROR: ${error.message}`
     );
+  }
+
+  // If the customer gave an exact callback time,
+  // use the same moment in the existing follow-up system.
+  if (scheduledAt) {
+    const scheduledDate =
+      new Date(scheduledAt);
+
+    if (!Number.isNaN(scheduledDate.getTime())) {
+      const { error: followupError } =
+        await db
+          .from("leads")
+          .update({
+            next_followup_at:
+              scheduledDate.toISOString(),
+            followup_status: "CALLBACK"
+          })
+          .eq("id", leadId);
+
+      if (followupError) {
+        throw new Error(
+          `CALLBACK FOLLOW-UP ERROR: ${followupError.message}`
+        );
+      }
+    }
   }
 }
 function extractOutputText(data) {
@@ -1429,6 +1462,7 @@ function createDefaultAnalysis() {
     should_offer_callback: false,
     callback_requested: false,
     requested_callback_time: null,
+    requested_callback_at: null,
 
     media_action: "NONE",
     media_type: "NONE",
@@ -1527,8 +1561,27 @@ async function runSalesEngine(
       ? conversation.slice(-14)
       : [];
 
+  const israelNow =
+    new Intl.DateTimeFormat(
+      "en-CA",
+      {
+        timeZone: "Asia/Jerusalem",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hourCycle: "h23"
+      }
+    ).format(new Date());
+
   const input = `
 אתה AI Sales Closer של Casa Verona.
+
+CURRENT ISRAEL DATE/TIME:
+${israelNow}
+Time zone: Asia/Jerusalem
 
 CUSTOMER MEMORY:
 ${customerBrain
@@ -3155,8 +3208,39 @@ callback_requested = true
 "מחר ב-10"
 או זמן אחר:
 
-שמור את הניסוח
+שמור את הניסוח המקורי
 ב-requested_callback_time.
+
+בנוסף, אם אפשר להבין מהניסוח
+תאריך ושעה מדויקים באופן אמין,
+המר אותם לזמן מוחלט ושמור
+ב-requested_callback_at.
+
+requested_callback_at חייב להיות
+ISO 8601 תקין עם offset של שעון ישראל
+לפי CURRENT ISRAEL DATE/TIME.
+
+לדוגמה:
+אם CURRENT ISRAEL DATE/TIME הוא
+2026-09-30 12:00
+והלקוח אומר:
+"מחר ב-10"
+
+requested_callback_time =
+"מחר ב-10"
+
+requested_callback_at =
+"2026-10-01T10:00:00+03:00"
+
+אל תנחש שעה מדויקת
+כאשר הלקוח נתן רק זמן כללי
+כמו "בערב".
+
+במקרה כזה:
+requested_callback_time = "בערב"
+requested_callback_at = null
+
+אם הלקוח נתן זמן ברור:
 
 callback_requested = true
 
@@ -3584,6 +3668,7 @@ OUTPUT
     "should_offer_callback": false,
     "callback_requested": false,
     "requested_callback_time": null,
+    "requested_callback_at": null,
     "media_action": "NONE",
     "media_type": "NONE",
     "media_id": null,
