@@ -4783,7 +4783,7 @@ async function cvEnablePushNotifications(){
     }
 
     const registration =
-      await navigator.serviceWorker.register("/sw.js", { scope: "/" });
+      await Promise.race([navigator.serviceWorker.ready,new Promise((_,reject)=>setTimeout(()=>reject(new Error("Push service worker timeout")),12000))]);
 
     let subscription =
       await registration.pushManager.getSubscription();
@@ -4918,7 +4918,7 @@ async function cvCheckPushStatus(){
   try{
 
     const registration =
-      await navigator.serviceWorker.register("/sw.js", { scope: "/" });
+      await Promise.race([navigator.serviceWorker.ready,new Promise((_,reject)=>setTimeout(()=>reject(new Error("Push service worker timeout")),12000))]);
 
     const subscription =
       await registration.pushManager.getSubscription();
