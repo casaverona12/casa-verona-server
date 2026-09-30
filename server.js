@@ -291,6 +291,86 @@ async function saveMessage({
   return data;
 }
 
+async function finalSalesSendGuard(
+  leadId,
+  incomingCreatedAt
+) {
+  const db = requireSupabase();
+
+  // 1. Human takeover always wins.
+  const pauseState =
+    await getAIPauseState(leadId);
+
+  if (pauseState.paused) {
+    return {
+      allowed: false,
+      reason: "AI_PAUSED"
+    };
+  }
+
+  if (!incomingCreatedAt) {
+    return {
+      allowed: false,
+      reason: "MISSING_INCOMING_TIMESTAMP"
+    };
+  }
+
+  // 2. If the customer sent another message while AI was
+  // thinking, this reply is now stale.
+  const { data: newerIncoming, error: incomingError } =
+    await db
+      .from("messages")
+      .select("id, created_at")
+      .eq("lead_id", leadId)
+      .eq("direction", "INCOMING")
+      .gt("created_at", incomingCreatedAt)
+      .order("created_at", { ascending: true })
+      .limit(1);
+
+  if (incomingError) {
+    throw new Error(
+      `SUPABASE FINAL GUARD INCOMING ERROR: ${incomingError.message}`
+    );
+  }
+
+  if (newerIncoming?.length) {
+    return {
+      allowed: false,
+      reason: "NEWER_CUSTOMER_MESSAGE"
+    };
+  }
+
+  // 3. If anything has already been sent after this customer
+  // message, do not allow another AI reply.
+  const { data: newerOutgoing, error: outgoingError } =
+    await db
+      .from("messages")
+      .select("id, sender, created_at")
+      .eq("lead_id", leadId)
+      .eq("direction", "OUTGOING")
+      .gt("created_at", incomingCreatedAt)
+      .order("created_at", { ascending: true })
+      .limit(1);
+
+  if (outgoingError) {
+    throw new Error(
+      `SUPABASE FINAL GUARD OUTGOING ERROR: ${outgoingError.message}`
+    );
+  }
+
+  if (newerOutgoing?.length) {
+    return {
+      allowed: false,
+      reason: "ALREADY_REPLIED"
+    };
+  }
+
+  return {
+    allowed: true,
+    reason: "OK"
+  };
+}
+
 async function loadConversation(leadId, limit = 14) {
   const db = requireSupabase();
 
@@ -541,6 +621,108 @@ async function saveAIState(
 // ======================================================
 // CASA VERONA — HUMAN AI PAUSE CONTROL
 // ======================================================
+
+async function markPendingSalesMessage(
+  leadId,
+  messageId
+) {
+  const db = requireSupabase();
+
+  const { error } =
+    await db.rpc(
+      "mark_pending_sales_message",
+      {
+        p_lead_id: leadId,
+        p_message_id: messageId
+      }
+    );
+
+  if (error) {
+    throw new Error(
+      `SUPABASE MARK PENDING SALES MESSAGE ERROR: ${error.message}`
+    );
+  }
+}
+
+async function isLatestPendingSalesMessage(
+  leadId,
+  messageId
+) {
+  const db = requireSupabase();
+
+  const { data, error } =
+    await db
+      .from("sales_ai_locks")
+      .select("pending_message_id")
+      .eq("lead_id", leadId)
+      .maybeSingle();
+
+  if (error) {
+    throw new Error(
+      `SUPABASE CHECK PENDING SALES MESSAGE ERROR: ${error.message}`
+    );
+  }
+
+  return (
+    String(data?.pending_message_id || "") ===
+    String(messageId || "")
+  );
+}
+
+async function acquireSalesAILock(
+  leadId,
+  lockSeconds = 120
+) {
+  const db = requireSupabase();
+
+  const lockToken =
+    `${process.pid}-${Date.now()}-${Math.random()
+      .toString(36)
+      .slice(2)}`;
+
+  const { data, error } =
+    await db.rpc(
+      "acquire_sales_ai_lock_v2",
+      {
+        p_lead_id: leadId,
+        p_lock_token: lockToken,
+        p_lock_seconds: lockSeconds
+      }
+    );
+
+  if (error) {
+    throw new Error(
+      `SUPABASE ACQUIRE SALES AI LOCK ERROR: ${error.message}`
+    );
+  }
+
+  return {
+    acquired: data === true,
+    lockToken
+  };
+}
+
+async function releaseSalesAILock(
+  leadId,
+  lockToken
+) {
+  const db = requireSupabase();
+
+  const { error } =
+    await db.rpc(
+      "release_sales_ai_lock",
+      {
+        p_lead_id: leadId,
+        p_lock_token: lockToken
+      }
+    );
+
+  if (error) {
+    throw new Error(
+      `SUPABASE RELEASE SALES AI LOCK ERROR: ${error.message}`
+    );
+  }
+}
 
 async function pauseAIForLead(leadId, minutes = 4) {
   const db = requireSupabase();
@@ -9328,6 +9510,12 @@ await saveMessage({
         const HEYY_API_KEY =
           String(process.env.HEYY_API_KEY || "").trim();
 
+        const HEYY_CHANNEL_ID =
+          String(
+            process.env.HEYY_CHANNEL_ID ||
+            "bb9bee6f-bd8c-4fc5-aaff-03e4bf0fdc1e"
+          ).trim();
+
         // HEYY — INCOMING WHATSAPP WEBHOOK
         // Test mode: receive only. No AI replies yet.
         // =====================================================
@@ -9721,6 +9909,69 @@ await saveMessage({
             return;
           }
 
+          // Durable per-lead debounce:
+          // If several customer messages arrive quickly,
+          // only the newest one continues into the AI.
+          await markPendingSalesMessage(
+            lead.id,
+            messageId
+          );
+
+          await new Promise(
+            resolve => setTimeout(resolve, 3000)
+          );
+
+          const isLatestMessage =
+            await isLatestPendingSalesMessage(
+              lead.id,
+              messageId
+            );
+
+          if (!isLatestMessage) {
+            console.log(
+              "⏳ HEYY MESSAGE COALESCED",
+              {
+                lead_id: lead.id,
+                message_id: messageId
+              }
+            );
+
+            sendJSON(res, 200, {
+              success: true,
+              received: true,
+              analyzed: false,
+              coalesced: true
+            });
+
+            return;
+          }
+
+          const salesAILock =
+            await acquireSalesAILock(
+              lead.id,
+              120
+            );
+
+          if (!salesAILock.acquired) {
+            console.log(
+              "🔒 HEYY SALES AI ALREADY PROCESSING",
+              {
+                lead_id: lead.id,
+                message_id: messageId
+              }
+            );
+
+            sendJSON(res, 200, {
+              success: true,
+              received: true,
+              analyzed: false,
+              locked: true
+            });
+
+            return;
+          }
+
+          try {
           const customerBrain =
             await loadCustomerBrain(lead.id);
 
@@ -9763,6 +10014,24 @@ await saveMessage({
             analysis
           );
 
+          // FINAL SEND GUARD — dry run.
+          // We are still ANALYZE_ONLY. Nothing is sent yet.
+          const finalSendGuard =
+            await finalSalesSendGuard(
+              lead.id,
+              savedIncomingMessage.created_at
+            );
+
+          console.log(
+            "🛡️ HEYY FINAL SEND GUARD",
+            {
+              lead_id: lead.id,
+              message_id: messageId,
+              allowed: finalSendGuard.allowed,
+              reason: finalSendGuard.reason
+            }
+          );
+
           console.log(
             "🧠 HEYY SALES AGENT ANALYZED",
             {
@@ -9791,6 +10060,20 @@ await saveMessage({
             analyzed: true,
             mode: "ANALYZE_ONLY"
           });
+
+          } finally {
+            try {
+              await releaseSalesAILock(
+                lead.id,
+                salesAILock.lockToken
+              );
+            } catch (releaseError) {
+              console.error(
+                "SALES AI LOCK RELEASE ERROR:",
+                releaseError
+              );
+            }
+          }
 
           return;
         }

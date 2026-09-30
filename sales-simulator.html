@@ -462,13 +462,7 @@ async function sendMessage() {
 
           body: JSON.stringify({
             message,
-            leads: [
-              {
-                analysis:
-                  brainData.analysis,
-                conversation
-              }
-            ]
+            conversation
           })
         }
       );
