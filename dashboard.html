@@ -4782,8 +4782,10 @@ async function cvEnablePushNotifications(){
       return;
     }
 
+    await navigator.serviceWorker.register("/sw.js", { scope: "/" });
+
     const registration =
-      await navigator.serviceWorker.register("/sw.js", { scope: "/" });
+      await navigator.serviceWorker.ready;
 
     let subscription =
       await registration.pushManager.getSubscription();
@@ -4917,8 +4919,10 @@ async function cvCheckPushStatus(){
 
   try{
 
+    await navigator.serviceWorker.register("/sw.js", { scope: "/" });
+
     const registration =
-      await navigator.serviceWorker.register("/sw.js", { scope: "/" });
+      await navigator.serviceWorker.ready;
 
     const subscription =
       await registration.pushManager.getSubscription();
