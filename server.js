@@ -849,7 +849,7 @@ async function getAIPauseState(leadId) {
 
   const { data, error } = await db
     .from("lead_ai_state")
-    .select("ai_paused_until")
+    .select("ai_paused_until, ai_disabled")
     .eq("lead_id", leadId)
     .maybeSingle();
 
@@ -862,13 +862,26 @@ async function getAIPauseState(leadId) {
   const pausedUntil =
     data?.ai_paused_until || null;
 
-  const paused =
+  const temporarilyPaused =
     Boolean(pausedUntil) &&
     new Date(pausedUntil).getTime() > Date.now();
 
+  const permanentlyDisabled =
+    data?.ai_disabled === true;
+
   return {
-    paused,
-    paused_until: pausedUntil
+    paused:
+      temporarilyPaused ||
+      permanentlyDisabled,
+
+    temporarily_paused:
+      temporarilyPaused,
+
+    disabled:
+      permanentlyDisabled,
+
+    paused_until:
+      pausedUntil
   };
 }
 
@@ -5169,6 +5182,99 @@ if (
 }
 
 // -----------------------------------------------
+// API - PERMANENT AI DISABLE / ENABLE
+// ADMIN ONLY
+// -----------------------------------------------
+
+const aiDisableMatch =
+  url.pathname.match(
+    /^\/api\/admin\/leads\/([^/]+)\/disable-ai$/
+  );
+
+if (
+  req.method === "POST" &&
+  aiDisableMatch
+) {
+  const auth = await requireAuth(req, res, ["ADMIN"]);
+
+  if (!auth) {
+    return;
+  }
+
+  const leadId =
+    decodeURIComponent(aiDisableMatch[1]);
+
+  const db = requireSupabase();
+
+  const { error } = await db
+    .from("lead_ai_state")
+    .update({
+      ai_disabled: true
+    })
+    .eq("lead_id", leadId);
+
+  if (error) {
+    sendJSON(res, 500, {
+      success: false,
+      error: error.message
+    });
+    return;
+  }
+
+  sendJSON(res, 200, {
+    success: true,
+    lead_id: leadId,
+    ai_disabled: true
+  });
+
+  return;
+}
+
+const aiEnableMatch =
+  url.pathname.match(
+    /^\/api\/admin\/leads\/([^/]+)\/enable-ai$/
+  );
+
+if (
+  req.method === "POST" &&
+  aiEnableMatch
+) {
+  const auth = await requireAuth(req, res, ["ADMIN"]);
+
+  if (!auth) {
+    return;
+  }
+
+  const leadId =
+    decodeURIComponent(aiEnableMatch[1]);
+
+  const db = requireSupabase();
+
+  const { error } = await db
+    .from("lead_ai_state")
+    .update({
+      ai_disabled: false
+    })
+    .eq("lead_id", leadId);
+
+  if (error) {
+    sendJSON(res, 500, {
+      success: false,
+      error: error.message
+    });
+    return;
+  }
+
+  sendJSON(res, 200, {
+    success: true,
+    lead_id: leadId,
+    ai_disabled: false
+  });
+
+  return;
+}
+
+// -----------------------------------------------
 
 // API - ADMIN LEADS CENTER
 // ADMIN ONLY
@@ -5220,6 +5326,7 @@ if (
         callback_requested,
         requested_callback_time,
         ai_paused_until,
+        ai_disabled,
         summary,
         updated_at
       )

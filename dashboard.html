@@ -1191,6 +1191,23 @@ body.cv-role-factory-owner #cvFactoryOwnerNav button{
           🤖 החזר ל-AI עכשיו
         </button>
 
+        <button
+          type="button"
+          id="cvLeadDisableAI"
+          class="cv-lead-pause-btn"
+        >
+          ⛔ כבה AI בצ'אט הזה
+        </button>
+
+        <button
+          type="button"
+          id="cvLeadEnableAI"
+          class="cv-lead-resume-btn"
+          hidden
+        >
+          🤖 הפעל AI מחדש
+        </button>
+
       </div>
 
       <div class="cv-lead-modal-grid">
@@ -2293,12 +2310,45 @@ function cvRenderLeadAIControl(){
   const resumeBtn =
     document.getElementById("cvLeadResumeAI");
 
+  const disableBtn =
+    document.getElementById("cvLeadDisableAI");
+
+  const enableBtn =
+    document.getElementById("cvLeadEnableAI");
+
   if(cvLeadAITimerInterval){
     clearInterval(cvLeadAITimerInterval);
     cvLeadAITimerInterval = null;
   }
 
   const update = ()=>{
+
+    // -----------------------------------------
+    // PERMANENTLY DISABLED FOR THIS CHAT
+    // -----------------------------------------
+    if(ai?.ai_disabled === true){
+
+      if(status){
+        status.textContent =
+          "⛔ AI כבוי בצ'אט הזה";
+      }
+
+      if(timer){
+        timer.textContent =
+          "הסוכן לא יענה ללקוח עד להפעלה מחדש";
+      }
+
+      if(pauseBtn) pauseBtn.hidden = true;
+      if(resumeBtn) resumeBtn.hidden = true;
+      if(disableBtn) disableBtn.hidden = true;
+      if(enableBtn) enableBtn.hidden = false;
+
+      return;
+    }
+
+    // -----------------------------------------
+    // TEMPORARY 4 MINUTE HUMAN TAKEOVER
+    // -----------------------------------------
     const pausedUntil =
       ai?.ai_paused_until
         ? new Date(ai.ai_paused_until).getTime()
@@ -2308,7 +2358,11 @@ function cvRenderLeadAIControl(){
       pausedUntil - Date.now();
 
     if(remaining > 0){
-      if(status) status.textContent = "👤 נציג מטפל";
+
+      if(status){
+        status.textContent = "👤 נציג מטפל";
+      }
+
       if(timer){
         timer.textContent =
           `ה-AI חוזר בעוד ${cvFormatPauseTime(remaining)}`;
@@ -2316,14 +2370,29 @@ function cvRenderLeadAIControl(){
 
       if(pauseBtn) pauseBtn.hidden = true;
       if(resumeBtn) resumeBtn.hidden = false;
+
+      if(disableBtn) disableBtn.hidden = false;
+      if(enableBtn) enableBtn.hidden = true;
+
       return;
     }
 
-    if(status) status.textContent = "🤖 AI פעיל";
-    if(timer) timer.textContent = "";
+    // -----------------------------------------
+    // AI ACTIVE
+    // -----------------------------------------
+    if(status){
+      status.textContent = "🤖 AI פעיל";
+    }
+
+    if(timer){
+      timer.textContent = "";
+    }
 
     if(pauseBtn) pauseBtn.hidden = false;
     if(resumeBtn) resumeBtn.hidden = true;
+
+    if(disableBtn) disableBtn.hidden = false;
+    if(enableBtn) enableBtn.hidden = true;
 
     if(cvLeadAITimerInterval){
       clearInterval(cvLeadAITimerInterval);
@@ -2333,7 +2402,10 @@ function cvRenderLeadAIControl(){
 
   update();
 
-  if(cvIsAIPaused(lead)){
+  if(
+    ai?.ai_disabled !== true &&
+    cvIsAIPaused(lead)
+  ){
     cvLeadAITimerInterval =
       setInterval(update,1000);
   }
@@ -2569,6 +2641,98 @@ document
 
     cvOpenLeadModal(row.dataset.cvLeadId);
   });
+
+// Permanently disable Sales AI for this lead.
+async function cvDisableLeadAI(){
+  if(!cvActiveLeadId) return;
+
+  const button =
+    document.getElementById("cvLeadDisableAI");
+
+  if(button) button.disabled = true;
+
+  try{
+    const response = await fetch(
+      `/api/admin/leads/${encodeURIComponent(cvActiveLeadId)}/disable-ai`,
+      {
+        method:"POST",
+        credentials:"include",
+        cache:"no-store"
+      }
+    );
+
+    const data = await response.json();
+
+    if(!response.ok || !data?.success){
+      throw new Error("לא הצלחנו לכבות את ה-AI בצ'אט.");
+    }
+
+    const lead = cvFindLead(cvActiveLeadId);
+    const ai = cvLeadAIState(lead);
+
+    ai.ai_disabled = true;
+
+    cvRenderLeadAIControl();
+
+  }catch(error){
+    console.error("CASA VERONA AI DISABLE:",error);
+    alert(error.message || "שגיאה בכיבוי ה-AI.");
+  }finally{
+    if(button) button.disabled = false;
+  }
+}
+
+
+// Re-enable Sales AI for this lead.
+async function cvEnableLeadAI(){
+  if(!cvActiveLeadId) return;
+
+  const button =
+    document.getElementById("cvLeadEnableAI");
+
+  if(button) button.disabled = true;
+
+  try{
+    const response = await fetch(
+      `/api/admin/leads/${encodeURIComponent(cvActiveLeadId)}/enable-ai`,
+      {
+        method:"POST",
+        credentials:"include",
+        cache:"no-store"
+      }
+    );
+
+    const data = await response.json();
+
+    if(!response.ok || !data?.success){
+      throw new Error("לא הצלחנו להפעיל מחדש את ה-AI.");
+    }
+
+    const lead = cvFindLead(cvActiveLeadId);
+    const ai = cvLeadAIState(lead);
+
+    ai.ai_disabled = false;
+
+    cvRenderLeadAIControl();
+
+  }catch(error){
+    console.error("CASA VERONA AI ENABLE:",error);
+    alert(error.message || "שגיאה בהפעלת ה-AI.");
+  }finally{
+    if(button) button.disabled = false;
+  }
+}
+
+
+// Permanent AI controls.
+document
+  .getElementById("cvLeadDisableAI")
+  ?.addEventListener("click",cvDisableLeadAI);
+
+document
+  .getElementById("cvLeadEnableAI")
+  ?.addEventListener("click",cvEnableLeadAI);
+
 
 // Close lead control card.
 document
