@@ -4671,11 +4671,24 @@ if(typeof checkExistingSession==="function"){checkExistingSession().then(ok=>{if
 </script>
 <script>
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js")
-      .then(() => console.log("Casa Verona PWA ready"))
-      .catch(err => console.error("PWA ERROR:", err));
-  });
+  navigator.serviceWorker.register("/sw.js", { scope: "/" })
+    .then(async registration => {
+      console.log("Casa Verona PWA registered");
+
+      try {
+        await registration.update();
+      } catch (e) {
+        console.warn("SW update warning:", e);
+      }
+
+      return navigator.serviceWorker.ready;
+    })
+    .then(registration => {
+      console.log("Casa Verona PWA ready", registration.scope);
+    })
+    .catch(err => {
+      console.error("PWA ERROR:", err);
+    });
 }
 </script>
 
