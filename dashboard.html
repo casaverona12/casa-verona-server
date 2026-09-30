@@ -2607,6 +2607,30 @@ async function cvLoadLeads(force=false){
     cvUpdateLeadsKPIs();
     cvRenderLeads();
 
+    // Open an exact lead when arriving from a push notification.
+    const pushLeadId =
+      new URLSearchParams(window.location.search)
+        .get("lead");
+
+    if(pushLeadId && cvFindLead(pushLeadId)){
+      cvOpenLeadModal(pushLeadId);
+
+      // Remove the parameter after opening so refresh
+      // does not keep reopening the same lead.
+      const cleanUrl =
+        new URL(window.location.href);
+
+      cleanUrl.searchParams.delete("lead");
+
+      window.history.replaceState(
+        {},
+        "",
+        cleanUrl.pathname +
+        cleanUrl.search +
+        cleanUrl.hash
+      );
+    }
+
   }catch(error){
     console.error("CASA VERONA LEADS:",error);
 

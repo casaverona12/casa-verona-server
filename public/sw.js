@@ -103,9 +103,25 @@ self.addEventListener(
 
     event.notification.close();
 
-    const targetUrl =
-      event.notification?.data?.url ||
+    const notificationData =
+      event.notification?.data || {};
+
+    const leadId =
+      notificationData.lead_id || null;
+
+    let targetUrl =
+      notificationData.url ||
       "/dashboard.html";
+
+    if(leadId){
+      const separator =
+        targetUrl.includes("?") ? "&" : "?";
+
+      targetUrl +=
+        separator +
+        "lead=" +
+        encodeURIComponent(leadId);
+    }
 
     event.waitUntil(
 
