@@ -1295,14 +1295,199 @@ const CASA_VERONA_KNOWLEDGE = {
   }
 };
 
+
+// ======================================================
+// LIVE SALES CATALOG
+// Supabase first + catalog.json fallback
+// Customer-safe AI knowledge only
+// ======================================================
+
+async function getLiveSalesCatalog() {
+  const fallback = getCatalog();
+
+  const fallbackProducts =
+    Array.isArray(fallback?.products)
+      ? fallback.products
+      : [];
+
+  if (!supabase) {
+    return {
+      ...fallback,
+      products: fallbackProducts,
+      fabrics: []
+    };
+  }
+
+  try {
+    const [
+      productsResult,
+      fabricsResult,
+      mediaResult
+    ] = await Promise.all([
+      supabase
+        .from("catalog_products")
+        .select(`
+          id,
+          name,
+          category,
+          description,
+          standard_size,
+          aliases,
+          customizable,
+          customer_notes,
+          structure_details,
+          materials_details,
+          comfort_details,
+          special_features,
+          customization_details,
+          fabric_options,
+          color_options,
+          price,
+          active,
+          ai_visible
+        `)
+        .eq("active", true)
+        .eq("ai_visible", true),
+
+      supabase
+        .from("catalog_fabrics")
+        .select(`
+          id,
+          name,
+          code,
+          fabric_type,
+          color,
+          description,
+          features,
+          customer_notes,
+          active,
+          ai_visible
+        `)
+        .eq("active", true)
+        .eq("ai_visible", true),
+
+      supabase
+        .from("catalog_media")
+        .select(`
+          id,
+          product_id,
+          fabric_id,
+          media_type,
+          title,
+          description,
+          storage_path,
+          approved_for_customer,
+          ai_visible,
+          sort_order
+        `)
+        .eq("ai_visible", true)
+        .order("sort_order", {
+          ascending: true
+        })
+    ]);
+
+    if (productsResult.error) {
+      throw productsResult.error;
+    }
+
+    if (fabricsResult.error) {
+      throw fabricsResult.error;
+    }
+
+    if (mediaResult.error) {
+      throw mediaResult.error;
+    }
+
+    const liveProducts =
+      productsResult.data || [];
+
+    const liveFabrics =
+      fabricsResult.data || [];
+
+    const liveMedia =
+      mediaResult.data || [];
+
+    // Live products override old JSON products
+    // when they share the same normalized name.
+    const liveNames =
+      new Set(
+        liveProducts.map(product =>
+          normalizeText(product.name)
+        )
+      );
+
+    const oldOnlyProducts =
+      fallbackProducts.filter(product =>
+        !liveNames.has(
+          normalizeText(product.name)
+        )
+      );
+
+    const products =
+      [
+        ...liveProducts,
+        ...oldOnlyProducts
+      ].map(product => ({
+        ...product,
+
+        media:
+          liveMedia.filter(media =>
+            String(media.product_id || "") ===
+            String(product.id || "")
+          )
+      }));
+
+    const fabrics =
+      liveFabrics.map(fabric => ({
+        ...fabric,
+
+        media:
+          liveMedia.filter(media =>
+            String(media.fabric_id || "") ===
+            String(fabric.id || "")
+          )
+      }));
+
+    return {
+      brand:
+        fallback?.brand || "Casa Verona",
+
+      currency:
+        fallback?.currency || "ILS",
+
+      products,
+      fabrics
+    };
+
+  } catch (error) {
+    console.error(
+      "LIVE SALES CATALOG ERROR:",
+      error.message
+    );
+
+    // Never break the sales agent because
+    // Supabase catalog is temporarily unavailable.
+    return {
+      ...fallback,
+      products: fallbackProducts,
+      fabrics: []
+    };
+  }
+}
+
 // ======================================================
 // PRODUCT MATCHER
 // ======================================================
 
-function findRelevantProduct(message, conversation = []) {
-  const catalog = getCatalog();
+function findRelevantProduct(
+  message,
+  conversation = [],
+  catalogOverride = null
+) {
+  const catalog =
+    catalogOverride || getCatalog();
 
-  const products = Array.isArray(catalog.products)
+  const products = Array.isArray(catalog?.products)
     ? catalog.products
     : [];
 
@@ -1315,7 +1500,10 @@ function findRelevantProduct(message, conversation = []) {
     const candidates = [
       product.name,
       product.id,
-      product.slug
+      product.slug,
+      ...(Array.isArray(product.aliases)
+        ? product.aliases
+        : [])
     ]
       .filter(Boolean)
       .map(normalizeText);
@@ -1413,17 +1601,77 @@ function findRelevantProduct(message, conversation = []) {
 function getCompactProduct(product) {
   if (!product) return null;
 
+  const media =
+    Array.isArray(product.media)
+      ? product.media
+          .filter(item => item?.ai_visible !== false)
+          .map(item => ({
+            id: item.id ?? null,
+            media_type: item.media_type ?? null,
+            title: item.title ?? null,
+            description: item.description ?? null,
+
+            // This tells the sales agent whether the
+            // real file is approved to be sent.
+            approved_for_customer:
+              item.approved_for_customer === true
+          }))
+      : [];
+
   return {
     id: product.id ?? null,
     name: product.name ?? null,
     category: product.category ?? null,
-    standard_size: product.standard_size ?? null,
-    price: product.price ?? null,
-    delivery_time: product.delivery_time ?? null,
-    customizable: product.customizable ?? null,
-    custom_sizes: product.custom_sizes ?? null,
-    colors: product.colors ?? null,
-    fabrics: product.fabrics ?? null
+
+    description:
+      product.description ?? null,
+
+    customer_notes:
+      product.customer_notes ?? null,
+
+    standard_size:
+      product.standard_size ?? null,
+
+    structure_details:
+      product.structure_details ?? null,
+
+    materials_details:
+      product.materials_details ?? null,
+
+    comfort_details:
+      product.comfort_details ?? null,
+
+    special_features:
+      product.special_features ?? null,
+
+    customization_details:
+      product.customization_details ?? null,
+
+    fabric_options:
+      product.fabric_options ?? null,
+
+    color_options:
+      product.color_options ?? null,
+
+    price:
+      product.price ?? null,
+
+    delivery_time:
+      product.delivery_time ?? null,
+
+    customizable:
+      product.customizable ?? null,
+
+    custom_sizes:
+      product.custom_sizes ?? null,
+
+    colors:
+      product.colors ?? null,
+
+    fabrics:
+      product.fabrics ?? null,
+
+    media
   };
 }
 
@@ -1563,8 +1811,17 @@ async function runSalesEngine(
   conversation = [],
   customerBrain = null
 ) {
+  // Load the current Casa Verona catalog from Supabase.
+  // catalog.json remains a fallback inside getLiveSalesCatalog().
+  const liveCatalog =
+    await getLiveSalesCatalog();
+
   const relevantProduct =
-    findRelevantProduct(message, conversation);
+    findRelevantProduct(
+      message,
+      conversation,
+      liveCatalog
+    );
 
   const productContext =
     getCompactProduct(relevantProduct);
@@ -2136,6 +2393,48 @@ LEADS FROM ADS
 אם ההיסטוריה כבר מבהירה
 באיזה מוצר מדובר,
 אל תשאל שוב.
+
+================================
+PRODUCT TRUTH — STRICT
+================================
+
+כאשר CURRENT PRODUCT אינו null וזוהה דגם ספציפי:
+
+CURRENT PRODUCT הוא מקור האמת היחיד
+לגבי התכונות הספציפיות של אותו דגם.
+
+אסור להסיק או להמציא לגבי הדגם:
+- מבנה או צורה
+- שזלונג
+- מגשים או אלמנטים מעץ
+- מספר מושבים
+- מידות
+- חומרים
+- סוג ספוג
+- סוג בד
+- צבעים
+- רמת נוחות
+- תכונות מיוחדות
+- אחריות ספציפית
+- מחיר
+- או כל מפרט אחר
+
+אלא אם המידע מופיע במפורש ב-CURRENT PRODUCT.
+
+VERIFIED KNOWLEDGE הוא ידע כללי על Casa Verona בלבד.
+אסור להפוך מידע כללי ממנו לתכונה של הדגם הספציפי.
+
+לדוגמה:
+אם VERIFIED KNOWLEDGE אומר
+"שבדגמים שיש בהם אלמנטים מעץ ניתן לשנות את גוון העץ",
+אסור לומר שלדגם הנוכחי יש אלמנטים מעץ
+אלא אם הדבר מופיע ב-CURRENT PRODUCT.
+
+אם פרט אינו קיים ב-CURRENT PRODUCT:
+אל תנחש אותו.
+אל תשלים אותו מהזיכרון.
+אל תשלים אותו מדגם אחר.
+אל תציג אותו כעובדה.
 
 ================================
 CURRENT PRODUCT
@@ -8074,6 +8373,904 @@ if (
 }
 
 
+
+
+
+
+// =====================================================
+// CASA VERONA — LIVE CATALOG READ
+// ADMIN ONLY
+// =====================================================
+
+if (
+  req.method === "GET" &&
+  url.pathname === "/api/admin/catalog/live"
+) {
+  const auth = await requireAuth(req,res,[USER_ROLES.ADMIN]);
+  if (!auth) return;
+
+  try {
+    const db = requireSupabase();
+
+    const [
+      productsResult,
+      fabricsResult,
+      mediaResult
+    ] = await Promise.all([
+      db
+        .from("catalog_products")
+        .select("*")
+        .order("created_at",{ascending:false}),
+
+      db
+        .from("catalog_fabrics")
+        .select("*")
+        .order("created_at",{ascending:false}),
+
+      db
+        .from("catalog_media")
+        .select("*")
+        .order("sort_order",{ascending:true})
+        .order("created_at",{ascending:false})
+    ]);
+
+    if (productsResult.error) throw productsResult.error;
+    if (fabricsResult.error) throw fabricsResult.error;
+    if (mediaResult.error) throw mediaResult.error;
+
+    const products = productsResult.data || [];
+    const fabrics = fabricsResult.data || [];
+    const media = mediaResult.data || [];
+
+    // Private bucket: generate temporary URLs only when needed.
+    const mediaWithUrls = await Promise.all(
+      media.map(async item => {
+        if (!item.storage_path) return item;
+
+        const {data,error} = await db.storage
+          .from("sales-media")
+          .createSignedUrl(item.storage_path,60 * 60);
+
+        return {
+          ...item,
+          signed_url:
+            !error && data?.signedUrl
+              ? data.signedUrl
+              : null
+        };
+      })
+    );
+
+    sendJSON(res,200,{
+      success:true,
+      products,
+      fabrics,
+      media:mediaWithUrls,
+      stats:{
+        products:products.filter(x=>x.active).length,
+        fabrics:fabrics.filter(x=>x.active).length,
+        media:media.length,
+        ai_ready:
+          products.filter(x=>x.active && x.ai_visible).length +
+          fabrics.filter(x=>x.active && x.ai_visible).length
+      }
+    });
+
+  } catch(error) {
+    console.error(
+      "LIVE CATALOG READ ERROR:",
+      error?.message || error
+    );
+
+    sendJSON(res,500,{
+      success:false,
+      error:"LIVE_CATALOG_READ_FAILED"
+    });
+  }
+
+  return;
+}
+
+async function readJSONBody(req) {
+  let body = "";
+
+  for await (const chunk of req) {
+    body += chunk.toString();
+  }
+
+  return JSON.parse(body || "{}");
+}
+
+// =====================================================
+// CASA VERONA — LIVE CATALOG PRODUCTS
+// ADMIN ONLY
+// =====================================================
+
+if (
+  req.method === "POST" &&
+  url.pathname === "/api/admin/catalog/products"
+) {
+
+  const auth = await requireAuth(req, res, [
+    USER_ROLES.ADMIN
+  ]);
+
+  if (!auth) return;
+
+  let body;
+
+  try {
+    body = await readJSONBody(req);
+  } catch {
+    sendJSON(res, 400, {
+      success: false,
+      error: "INVALID_JSON"
+    });
+    return;
+  }
+
+  const name =
+    String(body?.name || "").trim();
+
+  if (!name) {
+    sendJSON(res, 400, {
+      success: false,
+      error: "PRODUCT_NAME_REQUIRED"
+    });
+    return;
+  }
+
+  const numberOrNull = value => {
+    if (
+      value === null ||
+      value === undefined ||
+      String(value).trim() === ""
+    ) {
+      return null;
+    }
+
+    const number = Number(value);
+
+    return Number.isFinite(number)
+      ? number
+      : null;
+  };
+
+  const row = {
+    name,
+
+    category:
+      String(body?.category || "").trim() || null,
+
+    description:
+      String(body?.description || "").trim() || null,
+
+    standard_size:
+      String(body?.standard_size || "").trim() || null,
+
+    customizable:
+      body?.customizable !== false,
+
+    customer_notes:
+      String(body?.customer_notes || "").trim() || null,
+
+    internal_notes:
+      String(body?.internal_notes || "").trim() || null,
+
+    aliases:
+      Array.isArray(body?.aliases)
+        ? body.aliases
+            .map(value => String(value || "").trim())
+            .filter(Boolean)
+        : [],
+
+    structure_details:
+      String(body?.structure_details || "").trim() || null,
+
+    materials_details:
+      String(body?.materials_details || "").trim() || null,
+
+    comfort_details:
+      String(body?.comfort_details || "").trim() || null,
+
+    special_features:
+      String(body?.special_features || "").trim() || null,
+
+    customization_details:
+      String(body?.customization_details || "").trim() || null,
+
+    fabric_options:
+      String(body?.fabric_options || "").trim() || null,
+
+    color_options:
+      String(body?.color_options || "").trim() || null,
+
+    price:
+      numberOrNull(body?.price),
+
+    cost:
+      numberOrNull(body?.cost),
+
+    active:
+      body?.active !== false,
+
+    ai_visible:
+      body?.ai_visible !== false,
+
+    updated_at:
+      new Date().toISOString()
+  };
+
+  const db = requireSupabase();
+
+  const {
+    data: product,
+    error
+  } =
+    await db
+      .from("catalog_products")
+      .insert(row)
+      .select("*")
+      .single();
+
+  if (error) {
+    console.error(
+      "CATALOG PRODUCT CREATE ERROR:",
+      error.message
+    );
+
+    sendJSON(res, 500, {
+      success: false,
+      error: "CATALOG_PRODUCT_CREATE_FAILED"
+    });
+    return;
+  }
+
+  sendJSON(res, 201, {
+    success: true,
+    product
+  });
+
+  return;
+}
+
+
+
+
+// =====================================================
+// CASA VERONA — UPDATE LIVE CATALOG PRODUCT
+// ADMIN ONLY
+// =====================================================
+
+if (
+  req.method === "PATCH" &&
+  url.pathname.startsWith("/api/admin/catalog/products/")
+) {
+  const auth = await requireAuth(req, res, [
+    USER_ROLES.ADMIN
+  ]);
+
+  if (!auth) return;
+
+  const productId =
+    url.pathname.split("/").filter(Boolean).pop();
+
+  if (!productId) {
+    sendJSON(res, 400, {
+      success: false,
+      error: "PRODUCT_ID_REQUIRED"
+    });
+    return;
+  }
+
+  let body;
+
+  try {
+    body = await readJSONBody(req);
+  } catch {
+    sendJSON(res, 400, {
+      success: false,
+      error: "INVALID_JSON"
+    });
+    return;
+  }
+
+  const name = String(body?.name || "").trim();
+
+  if (!name) {
+    sendJSON(res, 400, {
+      success: false,
+      error: "PRODUCT_NAME_REQUIRED"
+    });
+    return;
+  }
+
+  const numberOrNull = value => {
+    if (
+      value === null ||
+      value === undefined ||
+      String(value).trim() === ""
+    ) return null;
+
+    const number = Number(value);
+    return Number.isFinite(number) ? number : null;
+  };
+
+  const row = {
+    name,
+
+    category:
+      String(body?.category || "").trim() || null,
+
+    description:
+      String(body?.description || "").trim() || null,
+
+    standard_size:
+      String(body?.standard_size || "").trim() || null,
+
+    customer_notes:
+      String(body?.customer_notes || "").trim() || null,
+
+    internal_notes:
+      String(body?.internal_notes || "").trim() || null,
+
+    aliases:
+      Array.isArray(body?.aliases)
+        ? body.aliases
+            .map(value => String(value || "").trim())
+            .filter(Boolean)
+        : [],
+
+    structure_details:
+      String(body?.structure_details || "").trim() || null,
+
+    materials_details:
+      String(body?.materials_details || "").trim() || null,
+
+    comfort_details:
+      String(body?.comfort_details || "").trim() || null,
+
+    special_features:
+      String(body?.special_features || "").trim() || null,
+
+    customization_details:
+      String(body?.customization_details || "").trim() || null,
+
+    fabric_options:
+      String(body?.fabric_options || "").trim() || null,
+
+    color_options:
+      String(body?.color_options || "").trim() || null,
+
+    price:
+      numberOrNull(body?.price),
+
+    cost:
+      numberOrNull(body?.cost),
+
+    customizable:
+      body?.customizable !== false,
+
+    active:
+      body?.active !== false,
+
+    ai_visible:
+      body?.ai_visible !== false,
+
+    updated_at:
+      new Date().toISOString()
+  };
+
+  const db = requireSupabase();
+
+  const {
+    data: product,
+    error
+  } = await db
+    .from("catalog_products")
+    .update(row)
+    .eq("id", productId)
+    .select("*")
+    .single();
+
+  if (error || !product) {
+    console.error(
+      "CATALOG PRODUCT UPDATE ERROR:",
+      error?.message || "PRODUCT_NOT_FOUND"
+    );
+
+    sendJSON(res, 500, {
+      success: false,
+      error: "CATALOG_PRODUCT_UPDATE_FAILED"
+    });
+    return;
+  }
+
+  sendJSON(res, 200, {
+    success: true,
+    product
+  });
+
+  return;
+}
+
+// =====================================================
+// CASA VERONA — LIVE CATALOG FABRICS
+// ADMIN ONLY
+// =====================================================
+
+if (
+  req.method === "POST" &&
+  url.pathname === "/api/admin/catalog/fabrics"
+) {
+
+  const auth = await requireAuth(req, res, [
+    USER_ROLES.ADMIN
+  ]);
+
+  if (!auth) return;
+
+  let body;
+
+  try {
+    body = await readJSONBody(req);
+  } catch {
+    sendJSON(res, 400, {
+      success: false,
+      error: "INVALID_JSON"
+    });
+    return;
+  }
+
+  const name =
+    String(body?.name || "").trim();
+
+  if (!name) {
+    sendJSON(res, 400, {
+      success: false,
+      error: "FABRIC_NAME_REQUIRED"
+    });
+    return;
+  }
+
+  const features =
+    Array.isArray(body?.features)
+      ? body.features
+          .map(value => String(value).trim())
+          .filter(Boolean)
+      : String(body?.features || "")
+          .split(",")
+          .map(value => value.trim())
+          .filter(Boolean);
+
+  const row = {
+    name,
+
+    code:
+      String(body?.code || "").trim() || null,
+
+    fabric_type:
+      String(body?.fabric_type || "").trim() || null,
+
+    color:
+      String(body?.color || "").trim() || null,
+
+    description:
+      String(body?.description || "").trim() || null,
+
+    features,
+
+    customer_notes:
+      String(body?.customer_notes || "").trim() || null,
+
+    internal_notes:
+      String(body?.internal_notes || "").trim() || null,
+
+    active:
+      body?.active !== false,
+
+    ai_visible:
+      body?.ai_visible !== false,
+
+    updated_at:
+      new Date().toISOString()
+  };
+
+  const db = requireSupabase();
+
+  const {
+    data: fabric,
+    error
+  } =
+    await db
+      .from("catalog_fabrics")
+      .insert(row)
+      .select("*")
+      .single();
+
+  if (error) {
+    console.error(
+      "CATALOG FABRIC CREATE ERROR:",
+      error.message
+    );
+
+    sendJSON(res, 500, {
+      success: false,
+      error: "CATALOG_FABRIC_CREATE_FAILED"
+    });
+    return;
+  }
+
+  sendJSON(res, 201, {
+    success: true,
+    fabric
+  });
+
+  return;
+}
+
+
+// =====================================================
+// CASA VERONA — LIVE CATALOG MEDIA UPLOAD
+// ADMIN ONLY
+// Products + Fabrics / Images + Videos
+// =====================================================
+
+if (
+  req.method === "POST" &&
+  url.pathname === "/api/admin/catalog/media"
+) {
+
+  const auth = await requireAuth(req, res, [
+    USER_ROLES.ADMIN
+  ]);
+
+  if (!auth) {
+    return;
+  }
+
+  let busboy;
+
+  try {
+    busboy = Busboy({
+      headers: req.headers,
+      limits: {
+        files: 1,
+        fileSize: 100 * 1024 * 1024,
+        fields: 20
+      }
+    });
+  } catch (error) {
+    sendJSON(res, 400, {
+      success: false,
+      error: "INVALID_MULTIPART_REQUEST"
+    });
+    return;
+  }
+
+  let uploadBuffer = null;
+  let uploadMime = "";
+  let originalName = "";
+  let uploadTooLarge = false;
+
+  const fields = {};
+
+  const uploadPromise =
+    new Promise((resolve, reject) => {
+
+      busboy.on("field", (name, value) => {
+        fields[name] = value;
+      });
+
+      busboy.on(
+        "file",
+        (fieldName, file, info) => {
+
+          if (fieldName !== "media") {
+            file.resume();
+            return;
+          }
+
+          originalName =
+            info?.filename || "catalog-media";
+
+          uploadMime =
+            String(info?.mimeType || "")
+              .toLowerCase();
+
+          const isImage =
+            uploadMime.startsWith("image/");
+
+          const isVideo =
+            uploadMime.startsWith("video/");
+
+          if (!isImage && !isVideo) {
+            file.resume();
+            reject(
+              new Error("INVALID_MEDIA_TYPE")
+            );
+            return;
+          }
+
+          const chunks = [];
+          let receivedBytes = 0;
+
+          file.on("data", chunk => {
+            receivedBytes += chunk.length;
+
+            // Images have a stricter 15MB limit.
+            if (
+              isImage &&
+              receivedBytes > 15 * 1024 * 1024
+            ) {
+              uploadTooLarge = true;
+            }
+
+            if (!uploadTooLarge) {
+              chunks.push(chunk);
+            }
+          });
+
+          file.on("limit", () => {
+            uploadTooLarge = true;
+          });
+
+          file.on("end", () => {
+            if (!uploadTooLarge) {
+              uploadBuffer =
+                Buffer.concat(chunks);
+            }
+          });
+        }
+      );
+
+      busboy.on("error", reject);
+      busboy.on("finish", resolve);
+
+      req.pipe(busboy);
+    });
+
+  try {
+    await uploadPromise;
+  } catch (error) {
+    sendJSON(res, 400, {
+      success: false,
+      error:
+        error.message ||
+        "CATALOG_MEDIA_PARSE_FAILED"
+    });
+    return;
+  }
+
+  if (uploadTooLarge) {
+    sendJSON(res, 413, {
+      success: false,
+      error: "MEDIA_TOO_LARGE"
+    });
+    return;
+  }
+
+  if (!uploadBuffer?.length) {
+    sendJSON(res, 400, {
+      success: false,
+      error: "MEDIA_REQUIRED"
+    });
+    return;
+  }
+
+  const isImage =
+    uploadMime.startsWith("image/");
+
+  const isVideo =
+    uploadMime.startsWith("video/");
+
+  const productId =
+    String(fields.product_id || "").trim() || null;
+
+  const fabricId =
+    String(fields.fabric_id || "").trim() || null;
+
+  // Media must belong to exactly one catalog entity.
+  if (
+    (!productId && !fabricId) ||
+    (productId && fabricId)
+  ) {
+    sendJSON(res, 400, {
+      success: false,
+      error: "PRODUCT_OR_FABRIC_REQUIRED"
+    });
+    return;
+  }
+
+  const db = requireSupabase();
+
+  // Verify the referenced catalog entity exists.
+  if (productId) {
+    const {
+      data: product,
+      error: productError
+    } =
+      await db
+        .from("catalog_products")
+        .select("id")
+        .eq("id", productId)
+        .maybeSingle();
+
+    if (productError || !product) {
+      sendJSON(res, 404, {
+        success: false,
+        error: "CATALOG_PRODUCT_NOT_FOUND"
+      });
+      return;
+    }
+  }
+
+  if (fabricId) {
+    const {
+      data: fabric,
+      error: fabricError
+    } =
+      await db
+        .from("catalog_fabrics")
+        .select("id")
+        .eq("id", fabricId)
+        .maybeSingle();
+
+    if (fabricError || !fabric) {
+      sendJSON(res, 404, {
+        success: false,
+        error: "CATALOG_FABRIC_NOT_FOUND"
+      });
+      return;
+    }
+  }
+
+  const bucketName = "sales-media";
+
+  const mimeExtensions = {
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/webp": "webp",
+    "image/heic": "heic",
+    "image/heif": "heif",
+    "image/gif": "gif",
+    "video/mp4": "mp4",
+    "video/quicktime": "mov",
+    "video/webm": "webm"
+  };
+
+  const originalExtension =
+    String(originalName)
+      .split(".")
+      .pop()
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, "");
+
+  const extension =
+    mimeExtensions[uploadMime] ||
+    originalExtension ||
+    (isVideo ? "mp4" : "jpg");
+
+  const ownerType =
+    productId ? "products" : "fabrics";
+
+  const ownerId =
+    productId || fabricId;
+
+  const storagePath =
+    `${ownerType}/${ownerId}/${Date.now()}-${Math.random().toString(36).slice(2,10)}.${extension}`;
+
+  const {
+    error: storageError
+  } =
+    await db.storage
+      .from(bucketName)
+      .upload(
+        storagePath,
+        uploadBuffer,
+        {
+          contentType: uploadMime,
+          upsert: false,
+          cacheControl: "3600"
+        }
+      );
+
+  if (storageError) {
+    console.error(
+      "CATALOG MEDIA STORAGE ERROR:",
+      storageError.message
+    );
+
+    sendJSON(res, 500, {
+      success: false,
+      error: "CATALOG_MEDIA_STORAGE_FAILED"
+    });
+    return;
+  }
+
+  const approvedForCustomer =
+    ["true", "1", "yes", "on"].includes(
+      String(
+        fields.approved_for_customer || ""
+      ).toLowerCase()
+    );
+
+  const aiVisible =
+    !["false", "0", "no", "off"].includes(
+      String(
+        fields.ai_visible ?? "true"
+      ).toLowerCase()
+    );
+
+  const sortOrder =
+    Number.isFinite(Number(fields.sort_order))
+      ? Number(fields.sort_order)
+      : 0;
+
+  const mediaRow = {
+    product_id: productId,
+    fabric_id: fabricId,
+
+    media_type:
+      isVideo ? "VIDEO" : "IMAGE",
+
+    storage_path: storagePath,
+
+    // Private bucket: do not create a permanent public URL.
+    public_url: null,
+
+    title:
+      String(fields.title || "").trim() || null,
+
+    description:
+      String(fields.description || "").trim() || null,
+
+    approved_for_customer:
+      approvedForCustomer,
+
+    ai_visible:
+      aiVisible,
+
+    sort_order:
+      sortOrder
+  };
+
+  const {
+    data: savedMedia,
+    error: mediaError
+  } =
+    await db
+      .from("catalog_media")
+      .insert(mediaRow)
+      .select("*")
+      .single();
+
+  if (mediaError) {
+
+    // Avoid orphaned Storage files if DB insert fails.
+    await db.storage
+      .from(bucketName)
+      .remove([storagePath]);
+
+    console.error(
+      "CATALOG MEDIA DB ERROR:",
+      mediaError.message
+    );
+
+    sendJSON(res, 500, {
+      success: false,
+      error: "CATALOG_MEDIA_SAVE_FAILED"
+    });
+    return;
+  }
+
+  sendJSON(res, 201, {
+    success: true,
+    media: savedMedia
+  });
+
+  return;
+}
 
 
 // =====================================================
