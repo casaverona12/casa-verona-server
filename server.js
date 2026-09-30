@@ -669,6 +669,49 @@ async function isLatestPendingSalesMessage(
   );
 }
 
+async function loadPendingSalesMessage(
+  leadId
+) {
+  const db = requireSupabase();
+
+  const { data: lockRow, error: lockError } =
+    await db
+      .from("sales_ai_locks")
+      .select("pending_message_id")
+      .eq("lead_id", leadId)
+      .maybeSingle();
+
+  if (lockError) {
+    throw new Error(
+      `SUPABASE LOAD PENDING LOCK ERROR: ${lockError.message}`
+    );
+  }
+
+  const pendingMessageId =
+    String(lockRow?.pending_message_id || "").trim();
+
+  if (!pendingMessageId) {
+    return null;
+  }
+
+  const { data: message, error: messageError } =
+    await db
+      .from("messages")
+      .select("*")
+      .eq("lead_id", leadId)
+      .eq("whatsapp_message_id", pendingMessageId)
+      .eq("direction", "INCOMING")
+      .maybeSingle();
+
+  if (messageError) {
+    throw new Error(
+      `SUPABASE LOAD PENDING MESSAGE ERROR: ${messageError.message}`
+    );
+  }
+
+  return message || null;
+}
+
 async function acquireSalesAILock(
   leadId,
   lockSeconds = 120
@@ -3199,6 +3242,63 @@ async function sendWhatsAppMessage(
     throw new Error(
       data.error?.message ||
       "WhatsApp send failed"
+    );
+  }
+
+  return data;
+}
+
+// ======================================================
+// HEYY — SALES AGENT TEXT SENDER
+// ======================================================
+
+async function sendHeyyTextMessage(
+  channelId,
+  phoneNumber,
+  message
+) {
+  const apiKey =
+    String(process.env.HEYY_API_KEY || "").trim();
+
+  if (!apiKey) {
+    throw new Error("HEYY_API_KEY missing");
+  }
+
+  if (!channelId || !phoneNumber || !message) {
+    throw new Error(
+      "Heyy channel, phone or message missing"
+    );
+  }
+
+  const response = await fetch(
+    `https://api.heyy.io/api/v2.0/${channelId}/whatsapp_messages/send`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        phoneNumber,
+        type: "TEXT",
+        bodyText: message
+      })
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    console.error(
+      "HEYY SALES SEND ERROR:",
+      data
+    );
+
+    throw new Error(
+      data?.message ||
+      data?.error ||
+      "Heyy WhatsApp send failed"
     );
   }
 
@@ -9946,15 +10046,34 @@ await saveMessage({
             return;
           }
 
-          const salesAILock =
-            await acquireSalesAILock(
-              lead.id,
-              120
-            );
+          // =====================================================
+          // CASA VERONA — SAME-LEAD CONCURRENCY WAIT
+          // =====================================================
+          // Another message for this lead may already be processing.
+          // Wait briefly for that lock to finish instead of dropping
+          // the newest pending customer message.
 
-          if (!salesAILock.acquired) {
-            console.log(
-              "🔒 HEYY SALES AI ALREADY PROCESSING",
+          let salesAILock = null;
+
+          for (let attempt = 0; attempt < 40; attempt++) {
+            salesAILock =
+              await acquireSalesAILock(
+                lead.id,
+                120
+              );
+
+            if (salesAILock.acquired) {
+              break;
+            }
+
+            await new Promise(
+              resolve => setTimeout(resolve, 500)
+            );
+          }
+
+          if (!salesAILock?.acquired) {
+            console.error(
+              "🚫 HEYY SALES AI LOCK TIMEOUT",
               {
                 lead_id: lead.id,
                 message_id: messageId
@@ -9965,7 +10084,49 @@ await saveMessage({
               success: true,
               received: true,
               analyzed: false,
-              locked: true
+              sent: false,
+              pending: true,
+              reason: "LOCK_TIMEOUT"
+            });
+
+            return;
+          }
+
+          // A newer customer message may have arrived while this
+          // request was waiting for the lock. Only the newest pending
+          // message is allowed to continue into the AI.
+          const stillLatestAfterLock =
+            await isLatestPendingSalesMessage(
+              lead.id,
+              messageId
+            );
+
+          if (!stillLatestAfterLock) {
+            console.log(
+              "⏳ HEYY MESSAGE SUPERSEDED WHILE WAITING",
+              {
+                lead_id: lead.id,
+                message_id: messageId
+              }
+            );
+
+            try {
+              await releaseSalesAILock(
+                lead.id,
+                salesAILock.lockToken
+              );
+            } catch (releaseError) {
+              console.error(
+                "SALES AI EARLY LOCK RELEASE ERROR:",
+                releaseError
+              );
+            }
+
+            sendJSON(res, 200, {
+              success: true,
+              received: true,
+              analyzed: false,
+              coalesced: true
             });
 
             return;
@@ -10051,14 +10212,89 @@ await saveMessage({
             }
           );
 
-          // IMPORTANT:
-          // Analyze-only mode.
-          // result.reply is intentionally NOT sent yet.
+          // =====================================================
+          // CASA VERONA — FINAL AI CUSTOMER REPLY
+          // =====================================================
+
+          if (!finalSendGuard.allowed) {
+            console.log(
+              "🛡️ HEYY AI SEND BLOCKED",
+              {
+                lead_id: lead.id,
+                message_id: messageId,
+                reason: finalSendGuard.reason
+              }
+            );
+
+            sendJSON(res, 200, {
+              success: true,
+              received: true,
+              analyzed: true,
+              sent: false,
+              blocked: true,
+              reason: finalSendGuard.reason
+            });
+
+            return;
+          }
+
+          const reply =
+            String(result?.reply || "").trim();
+
+          if (!reply) {
+            console.error(
+              "🚫 HEYY AI EMPTY REPLY",
+              {
+                lead_id: lead.id,
+                message_id: messageId
+              }
+            );
+
+            sendJSON(res, 200, {
+              success: true,
+              received: true,
+              analyzed: true,
+              sent: false,
+              error: "EMPTY_AI_REPLY"
+            });
+
+            return;
+          }
+
+          // Send exactly one customer-facing reply.
+          const whatsappResponse =
+            await sendHeyyTextMessage(
+              channelId,
+              phone,
+              reply
+            );
+
+          // Heyy response ID will be mapped after the first controlled test.
+          const outgoingMessageId = null;
+
+          await saveMessage({
+            leadId: lead.id,
+            direction: "OUTGOING",
+            sender: "AI",
+            content: reply,
+            whatsappMessageId: outgoingMessageId
+          });
+
+          console.log(
+            "🤖 HEYY AI REPLY SENT",
+            {
+              lead_id: lead.id,
+              message_id: messageId,
+              outgoing_message_id:
+                outgoingMessageId
+            }
+          );
+
           sendJSON(res, 200, {
             success: true,
             received: true,
             analyzed: true,
-            mode: "ANALYZE_ONLY"
+            sent: true
           });
 
           } finally {
