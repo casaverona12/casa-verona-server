@@ -4977,7 +4977,7 @@ async function cvCheckPushStatus(){
     );
 
     status.textContent =
-      "שגיאת סנכרון";
+      error?.message || "שגיאת סנכרון";
 
     button.textContent =
       "נסה שוב";
