@@ -4710,41 +4710,6 @@ function cvUrlBase64ToUint8Array(base64String){
   );
 }
 
-
-async function cvGetPushServiceWorker(){
-
-  if(!("serviceWorker" in navigator)){
-    throw new Error("Service Worker אינו נתמך במכשיר");
-  }
-
-  let registration =
-    await navigator.serviceWorker.getRegistration("/");
-
-  if(!registration){
-    registration =
-      await navigator.serviceWorker.register("/sw.js", {
-        scope: "/"
-      });
-  }
-
-  const readyPromise =
-    navigator.serviceWorker.ready;
-
-  const timeoutPromise =
-    new Promise((_, reject) => {
-      setTimeout(() => {
-        reject(
-          new Error("החיבור להתראות לקח יותר מדי זמן. סגור ופתח מחדש את האפליקציה.")
-        );
-      }, 12000);
-    });
-
-  return await Promise.race([
-    readyPromise,
-    timeoutPromise
-  ]);
-}
-
 async function cvEnablePushNotifications(){
 
   const isFactoryOwner =
@@ -4805,7 +4770,7 @@ async function cvEnablePushNotifications(){
     }
 
     const registration =
-      await cvGetPushServiceWorker();
+      await Promise.race([navigator.serviceWorker.ready,new Promise((_,reject)=>setTimeout(()=>reject(new Error("Push service worker timeout")),12000))]);
 
     let subscription =
       await registration.pushManager.getSubscription();
@@ -4940,7 +4905,7 @@ async function cvCheckPushStatus(){
   try{
 
     const registration =
-      await cvGetPushServiceWorker();
+      await Promise.race([navigator.serviceWorker.ready,new Promise((_,reject)=>setTimeout(()=>reject(new Error("Push service worker timeout")),12000))]);
 
     const subscription =
       await registration.pushManager.getSubscription();
