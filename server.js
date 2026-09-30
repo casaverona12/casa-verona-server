@@ -1463,7 +1463,17 @@ function getSmartFallbackReply(message, analysis = {}) {
     analysis.product !== "unknown";
 
   if (hasProduct) {
-    return "מה הכי חשוב לך לדעת על הדגם כדי שנדייק לך אותו?";
+    const discoveryComplete =
+      analysis.shopping_scope !== "UNKNOWN" ||
+      (Array.isArray(analysis.customer_priorities) &&
+       analysis.customer_priorities.length > 0) ||
+      Boolean(analysis.style_direction);
+
+    if (discoveryComplete) {
+      return "מעולה, לפי הכיוון שדיברנו עליו אני כבר יכול להתחיל לכוון לדגמים שמתאימים.";
+    }
+
+    return "בכיף, בוא נדייק קצת את הכיוון כדי להתאים משהו שבאמת יתאים.";
   }
 
   const asksPrice = [
@@ -2131,6 +2141,64 @@ CATALOG-FIRST PRODUCT IDENTIFICATION:
 ================================
 ================================
 ================================
+================================
+LUXURY CONVERSATIONAL HEBREW
+================================
+
+Casa Verona should sound premium, confident and sales-oriented,
+but still like a real WhatsApp conversation.
+
+Use polished conversational Hebrew — not advertising-copy Hebrew.
+
+The target tone:
+- premium
+- warm
+- confident
+- simple
+- natural
+- concise
+- sales-smart
+
+Avoid language that sounds overly literary, theatrical or written
+just to appear luxurious.
+
+Prefer words a strong salesperson would naturally use in WhatsApp.
+
+For example:
+
+Too formal / polished:
+"כיוון מודרני ובהיר יכול להעניק לבית מראה נקי ומרווח"
+
+Better:
+"מעולה, מודרני ובהיר זה כיוון יפה."
+
+Too formal:
+"ספה בעלת נוכחות וצורה פיסולית"
+
+Better:
+"ספה עם נוכחות ועיצוב מיוחד"
+
+Too generic:
+"לא עוד דגם שגרתי"
+
+Better when appropriate:
+"משהו שלא רואים בכל בית"
+
+Luxury comes from confidence, taste and precision —
+not from complicated words.
+
+Do not become slang-heavy either.
+Do not automatically use words such as:
+"אחי", "יאללה", "מלך", "פצצה".
+
+Adapt slightly to the customer's tone,
+while keeping Casa Verona professional.
+
+Keep most WhatsApp messages short.
+Usually 1-3 short sentences are enough.
+
+================================
+
 EMOJI DISCIPLINE
 ================================
 
@@ -2350,6 +2418,43 @@ COMFORT, DESIGN, SIZE, PRACTICALITY, DURABILITY, EASY_CLEANING.
 
 Do not interrogate the customer just to fill these fields.
 Learn them naturally while providing useful service.
+
+================================
+
+================================
+CATALOG DELIVERY
+================================
+
+The catalog is a sales tool, not a default response.
+
+Use:
+next_action = "SEND_CATALOG"
+
+ONLY when the catalog should actually be sent to the customer NOW.
+
+Use SEND_CATALOG when:
+- the customer explicitly asks for the catalog
+- the customer agrees after being offered the catalog
+- enough discovery has been completed and showing the available designs
+  is genuinely the most useful next step
+
+Do NOT use SEND_CATALOG:
+- for a generic greeting
+- just because the customer does not have a screenshot
+- before understanding a broad customer need
+- as a substitute for answering a question
+- repeatedly when the catalog was already sent in the recent conversation
+
+When using SEND_CATALOG:
+- write a short natural reply that makes it clear the catalog is being sent now
+- do not ask "רוצה שאשלח?" if you are already sending it
+- continue the sales conversation naturally after the customer reviews it
+
+Example:
+"יש לנו כמה דגמים שיכולים להתאים לכיוון הזה. שולח לך את הקטלוג, תראה מה תופס לך את העין ומשם נדייק."
+
+should_offer_catalog means the catalog may be useful.
+SEND_CATALOG means send the actual document now.
 
 ================================
 
@@ -3390,6 +3495,15 @@ handoff_reason,
       String(parsed.reply || "").trim();
 
     if (!reply) {
+      console.warn(
+        "⚠️ SALES ENGINE EMPTY REPLY — USING FALLBACK",
+        {
+          next_action: analysis.next_action,
+          stage: analysis.stage,
+          product: analysis.product
+        }
+      );
+
       reply =
         getSmartFallbackReply(
           message,
@@ -3403,7 +3517,8 @@ handoff_reason,
     };
   } catch (error) {
     console.error(
-      "SALES ENGINE JSON ERROR:",
+      "❌ SALES ENGINE JSON PARSE ERROR:",
+      error.message,
       cleaned
     );
 
@@ -3613,6 +3728,62 @@ async function sendWhatsAppMessage(
 // ======================================================
 // HEYY — SALES AGENT TEXT SENDER
 // ======================================================
+
+const CASA_VERONA_CATALOG_HEYY_FILE_ID =
+  "805d708b-f913-4d56-b6e7-6b78c88edfac";
+
+async function sendHeyyCatalog(
+  channelId,
+  phoneNumber
+) {
+  const apiKey =
+    String(process.env.HEYY_API_KEY || "").trim();
+
+  if (!apiKey) {
+    throw new Error("HEYY_API_KEY missing");
+  }
+
+  if (!channelId || !phoneNumber) {
+    throw new Error(
+      "Heyy channel or phone missing for catalog"
+    );
+  }
+
+  const response = await fetch(
+    `https://api.heyy.io/api/v2.0/${channelId}/whatsapp_messages/send`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        phoneNumber,
+        type: "DOCUMENT",
+        fileId:
+          CASA_VERONA_CATALOG_HEYY_FILE_ID
+      })
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    console.error(
+      "HEYY CATALOG SEND ERROR:",
+      data
+    );
+
+    throw new Error(
+      data?.message ||
+      data?.error ||
+      "Heyy catalog send failed"
+    );
+  }
+
+  return data;
+}
 
 async function sendHeyyTextMessage(
   channelId,
@@ -10642,6 +10813,65 @@ await saveMessage({
             whatsappMessageId: outgoingMessageId
           });
 
+          // =====================================================
+          // CASA VERONA — CATALOG DELIVERY
+          // =====================================================
+
+          const wantsCatalogNow =
+            analysis?.next_action === "SEND_CATALOG";
+
+          const catalogAlreadySent =
+            Boolean(
+              customerBrain?.sales_state?.catalog_sent_at
+            );
+
+          let catalogSent = false;
+
+          if (
+            wantsCatalogNow &&
+            !catalogAlreadySent
+          ) {
+            try {
+              await sendHeyyCatalog(
+                channelId,
+                phone
+              );
+
+              const db = requireSupabase();
+
+              const { error: catalogStateError } =
+                await db
+                  .from("lead_ai_state")
+                  .update({
+                    catalog_sent_at:
+                      new Date().toISOString()
+                  })
+                  .eq("lead_id", lead.id);
+
+              if (catalogStateError) {
+                console.error(
+                  "CATALOG STATE UPDATE ERROR:",
+                  catalogStateError.message
+                );
+              }
+
+              catalogSent = true;
+
+              console.log(
+                "📖 HEYY CATALOG SENT",
+                {
+                  lead_id: lead.id,
+                  message_id: messageId
+                }
+              );
+            } catch (catalogError) {
+              console.error(
+                "HEYY CATALOG DELIVERY ERROR:",
+                catalogError
+              );
+            }
+          }
+
           console.log(
             "🤖 HEYY AI REPLY SENT",
             {
@@ -10656,7 +10886,8 @@ await saveMessage({
             success: true,
             received: true,
             analyzed: true,
-            sent: true
+            sent: true,
+            catalog_sent: catalogSent
           });
 
           } finally {
