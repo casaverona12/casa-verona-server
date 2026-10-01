@@ -4848,6 +4848,101 @@ async function sendPushToRole(role, payload) {
 }
 
 
+
+// =====================================================
+// CASA VERONA — QUOTE READY NOTIFICATION
+// =====================================================
+
+async function createQuoteReadyNotification(
+  leadId,
+  analysis
+) {
+  if (!leadId || analysis?.quote_ready !== true) {
+    return {
+      created: false,
+      reason: "NOT_QUOTE_READY"
+    };
+  }
+
+  const db = requireSupabase();
+
+  const title =
+    "🔥 ליד חם מוכן להצעת מחיר";
+
+  const message =
+    analysis?.product &&
+    analysis.product !== "unknown"
+      ? `${analysis.product} — הלקוח מוכן להצעת מחיר`
+      : "הלקוח מוכן להצעת מחיר";
+
+  const {
+    data: notification,
+    error
+  } = await db
+    .from("sales_notifications")
+    .insert({
+      lead_id: leadId,
+      notification_type: "QUOTE_READY",
+      status: "PENDING",
+      title,
+      message
+    })
+    .select("id")
+    .single();
+
+  if (error) {
+    // Unique pending notification already exists.
+    if (error.code === "23505") {
+      return {
+        created: false,
+        reason: "ALREADY_PENDING"
+      };
+    }
+
+    throw new Error(
+      "QUOTE READY NOTIFICATION ERROR: " +
+      error.message
+    );
+  }
+
+  // The database event is already safely stored.
+  // Push failure must not lose the notification.
+  try {
+    const pushResult =
+      await sendPushToRole(
+        USER_ROLES.ADMIN,
+        {
+          title,
+          body: message,
+          tag: `quote-ready-${leadId}`,
+          url: `/dashboard.html?lead=${encodeURIComponent(
+            leadId
+          )}`,
+          lead_id: leadId,
+          requireInteraction: true
+        }
+      );
+
+    console.log(
+      "🔥 QUOTE READY PUSH:",
+      leadId,
+      pushResult
+    );
+  } catch (pushError) {
+    console.error(
+      "QUOTE READY PUSH ERROR:",
+      leadId,
+      pushError?.message || pushError
+    );
+  }
+
+  return {
+    created: true,
+    notification_id: notification?.id || null
+  };
+}
+
+
 const server =
   http.createServer(
     async (req, res) => {
@@ -10944,6 +11039,20 @@ await updateLeadFromAnalysis(
   analysis
 );
 
+try {
+  await createQuoteReadyNotification(
+    lead.id,
+    analysis
+  );
+} catch (quoteNotificationError) {
+  console.error(
+    "QUOTE READY NOTIFICATION FAILED:",
+    lead.id,
+    quoteNotificationError?.message ||
+      quoteNotificationError
+  );
+}
+
 await saveAIState(
   lead.id,
   analysis
@@ -12282,6 +12391,20 @@ await saveMessage({
             lead.id,
             analysis
           );
+
+          try {
+            await createQuoteReadyNotification(
+              lead.id,
+              analysis
+            );
+          } catch (quoteNotificationError) {
+            console.error(
+              "QUOTE READY NOTIFICATION FAILED:",
+              lead.id,
+              quoteNotificationError?.message ||
+                quoteNotificationError
+            );
+          }
 
           await saveAIState(
             lead.id,
