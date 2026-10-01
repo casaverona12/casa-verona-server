@@ -11054,6 +11054,18 @@ const conversation =
 
           const analysis =
             result.analysis;
+
+          console.log("🧪 SALES DECISION:", {
+            stage: analysis?.stage,
+            next_action: analysis?.next_action,
+            quote_ready: analysis?.quote_ready,
+            needs_human: analysis?.needs_human,
+            handoff_reason: analysis?.handoff_reason,
+            should_offer_callback:
+              analysis?.should_offer_callback,
+            callback_requested:
+              analysis?.callback_requested
+          });
           
           
 
@@ -11352,6 +11364,18 @@ await saveMessage({
 
           const analysis =
             result.analysis;
+
+          console.log("🧪 SALES DECISION:", {
+            stage: analysis?.stage,
+            next_action: analysis?.next_action,
+            quote_ready: analysis?.quote_ready,
+            needs_human: analysis?.needs_human,
+            handoff_reason: analysis?.handoff_reason,
+            should_offer_callback:
+              analysis?.should_offer_callback,
+            callback_requested:
+              analysis?.callback_requested
+          });
 
           const handoff =
             createHandoff(
@@ -12409,6 +12433,18 @@ await saveMessage({
 
           const analysis =
             result.analysis;
+
+          console.log("🧪 SALES DECISION:", {
+            stage: analysis?.stage,
+            next_action: analysis?.next_action,
+            quote_ready: analysis?.quote_ready,
+            needs_human: analysis?.needs_human,
+            handoff_reason: analysis?.handoff_reason,
+            should_offer_callback:
+              analysis?.should_offer_callback,
+            callback_requested:
+              analysis?.callback_requested
+          });
 
           await updateLeadFromAnalysis(
             lead.id,
