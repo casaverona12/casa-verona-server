@@ -5463,6 +5463,36 @@ if (
       "./ai-business-os/marketing-agency/marketing-intelligence"
     );
 
+    // Shared daily quota stored atomically in Supabase.
+    const quotaDb = requireSupabase();
+
+    const { data: quotaRows, error: quotaError } =
+      await quotaDb.rpc("consume_marketing_ai_quota", {
+        p_limit: 50
+      });
+
+    if (quotaError || !Array.isArray(quotaRows) || quotaRows.length !== 1) {
+      console.error("MARKETING AI QUOTA ERROR:", quotaError?.message || "INVALID_RESPONSE");
+      sendMarketingResponse(503, {
+        success: false,
+        error: "MARKETING_AI_QUOTA_UNAVAILABLE"
+      });
+      return;
+    }
+
+    const quota = quotaRows[0];
+
+    if (!quota.allowed) {
+      sendMarketingResponse(429, {
+        success: false,
+        error: "MARKETING_AI_DAILY_LIMIT",
+        limit: 50,
+        used: quota.used,
+        remaining: 0
+      });
+      return;
+    }
+
     const result = await consultMarketingAI(input.messages);
 
     if (!result.success) {
