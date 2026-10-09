@@ -4466,6 +4466,9 @@ async function sendHeyyTextMessage(
 // CASA VERONA OS — AUTH & ROLES
 // =====================================================
 
+// MARKETING_AI_RATE_LIMIT
+const marketingAIRateLimits = new Map();
+
 const USER_ROLES = {
   ADMIN: "ADMIN",
   FACTORY_OWNER: "FACTORY_OWNER",
@@ -5015,6 +5018,150 @@ const server =
           return;
         }
 
+
+// =====================================================
+// CASA VERONA — MARKETING AGENCY UI ASSETS
+// Only these two public interface files are exposed.
+// =====================================================
+
+if (
+  req.method === "GET" &&
+  (
+    url.pathname === "/ai-business-os/marketing-agency/agency.css" ||
+    url.pathname === "/ai-business-os/marketing-agency/agency-ui.js"
+  )
+) {
+  const isCss = url.pathname.endsWith(".css");
+
+  const filename = isCss ? "agency.css" : "agency-ui.js";
+
+  const assetPath = path.join(
+    __dirname,
+    "ai-business-os",
+    "marketing-agency",
+    filename
+  );
+
+  fs.readFile(assetPath, (error, data) => {
+    if (error) {
+      res.writeHead(404, {
+        "Content-Type": "text/plain; charset=utf-8"
+      });
+      res.end("Marketing asset not found");
+      return;
+    }
+
+    res.writeHead(200, {
+      "Content-Type": isCss
+        ? "text/css; charset=utf-8"
+        : "application/javascript; charset=utf-8",
+      "Cache-Control": "no-store"
+    });
+
+    res.end(data);
+  });
+
+  return;
+}
+
+
+// CASA VERONA — CAMPAIGN PLANNER ASSET
+if (
+  req.method === "GET" &&
+  url.pathname === "/ai-business-os/marketing-agency/campaign-planner.js"
+) {
+  const filePath = path.join(
+    __dirname,
+    "ai-business-os",
+    "marketing-agency",
+    "campaign-planner.js"
+  );
+
+  fs.readFile(filePath, (error, data) => {
+    if (error) {
+      res.writeHead(404, {
+        "Content-Type": "text/plain; charset=utf-8"
+      });
+      res.end("Campaign planner not found");
+      return;
+    }
+
+    res.writeHead(200, {
+      "Content-Type": "application/javascript; charset=utf-8",
+      "Cache-Control": "no-store"
+    });
+    res.end(data);
+  });
+
+  return;
+}
+
+
+// CASA VERONA — CAMPAIGN WORKSPACE UI ASSET
+if (
+  req.method === "GET" &&
+  url.pathname === "/ai-business-os/marketing-agency/campaign-workspace.js"
+) {
+  const assetPath = path.join(
+    __dirname,
+    "ai-business-os",
+    "marketing-agency",
+    "campaign-workspace.js"
+  );
+
+  fs.readFile(assetPath, (error, data) => {
+    if (error) {
+      res.writeHead(404, {
+        "Content-Type": "text/plain; charset=utf-8"
+      });
+      res.end("Campaign workspace not found");
+      return;
+    }
+
+    res.writeHead(200, {
+      "Content-Type": "application/javascript; charset=utf-8",
+      "Cache-Control": "no-store"
+    });
+
+    res.end(data);
+  });
+
+  return;
+}
+
+
+// CASA VERONA — CAMPAIGN WORKSPACE CSS
+if (
+  req.method === "GET" &&
+  url.pathname === "/ai-business-os/marketing-agency/campaign-workspace.css"
+) {
+  const assetPath = path.join(
+    __dirname,
+    "ai-business-os",
+    "marketing-agency",
+    "campaign-workspace.css"
+  );
+
+  fs.readFile(assetPath, (error, data) => {
+    if (error) {
+      res.writeHead(404, {
+        "Content-Type": "text/plain; charset=utf-8"
+      });
+      res.end("Campaign CSS not found");
+      return;
+    }
+
+    res.writeHead(200, {
+      "Content-Type": "text/css; charset=utf-8",
+      "Cache-Control": "no-store"
+    });
+
+    res.end(data);
+  });
+
+  return;
+}
+
 // CASA VERONA ASSETS
 // -----------------------------------------------
 
@@ -5208,6 +5355,230 @@ if (
 }
 
         // -----------------------------------------------
+
+
+
+// -----------------------------------------------
+
+
+// API - MARKETING INTELLIGENCE
+// ADMIN ONLY - ADVISORY CHAT
+// -----------------------------------------------
+
+if (
+  req.method === "POST" &&
+  url.pathname === "/api/ai/marketing/consult"
+) {
+  const auth = await requireAuth(req, res, [USER_ROLES.ADMIN]);
+  if (!auth) return;
+
+  if (process.env.MARKETING_AI_ENABLED !== "true") {
+    res.writeHead(503, {
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "no-store"
+    });
+    res.end(JSON.stringify({
+      success: false,
+      error: "MARKETING_AI_DISABLED"
+    }));
+    return;
+  }
+
+  const marketingUserId = String(auth.user?.id || auth.profile?.id || "");
+
+  if (!marketingUserId) {
+    res.writeHead(403, {
+      "Content-Type": "application/json; charset=utf-8"
+    });
+    res.end(JSON.stringify({
+      success: false,
+      error: "MARKETING_USER_ID_MISSING"
+    }));
+    return;
+  }
+
+  const marketingNow = Date.now();
+  const marketingWindowMs = 60000;
+
+  const marketingRecent = (
+    marketingAIRateLimits.get(marketingUserId) || []
+  ).filter(time => marketingNow - time < marketingWindowMs);
+
+  if (marketingRecent.length >= 10) {
+    res.writeHead(429, {
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "no-store",
+      "Retry-After": "60"
+    });
+    res.end(JSON.stringify({
+      success: false,
+      error: "MARKETING_AI_RATE_LIMIT"
+    }));
+    return;
+  }
+
+  marketingRecent.push(marketingNow);
+  marketingAIRateLimits.set(marketingUserId, marketingRecent);
+
+
+  const sendMarketingResponse = (status, payload) => {
+    res.writeHead(status, {
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "no-store"
+    });
+    res.end(JSON.stringify(payload));
+  };
+
+  try {
+    let raw = "";
+    let bytes = 0;
+
+    for await (const chunk of req) {
+      bytes += chunk.length;
+
+      if (bytes > 30000) {
+        sendMarketingResponse(413, {
+          success: false,
+          error: "REQUEST_TOO_LARGE"
+        });
+        return;
+      }
+
+      raw += chunk.toString("utf8");
+    }
+
+    let input;
+
+    try {
+      input = JSON.parse(raw || "{}");
+    } catch {
+      sendMarketingResponse(400, {
+        success: false,
+        error: "INVALID_JSON"
+      });
+      return;
+    }
+
+    const { consultMarketingAI } = require(
+      "./ai-business-os/marketing-agency/marketing-intelligence"
+    );
+
+    const result = await consultMarketingAI(input.messages);
+
+    if (!result.success) {
+      sendMarketingResponse(503, result);
+      return;
+    }
+
+    sendMarketingResponse(200, result);
+
+  } catch (error) {
+    const validationErrors = [
+      "INVALID_MESSAGES",
+      "INVALID_MESSAGE_COUNT",
+      "INVALID_MESSAGE",
+      "LAST_MESSAGE_MUST_BE_USER"
+    ];
+
+    if (validationErrors.includes(error.message)) {
+      sendMarketingResponse(400, {
+        success: false,
+        error: error.message
+      });
+      return;
+    }
+
+    console.error(
+      "MARKETING AI ERROR:",
+      error.message
+    );
+
+    sendMarketingResponse(502, {
+      success: false,
+      error: "MARKETING_AI_FAILED"
+    });
+  }
+
+  return;
+}
+
+// -----------------------------------------------
+// API - AI PRODUCT DEVELOPMENT
+// ADMIN ONLY - CONCEPT GENERATION
+// -----------------------------------------------
+
+if (
+  req.method === "POST" &&
+  url.pathname === "/api/ai/product-development/concept"
+) {
+  const auth = await requireAuth(req, res, [USER_ROLES.ADMIN]);
+  if (!auth) return;
+
+  try {
+    let raw = "";
+
+    for await (const chunk of req) {
+      raw += chunk;
+      if (raw.length > 20000) {
+        res.writeHead(413, {
+          "Content-Type": "application/json; charset=utf-8"
+        });
+        res.end(JSON.stringify({
+          success: false,
+          error: "REQUEST_TOO_LARGE"
+        }));
+        return;
+      }
+    }
+
+    const input = JSON.parse(raw || "{}");
+
+    if (
+      !input ||
+      typeof input !== "object" ||
+      Array.isArray(input)
+    ) {
+      throw new Error("INVALID_INPUT");
+    }
+
+    const { developModel } =
+      require("./ai-business-os/model-developer/pipeline");
+
+    const result = developModel({
+      category: String(input.category || "sofas").slice(0, 100),
+      trend: String(input.trend || "").slice(0, 200),
+      trendScore: Math.max(
+        0,
+        Math.min(100, Number(input.trendScore) || 0)
+      ),
+      preferredStyle: String(
+        input.preferredStyle || "premium contemporary"
+      ).slice(0, 200),
+      market: "Israel"
+    });
+
+    res.writeHead(200, {
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "no-store"
+    });
+
+    res.end(JSON.stringify(result));
+
+  } catch (error) {
+    console.error("PRODUCT DEVELOPMENT ERROR:", error.message);
+
+    res.writeHead(400, {
+      "Content-Type": "application/json; charset=utf-8"
+    });
+
+    res.end(JSON.stringify({
+      success: false,
+      error: "PRODUCT_CONCEPT_FAILED"
+    }));
+  }
+
+  return;
+}
 
 // -----------------------------------------------
 // API - DASHBOARD SUMMARY

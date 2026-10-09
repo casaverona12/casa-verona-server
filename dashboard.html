@@ -483,6 +483,127 @@ linear-gradient(90deg,rgba(12,12,11,.025) 1px,transparent 1px),
   z-index:10 !important;
 }
 
+/* CASA VERONA — MARKETING AGENCY */
+.cv-agency {
+  direction: rtl;
+  padding: 8px 0 30px;
+  color: #eae5db;
+}
+
+
+
+.cv-agency-hero {
+  padding: 36px;
+  border: 1px solid rgba(194,167,119,.22);
+  border-radius: 22px;
+  background: linear-gradient(135deg,#151719,#24221f);
+  margin-bottom: 24px;
+}
+
+
+
+.cv-agency-eyebrow {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: #c7aa79;
+  margin-bottom: 14px;
+}
+
+
+
+.cv-agency-hero h1 {
+  font-size: clamp(27px,3vw,42px);
+  font-weight: 500;
+  margin: 0 0 12px;
+  color: #f5f0e7;
+}
+
+
+
+.cv-agency-hero p {
+  line-height: 1.9;
+  color: #c7c2b9;
+  max-width: 650px;
+}
+
+
+
+.cv-agency-stage {
+  display: inline-block;
+  margin-top: 16px;
+  font-size: 12px;
+  color: #c7aa79;
+}
+
+
+
+.cv-agency-grid {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: 18px;
+}
+
+
+
+.cv-agency-card {
+  background: #1b1d20;
+  border: 1px solid rgba(194,167,119,.18);
+  border-radius: 18px;
+  padding: 25px;
+  min-height: 215px;
+}
+
+
+
+.cv-agency-card > span {
+  color: #c7aa79;
+  font-size: 10px;
+  letter-spacing: 1.4px;
+}
+
+
+
+.cv-agency-card h3 {
+  color: #f5f0e7;
+  font-size: 19px;
+  margin: 22px 0 10px;
+}
+
+
+
+.cv-agency-card p {
+  color: #bdb8af;
+  font-size: 13px;
+  line-height: 1.9;
+}
+
+
+
+.cv-agency-card small {
+  display: block;
+  margin-top: 17px;
+  color: #c7aa79;
+}
+
+
+
+@media(max-width:1050px) {
+  .cv-agency-grid {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+  }
+}
+
+
+
+@media(max-width:650px) {
+  .cv-agency-hero { padding: 25px 20px; }
+  .cv-agency-grid { grid-template-columns: 1fr; }
+  .cv-agency-card { min-height: auto; }
+}
+
+
+
 </style>
 
 <style>
@@ -823,7 +944,8 @@ body.cv-role-factory-owner #cvFactoryOwnerNav button{
     <button data-page="ai-creative"><span class="cv-nav-no">13</span><span class="cv-nav-name">Creative Director</span></button>
     <button data-page="ai-customer"><span class="cv-nav-no">14</span><span class="cv-nav-name">Customer Success</span></button>
     <button data-page="ai-production"><span class="cv-nav-no">15</span><span class="cv-nav-name">Production AI</span></button>
-    <button data-page="ai-ceo"><span class="cv-nav-no">16</span><span class="cv-nav-name">CEO Brain</span></button>
+    <button data-page="ai-product-development"><span class="cv-nav-no">17</span><span class="cv-nav-name">AI Product Development</span></button>
+      <button data-page="ai-ceo"><span class="cv-nav-no">16</span><span class="cv-nav-name">CEO Brain</span></button>
   </nav></div>
   <div class="cv-nav-group"><span class="cv-nav-label">INTELLIGENCE</span><nav class="cv-nav"><button data-page="reports"><span class="cv-nav-no">17</span><span class="cv-nav-name">דוחות ורווחיות</span></button></nav></div>
 </aside>
@@ -2516,10 +2638,215 @@ body.cv-role-factory-owner #cvFactoryOwnerNav button{
 
 <section id="ai-sales-agent" class="page"></section>
 <section id="ai-sales-coach" class="page"></section>
-<section id="ai-marketing" class="page"></section>
+
+<link rel="stylesheet" href="/ai-business-os/marketing-agency/agency.css">
+<script src="/ai-business-os/marketing-agency/campaign-planner.js"></script>
+<link rel="stylesheet" href="/ai-business-os/marketing-agency/campaign-workspace.css">
+<script src="/ai-business-os/marketing-agency/campaign-workspace.js"></script>
+<script src="/ai-business-os/marketing-agency/agency-ui.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const agency = document.getElementById("cvMarketingAgencyHome");
+  if (
+    agency &&
+    window.CasaVeronaMarketingAgency &&
+    typeof window.CasaVeronaMarketingAgency.createAgency === "function"
+  ) {
+    window.CasaVeronaMarketingAgency.createAgency(agency);
+  }
+});
+</script>
+
+<section id="ai-marketing" class="page">
+  <div id="cvMarketingAgencyHome" class="cv-agency">
+
+
+
+    <div class="cv-agency-hero">
+      <span class="cv-agency-eyebrow">CASA VERONA · MARKETING INTELLIGENCE</span>
+      <h1>סוכנות השיווק שלנו</h1>
+      <p>מרכז אחד לבניית המותג, תכנון קמפיינים, יצירת תוכן והגדלת המכירות.</p>
+      <span class="cv-agency-stage">מרכז עבודה בהקמה · ללא חיבור לחשבונות פרסום</span>
+    </div>
+
+
+
+    <div class="cv-agency-grid">
+
+
+
+      <article class="cv-agency-card">
+        <span>01 / PAID MEDIA</span>
+        <h3>מנהל קמפיינים ממומנים</h3>
+        <p>תכנון קמפיינים לפייסבוק ולאינסטגרם, קהלים, תקציבים, מדידה ואופטימיזציה.</p>
+        <small>Meta Ads AI Manager</small>
+      </article>
+
+
+
+      <article class="cv-agency-card">
+        <span>02 / CREATIVE STUDIO</span>
+        <h3>סטודיו קריאייטיב AI</h3>
+        <p>העלאת תמונות וסרטונים והכנת תוכן לסטורי, רילס, פוסטים ומודעות.</p>
+        <small>AI Creative Studio</small>
+      </article>
+
+
+
+      <article class="cv-agency-card">
+        <span>03 / MARKET INTELLIGENCE</span>
+        <h3>מחקר שוק ומתחרים</h3>
+        <p>מחקר מותגי ריהוט, מגמות, קהלי יעד והזדמנויות בשוק הישראלי.</p>
+        <small>Market Research</small>
+      </article>
+
+
+
+      <article class="cv-agency-card">
+        <span>04 / BRAND STRATEGY</span>
+        <h3>אסטרטגיית מותג</h3>
+        <p>שפה עיצובית, מיצוב יוקרתי, מסרים שיווקיים ונוכחות אחידה ברשתות.</p>
+        <small>Brand Director</small>
+      </article>
+
+
+
+      <article class="cv-agency-card">
+        <span>05 / MONTHLY PLANNING</span>
+        <h3>תכנון שיווק חודשי</h3>
+        <p>בניית תוכנית חודשית, חלוקת תקציב, משימות, יעדים ולוח תוכן.</p>
+        <small>Marketing Planner</small>
+      </article>
+
+
+
+      <article class="cv-agency-card">
+        <span>06 / PERFORMANCE</span>
+        <h3>ביצועים והמרות</h3>
+        <p>ניתוח לידים, עלויות, סגירות, הכנסות ורווחיות לפי קמפיין.</p>
+        <small>Campaign Analytics</small>
+      </article>
+
+
+
+    </div>
+  </div>
+</section>
 <section id="ai-creative" class="page"></section>
 <section id="ai-customer" class="page"></section>
 <section id="ai-production" class="page"></section>
+<section id="ai-product-development" class="page">
+  <div class="cv-section-head">
+    <small>CASA VERONA AI · PRODUCT DEVELOPMENT</small>
+    <h1>מחלקת פיתוח מוצרים</h1>
+    <p>ממחקר מגמות ועד לפיתוח דגמים ותיקי ייצור.</p>
+  </div>
+
+
+
+  <div class="cv-modules">
+    <article class="cv-module">
+      <small>RESEARCH</small>
+      <h3>מחקר שוק ומגמות</h3>
+      <p>זיהוי הזדמנויות ודגמים מבוקשים.</p>
+    </article>
+
+
+
+    <article class="cv-module">
+      <small>DESIGN STUDIO</small>
+      <h3>סטודיו לפיתוח דגמים</h3>
+      <p>פיתוח קונספטים, מפרטים והדמיות.</p>
+    </article>
+
+
+
+    <article class="cv-module dark">
+      <small>FACTORY DEVELOPMENT</small>
+      <h3>תיקי ייצור ואישורים</h3>
+      <p>אישור בעל העסק, בדיקה הנדסית ואישור מפעל.</p>
+    </article>
+  </div>
+
+
+
+
+
+<div style="margin-top:28px;padding:24px;border:1px solid #ccc;border-radius:12px">
+  <h2>סטודיו לפיתוח דגם חדש</h2>
+  <p>הגדר את כיוון העיצוב והפעל את מנוע פיתוח הקונספטים.</p>
+
+
+
+  <form id="cvProductConceptForm" style="display:grid;gap:14px;max-width:650px">
+    <label>קטגוריית מוצר
+      <select name="category" required>
+        <option value="sofas">ספות</option>
+        <option value="beds">מיטות</option>
+        <option value="armchairs">כורסאות</option>
+        <option value="dining tables">פינות אוכל</option>
+        <option value="coffee tables">שולחנות סלון</option>
+        <option value="tv units">מזנונים</option>
+      </select>
+    </label>
+
+
+
+    <label>מגמה או רעיון לפיתוח
+      <input name="trend" maxlength="200" required
+        placeholder="לדוגמה: ספה מודולרית עם קווים מעוגלים">
+    </label>
+
+
+
+    <label>סגנון מועדף
+      <input name="preferredStyle" maxlength="200"
+        value="premium contemporary">
+    </label>
+
+
+
+    <label>ציון מגמה משוער (0–100)
+      <input name="trendScore" type="number" min="0" max="100"
+        value="70">
+    </label>
+
+
+
+    <button type="submit" id="cvProductConceptButton">
+      צור קונספט חדש
+    </button>
+  </form>
+
+
+
+  <div id="cvProductConceptStatus" role="status"
+       aria-live="polite" style="margin-top:16px"></div>
+
+
+
+
+  <div id="cvProductConceptCard"
+       style="display:none;margin-top:22px;padding:26px;
+       border:1px solid #d8d1c5;border-radius:16px;
+       background:#faf8f3;color:#24201c;direction:rtl">
+    <div style="font-size:11px;letter-spacing:2px;color:#8b6b55">
+      CASA VERONA · DESIGN STUDIO
+    </div>
+    <h2 style="margin:12px 0">קונספט לפיתוח דגם חדש</h2>
+    <div id="cvProductConceptCardContent"></div>
+    <p style="margin-top:22px;font-size:12px;color:#777">
+      קונספט ראשוני בלבד · טרם נוצרה הדמיה · לא נשמר במערכת
+    </p>
+  </div>
+
+  <pre id="cvProductConceptResult"
+       style="display:none;white-space:pre-wrap;overflow-wrap:anywhere;direction:ltr;text-align:left;padding:18px;border:1px solid #ccc;border-radius:10px;margin-top:16px"></pre>
+</div>
+
+
+
+</section>
 <section id="ai-ceo" class="page"></section>
 <section id="reports" class="page"></section>
 </main></div>
@@ -2531,7 +2858,7 @@ leads:["לידים","SALES · LEADS"],sales:["מכירות","SALES · PERFORMANC
 orders:["הזמנות","OPERATIONS · ORDERS"],production:["ייצור","FACTORY · PRODUCTION"],deliveries:["אספקות","OPERATIONS · DELIVERY"],catalog:["קטלוג","PRODUCT · CATALOG"],
 "ai-sales-agent":["AI Sales Agent","CASA VERONA AI · SALES"],"ai-sales-coach":["AI Sales Coach","CASA VERONA AI · COACH"],"ai-marketing":["יועץ השיווק","CASA VERONA AI · MARKETING"],
 "ai-creative":["Creative Director","CASA VERONA AI · CREATIVE"],"ai-customer":["Customer Success","CASA VERONA AI · CUSTOMER"],"ai-production":["Production AI","CASA VERONA AI · FACTORY"],
-"ai-ceo":["CEO Brain","CASA VERONA AI · EXECUTIVE"],reports:["דוחות ורווחיות","INTELLIGENCE · REPORTS"]};
+"ai-product-development":["מחלקת פיתוח מוצרים","CASA VERONA AI · DEVELOPMENT"],"ai-ceo":["CEO Brain","CASA VERONA AI · EXECUTIVE"],reports:["דוחות ורווחיות","INTELLIGENCE · REPORTS"]};
 const CV_PAGE_COPY={
 leads:["מרכז הלידים","כל הלידים, הסטטוסים וההזדמנויות של Casa Verona.","PIPELINE","צינור המכירות","HOT LEADS","לידים חמים","AI","חיבור לסוכן המכירות"],
 sales:["מרכז המכירות","עסקאות, ביצועים וסגירות במקום אחד.","CLOSING","עסקאות וסגירות","PERFORMANCE","ביצועי מכירות","REVENUE","הכנסות ורווחיות"],
@@ -2549,7 +2876,7 @@ catalog:["קטלוג","מאגר המוצרים והידע של צוות המכי
 "ai-production":["Production AI","ניהול עומסים, דדליינים וחריגות במפעל.","LOAD","עומסי ייצור","RISK","סיכון לאיחור","PRIORITY","סדרי עדיפויות"],
 "ai-ceo":["CEO Brain","תמונת מצב עסקית ותובנות ניהוליות במקום אחד.","EXECUTIVE","מצב העסק","INSIGHTS","תובנות","DECISIONS","בסיס להחלטות"],
 reports:["דוחות ורווחיות","המרות, הכנסות, עלויות ורווחיות.","SALES","דוחות מכירה","PROFIT","רווחיות ועלויות","CONVERSION","משפך והמרות"]};
-function cvBuildPage(id){if(id==="leads" || id==="followups" || id==="orders" || id==="production" || id==="deliveries" || id==="catalog")return;const p=document.getElementById(id),d=CV_PAGE_COPY[id];if(!p||!d)return;p.innerHTML=`<div class="cv-section-head"><small>${CV_PAGE_META[id][1]}</small><h1>${d[0]}</h1><p>${d[1]}</p></div><div class="cv-modules"><article class="cv-module"><small>${d[2]}</small><h3>${d[3]}</h3><p>המודול מוכן לחיבור לנתונים האמיתיים של Casa Verona.</p></article><article class="cv-module"><small>${d[4]}</small><h3>${d[5]}</h3><p>כאן נבנה את כלי העבודה, התהליכים והאוטומציות של המודול.</p></article><article class="cv-module dark"><small>${d[6]}</small><h3>${d[7]}</h3><p>אין נתוני דמה. המידע יוצג לאחר חיבור ה־API המאובטח.</p></article></div><div class="cv-empty">המסך מוכן לשלב הבא · חיבור נתונים ופונקציונליות</div>`}
+function cvBuildPage(id){if(id==="ai-marketing")return;if(id==="leads" || id==="followups" || id==="orders" || id==="production" || id==="deliveries" || id==="catalog")return;const p=document.getElementById(id),d=CV_PAGE_COPY[id];if(!p||!d)return;p.innerHTML=`<div class="cv-section-head"><small>${CV_PAGE_META[id][1]}</small><h1>${d[0]}</h1><p>${d[1]}</p></div><div class="cv-modules"><article class="cv-module"><small>${d[2]}</small><h3>${d[3]}</h3><p>המודול מוכן לחיבור לנתונים האמיתיים של Casa Verona.</p></article><article class="cv-module"><small>${d[4]}</small><h3>${d[5]}</h3><p>כאן נבנה את כלי העבודה, התהליכים והאוטומציות של המודול.</p></article><article class="cv-module dark"><small>${d[6]}</small><h3>${d[7]}</h3><p>אין נתוני דמה. המידע יוצג לאחר חיבור ה־API המאובטח.</p></article></div><div class="cv-empty">המסך מוכן לשלב הבא · חיבור נתונים ופונקציונליות</div>`}
 Object.keys(CV_PAGE_COPY).forEach(cvBuildPage);
 
 
@@ -24820,6 +25147,139 @@ document.addEventListener(
 })();
 </script>
 
+
+
+
+<script>
+async function cvCreateProductConcept(event) {
+  event.preventDefault();
+
+
+
+  const form = event.target;
+  const button = document.getElementById("cvProductConceptButton");
+  const status = document.getElementById("cvProductConceptStatus");
+  const output = document.getElementById("cvProductConceptResult");
+
+
+
+  if (!button || !status || !output) return;
+
+
+
+  const data = new FormData(form);
+
+
+
+  const payload = {
+    category: data.get("category"),
+    trend: data.get("trend"),
+    preferredStyle: data.get("preferredStyle"),
+    trendScore: Number(data.get("trendScore"))
+  };
+
+
+
+  button.disabled = true;
+  status.textContent = "מפתח קונספט...";
+  output.style.display = "none";
+
+
+
+  try {
+    const response = await fetch(
+      "/api/ai/product-development/concept",
+      {
+        method: "POST",
+        credentials: "include",
+        cache: "no-store",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      }
+    );
+
+
+
+    const result = await response.json();
+
+
+
+    if (!response.ok || !result.success) {
+      if (response.status === 401) {
+        throw new Error("יש להתחבר מחדש למערכת");
+      }
+      if (response.status === 403) {
+        throw new Error("הפעולה זמינה למנהל בלבד");
+      }
+      throw new Error("לא ניתן ליצור קונספט כרגע");
+    }
+
+
+
+    const card = document.getElementById("cvProductConceptCard");
+    const content = document.getElementById("cvProductConceptCardContent");
+
+    if (card && content) {
+      const concept = result.concept || {};
+      const design = concept.concept || {};
+      const research = concept.research || {};
+
+      content.replaceChildren();
+
+      const fields = [
+        ["קטגוריה", design.category || "לא הוגדר"],
+        ["שוק יעד", design.market || "לא הוגדר"],
+        ["סגנון", design.style || "לא הוגדר"],
+        ["כיוון עיצובי", design.design_direction || "לא הוגדר"],
+        ["מגמה", research.trend || "לא הוגדר"],
+        ["ציון מגמה משוער", String(research.trend_score ?? "לא הוגדר")],
+        ["סטטוס", result.status || "CONCEPT"]
+      ];
+
+      for (const [label, value] of fields) {
+        const row = document.createElement("div");
+        row.style.cssText =
+          "padding:13px 0;border-bottom:1px solid #e5dfd5";
+
+        const title = document.createElement("strong");
+        title.style.cssText =
+          "display:block;font-size:12px;color:#8b6b55;margin-bottom:5px";
+        title.textContent = label;
+
+        const text = document.createElement("div");
+        text.style.cssText = "font-size:14px;line-height:1.7";
+        text.textContent = String(value);
+
+        row.append(title, text);
+        content.appendChild(row);
+      }
+
+      card.style.display = "block";
+    }
+
+    output.textContent = JSON.stringify(result, null, 2);
+    output.style.display = "block";
+    status.textContent = "הקונספט נוצר בהצלחה. עדיין לא נשמר במערכת.";
+
+
+
+  } catch (error) {
+    status.textContent = error.message || "שגיאה ביצירת קונספט";
+  } finally {
+    button.disabled = false;
+  }
+}
+
+
+
+document.addEventListener("submit", function(event) {
+  if (event.target?.id === "cvProductConceptForm") {
+    cvCreateProductConcept(event);
+  }
+});
+</script>
 
 
 

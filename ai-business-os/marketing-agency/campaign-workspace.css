@@ -1,0 +1,193 @@
+/* CASA VERONA — CAMPAIGN DIRECTOR */
+
+.cv-campaign-workspace {
+  direction: rtl;
+  color: #f5f0e7;
+  font-family: inherit;
+  padding: 12px 0 28px;
+}
+
+.cv-campaign-workspace > h2 {
+  font-size: clamp(26px, 3vw, 36px);
+  font-weight: 700;
+  margin: 0 0 8px;
+  color: #e7c98e;
+}
+
+.cv-campaign-workspace > p {
+  color: #bcb6ab;
+  margin: 0 0 28px;
+  line-height: 1.7;
+}
+
+.cv-campaign-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  align-items: start;
+}
+
+.cv-campaign-panel {
+  min-width: 0;
+  padding: 26px;
+  border: 1px solid rgba(215, 181, 117, 0.25);
+  border-radius: 20px;
+  background: linear-gradient(145deg, #242321, #151515);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+}
+
+.cv-campaign-panel h3 {
+  color: #e7c98e;
+  font-size: 21px;
+  margin: 0 0 18px;
+}
+
+.cv-campaign-panel p {
+  color: #bcb6ab;
+  line-height: 1.7;
+}
+
+.cv-campaign-form {
+  display: grid;
+  gap: 17px;
+}
+
+.cv-campaign-field {
+  display: grid;
+  gap: 8px;
+  color: #e9e3d9;
+  font-size: 14px;
+}
+
+.cv-campaign-field input,
+.cv-campaign-field select,
+.cv-campaign-panel textarea {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-height: 46px;
+  padding: 12px 14px;
+  border: 1px solid #51483a;
+  border-radius: 10px;
+  background: #101010;
+  color: #f5f0e7;
+  font: inherit;
+}
+
+.cv-campaign-field input:focus,
+.cv-campaign-field select:focus {
+  outline: 2px solid #c8a66a;
+  outline-offset: 2px;
+}
+
+.cv-campaign-summary {
+  margin: 22px 0;
+  padding: 18px;
+  border-radius: 12px;
+  border: 1px solid rgba(215, 181, 117, 0.35);
+  background: rgba(215, 181, 117, 0.08);
+  color: #e7c98e;
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.cv-campaign-panel textarea {
+  resize: vertical;
+  min-height: 130px;
+  margin-top: 14px;
+}
+
+.cv-campaign-panel button {
+  margin-top: 14px;
+  padding: 13px 22px;
+  border: 0;
+  border-radius: 10px;
+  background: #c8a66a;
+  color: #171512;
+  font: inherit;
+  font-weight: 700;
+}
+
+.cv-campaign-panel button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 850px) {
+  .cv-campaign-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .cv-campaign-panel {
+    padding: 19px;
+  }
+}
+
+
+/* CASA VERONA MARKETING CHAT STYLES */
+
+.cv-marketing-chat-history {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  height: 390px;
+  overflow-y: auto;
+  padding: 18px;
+  border: 1px solid rgba(215, 181, 117, 0.22);
+  border-radius: 14px;
+  background: #101010;
+  direction: rtl;
+  scrollbar-width: thin;
+  scrollbar-color: #6f5a37 #171717;
+}
+
+.cv-marketing-chat-bubble {
+  max-width: 88%;
+  width: fit-content;
+  padding: 13px 16px;
+  border-radius: 15px;
+  font-size: 14px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.cv-marketing-chat-user {
+  align-self: flex-start;
+  background: #c8a66a;
+  color: #171512;
+  border-bottom-right-radius: 4px;
+}
+
+.cv-marketing-chat-assistant {
+  align-self: flex-end;
+  background: #292724;
+  color: #f5f0e7;
+  border: 1px solid rgba(215, 181, 117, 0.2);
+  border-bottom-left-radius: 4px;
+}
+
+.cv-campaign-panel textarea:focus {
+  outline: 2px solid #c8a66a;
+  outline-offset: 2px;
+}
+
+.cv-campaign-panel button:not(:disabled) {
+  cursor: pointer;
+}
+
+.cv-campaign-panel button:not(:disabled):hover {
+  background: #e7c98e;
+}
+
+@media (max-width: 600px) {
+  .cv-marketing-chat-history {
+    height: 340px;
+    padding: 12px;
+  }
+
+  .cv-marketing-chat-bubble {
+    max-width: 94%;
+    font-size: 13px;
+  }
+}

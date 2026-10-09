@@ -1,0 +1,130 @@
+/* CASA VERONA — PRIVATE MARKETING AGENCY */
+
+.cv-ma {
+  --ma-gold: #c6aa7b;
+  --ma-cream: #f4eee4;
+  --ma-muted: #a9a49d;
+  --ma-border: rgba(198,170,123,.19);
+
+  direction: rtl;
+  color: var(--ma-cream);
+  font-family: inherit;
+}
+
+.cv-ma * {
+  box-sizing: border-box;
+}
+
+.cv-ma-hero {
+  padding: clamp(24px,4vw,48px);
+  background: linear-gradient(135deg,#17191b,#25231f);
+  border: 1px solid var(--ma-border);
+  border-radius: 24px;
+}
+
+.cv-ma-eyebrow {
+  color: var(--ma-gold);
+  font-size: 11px;
+  letter-spacing: 2px;
+}
+
+.cv-ma-hero h1 {
+  color: var(--ma-cream);
+  font-size: clamp(29px,4vw,46px);
+  font-weight: 500;
+  margin: 15px 0 12px;
+}
+
+.cv-ma-hero p {
+  color: var(--ma-muted);
+  font-size: 14px;
+  line-height: 1.9;
+  max-width: 580px;
+}
+
+.cv-ma-grid {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 16px;
+  margin-top: 22px;
+}
+
+.cv-ma-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: right;
+  width: 100%;
+  min-height: 175px;
+  padding: 25px;
+  color: var(--ma-cream);
+  background: #1c1e20;
+  border: 1px solid var(--ma-border);
+  border-radius: 18px;
+  cursor: pointer;
+  font: inherit;
+  transition: border-color .2s,transform .2s,background .2s;
+}
+
+.cv-ma-card:hover,
+.cv-ma-card:focus-visible {
+  background: #252629;
+  border-color: var(--ma-gold);
+  transform: translateY(-2px);
+}
+
+.cv-ma-card small {
+  color: var(--ma-gold);
+  font-size: 10px;
+  letter-spacing: 1.4px;
+}
+
+.cv-ma-card strong {
+  margin-top: 18px;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.cv-ma-card span {
+  margin-top: 10px;
+  color: var(--ma-muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.cv-ma-back {
+  border: 1px solid var(--ma-border);
+  border-radius: 12px;
+  padding: 11px 17px;
+  background: #242526;
+  color: var(--ma-cream);
+  cursor: pointer;
+  font: inherit;
+}
+
+.cv-ma-back:focus-visible {
+  outline: 2px solid var(--ma-gold);
+  outline-offset: 3px;
+}
+
+.cv-ma[hidden],
+.cv-ma [hidden] {
+  display: none !important;
+}
+
+@media (max-width: 650px) {
+  .cv-ma-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cv-ma-card {
+    min-height: 140px;
+    padding: 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cv-ma-card {
+    transition: none;
+  }
+}
