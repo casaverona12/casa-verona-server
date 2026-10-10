@@ -4634,6 +4634,74 @@ async function requireAuth(req, res, allowedRoles = []) {
 // ANY AUTHENTICATED USER
 // -----------------------------------------------
 
+async function handlePersonalPushTest(req, res) {
+  const auth = await requireAuth(req, res);
+  if (!auth) return;
+
+  const db = requireSupabase();
+
+  const { data: devices, error } = await db
+    .from("push_subscriptions")
+    .select("endpoint, p256dh, auth")
+    .eq("user_id", auth.user.id);
+
+  if (error) {
+    console.error("PUSH TEST DB ERROR:", error.message);
+    sendJSON(res, 500, {
+      success: false,
+      error: "PUSH_DEVICES_LOAD_FAILED"
+    });
+    return;
+  }
+
+  if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
+    sendJSON(res, 503, {
+      success: false,
+      error: "VAPID_NOT_CONFIGURED"
+    });
+    return;
+  }
+
+  let sent = 0;
+  let failed = 0;
+
+  for (const device of devices || []) {
+    try {
+      await webpush.sendNotification(
+        {
+          endpoint: device.endpoint,
+          keys: {
+            p256dh: device.p256dh,
+            auth: device.auth
+          }
+        },
+        JSON.stringify({
+          title: "Casa Verona 🔔",
+          body: "התראת ניסיון — מערכת ההתראות פועלת בהצלחה",
+          url: "/dashboard"
+        })
+      );
+
+      sent++;
+    } catch (error) {
+      failed++;
+      console.error(
+        "PERSONAL PUSH TEST ERROR:",
+        error.statusCode,
+        error.message
+      );
+    }
+  }
+
+  sendJSON(res, 200, {
+    success: true,
+    devices: (devices || []).length,
+    sent,
+    failed
+  });
+}
+
+
 async function handlePushSubscription(req, res) {
 
   const auth = await requireAuth(req, res);
@@ -5007,6 +5075,15 @@ const server =
 
 // -----------------------------------------------
 // -----------------------------------------------
+        // CASA VERONA — PERSONAL PUSH TEST
+        if (
+          req.method === "POST" &&
+          url.pathname === "/api/admin/push/test"
+        ) {
+          await handlePersonalPushTest(req, res);
+          return;
+        }
+
         // CASA VERONA — PUSH SUBSCRIPTION
         // -----------------------------------------------
 
