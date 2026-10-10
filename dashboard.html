@@ -922,6 +922,12 @@ body.cv-role-factory-owner #cvFactoryOwnerNav button{
     <span>🔔</span>
     הפעל
   </button>
+  <button
+    type="button"
+    id="cvTestPush"
+    onclick="cvSendTestPush()"
+    style="width:100%;margin-top:10px;padding:10px;border:1px solid #8f4a58;border-radius:8px;background:transparent;color:inherit;cursor:pointer"
+  >🔔 שלח פוש ניסיון</button>
 </div>
 
 <div class="cv-nav-group"><span class="cv-nav-label">COMMAND</span><nav class="cv-nav">
@@ -25289,6 +25295,38 @@ document.addEventListener("submit", function(event) {
 </script>
 
 
+
+
+<script>
+async function cvSendTestPush() {
+  const button = document.getElementById("cvTestPush");
+  if (!button) return;
+
+  button.disabled = true;
+  button.textContent = "שולח התראה...";
+
+  try {
+    const response = await fetch("/api/admin/push/test", {
+      method: "POST",
+      credentials: "include"
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || "שליחת ההתראה נכשלה");
+    }
+
+    button.textContent =
+      "נשלחו: " + data.sent + " | נכשלו: " + data.failed;
+
+  } catch (error) {
+    button.textContent = "שגיאה: " + error.message;
+  } finally {
+    button.disabled = false;
+  }
+}
+</script>
 
 </body>
 </html>
