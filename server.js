@@ -849,7 +849,7 @@ async function getAIPauseState(leadId) {
 
   const { data, error } = await db
     .from("lead_ai_state")
-    .select("ai_paused_until, ai_disabled")
+    .select("ai_paused_until, ai_disabled, needs_human")
     .eq("lead_id", leadId)
     .maybeSingle();
 
@@ -872,7 +872,8 @@ async function getAIPauseState(leadId) {
   return {
     paused:
       temporarilyPaused ||
-      permanentlyDisabled,
+      permanentlyDisabled ||
+      data?.needs_human === true,
 
     temporarily_paused:
       temporarilyPaused,
@@ -6172,7 +6173,9 @@ if (
   const { error } = await db
     .from("lead_ai_state")
     .update({
-      ai_disabled: false
+      ai_disabled: false,
+      ai_paused_until: null,
+      needs_human: false
     })
     .eq("lead_id", leadId);
 
@@ -12639,6 +12642,17 @@ await saveMessage({
 
           const heyyMessage = payload?.data || {};
 
+          console.log("HEYY MESSAGE STRUCTURE", {
+            message_keys: Object.keys(heyyMessage),
+            content_keys:
+              heyyMessage.content &&
+              typeof heyyMessage.content === "object"
+                ? Object.keys(heyyMessage.content)
+                : [],
+            content_type: typeof heyyMessage.content
+          });
+
+
           const sender =
             String(heyyMessage.sender || "").toLowerCase();
 
@@ -12890,6 +12904,26 @@ await saveMessage({
           }
 
           try {
+          // Recheck human takeover after acquiring the lead lock.
+          const pauseAfterLock = await getAIPauseState(lead.id);
+
+          if (pauseAfterLock.paused) {
+            console.log("👤 HEYY AI STOPPED AFTER LOCK", {
+              lead_id: lead.id,
+              message_id: messageId
+            });
+
+            sendJSON(res, 200, {
+              success: true,
+              received: true,
+              analyzed: false,
+              sent: false,
+              ai_paused: true
+            });
+
+            return;
+          }
+
           const customerBrain =
             await loadCustomerBrain(lead.id);
 
@@ -12912,6 +12946,11 @@ await saveMessage({
           const analysis =
             result.analysis;
 
+          // Persist every human-handoff decision.
+          if (analysis?.stage === "HUMAN_HANDOFF") {
+            analysis.needs_human = true;
+          }
+
           console.log("🧪 SALES DECISION:", {
             stage: analysis?.stage,
             next_action: analysis?.next_action,
@@ -12929,18 +12968,25 @@ await saveMessage({
             analysis
           );
 
-          try {
-            await createQuoteReadyNotification(
-              lead.id,
-              analysis
-            );
-          } catch (quoteNotificationError) {
-            console.error(
-              "QUOTE READY NOTIFICATION FAILED:",
-              lead.id,
-              quoteNotificationError?.message ||
-                quoteNotificationError
-            );
+          // Human handoff uses its own push notification.
+          // Avoid sending a duplicate quote-ready notification.
+          if (
+            analysis?.needs_human !== true &&
+            analysis?.stage !== "HUMAN_HANDOFF"
+          ) {
+            try {
+              await createQuoteReadyNotification(
+                lead.id,
+                analysis
+              );
+            } catch (quoteNotificationError) {
+              console.error(
+                "QUOTE READY NOTIFICATION FAILED:",
+                lead.id,
+                quoteNotificationError?.message ||
+                  quoteNotificationError
+              );
+            }
           }
 
           await saveAIState(
@@ -12948,15 +12994,46 @@ await saveMessage({
             analysis
           );
 
-          await scheduleSmartFollowup(
-            lead.id,
-            analysis
-          );
+          const humanHandoff =
+            analysis?.needs_human === true ||
+            analysis?.stage === "HUMAN_HANDOFF";
 
-          await saveCallbackRequest(
-            lead.id,
-            analysis
-          );
+          if (humanHandoff) {
+            try {
+              const pushResult = await sendPushToRole(
+                USER_ROLES.ADMIN,
+                {
+                  title: "🔥 לקוח ממתין לנציג",
+                  body: "לקוח הועבר לטיפול אנושי ב-Casa Verona",
+                  tag: `human-handoff-${lead.id}`,
+                  url: `/dashboard.html?lead=${encodeURIComponent(lead.id)}`,
+                  lead_id: lead.id,
+                  requireInteraction: true
+                }
+              );
+
+              console.log("👤 HUMAN HANDOFF PUSH", {
+                lead_id: lead.id,
+                pushResult
+              });
+            } catch (pushError) {
+              console.error(
+                "HUMAN HANDOFF PUSH ERROR:",
+                lead.id,
+                pushError?.message || pushError
+              );
+            }
+          } else {
+            await scheduleSmartFollowup(
+              lead.id,
+              analysis
+            );
+
+            await saveCallbackRequest(
+              lead.id,
+              analysis
+            );
+          }
 
           // FINAL SEND GUARD — dry run.
           // We are still ANALYZE_ONLY. Nothing is sent yet.
@@ -12998,6 +13075,28 @@ await saveMessage({
           // =====================================================
           // CASA VERONA — FINAL AI CUSTOMER REPLY
           // =====================================================
+
+          // HUMAN HANDOFF — never send an AI reply after escalation.
+          if (
+            analysis?.needs_human === true ||
+            analysis?.stage === "HUMAN_HANDOFF"
+          ) {
+            console.log("👤 HEYY HUMAN HANDOFF — AI REPLY BLOCKED", {
+              lead_id: lead.id,
+              message_id: messageId,
+              reason: analysis?.handoff_reason || "HUMAN_HANDOFF"
+            });
+
+            sendJSON(res, 200, {
+              success: true,
+              received: true,
+              analyzed: true,
+              sent: false,
+              human_handoff: true
+            });
+
+            return;
+          }
 
           if (!finalSendGuard.allowed) {
             console.log(
