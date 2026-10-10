@@ -163,4 +163,4 @@ self.addEventListener(
     );
 
   }
-);\n
+);
