@@ -5090,11 +5090,14 @@ async function cvEnablePushNotifications(){
     return;
   }
 
+  let pushStep = "התחלה";
+
   try{
 
     button.disabled = true;
     button.textContent = "מתחבר...";
 
+    pushStep = "בקשת הרשאה";
     const permission =
       await Notification.requestPermission();
 
@@ -5109,11 +5112,14 @@ async function cvEnablePushNotifications(){
       return;
     }
 
+    pushStep = "רישום Service Worker";
     await navigator.serviceWorker.register("/sw.js", { scope: "/" });
 
+    pushStep = "המתנה ל-Service Worker";
     const registration =
       await navigator.serviceWorker.ready;
 
+    pushStep = "בדיקת מנוי Push";
     let subscription =
       await registration.pushManager.getSubscription();
 
@@ -5121,6 +5127,7 @@ async function cvEnablePushNotifications(){
     // Create a new one only when this device is not subscribed yet.
     if(!subscription){
 
+      pushStep = "יצירת מנוי Push";
       subscription =
         await registration.pushManager.subscribe({
           userVisibleOnly:true,
@@ -5131,6 +5138,7 @@ async function cvEnablePushNotifications(){
         });
     }
 
+    pushStep = "שמירת מנוי בשרת";
     const response =
       await fetch(
         "/api/admin/push/subscribe",
@@ -5178,8 +5186,7 @@ async function cvEnablePushNotifications(){
     );
 
     status.textContent =
-      error.message ||
-      "לא ניתן להפעיל התראות";
+      pushStep + ": " + (error?.message || "לא ניתן להפעיל התראות");
 
     button.disabled = false;
     button.textContent = "נסה שוב";
