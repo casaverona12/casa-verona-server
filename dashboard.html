@@ -3159,9 +3159,13 @@ function cvRenderLeadAIControl(){
 
   const completeButton = document.getElementById("cvLeadCompleteHandoff");
   if (completeButton) {
-    completeButton.hidden = !(
-      lead.needs_human === true || ai.needs_human === true
-    );
+    const handoffActive =
+      lead.needs_human === true ||
+      ai.needs_human === true ||
+      lead.stage === "HUMAN_HANDOFF" ||
+      ai.stage === "HUMAN_HANDOFF";
+
+    completeButton.hidden = !handoffActive;
   }
 
 
