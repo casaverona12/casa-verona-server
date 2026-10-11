@@ -12653,6 +12653,28 @@ await saveMessage({
           });
 
 
+          const heyyAttachments =
+            heyyMessage?.content?.attachments;
+
+          console.log("HEYY ATTACHMENTS DIAGNOSTIC", {
+            is_array: Array.isArray(heyyAttachments),
+            count: Array.isArray(heyyAttachments)
+              ? heyyAttachments.length
+              : heyyAttachments
+                ? 1
+                : 0,
+            attachment_types: Array.isArray(heyyAttachments)
+              ? heyyAttachments.map(a => ({
+                  type: a?.type || null,
+                  mimeType: a?.mimeType || null,
+                  contentType: a?.contentType || null,
+                  keys: a && typeof a === "object"
+                    ? Object.keys(a)
+                    : []
+                }))
+              : []
+          });
+
           const sender =
             String(heyyMessage.sender || "").toLowerCase();
 
