@@ -252,7 +252,8 @@ async function saveMessage({
   direction,
   sender,
   content,
-  whatsappMessageId = null
+  whatsappMessageId = null,
+  imageUrl = null
 }) {
   const db = requireSupabase();
 
@@ -261,6 +262,7 @@ async function saveMessage({
     direction,
     sender,
     message_type: "text",
+    ...(imageUrl ? { image_url: imageUrl } : {}),
     content
   };
 
@@ -694,6 +696,38 @@ async function isLatestPendingSalesMessage(
     String(data?.pending_message_id || "") ===
     String(messageId || "")
   );
+}
+
+async function loadRecentCustomerImage(leadId) {
+  const db = requireSupabase();
+
+  const since = new Date(
+    Date.now() - 60 * 1000
+  ).toISOString();
+
+  const { data, error } = await db
+    .from("messages")
+    .select("image_url, created_at")
+    .eq("lead_id", leadId)
+    .eq("direction", "INCOMING")
+    .not("image_url", "is", null)
+    .gte("created_at", since)
+    .order("created_at", { ascending: false })
+    .limit(1);
+
+  if (error) {
+    throw new Error(
+      `SUPABASE LOAD CUSTOMER IMAGE ERROR: ${error.message}`
+    );
+  }
+
+  const url = data?.[0]?.image_url;
+
+  return typeof url === "string" &&
+    url.length <= 2048 &&
+    /^https:\/\//i.test(url)
+      ? url
+      : null;
 }
 
 async function loadPendingSalesMessage(
@@ -4135,7 +4169,28 @@ handoff_reason,
       ? imageInput
       : null;
 
-  const text = await callOpenAI(input, visionImageInput);
+  const visionSalesInput = visionImageInput
+    ? input + `
+
+FURNITURE VISION — VERIFIED IMAGE INPUT:
+An actual customer image is attached to this AI request.
+Visually inspect the furniture before answering.
+Identify only clearly visible characteristics, such as:
+- furniture category
+- straight, corner, chaise, modular or curved structure
+- visible upholstery color and general design
+Do not invent hidden materials, measurements or specifications.
+Casa Verona can manufacture custom furniture from reference images.
+Respond naturally in Hebrew, using the image and customer message together.
+Ask only for missing information needed to prepare a quote.
+Preserve the existing HUMAN_HANDOFF and pricing rules.
+`
+    : input;
+
+  const text = await callOpenAI(
+    visionSalesInput,
+    visionImageInput
+  );
 
   const cleaned = text
     .replace(/```json/gi, "")
@@ -12851,6 +12906,16 @@ await saveMessage({
                 String(attachment?.type || "").toLowerCase() === "image"
             );
 
+          const incomingImageUrl =
+            Array.isArray(heyyAttachments)
+              ? heyyAttachments.find(
+                  a =>
+                    String(a?.type || "").toLowerCase() === "image" &&
+                    typeof a?.file?.url === "string" &&
+                    /^https:\/\//i.test(a.file.url)
+                )?.file?.url || null
+              : null;
+
           const customerMessage = [
             customerText,
             hasCustomerImage ? "[הלקוח שלח תמונה]" : ""
@@ -12924,7 +12989,8 @@ await saveMessage({
               direction: "INCOMING",
               sender: "CUSTOMER",
               content: customerMessage,
-              whatsappMessageId: messageId
+              whatsappMessageId: messageId,
+              imageUrl: incomingImageUrl
             });
 
           if (!savedIncomingMessage) {
@@ -13123,13 +13189,29 @@ await saveMessage({
           const conversation =
             fullConversation.slice(0, -1);
 
+          // Optional image from the current Heyy message.
+          // Vision remains disabled unless explicitly enabled.
+
           // EXACTLY ONE AI CALL.
-          const result =
-            await runSalesEngine(
-              customerMessage,
-              conversation,
-              customerBrain
-            );
+          const furnitureVisionEnabled =
+            process.env.CASA_VERONA_FURNITURE_VISION === "true";
+
+          const recentCustomerImageUrl =
+            furnitureVisionEnabled && !incomingImageUrl
+              ? await loadRecentCustomerImage(lead.id)
+              : null;
+
+          const visionImageUrl =
+            furnitureVisionEnabled
+              ? incomingImageUrl || recentCustomerImageUrl
+              : null;
+
+          const result = await runSalesEngine(
+            customerMessage,
+            conversation,
+            customerBrain,
+            visionImageUrl
+          );
 
           const analysis =
             result.analysis;
