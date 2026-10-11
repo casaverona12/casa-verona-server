@@ -2511,6 +2511,18 @@ HUMAN WHATSAPP BEHAVIOR V2
 
 ================================
 
+IMAGE RECEIPT — HIGH PRIORITY:
+- The marker [הלקוח שלח תמונה] means an actual customer image was received.
+- This marker may appear in the current message or conversation history.
+- If the customer already sent an image for the current product request, do NOT ask for the same image or screenshot again.
+- Acknowledge receipt naturally when appropriate.
+- You cannot visually identify the model from this marker alone.
+- Do NOT invent the model, color, dimensions, material or image contents.
+- Continue with ONE relevant sales question only if information is missing.
+- If the customer requests a quote and the available details are sufficient for human pricing, use HUMAN_HANDOFF instead of ASK_SCREENSHOT.
+- Ask for another image only if the customer clearly refers to a different product or a genuinely necessary new view.
+- Never set next_action = ASK_SCREENSHOT solely because an already-received image was not visually analyzed.
+
 CATALOG-FIRST PRODUCT IDENTIFICATION:
 - If the customer says they saw a sofa, furniture item, or product in an ad but the exact product/model is not identified, do NOT start a long identification flow by asking color, shape, size, fabric, or other descriptive questions.
 - First ask the customer naturally if they have a screenshot of the product/model they saw.
@@ -12686,10 +12698,22 @@ await saveMessage({
               heyyMessage?.contact?.phoneNumber || ""
             ).trim();
 
-          const customerMessage =
+          const customerText =
             String(
               heyyMessage?.content?.body || ""
             ).trim();
+
+          const hasCustomerImage =
+            Array.isArray(heyyAttachments) &&
+            heyyAttachments.some(
+              attachment =>
+                String(attachment?.type || "").toLowerCase() === "image"
+            );
+
+          const customerMessage = [
+            customerText,
+            hasCustomerImage ? "[הלקוח שלח תמונה]" : ""
+          ].filter(Boolean).join("\n");
 
           const channelId =
             String(
@@ -12704,7 +12728,8 @@ await saveMessage({
               messageId,
               channelId,
               has_phone: Boolean(phone),
-              has_text: Boolean(customerMessage)
+              has_text: Boolean(customerText),
+              has_image: hasCustomerImage
             }
           );
 
@@ -12719,8 +12744,8 @@ await saveMessage({
             return;
           }
 
-          // Analyze-only currently handles text.
-          // Attachments/media will be added separately.
+          // Accept customer text and image attachments.
+          // Other attachment types are not treated as images.
           if (!customerMessage) {
             sendJSON(res, 200, {
               success: true,
