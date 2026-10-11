@@ -12813,6 +12813,12 @@ await saveMessage({
                   hasMediaUrl: Boolean(a?.mediaUrl),
                   hasFileUrl: Boolean(a?.fileUrl),
                   hasId: Boolean(a?.id),
+                  fileUrlPresent:
+                    typeof a?.file?.url === "string" &&
+                    a.file.url.length > 0,
+                  fileUrlHttps:
+                    typeof a?.file?.url === "string" &&
+                    /^https:\/\//i.test(a.file.url),
                   fileType: typeof a?.file,
                   fileKeys:
                     a?.file && typeof a.file === "object"
