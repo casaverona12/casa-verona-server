@@ -12812,7 +12812,12 @@ await saveMessage({
                   hasUrl: Boolean(a?.url),
                   hasMediaUrl: Boolean(a?.mediaUrl),
                   hasFileUrl: Boolean(a?.fileUrl),
-                  hasId: Boolean(a?.id)
+                  hasId: Boolean(a?.id),
+                  fileType: typeof a?.file,
+                  fileKeys:
+                    a?.file && typeof a.file === "object"
+                      ? Object.keys(a.file).join(", ")
+                      : null
                 }))
               : []
           });
