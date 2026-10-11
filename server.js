@@ -12786,7 +12786,11 @@ await saveMessage({
                   contentType: a?.contentType || null,
                   keys: a && typeof a === "object"
                     ? Object.keys(a)
-                    : []
+                    : [],
+                  hasUrl: Boolean(a?.url),
+                  hasMediaUrl: Boolean(a?.mediaUrl),
+                  hasFileUrl: Boolean(a?.fileUrl),
+                  hasId: Boolean(a?.id)
                 }))
               : []
           });
