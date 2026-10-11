@@ -1098,7 +1098,7 @@ function extractOutputText(data) {
   return text.trim();
 }
 
-async function callOpenAI(input) {
+async function callOpenAI(input, imageInput = null) {
   if (!OPENAI_API_KEY) {
     throw new Error("OPENAI_API_KEY חסר");
   }
@@ -1115,7 +1115,15 @@ async function callOpenAI(input) {
 
       body: JSON.stringify({
         model: "gpt-5.6-luna",
-        input
+        input: imageInput
+          ? [{
+              role: "user",
+              content: [
+                { type: "input_text", text: input },
+                { type: "input_image", image_url: imageInput }
+              ]
+            }]
+          : input
       })
     }
   );
@@ -1810,7 +1818,8 @@ function getSmartFallbackReply(message, analysis = {}) {
 async function runSalesEngine(
   message,
   conversation = [],
-  customerBrain = null
+  customerBrain = null,
+  imageInput = null
 ) {
   // Load the current Casa Verona catalog from Supabase.
   // catalog.json remains a fallback inside getLiveSalesCatalog().
@@ -4113,7 +4122,20 @@ handoff_reason,
 או media_reason.
 `;
 
-  const text = await callOpenAI(input);
+  // Furniture Vision stays disabled until image delivery is verified.
+  const furnitureVisionEnabled =
+    process.env.CASA_VERONA_FURNITURE_VISION === "true";
+
+  // Accept only HTTPS image URLs when Vision is enabled.
+  const visionImageInput =
+    furnitureVisionEnabled &&
+    typeof imageInput === "string" &&
+    imageInput.length <= 2048 &&
+    /^https:\/\//i.test(imageInput)
+      ? imageInput
+      : null;
+
+  const text = await callOpenAI(input, visionImageInput);
 
   const cleaned = text
     .replace(/```json/gi, "")
@@ -12785,7 +12807,7 @@ await saveMessage({
                   mimeType: a?.mimeType || null,
                   contentType: a?.contentType || null,
                   keys: a && typeof a === "object"
-                    ? Object.keys(a)
+                    ? Object.keys(a).join(", ")
                     : [],
                   hasUrl: Boolean(a?.url),
                   hasMediaUrl: Boolean(a?.mediaUrl),
