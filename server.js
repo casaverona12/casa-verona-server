@@ -2511,6 +2511,26 @@ HUMAN WHATSAPP BEHAVIOR V2
 
 ================================
 
+IMAGE-LED SALES FLOW — HIGH PRIORITY:
+- When the customer sends only an image of a furniture item, treat it as interest in that item.
+- Respond naturally and warmly, then ask for the required dimensions.
+- Example tone: "יש לך טעם טוב! 😍 איזה מידות אתה צריך לסלון?"
+- If the customer sends an image and asks for a price, explain briefly that Casa Verona furniture is made to order and dimensions are customizable.
+- Then ask for the dimensions needed for an accurate quote.
+- Example tone: "יש לך טעם טוב! 😍 אצלנו הסלונים מיוצרים בהתאמה אישית, אז המידות הן לבחירתך. איזה מידות אתה צריך ומה גודל החלל? לפי זה אוכל להכין לך הצעת מחיר מדויקת."
+- These are examples, not mandatory fixed replies. Adapt naturally to the customer's message and product category.
+- Never claim to have visually identified the product from the image marker alone.
+- If the customer already supplied the dimensions needed for pricing, do not ask for those dimensions again.
+- When the customer requests a quote and the necessary dimensions are available, set stage = HUMAN_HANDOFF, next_action = HUMAN_QUOTE, needs_human = true, quote_ready = true, and handoff_reason = PRICE_REQUEST.
+- Determine dimensions from the current message AND conversation history. Examples: "3 מטר עם שזלונג 1.80", "רוחב 300 עומק 110", or equivalent measurements.
+- Do NOT mistake a phone number, budget, price, model number, quantity, or delivery date for furniture dimensions.
+- For a sofa with a chaise, obtain the overall sofa width and chaise length when needed. For other furniture, use the relevant dimensions for that product.
+- If a critical measurement is missing, ask only for that missing measurement; do NOT trigger HUMAN_HANDOFF yet.
+- Do not require unnecessary measurements when the available information is already sufficient for a human to prepare a quote.
+- Never invent measurements. If measurements are ambiguous, clarify before handoff.
+- Do not invent a price or price range.
+- Do not promise that a quote has already been prepared.
+
 IMAGE RECEIPT — HIGH PRIORITY:
 - The marker [הלקוח שלח תמונה] means an actual customer image was received.
 - This marker may appear in the current message or conversation history.
@@ -4957,6 +4977,64 @@ async function sendPushToRole(role, payload) {
 
 
 // =====================================================
+// CASA VERONA — HUMAN HANDOFF NOTIFICATION
+// The AI state lock prevents repeated handoff processing.
+// Database uniqueness protects pending notifications.
+async function createHumanHandoffNotification(leadId, analysis, lead) {
+  const db = requireSupabase();
+
+  const { data: latestLead, error: leadError } = await db
+    .from("leads")
+    .select("phone, requested_size, product_interest")
+    .eq("id", leadId)
+    .single();
+
+  if (leadError) {
+    throw new Error("HANDOFF LEAD LOAD ERROR: " + leadError.message);
+  }
+
+  const title = "🔥 לקוח ממתין להצעת מחיר";
+  const size = analysis?.requested_size || latestLead?.requested_size || null;
+  const product = analysis?.product || latestLead?.product_interest || null;
+  lead = latestLead;
+
+  const details = [
+    lead?.phone ? "טלפון: " + lead.phone : null,
+    product && product !== "unknown" ? "מוצר: " + product : null,
+    size ? "מידות: " + size : null
+  ].filter(Boolean);
+
+  const message = details.length
+    ? details.join(" | ")
+    : "לקוח ממתין לטיפול נציג";
+
+  const { data, error } = await db
+    .from("sales_notifications")
+    .insert({
+      lead_id: leadId,
+      notification_type: "HUMAN_HANDOFF",
+      status: "PENDING",
+      title,
+      message
+    })
+    .select("id")
+    .single();
+
+  if (error) {
+    if (error.code === "23505") {
+      return { created: false, reason: "ALREADY_PENDING" };
+    }
+    throw new Error("HUMAN HANDOFF NOTIFICATION ERROR: " + error.message);
+  }
+
+  return {
+    created: true,
+    notification_id: data.id,
+    title,
+    message
+  };
+}
+
 // CASA VERONA — QUOTE READY NOTIFICATION
 // =====================================================
 
@@ -6209,6 +6287,32 @@ if (
 }
 
 // -----------------------------------------------
+
+// CASA VERONA — ATOMIC ADMIN HUMAN HANDOFF COMPLETION
+// The Supabase function is a single database transaction; AI remains disabled.
+const completeHandoffMatch = url.pathname.match(
+  /^\/api\/admin\/leads\/([^/]+)\/complete-handoff$/
+);
+if (req.method === "POST" && completeHandoffMatch) {
+  const auth = await requireAuth(req, res, ["ADMIN"]);
+  if (!auth) return;
+  const leadId = decodeURIComponent(completeHandoffMatch[1]);
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(leadId)) {
+    sendJSON(res, 400, { success: false, error: "INVALID_LEAD_ID" });
+    return;
+  }
+  const db = requireSupabase();
+  const { data, error } = await db.rpc("cv_complete_human_handoff", {
+    p_lead_id: leadId
+  });
+  if (error || !data || data.success !== true) {
+    console.error("ATOMIC HANDOFF COMPLETION FAILED:", leadId, error?.message || "Invalid RPC result");
+    sendJSON(res, 500, { success: false, error: "HANDOFF_COMPLETION_FAILED" });
+    return;
+  }
+  sendJSON(res, 200, { success: true, lead_id: leadId, ai_disabled: true });
+  return;
+}
 
 // API - ADMIN LEADS CENTER
 // ADMIN ONLY
@@ -13041,33 +13145,79 @@ await saveMessage({
             analysis
           );
 
+          // Permanently stop AI after human handoff.
+          if (
+            analysis?.needs_human === true ||
+            analysis?.stage === "HUMAN_HANDOFF"
+          ) {
+            const { data: disabledState, error: disableError } =
+              await requireSupabase()
+                .from("lead_ai_state")
+                .update({ ai_disabled: true })
+                .eq("lead_id", lead.id)
+                .select("lead_id")
+                .maybeSingle();
+
+            if (disableError || !disabledState) {
+              throw new Error(
+                "HUMAN HANDOFF AI DISABLE FAILED: " +
+                (disableError?.message || "No AI state row updated")
+              );
+            }
+          }
+
           const humanHandoff =
             analysis?.needs_human === true ||
             analysis?.stage === "HUMAN_HANDOFF";
 
           if (humanHandoff) {
             try {
-              const pushResult = await sendPushToRole(
-                USER_ROLES.ADMIN,
-                {
-                  title: "🔥 לקוח ממתין לנציג",
-                  body: "לקוח הועבר לטיפול אנושי ב-Casa Verona",
-                  tag: `human-handoff-${lead.id}`,
-                  url: `/dashboard.html?lead=${encodeURIComponent(lead.id)}`,
-                  lead_id: lead.id,
-                  requireInteraction: true
-                }
-              );
+              const notification =
+                await createHumanHandoffNotification(
+                  lead.id,
+                  analysis,
+                  lead
+                );
 
-              console.log("👤 HUMAN HANDOFF PUSH", {
-                lead_id: lead.id,
-                pushResult
-              });
-            } catch (pushError) {
+              if (notification.created) {
+                const pushResult = await sendPushToRole(
+                  USER_ROLES.ADMIN,
+                  {
+                    title: notification.title,
+                    body: notification.message,
+                    tag: `human-handoff-${lead.id}`,
+                    url: `/dashboard.html?lead=${encodeURIComponent(lead.id)}`,
+                    lead_id: lead.id,
+                    requireInteraction: true
+                  }
+                );
+
+                if (pushResult?.sent > 0) {
+                  console.log("✅ HUMAN HANDOFF PUSH SENT", {
+                    lead_id: lead.id,
+                    sent: pushResult.sent,
+                    failed: pushResult.failed
+                  });
+                } else {
+                  console.error("⚠️ HUMAN HANDOFF PUSH NOT DELIVERED", {
+                    lead_id: lead.id,
+                    sent: pushResult?.sent ?? 0,
+                    failed: pushResult?.failed ?? 0,
+                    notification_id: notification.notification_id,
+                    action: "CHECK_PENDING_NOTIFICATION"
+                  });
+                }
+              } else {
+                console.log("👤 HUMAN HANDOFF ALREADY NOTIFIED", {
+                  lead_id: lead.id,
+                  reason: notification.reason
+                });
+              }
+            } catch (handoffError) {
               console.error(
-                "HUMAN HANDOFF PUSH ERROR:",
+                "HUMAN HANDOFF NOTIFICATION FAILED:",
                 lead.id,
-                pushError?.message || pushError
+                handoffError?.message || handoffError
               );
             }
           } else {

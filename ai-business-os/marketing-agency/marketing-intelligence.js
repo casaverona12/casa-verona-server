@@ -54,6 +54,18 @@ function normalizeMessages(messages) {
     throw new Error("INVALID_MESSAGE_COUNT");
   }
 
+  const totalCharacters = messages.reduce(
+    (sum, message) =>
+      sum + (typeof message?.content === "string"
+        ? message.content.length
+        : 0),
+    0
+  );
+
+  if (totalCharacters > 12000) {
+    throw new Error("MARKETING_AI_INPUT_TOO_LONG");
+  }
+
   return messages.map(message => {
     if (
       !message ||
@@ -91,7 +103,7 @@ async function consultMarketingAI(messages) {
   });
 
   const response = await client.responses.create({
-    model: process.env.MARKETING_AI_MODEL || "gpt-5.1",
+    model: "gpt-5.1",
     store: false,
     max_output_tokens: 1200,
     input: [
@@ -106,7 +118,13 @@ async function consultMarketingAI(messages) {
   return {
     success: true,
     answer: response.output_text || "",
-    model: response.model
+    model: response.model,
+    usage: {
+      input_tokens: response.usage?.input_tokens ?? 0,
+      output_tokens: response.usage?.output_tokens ?? 0,
+      cached_input_tokens:
+        response.usage?.input_tokens_details?.cached_tokens ?? 0
+    }
   };
 }
 

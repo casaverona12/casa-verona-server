@@ -1329,6 +1329,15 @@ body.cv-role-factory-owner #cvFactoryOwnerNav button{
 
         <button
           type="button"
+          id="cvLeadCompleteHandoff"
+          class="cv-lead-resume-btn"
+          hidden
+        >
+          ✅ סיום טיפול בנציג
+        </button>
+
+        <button
+          type="button"
           id="cvLeadEnableAI"
           class="cv-lead-resume-btn"
           hidden
@@ -3147,6 +3156,14 @@ function cvRenderLeadAIControl(){
   if(!lead) return;
 
   const ai = cvLeadAIState(lead);
+
+  const completeButton = document.getElementById("cvLeadCompleteHandoff");
+  if (completeButton) {
+    completeButton.hidden = !(
+      lead.needs_human === true || ai.needs_human === true
+    );
+  }
+
 
   const status =
     document.getElementById("cvLeadAIStatus");
@@ -25328,6 +25345,35 @@ async function cvSendTestPush() {
 }
 </script>
 
+
+<script>
+// CASA VERONA — COMPLETE HUMAN HANDOFF (admin only)
+document.addEventListener("DOMContentLoaded", () => {
+  const button = document.getElementById("cvLeadCompleteHandoff");
+  if (!button) return;
+  button.addEventListener("click", async () => {
+    const leadId = cvActiveLeadId;
+    if (!leadId || !confirm("לסיים טיפול בנציג? ה-AI יישאר כבוי ללקוח הזה.")) return;
+    button.disabled = true;
+    try {
+      const response = await fetch(
+        `/api/admin/leads/${encodeURIComponent(leadId)}/complete-handoff`,
+        { method: "POST", credentials: "include" }
+      );
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.error || "סיום הטיפול נכשל");
+      await cvLoadLeads(true);
+      cvRenderLeadAIControl();
+      alert("הטיפול סומן כהושלם. ה-AI נשאר כבוי.");
+    } catch (error) {
+      console.error("COMPLETE HANDOFF:", error);
+      alert("לא ניתן לסיים טיפול: " + (error.message || "שגיאה"));
+    } finally {
+      button.disabled = false;
+    }
+  });
+});
+</script>
 </body>
 </html>
 
