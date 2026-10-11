@@ -1890,6 +1890,29 @@ async function runSalesEngine(
       }
     ).format(new Date());
 
+  // Keep customer facts, but exclude previous handoff decisions
+  // from the AI prompt. Human pause enforcement remains unchanged.
+  const cleanCustomerBrain = customerBrain
+    ? JSON.parse(JSON.stringify(customerBrain))
+    : null;
+
+  for (const state of [
+    cleanCustomerBrain?.customer,
+    cleanCustomerBrain?.sales_state
+  ]) {
+    if (!state) continue;
+    for (const key of [
+      "stage",
+      "needs_human",
+      "quote_ready",
+      "handoff_reason",
+      "ai_disabled",
+      "ai_paused_until"
+    ]) {
+      delete state[key];
+    }
+  }
+
   const input = `
 אתה AI Sales Closer של Casa Verona.
 
@@ -1898,8 +1921,8 @@ ${israelNow}
 Time zone: Asia/Jerusalem
 
 CUSTOMER MEMORY:
-${customerBrain
-  ? JSON.stringify(customerBrain, null, 2)
+${cleanCustomerBrain
+  ? JSON.stringify(cleanCustomerBrain, null, 2)
   : "אין עדיין זיכרון קודם על הלקוח."}
 
 כל המידע ב-CUSTOMER MEMORY הוא מידע שנשמר משיחות קודמות עם אותו לקוח.
