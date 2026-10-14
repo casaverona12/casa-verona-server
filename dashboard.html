@@ -2810,6 +2810,12 @@ input::placeholder,textarea::placeholder{color:#788395}
 }
 </style>
 
+<style id="cv-ios-login-visibility-fix-v1">
+/* CV_IOS_LOGIN_VISIBILITY_FIX_V1
+   The mobile .cv-login display:grid!important rule must not override
+   hideLogin() after a successful authentication. */
+#loginScreen.cv-login-hidden { display: none !important; }
+</style>
 </head>
 <body>
 
@@ -6140,9 +6146,8 @@ document.addEventListener("click",e=>{const n=e.target.closest("[data-page]"),o=
 
       if (!loginScreen) return;
 
-      loginScreen.style.removeProperty(
-        "display"
-      );
+      loginScreen.classList.remove("cv-login-hidden");
+      loginScreen.style.removeProperty("display");
 
     }
 
@@ -6151,6 +6156,7 @@ document.addEventListener("click",e=>{const n=e.target.closest("[data-page]"),o=
 
       if (!loginScreen) return;
 
+      loginScreen.classList.add("cv-login-hidden");
       loginScreen.style.display = "none";
 
     }
