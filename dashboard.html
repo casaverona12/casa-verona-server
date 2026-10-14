@@ -2711,6 +2711,105 @@ input::placeholder,textarea::placeholder{color:#788395}
 
 
 </style>
+
+<style id="cv-ui-layout-fix-20261014">
+.cv-sales-control-wrap{width:100%;max-width:none;margin:16px 0 0;position:relative;z-index:1}
+#cvSalesBotMasterPanel[hidden]{display:none!important}
+@media(max-width:760px){
+ .cv-login{display:grid!important;grid-template-columns:1fr!important;grid-template-rows:minmax(42vh,48vh) auto!important;overflow-y:auto!important}
+ .cv-login-art{grid-column:1!important;grid-row:1!important;order:unset!important;min-height:42vh!important;background-position:center 55%!important}
+ .cv-login-panel{grid-column:1!important;grid-row:2!important;order:unset!important;min-height:unset!important;padding:20px 24px 28px!important}
+ .cv-login-box{margin:12px auto!important}
+ .cv-login-box h2{font-size:clamp(28px,8vw,39px)!important}
+ .cv-login-art-copy h1{font-size:clamp(25px,7vw,34px)!important}
+ .cv-sales-control-wrap{max-width:none;margin:0 0 18px}
+}
+</style>
+
+<style id="cv-mobile-login-polish-v1">
+/* CV_MOBILE_LOGIN_POLISH_V1 */
+
+@media (max-width: 760px) {
+
+  #loginScreen .cv-login-panel {
+    padding: 26px 20px 24px !important;
+  }
+
+  #loginScreen .cv-login-logo-wrap {
+    margin-bottom: 15px !important;
+  }
+
+  #loginScreen .cv-login-logo {
+    width: 112px !important;
+    max-width: 112px !important;
+    height: 82px !important;
+    max-height: 82px !important;
+    object-fit: contain !important;
+    border-radius: 10px;
+  }
+
+  #loginScreen .cv-login-box h2 {
+    font-size: clamp(27px, 7vw, 34px) !important;
+    line-height: 1.25 !important;
+  }
+
+  #loginScreen .cv-login-sub {
+    font-size: 12px !important;
+    line-height: 1.65 !important;
+    margin-bottom: 20px !important;
+  }
+
+  #loginScreen .cv-input {
+    min-height: 58px !important;
+  }
+
+  #loginScreen .cv-input input {
+    min-height: 58px !important;
+    font-size: 16px !important;
+  }
+
+  #loginScreen .cv-login-btn {
+    width: 100% !important;
+    min-height: 66px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: relative !important;
+    padding: 12px 50px !important;
+    box-sizing: border-box !important;
+  }
+
+  #loginScreen .cv-auth-button-copy {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    min-width: 0 !important;
+    text-align: center !important;
+  }
+
+  #loginScreen .cv-auth-button-copy strong {
+    font-size: 15px !important;
+    line-height: 1.35 !important;
+    white-space: normal !important;
+    text-align: center !important;
+  }
+
+  #loginScreen .cv-auth-arrow {
+    position: absolute !important;
+    left: 16px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    font-size: 20px !important;
+  }
+
+  #loginScreen .cv-login-foot {
+    margin-top: 18px !important;
+  }
+}
+</style>
+
 </head>
 <body>
 
@@ -3230,6 +3329,7 @@ input::placeholder,textarea::placeholder{color:#788395}
 <!-- CV_NATIVE_STUDIO_END -->
 
 <section id="dashboard" class="page active">
+
   <div class="cv-hero">
     <div class="cv-hero-copy"><span class="cv-hero-kicker">CASA VERONA · EXECUTIVE COMMAND CENTER</span><h1 id="cvWelcomeTitle">ברוכים <em>הבאים.</em></h1><p>כל Casa Verona במסך אחד — מכירות, Follow-Ups, הזמנות, ייצור, אספקות ו־AI.</p></div>
     <div class="cv-hero-side"><small>TODAY · CASA VERONA</small><strong><span id="cvDashboardDay">—</span> · <span id="cvDashboardDate">—</span></strong><div class="cv-live-line"><span><i class="cv-live-dot"></i>מערכת</span><b>ONLINE</b></div></div>
@@ -3289,7 +3389,54 @@ input::placeholder,textarea::placeholder{color:#788395}
   </div>
   <div class="cv-lower">
     <article class="cv-mini"><h3>Follow-Up Center</h3><p>הזדמנויות שאסור לתת להן להתקרר.</p><div class="cv-task"><span>מעקבים להיום</span><b id="cvFollowupsToday">—</b></div><div class="cv-task"><span>מעקבים באיחור</span><b class="cv-warn" id="cvFollowupsLate">—</b></div><div class="cv-task"><span>לידים חמים</span><b id="cvHotLeadsMini">—</b></div></article>
-    <article class="cv-mini"><h3>AI Sales Agent</h3><p>סוכן המכירות החכם של Casa Verona.</p><div class="cv-agent"><div class="cv-agent-icon">AI</div><div><strong>Sales Agent</strong><small>WhatsApp Sales Brain</small></div></div><div class="cv-task"><span>חיבור WhatsApp</span><b>—</b></div><div class="cv-task"><span>מצב מנוע</span><b>—</b></div></article>
+    <article class="cv-mini"><h3>AI Sales Agent</h3><p>סוכן המכירות החכם של Casa Verona.</p><div class="cv-agent"><div class="cv-agent-icon">AI</div><div><strong>Sales Agent</strong><small>WhatsApp Sales Brain</small></div></div><div class="cv-sales-control-wrap"><div id="cvSalesBotMasterPanel" style="width:100%;box-sizing:border-box;
+  background:#17191c;
+  color:#f4f0e8;
+  border:1px solid #a99064;
+  border-radius:18px;
+  padding:18px;
+  box-shadow:0 14px 40px rgba(0,0,0,.25);
+  direction:rtl;
+  font-family:inherit;
+">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+    <div>
+      <strong style="font-size:16px">🤖 AI Sales Bot</strong>
+      <div style="font-size:12px;color:#c5b9a7;margin-top:4px">
+        WhatsApp Master Control
+      </div>
+    </div>
+    <span id="cvSalesBotState" style="
+      background:#393939;
+      border-radius:30px;
+      padding:5px 10px;
+      font-size:12px;
+    ">טוען...</span>
+  </div>
+
+  <p id="cvSalesBotDescription" style="
+    font-size:13px;
+    line-height:1.7;
+    color:#c5b9a7;
+    margin:14px 0;
+  ">בודק את מצב הבוט בשרת...</p>
+
+  <button id="cvSalesBotToggle" type="button" disabled style="
+    width:100%;
+    padding:12px;
+    border-radius:10px;
+    border:1px solid #b69b6e;
+    background:#b69b6e;
+    color:#17191c;
+    font-weight:700;
+    cursor:pointer;
+  ">טוען...</button>
+
+  <div id="cvSalesBotFeedback"
+       role="status"
+       aria-live="polite"
+       style="font-size:12px;margin-top:10px;color:#c5b9a7"></div>
+</div></div></article>
     <article class="cv-mini"><h3>Operations</h3><p>ייצור ואספקות במקום אחד.</p><div class="cv-task"><span>בתהליך ייצור</span><b id="cvProductionMini">—</b></div><div class="cv-task"><span>מוכנים לאספקה</span><b id="cvDeliveryMini">—</b></div><div class="cv-task"><span>חריגות / עיכובים</span><b>—</b></div></article>
   </div>
 </section>
@@ -28105,59 +28252,7 @@ render();
 
 
 <!-- CV_SALES_BOT_MASTER_UI_V1 -->
-<div id="cvSalesBotMasterPanel" style="z-index:9500;
-  position:fixed;
-  bottom:24px;
-  left:24px;
-  z-index:900;
-  width:min(340px,calc(100vw - 48px));
-  background:#17191c;
-  color:#f4f0e8;
-  border:1px solid #a99064;
-  border-radius:18px;
-  padding:18px;
-  box-shadow:0 14px 40px rgba(0,0,0,.25);
-  direction:rtl;
-  font-family:inherit;
-">
-  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
-    <div>
-      <strong style="font-size:16px">🤖 AI Sales Bot</strong>
-      <div style="font-size:12px;color:#c5b9a7;margin-top:4px">
-        WhatsApp Master Control
-      </div>
-    </div>
-    <span id="cvSalesBotState" style="
-      background:#393939;
-      border-radius:30px;
-      padding:5px 10px;
-      font-size:12px;
-    ">טוען...</span>
-  </div>
 
-  <p id="cvSalesBotDescription" style="
-    font-size:13px;
-    line-height:1.7;
-    color:#c5b9a7;
-    margin:14px 0;
-  ">בודק את מצב הבוט בשרת...</p>
-
-  <button id="cvSalesBotToggle" type="button" disabled style="
-    width:100%;
-    padding:12px;
-    border-radius:10px;
-    border:1px solid #b69b6e;
-    background:#b69b6e;
-    color:#17191c;
-    font-weight:700;
-    cursor:pointer;
-  ">טוען...</button>
-
-  <div id="cvSalesBotFeedback"
-       role="status"
-       aria-live="polite"
-       style="font-size:12px;margin-top:10px;color:#c5b9a7"></div>
-</div>
 
 <script id="cvSalesBotMasterClientV1">
 (function () {
