@@ -3248,7 +3248,7 @@ input::placeholder,textarea::placeholder{color:#788395}
 
   
 <!-- CV_CINEMATIC_UI_V1 -->
-<section style="margin:20px 0;padding:22px;border:1px solid #b99a73;border-radius:18px;background:#191a1e;color:#f7f2e9;direction:rtl">
+<section data-cv-legacy-hidden="1" hidden style="display:none!important" style="margin:20px 0;padding:22px;border:1px solid #b99a73;border-radius:18px;background:#191a1e;color:#f7f2e9;direction:rtl">
  <div style="font-size:11px;letter-spacing:2px;color:#d7b98a">CASA VERONA · CINEMATIC STUDIO</div>
  <h3 style="margin:9px 0">🎬 הפקה קולנועית — 30 שניות</h3>
  <p style="line-height:1.6;opacity:.8">עריכת סרטוני גלם לפורמט רילס 9:16, עם חיתוכים וגימור צבע. גרסת V1 אינה בוחרת שוטים בעזרת AI ואינה מוסיפה מוזיקה.</p>
@@ -3263,8 +3263,96 @@ input::placeholder,textarea::placeholder{color:#788395}
  </form>
 </section>
 <!-- CV_CINEMATIC_UI_END -->
+
+<!-- CV_UNIFIED_FILM_STUDIO_V1 -->
+<section id="cvUnifiedFilmStudio" dir="rtl" style="margin:20px 0;padding:20px;background:#15171c;color:#f6f0e7;border:1px solid #5a4b3b;border-radius:20px">
+  <div style="font-size:11px;letter-spacing:2px;color:#c9ab78">CASA VERONA · AI FILM STUDIO</div>
+  <h2 style="margin:10px 0">סטודיו הפקות</h2>
+  <div style="background:#08090c;border-radius:16px;padding:12px;margin:18px 0">
+    <video id="cvUnifiedPreview" controls playsinline style="width:100%;max-height:520px;display:none"></video>
+    <div id="cvUnifiedPlaceholder" style="min-height:260px;display:grid;place-items:center;text-align:center;color:#bba888">
+      🎬 הסרטון שלך יוצג כאן
+    </div>
+    <a id="cvUnifiedDownload" download="casa-verona-film.mp4" style="display:none;color:#e8c796;margin-top:12px">הורדת הסרטון</a>
+  </div>
+  <div id="cvUnifiedForm" style="display:grid;gap:14px">
+    <label>מה מפיקים?
+      <select id="cvUnifiedType" style="display:block;width:100%;padding:12px">
+        <option>פרסומת למוצר</option><option>סרטון מותג</option><option>רילס</option>
+      </select>
+    </label>
+    <label>לאן הסרטון מיועד?
+      <select id="cvUnifiedPlatform" style="display:block;width:100%;padding:12px">
+        <option>אינסטגרם</option><option>פייסבוק</option><option>טיקטוק</option><option>אתר</option>
+      </select>
+    </label>
+    <label>מה המטרה?
+      <select id="cvUnifiedGoal" style="display:block;width:100%;padding:12px">
+        <option>מכירות</option><option>חשיפה</option><option>השקת מוצר</option>
+      </select>
+    </label>
+    <label>איזה סגנון?
+      <select id="cvUnifiedStyle" style="display:block;width:100%;padding:12px">
+        <option>יוקרתי וקולנועי</option><option>רגשי</option><option>מכירתי וקצבי</option>
+      </select>
+    </label>
+    <label>העלאת סרטוני גלם (2–6, עד 35MB לקובץ)
+      <input id="cvUnifiedFiles" type="file" accept="video/mp4,video/quicktime,.mp4,.mov" multiple required style="display:block;width:100%;margin-top:8px">
+    </label>
+    <button id="cvUnifiedGo" type="button" style="padding:15px;background:#c9ab78;color:#171717;border:0;border-radius:12px;font-weight:bold">🎬 הפק את הסרטון שלי</button>
+    <p id="cvUnifiedStatus" aria-live="polite"></p>
+  </div>
+  <div style="border-top:1px solid #464047;margin-top:20px;padding-top:18px">
+    <h3>✦ הבמאי הדיגיטלי</h3>
+    <p style="font-size:13px;color:#b9b1a8">אפשר לכתוב הנחיות להפקה. עריכה אוטומטית לפי הצ'אט תתווסף בהמשך.</p>
+    <textarea id="cvUnifiedInstructions" rows="3" placeholder="למשל: פתיחה דרמטית, דגש על הספה וסיום יוקרתי" style="box-sizing:border-box;width:100%;padding:12px;border-radius:10px"></textarea>
+  </div>
+</section>
+<!-- CV_UNIFIED_FILM_STUDIO_END -->
+<script id="cv-unified-film-client-v1">
+(function(){
+ const form=document.getElementById('cvUnifiedForm');
+ if(!form)return;
+ let previous=null;
+ document.getElementById('cvUnifiedGo').addEventListener('click',async function(e){
+  e.preventDefault();
+  const files=[...document.getElementById('cvUnifiedFiles').files];
+  const status=document.getElementById('cvUnifiedStatus');
+  const btn=document.getElementById('cvUnifiedGo');
+  const video=document.getElementById('cvUnifiedPreview');
+  const link=document.getElementById('cvUnifiedDownload');
+  if(files.length<2||files.length>6){status.textContent='יש לבחור 2–6 סרטונים';return;}
+  if(files.some(f=>f.size>35*1024*1024)){status.textContent='כל קובץ חייב להיות עד 35MB';return;}
+  const fd=new FormData();
+  files.forEach(f=>fd.append('clips',f));
+  fd.append('format','vertical');
+  btn.disabled=true;
+  status.textContent='מעלה חומרים ומפיק סרטון...';
+  try{
+   const response=await fetch('/api/marketing/video/cinematic',{method:'POST',body:fd,credentials:'same-origin'});
+   if(!response.ok){
+    let message='ההפקה נכשלה';
+    try{const data=await response.json();message=data.error||message;}catch{}
+    throw new Error(message);
+   }
+   const blob=await response.blob();
+   if(!blob.size)throw new Error('התקבל סרטון ריק');
+   if(previous)URL.revokeObjectURL(previous);
+   previous=URL.createObjectURL(blob);
+   video.src=previous;
+   video.style.display='block';
+   document.getElementById('cvUnifiedPlaceholder').style.display='none';
+   link.href=previous;
+   link.style.display='inline-block';
+   status.textContent='הסרטון מוכן!';
+  }catch(error){status.textContent='שגיאה: '+error.message;}
+  finally{btn.disabled=false;}
+ });
+})();
+</script>
+
 <!-- CV_CLIP_MONTAGE_UI_V1 -->
-<section style="margin:20px 0;padding:20px;border:1px solid #80636a;border-radius:18px;background:#211d22;color:#f7f2e9;direction:rtl">
+<section style="display:none!important;margin:20px 0;padding:20px;border:1px solid #80636a;border-radius:18px;background:#211d22;color:#f7f2e9;direction:rtl">
  <h3 style="margin:0 0 8px">🎬 עריכת סרטוני גלם — MP4</h3>
  <p style="margin:0 0 14px">העלאת 2–6 סרטונים ליצירת סרטון רציף. כרגע זו עריכה בסיסית, ללא בחירת שוטים חכמה, מוזיקה או אווטאר.</p>
  <form id="cvClipMontageForm" style="display:grid;gap:12px">
@@ -3278,8 +3366,8 @@ input::placeholder,textarea::placeholder{color:#788395}
 </section>
 <!-- CV_CLIP_MONTAGE_UI_END -->
 <!-- CV_AUTO_PRODUCTION_PANEL_V1 -->
-<div id="cvAutoProductionPanel"
-     style="margin-top:26px;padding:24px;border:1px solid rgba(190,163,111,.35);border-radius:18px;background:rgba(20,22,26,.92);color:#f7f3eb">
+<div id="cvAutoProductionPanel" data-cv-legacy-hidden="1" hidden
+     style="display:none!important;margin-top:26px;padding:24px;border:1px solid rgba(190,163,111,.35);border-radius:18px;background:rgba(20,22,26,.92);color:#f7f3eb">
 
   <div style="font-size:11px;letter-spacing:2px;color:#d3b783;margin-bottom:10px">
     CASA VERONA · AI PRODUCTION
