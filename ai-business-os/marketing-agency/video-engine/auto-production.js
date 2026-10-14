@@ -58,10 +58,10 @@ async function produceCommercial(options) {
 
   if (
     !Array.isArray(images) ||
-    images.length < 2 ||
+    images.length < 1 ||
     images.length > 8
   ) {
-    throw new Error("Provide 2–8 product images");
+    throw new Error("Provide 1–8 product images");
   }
 
   const duration = Number(options.sceneDuration ?? 3);

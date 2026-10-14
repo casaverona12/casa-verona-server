@@ -3385,8 +3385,8 @@ input::placeholder,textarea::placeholder{color:#788395}
         <option>יוקרתי וקולנועי</option><option>רגשי</option><option>מכירתי וקצבי</option>
       </select>
     </label>
-    <label>העלאת סרטוני גלם (2–6, עד 35MB לקובץ)
-      <input id="cvUnifiedFiles" type="file" accept="video/mp4,video/quicktime,.mp4,.mov" multiple required style="display:block;width:100%;margin-top:8px">
+    <label>העלאת תמונות או סרטונים
+      <input id="cvUnifiedFiles" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,.jpg,.jpeg,.png,.webp,.mp4,.mov" multiple style="display:block;width:100%;margin-top:8px">
     </label>
     <button id="cvUnifiedGo" type="button" style="padding:15px;background:#c9ab78;color:#171717;border:0;border-radius:12px;font-weight:bold">🎬 הפק את הסרטון שלי</button>
     <p id="cvUnifiedStatus" aria-live="polite"></p>
@@ -3400,42 +3400,85 @@ input::placeholder,textarea::placeholder{color:#788395}
 <!-- CV_UNIFIED_FILM_STUDIO_END -->
 <script id="cv-unified-film-client-v1">
 (function(){
- const form=document.getElementById('cvUnifiedForm');
- if(!form)return;
+ const btn=document.getElementById('cvUnifiedGo');
+ if(!btn)return;
  let previous=null;
- document.getElementById('cvUnifiedGo').addEventListener('click',async function(e){
-  e.preventDefault();
+
+ btn.addEventListener('click',async function(){
   const files=[...document.getElementById('cvUnifiedFiles').files];
   const status=document.getElementById('cvUnifiedStatus');
-  const btn=document.getElementById('cvUnifiedGo');
   const video=document.getElementById('cvUnifiedPreview');
   const link=document.getElementById('cvUnifiedDownload');
-  if(files.length<2||files.length>6){status.textContent='יש לבחור 2–6 סרטונים';return;}
-  if(files.some(f=>f.size>35*1024*1024)){status.textContent='כל קובץ חייב להיות עד 35MB';return;}
+
+  if(!files.length){
+   status.textContent='יש לבחור לפחות תמונה או סרטון';
+   return;
+  }
+
+  const images=files.filter(f=>f.type.startsWith('image/'));
+  const clips=files.filter(f=>f.type.startsWith('video/'));
+
+  if(images.length && clips.length){
+   status.textContent='שילוב תמונות וסרטונים באותה הפקה יתווסף בהמשך';
+   return;
+  }
+
+  const imageMode=images.length>0;
+
+  if(imageMode && (images.length>8 || images.some(f=>f.size>8*1024*1024))){
+   status.textContent='ניתן לבחור 1–8 תמונות, עד 8MB לתמונה';
+   return;
+  }
+
+  if(!imageMode && (clips.length<2 || clips.length>6 || clips.some(f=>f.size>35*1024*1024))){
+   status.textContent='ניתן לבחור 2–6 סרטונים, עד 35MB לסרטון';
+   return;
+  }
+
   const fd=new FormData();
-  files.forEach(f=>fd.append('clips',f));
-  fd.append('format','vertical');
+  files.forEach(f=>fd.append(imageMode?'images':'clips',f));
+  if(!imageMode)fd.append('format','vertical');
+
   btn.disabled=true;
-  status.textContent='מעלה חומרים ומפיק סרטון...';
+  status.textContent='מפיקים את הסרטון שלך...';
+
   try{
-   const response=await fetch('/api/marketing/video/cinematic',{method:'POST',body:fd,credentials:'same-origin'});
-   if(!response.ok){
-    let message='ההפקה נכשלה';
-    try{const data=await response.json();message=data.error||message;}catch{}
-    throw new Error(message);
+   const response=await fetch(
+    imageMode?'/api/marketing/video/produce':'/api/marketing/video/cinematic',
+    {method:'POST',body:fd,credentials:'same-origin'}
+   );
+
+   if(imageMode){
+    const data=await response.json();
+    if(!response.ok||!data.success)throw new Error(data.error||'הפקת התמונות נכשלה');
+    if(!/^cv-commercial-[a-f0-9-]{36}$/.test(data.productionId))throw new Error('מזהה הפקה לא תקין');
+    if(previous)URL.revokeObjectURL(previous);
+    previous=null;
+    video.src='/api/marketing/video/export/'+encodeURIComponent(data.productionId);
+    link.href=video.src;
+   }else{
+    if(!response.ok){
+     let message='הפקת הסרטון נכשלה';
+     try{const data=await response.json();message=data.error||message;}catch{}
+     throw new Error(message);
+    }
+    const blob=await response.blob();
+    if(!blob.size)throw new Error('התקבל סרטון ריק');
+    if(previous)URL.revokeObjectURL(previous);
+    previous=URL.createObjectURL(blob);
+    video.src=previous;
+    link.href=previous;
    }
-   const blob=await response.blob();
-   if(!blob.size)throw new Error('התקבל סרטון ריק');
-   if(previous)URL.revokeObjectURL(previous);
-   previous=URL.createObjectURL(blob);
-   video.src=previous;
+
    video.style.display='block';
    document.getElementById('cvUnifiedPlaceholder').style.display='none';
-   link.href=previous;
    link.style.display='inline-block';
-   status.textContent='הסרטון מוכן!';
-  }catch(error){status.textContent='שגיאה: '+error.message;}
-  finally{btn.disabled=false;}
+   status.textContent='✅ הסרטון מוכן!';
+  }catch(error){
+   status.textContent='שגיאה: '+error.message;
+  }finally{
+   btn.disabled=false;
+  }
  });
 })();
 </script>

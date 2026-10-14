@@ -223,7 +223,7 @@ async function handleProductionUpload(req, res) {
       });
     }
 
-    if (images.length < 2) {
+    if (images.length < 1) {
       return respond(400, {
         success: false,
         error: "AT_LEAST_TWO_IMAGES_REQUIRED"
