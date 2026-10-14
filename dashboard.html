@@ -3395,9 +3395,104 @@ input::placeholder,textarea::placeholder{color:#788395}
     <h3>✦ הבמאי הדיגיטלי</h3>
     <p style="font-size:13px;color:#b9b1a8">אפשר לכתוב הנחיות להפקה. עריכה אוטומטית לפי הצ'אט תתווסף בהמשך.</p>
     <textarea id="cvUnifiedInstructions" rows="3" placeholder="למשל: פתיחה דרמטית, דגש על הספה וסיום יוקרתי" style="box-sizing:border-box;width:100%;padding:12px;border-radius:10px"></textarea>
+    <button id="cvDirectorPlanButton" type="button"
+      style="margin-top:12px;width:100%;padding:14px;border:1px solid #c9ab78;border-radius:12px;background:#26201c;color:#e8c796;font-weight:700">
+      ✦ בקש תוכנית מהבמאי
+    </button>
+    <p id="cvDirectorPlanStatus" aria-live="polite"></p>
+    <div id="cvDirectorPlanResult" dir="rtl"
+      style="display:none;margin-top:12px;padding:16px;border:1px solid #49413a;border-radius:14px;background:#10151e;white-space:pre-wrap;line-height:1.8"></div>
+
   </div>
 </section>
 <!-- CV_UNIFIED_FILM_STUDIO_END -->
+
+<script id="cv-film-director-plan-client-v1">
+(function(){
+  const button = document.getElementById("cvDirectorPlanButton");
+  const instructions = document.getElementById("cvUnifiedInstructions");
+  const status = document.getElementById("cvDirectorPlanStatus");
+  const result = document.getElementById("cvDirectorPlanResult");
+
+  if (!button || !instructions || !status || !result) return;
+
+  const platformMap = {
+    "אינסטגרם": "instagram",
+    "פייסבוק": "facebook",
+    "טיקטוק": "tiktok",
+    "אתר": "all"
+  };
+
+  button.addEventListener("click", async function(){
+    const instruction = instructions.value.trim();
+
+    if (!instruction || instruction.length > 3000) {
+      status.textContent = "יש לכתוב הוראות עד 3,000 תווים.";
+      return;
+    }
+
+    const selectedPlatform =
+      document.getElementById("cvUnifiedPlatform")?.value || "";
+
+    const payload = {
+      instruction,
+      platform: platformMap[selectedPlatform] || "all",
+      objective: document.getElementById("cvUnifiedGoal")?.value || "whatsapp_leads",
+      style: document.getElementById("cvUnifiedStyle")?.value || "premium_cinematic"
+    };
+
+    button.disabled = true;
+    status.textContent = "הבמאי מכין תוכנית עבודה...";
+    result.style.display = "none";
+
+    try {
+      const response = await fetch(
+        "/api/marketing/film-director/plan",
+        {
+          method: "POST",
+          credentials: "same-origin",
+          cache: "no-store",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(payload)
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "שגיאה בתכנון ההפקה");
+      }
+
+      const lines = [
+        "🎬 תוכנית הפקה — Casa Verona",
+        "",
+        "הנחיות: " + data.brief.instruction,
+        "פלטפורמה: " + data.brief.platform,
+        "",
+        "מחלקות ומשימות:"
+      ];
+
+      for (const task of data.tasks || []) {
+        lines.push("• " + task.department + ": " + task.task);
+        lines.push("  סטטוס: " + task.status);
+      }
+
+      lines.push("");
+      lines.push("⚠️ זו תוכנית ראשונית. מחקר ויצירת תוכן באמצעות AI טרם הופעלו.");
+
+      result.textContent = lines.join("\n");
+      result.style.display = "block";
+      status.textContent = "✅ תוכנית העבודה הוכנה ללא חיוב.";
+
+    } catch (error) {
+      status.textContent = "שגיאה: " + error.message;
+    } finally {
+      button.disabled = false;
+    }
+  });
+})();
+</script>
+
 <script id="cv-unified-film-client-v1">
 (function(){
  const btn=document.getElementById('cvUnifiedGo');

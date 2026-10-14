@@ -5851,6 +5851,63 @@ if (
   return;
 }
 
+
+// CV_AI_FILM_DIRECTOR_PLAN_V1
+if (
+  req.method === "POST" &&
+  url.pathname === "/api/marketing/film-director/plan"
+) {
+  const auth = await requireAuth(req, res, [USER_ROLES.ADMIN]);
+  if (!auth) return;
+
+  try {
+    const maxBytes = 12000;
+    let body = "";
+    let bytes = 0;
+
+    for await (const chunk of req) {
+      bytes += chunk.length;
+
+      if (bytes > maxBytes) {
+        sendJSON(res, 413, {
+          success: false,
+          error: "DIRECTOR_REQUEST_TOO_LARGE"
+        });
+        return;
+      }
+
+      body += chunk.toString("utf8");
+    }
+
+    const input = JSON.parse(body);
+
+    const { createProductionPlan } = require(
+      "./ai-business-os/marketing-agency/film-director/director-intelligence"
+    );
+
+    const plan = createProductionPlan(input);
+
+    sendJSON(res, 200, plan);
+  } catch (error) {
+    const invalidInput = [
+      "INVALID_DIRECTOR_INSTRUCTION",
+      "Unexpected token",
+      "Unexpected end"
+    ].some(message => String(error.message).includes(message));
+
+    console.error("FILM DIRECTOR PLAN ERROR:", error.message);
+
+    sendJSON(res, invalidInput ? 400 : 500, {
+      success: false,
+      error: invalidInput
+        ? "INVALID_DIRECTOR_REQUEST"
+        : "DIRECTOR_PLAN_FAILED"
+    });
+  }
+
+  return;
+}
+
 // CV_CINEMATIC_ROUTE_V1 — separate admin-only cinematic rendering
 if (req.method === "POST" && url.pathname === "/api/marketing/video/cinematic") {
   const auth = await requireAuth(req, res, [USER_ROLES.ADMIN]);
