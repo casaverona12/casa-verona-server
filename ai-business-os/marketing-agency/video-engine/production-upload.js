@@ -12,7 +12,7 @@ const { spawnSync } = require("node:child_process");
 
 function validateImageFile(filepath) {
   const result = spawnSync(
-    "/opt/homebrew/bin/ffprobe",
+    process.env.FFPROBE_PATH || (fs.existsSync("/opt/homebrew/bin/ffprobe") ? "/opt/homebrew/bin/ffprobe" : "ffprobe"),
     [
       "-v", "error",
       "-select_streams", "v:0",
