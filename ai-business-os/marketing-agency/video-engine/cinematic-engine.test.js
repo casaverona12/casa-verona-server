@@ -1,0 +1,12 @@
+'use strict';
+const assert=require('node:assert/strict');
+const {planShots,safeFile}=require('./cinematic-engine');
+const path=require('node:path');
+const {UPLOADS}=require('./video-editor');
+const shots=planShots([12,12,12],30);
+assert.equal(shots.reduce((sum,s)=>sum+s.duration,0),30);
+assert(shots.every(s=>s.duration<=5 && s.duration>0));
+assert.throws(()=>planShots([4,4],30),/INSUFFICIENT_FOOTAGE/);
+assert.throws(()=>safeFile('/etc/passwd'),/INVALID_MEDIA_PATH/);
+assert.equal(safeFile(path.join(UPLOADS,'sample.mp4')),path.join(UPLOADS,'sample.mp4'));
+console.log('✅ Cinematic engine planning and path tests passed');

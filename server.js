@@ -4774,6 +4774,35 @@ async function requireAuth(req, res, allowedRoles = []) {
   return auth;
 }
 
+
+/**
+ * CASA VERONA OS — OWNER SECURITY
+ *
+ * OWNER is separate from the ADMIN business role.
+ * Identity is verified against Supabase Auth user ID.
+ * Missing configuration denies access.
+ */
+async function requireOwner(req, res) {
+  const auth = await requireAuth(req, res, [USER_ROLES.ADMIN]);
+
+  if (!auth) return null;
+
+  const ownerUid = String(
+    process.env.CASA_VERONA_OWNER_UID || ""
+  ).trim();
+
+  if (
+    !ownerUid ||
+    auth.user.id !== ownerUid ||
+    auth.profile.id !== ownerUid
+  ) {
+    sendForbidden(res);
+    return null;
+  }
+
+  return auth;
+}
+
 // -----------------------------------------------
 // API - PUSH SUBSCRIPTION
 // ANY AUTHENTICATED USER
@@ -5819,6 +5848,14 @@ if (
     });
   }
 
+  return;
+}
+
+// CV_CINEMATIC_ROUTE_V1 — separate admin-only cinematic rendering
+if (req.method === "POST" && url.pathname === "/api/marketing/video/cinematic") {
+  const auth = await requireAuth(req, res, [USER_ROLES.ADMIN]);
+  if (!auth) return;
+  await require("./ai-business-os/marketing-agency/video-engine/cinematic-upload").handleCinematic(req, res);
   return;
 }
 

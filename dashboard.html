@@ -3247,6 +3247,22 @@ input::placeholder,textarea::placeholder{color:#788395}
   </div>
 
   
+<!-- CV_CINEMATIC_UI_V1 -->
+<section style="margin:20px 0;padding:22px;border:1px solid #b99a73;border-radius:18px;background:#191a1e;color:#f7f2e9;direction:rtl">
+ <div style="font-size:11px;letter-spacing:2px;color:#d7b98a">CASA VERONA · CINEMATIC STUDIO</div>
+ <h3 style="margin:9px 0">🎬 הפקה קולנועית — 30 שניות</h3>
+ <p style="line-height:1.6;opacity:.8">עריכת סרטוני גלם לפורמט רילס 9:16, עם חיתוכים וגימור צבע. גרסת V1 אינה בוחרת שוטים בעזרת AI ואינה מוסיפה מוזיקה.</p>
+ <form id="cvCinematicForm" style="display:grid;gap:12px">
+  <label>בחר 2–6 סרטונים (MP4 / MOV, עד 35MB לקובץ)
+   <input id="cvCinematicFiles" type="file" accept="video/mp4,video/quicktime,.mp4,.mov" multiple required style="display:block;width:100%;margin-top:8px">
+  </label>
+  <button id="cvCinematicGo" type="submit" style="padding:14px;border:0;border-radius:10px;background:#c9ab78;color:#181818;font-weight:700">הפק סרטון Cinematic</button>
+  <p id="cvCinematicStatus" aria-live="polite" style="margin:0"></p>
+  <a id="cvCinematicDownload" download="casa-verona-cinematic.mp4" style="display:none;color:#e8c796">הורד את הסרטון המוכן</a>
+  <video id="cvCinematicPreview" controls playsinline style="display:none;max-width:100%;max-height:420px"></video>
+ </form>
+</section>
+<!-- CV_CINEMATIC_UI_END -->
 <!-- CV_CLIP_MONTAGE_UI_V1 -->
 <section style="margin:20px 0;padding:20px;border:1px solid #80636a;border-radius:18px;background:#211d22;color:#f7f2e9;direction:rtl">
  <h3 style="margin:0 0 8px">🎬 עריכת סרטוני גלם — MP4</h3>
@@ -28411,6 +28427,31 @@ render();
 })();
 </script>
 
+<script id="cv-cinematic-client-v1">
+(function(){
+ const form=document.getElementById('cvCinematicForm');if(!form)return;
+ let previous=null;
+ form.addEventListener('submit',async function(event){
+  event.preventDefault();
+  const files=[...document.getElementById('cvCinematicFiles').files];
+  const status=document.getElementById('cvCinematicStatus'),btn=document.getElementById('cvCinematicGo');
+  const video=document.getElementById('cvCinematicPreview'),link=document.getElementById('cvCinematicDownload');
+  if(files.length<2||files.length>6){status.textContent='יש לבחור 2–6 סרטונים';return;}
+  if(files.some(f=>f.size>35*1024*1024)){status.textContent='כל סרטון חייב להיות קטן מ־35MB';return;}
+  const fd=new FormData();files.forEach(f=>fd.append('clips',f));fd.append('format','vertical');
+  status.textContent='מעלה סרטונים ומפיק סרטון קולנועי... זה עשוי להימשך כמה דקות';
+  btn.disabled=true;link.style.display='none';video.style.display='none';
+  try{
+   const response=await fetch('/api/marketing/video/cinematic',{method:'POST',body:fd,credentials:'same-origin'});
+   if(!response.ok){let message='ההפקה נכשלה';try{const d=await response.json();message=d.error||message;}catch{}throw new Error(message);}
+   const blob=await response.blob();if(!blob.size)throw new Error('התקבל קובץ ריק');
+   if(previous)URL.revokeObjectURL(previous);previous=URL.createObjectURL(blob);
+   link.href=previous;link.style.display='inline-block';video.src=previous;video.style.display='block';
+   status.textContent='הסרטון מוכן לצפייה ולהורדה';
+  }catch(e){status.textContent='שגיאה: '+e.message;}finally{btn.disabled=false;}
+ });
+})();
+</script>
 <script id="cv-clip-montage-client-v1">
 (function(){
  const form=document.getElementById('cvClipMontageForm');if(!form)return;
