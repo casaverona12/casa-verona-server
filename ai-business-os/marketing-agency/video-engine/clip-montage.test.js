@@ -1,0 +1,10 @@
+'use strict';
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const path=require('node:path');
+const {validateOptions,within}=require('./clip-montage');
+test('accepts 2 clips and vertical format',()=>assert.equal(validateOptions({clips:['a','b']}).format,'vertical'));
+test('rejects single clip',()=>assert.throws(()=>validateOptions({clips:['a']}),/CLIPS/));
+test('rejects unbounded duration',()=>assert.throws(()=>validateOptions({clips:['a','b'],sceneSeconds:1000}),/DURATION/));
+test('rejects traversal',()=>assert.throws(()=>within('/tmp/elsewhere.mp4',path.join(__dirname,'uploads')),/PATH/));
+test('rejects unsupported formats',()=>assert.throws(()=>validateOptions({clips:['a','b'],format:'huge'}),/FORMAT/));

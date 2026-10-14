@@ -5822,6 +5822,14 @@ if (
   return;
 }
 
+// CV_CLIP_MONTAGE_API_V1 — authenticated admin-only video rendering
+if (req.method === "POST" && url.pathname === "/api/marketing/video/montage") {
+  const auth = await requireAuth(req, res, [USER_ROLES.ADMIN]);
+  if (!auth) return;
+  await require("./ai-business-os/marketing-agency/video-engine/clip-montage-upload").handleClipMontage(req,res);
+  return;
+}
+
 // CV_AUTO_VIDEO_PRODUCTION_ROUTE_V1
 if (
   req.method === "POST" &&
