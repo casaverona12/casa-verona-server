@@ -20,7 +20,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}bu
 
 /* PRIVATE ACCESS */
 .cv-login{position:fixed;inset:0;z-index:9999;display:grid;grid-template-columns:41% 59%;background:#c9c6bf}
-.cv-login-art{position:relative;grid-column:2;grid-row:1;min-height:100vh;background:url("/assets/casa-verona-login-bg.png") center/cover no-repeat;overflow:hidden}
+.cv-login-art{position:relative;grid-column:2;grid-row:1;min-height:100vh;background:url("/assets/casa-verona-login-bg.png?version=penthouse-219") center/cover no-repeat;overflow:hidden}
 .cv-login-art:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(8,8,8,.5),rgba(8,8,8,.03) 62%),linear-gradient(0deg,rgba(8,8,8,.45),transparent 55%)}
 .cv-login-art-top{position:absolute;z-index:2;top:42px;left:48px;right:48px;display:flex;justify-content:space-between;color:#fff;font-size:8px;letter-spacing:2.8px;direction:ltr}
 .cv-login-art-copy{position:absolute;z-index:2;left:52px;bottom:48px;color:#fff;direction:ltr;text-align:left}
@@ -805,6 +805,1912 @@ body.cv-role-factory-owner #cvFactoryOwnerNav button{
 
 </style>
 
+
+<style>
+/* CV_CINEMATIC_LOGIN_V1 */
+
+#loginScreen.cv-login {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: block;
+  min-height: 100svh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  isolation: isolate;
+  background: #101411;
+  color: #f7f4ec;
+}
+
+#loginScreen .cv-login-art {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  display: block;
+  width: 100%;
+  min-height: 100%;
+  background-image: url("/assets/casa-verona-login-bg.png?version=penthouse-219");
+  background-position: center center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  transform: scale(1.025);
+  animation: cvLoginReveal 1.4s ease-out both;
+}
+
+#loginScreen .cv-login-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg,
+      rgba(8, 12, 12, .40) 0%,
+      rgba(8, 12, 12, .08) 48%,
+      rgba(8, 12, 12, .46) 100%),
+    linear-gradient(0deg,
+      rgba(5, 8, 8, .48),
+      transparent 46%);
+}
+
+#loginScreen .cv-login-panel {
+  position: relative;
+  z-index: 3;
+  box-sizing: border-box;
+  width: min(450px, calc(100% - 48px));
+  min-height: auto;
+  margin: clamp(42px, 9vh, 110px) clamp(24px, 7vw, 120px)
+          60px auto;
+  padding: clamp(26px, 3vw, 44px);
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 24px;
+  background: linear-gradient(140deg,
+    rgba(18, 22, 22, .82),
+    rgba(10, 15, 16, .70));
+  box-shadow:
+    0 35px 100px rgba(0,0,0,.42),
+    inset 0 1px 0 rgba(255,255,255,.12);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  color: #f7f4ec;
+  animation: cvPanelReveal .85s .12s ease-out both;
+}
+
+#loginScreen .cv-login-logo-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+#loginScreen .cv-login-logo {
+  display: block;
+  max-width: 150px;
+  max-height: 100px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+#loginScreen .cv-login-box {
+  width: 100%;
+  max-width: none;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+#loginScreen .cv-login-kicker {
+  color: #cbb994;
+  font-size: 10px;
+  letter-spacing: 2.2px;
+  text-align: center;
+}
+
+#loginScreen .cv-login-box h2 {
+  color: #fffaf1;
+  text-align: center;
+  font-size: clamp(28px, 3vw, 40px);
+  line-height: 1.2;
+  margin: 16px 0 10px;
+}
+
+#loginScreen .cv-login-box h2 em {
+  color: #d8c39b;
+}
+
+#loginScreen .cv-login-sub {
+  color: rgba(245,244,237,.7);
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+#loginScreen .cv-field-head,
+#loginScreen .cv-field-head label {
+  color: #e9e5da;
+}
+
+#loginScreen .cv-field-head span {
+  color: #b9a985;
+}
+
+#loginScreen .cv-input {
+  background: rgba(255,255,255,.055);
+  border: 1px solid rgba(255,255,255,.19);
+  border-radius: 12px;
+}
+
+#loginScreen .cv-input:focus-within {
+  border-color: #cbb994;
+  box-shadow: 0 0 0 3px rgba(203,185,148,.13);
+}
+
+#loginScreen .cv-input input {
+  color: #fff;
+  background: transparent;
+}
+
+#loginScreen .cv-input input::placeholder {
+  color: rgba(255,255,255,.43);
+}
+
+#loginScreen .cv-login-btn {
+  background: linear-gradient(135deg, #e5d3ad, #bda071);
+  color: #171a18;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0,0,0,.22);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+
+#loginScreen .cv-login-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px rgba(0,0,0,.3);
+}
+
+#loginScreen .cv-auth-button-copy,
+#loginScreen .cv-auth-button-copy strong,
+#loginScreen .cv-auth-button-copy small {
+  color: #171a18;
+}
+
+#loginScreen .cv-login-art-top,
+#loginScreen .cv-login-art-copy {
+  text-shadow: 0 2px 20px rgba(0,0,0,.5);
+}
+
+@keyframes cvLoginReveal {
+  from { opacity: .4; transform: scale(1.065); }
+  to { opacity: 1; transform: scale(1.025); }
+}
+
+@keyframes cvPanelReveal {
+  from { opacity: 0; transform: translateY(22px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 700px) {
+  #loginScreen.cv-login {
+    padding: 0 0 env(safe-area-inset-bottom);
+  }
+
+  #loginScreen .cv-login-art {
+    background-position: 45% center;
+  }
+
+  #loginScreen .cv-login-art::after {
+    background:
+      linear-gradient(180deg,
+        rgba(8,12,12,.18) 0%,
+        rgba(8,12,12,.18) 24%,
+        rgba(8,12,12,.60) 55%,
+        rgba(8,12,12,.82) 100%);
+  }
+
+  #loginScreen .cv-login-panel {
+    width: calc(100% - 32px);
+    max-width: 430px;
+    margin: max(22vh, 120px) auto 30px;
+    padding: 26px 22px;
+    border-radius: 22px;
+  }
+
+  #loginScreen .cv-login-art-top {
+    top: max(20px, env(safe-area-inset-top));
+    left: 20px;
+    right: 20px;
+    font-size: 7px;
+  }
+
+  #loginScreen .cv-login-art-copy {
+    display: none;
+  }
+
+  #loginScreen .cv-login-logo {
+    max-width: 128px;
+    max-height: 78px;
+  }
+
+  #loginScreen .cv-login-box h2 {
+    font-size: 30px;
+  }
+
+  #loginScreen .cv-input input {
+    font-size: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #loginScreen .cv-login-art,
+  #loginScreen .cv-login-panel {
+    animation: none;
+  }
+}
+</style>
+
+
+<style>
+/* CV_CINEMATIC_DEPTH_V2 */
+#loginScreen .cv-login-art {
+  background-position: center center !important;
+  transform: translate3d(var(--cv-x, 0px), var(--cv-y, 0px), 0)
+             scale(1.09) !important;
+  transition: transform 500ms ease-out;
+  will-change: transform;
+  animation: none !important;
+}
+
+#loginScreen .cv-login-panel {
+  transform: perspective(1100px)
+             rotateY(var(--cv-ry, 0deg))
+             rotateX(var(--cv-rx, 0deg));
+  transition: transform 500ms ease-out;
+  transform-style: preserve-3d;
+}
+
+@media (max-width: 700px) {
+  #loginScreen .cv-login-art {
+    background-position: 38% center !important;
+    transform: scale(1.12) !important;
+    animation: cvMobileCinema 22s ease-in-out infinite alternate !important;
+  }
+
+  #loginScreen .cv-login-panel {
+    transform: none !important;
+  }
+}
+
+@keyframes cvMobileCinema {
+  from { transform: scale(1.12) translateX(1%); }
+  to { transform: scale(1.18) translateX(-1%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #loginScreen .cv-login-art,
+  #loginScreen .cv-login-panel {
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+}
+</style>
+
+
+<style>
+/* CV_PENTHOUSE_VIEW_V1 */
+
+/* Desktop: show more of the skyline and sea */
+#loginScreen .cv-login-art {
+  background-position: 62% 44% !important;
+  background-size: cover !important;
+}
+
+/* Keep the sea visible behind the glass panel */
+#loginScreen .cv-login-art::after {
+  background:
+    linear-gradient(90deg,
+      rgba(7,10,12,.18) 0%,
+      rgba(7,10,12,.02) 45%,
+      rgba(7,10,12,.20) 100%),
+    linear-gradient(0deg,
+      rgba(5,8,10,.30),
+      transparent 50%) !important;
+}
+
+@media (max-width: 700px) {
+  #loginScreen .cv-login-art {
+    background-position: 63% 45% !important;
+  }
+}
+</style>
+
+
+<style>
+/* CV_TITANIUM_GLASS_LOGIN_V1 */
+
+#loginScreen.cv-login {
+  font-family: -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Arial, sans-serif;
+}
+
+#loginScreen .cv-login-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-sizing: border-box;
+  width: min(448px, calc(100% - 48px));
+  min-height: 0;
+  margin: clamp(36px, 8vh, 100px)
+          clamp(24px, 6vw, 110px)
+          40px auto;
+  padding: clamp(28px, 3.4vw, 46px);
+  border: 1px solid rgba(239, 220, 183, .28);
+  border-radius: 24px;
+  background:
+    linear-gradient(145deg,
+      rgba(32, 36, 37, .78),
+      rgba(9, 13, 15, .88));
+  box-shadow:
+    0 32px 90px rgba(0,0,0,.42),
+    0 0 0 1px rgba(255,255,255,.035),
+    inset 0 1px 0 rgba(255,255,255,.17);
+  -webkit-backdrop-filter: blur(26px) saturate(125%);
+  backdrop-filter: blur(26px) saturate(125%);
+  color: #f7f5ef;
+}
+
+#loginScreen .cv-login-panel::before {
+  content: "";
+  position: absolute;
+  inset: 10px;
+  border: 1px solid rgba(255,255,255,.065);
+  border-radius: 17px;
+  pointer-events: none;
+}
+
+#loginScreen .cv-login-panel::after {
+  content: "";
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  top: -1px;
+  height: 1px;
+  background: linear-gradient(
+    90deg, transparent, #e9d6af, transparent
+  );
+  pointer-events: none;
+}
+
+#loginScreen .cv-login-logo-wrap {
+  padding: 0;
+  margin: 0 0 24px;
+}
+
+#loginScreen .cv-login-logo {
+  max-width: 138px;
+  max-height: 92px;
+  object-fit: contain;
+  filter: drop-shadow(0 5px 15px rgba(0,0,0,.2));
+}
+
+#loginScreen .cv-login-box {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+}
+
+#loginScreen .cv-login-kicker {
+  color: #d9c59d;
+  text-align: center;
+  font-family: inherit;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 2.4px;
+}
+
+#loginScreen .cv-login-box h2 {
+  margin: 18px 0 12px;
+  text-align: center;
+  color: #fffaf2;
+  font-size: clamp(30px, 3vw, 39px);
+  font-weight: 500;
+  letter-spacing: -.9px;
+  line-height: 1.2;
+}
+
+#loginScreen .cv-login-box h2 em {
+  color: #dec79d;
+  font-style: normal;
+}
+
+#loginScreen .cv-login-sub {
+  margin: 0 0 30px;
+  text-align: center;
+  color: rgba(244,242,235,.66);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+#loginScreen #loginForm {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+#loginScreen .cv-field {
+  margin: 0;
+}
+
+#loginScreen .cv-field-head {
+  margin-bottom: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#loginScreen .cv-field-head label {
+  color: #eee9df;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+#loginScreen .cv-field-head span {
+  color: rgba(218,199,161,.65);
+  font-size: 10px;
+}
+
+#loginScreen .cv-input {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: 55px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 12px;
+  background: rgba(255,255,255,.055);
+  transition:
+    border-color .2s ease,
+    background .2s ease,
+    box-shadow .2s ease;
+}
+
+#loginScreen .cv-input:focus-within {
+  border-color: rgba(227,202,156,.9);
+  background: rgba(255,255,255,.09);
+  box-shadow: 0 0 0 3px rgba(220,193,146,.12);
+}
+
+#loginScreen .cv-input input {
+  width: 100%;
+  min-width: 0;
+  min-height: 53px;
+  box-sizing: border-box;
+  padding: 0 16px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #fff;
+  font-size: 16px;
+}
+
+#loginScreen .cv-input input::placeholder {
+  color: rgba(255,255,255,.39);
+}
+
+#loginScreen .cv-login-btn {
+  width: 100%;
+  min-height: 66px;
+  height: auto;
+  margin-top: 9px;
+  padding: 12px 20px;
+  border: 1px solid rgba(255,241,208,.5);
+  border-radius: 12px;
+  background: linear-gradient(
+    120deg, #f0dfbc 0%, #c9ab78 100%
+  );
+  color: #171916;
+  box-shadow:
+    0 12px 30px rgba(0,0,0,.25),
+    inset 0 1px 0 rgba(255,255,255,.6);
+  cursor: pointer;
+  transition:
+    transform .2s ease,
+    filter .2s ease,
+    box-shadow .2s ease;
+}
+
+#loginScreen .cv-login-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+  box-shadow: 0 18px 34px rgba(0,0,0,.3);
+}
+
+#loginScreen .cv-login-btn:active {
+  transform: translateY(0);
+}
+
+#loginScreen .cv-login-btn:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
+#loginScreen .cv-auth-button-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+#loginScreen .cv-auth-button-copy small {
+  color: rgba(24,26,23,.64);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1.8px;
+}
+
+#loginScreen .cv-auth-button-copy strong {
+  color: #171916;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+#loginScreen .cv-auth-arrow {
+  color: #171916;
+  font-size: 23px;
+}
+
+#loginScreen .cv-auth-error {
+  color: #ffd0c9;
+  font-size: 12px;
+}
+
+#loginScreen .cv-login-foot {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 9px 15px;
+  margin-top: 28px;
+  padding-top: 19px;
+  border-top: 1px solid rgba(255,255,255,.12);
+  color: rgba(245,239,225,.55);
+  text-align: center;
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+
+#loginScreen .cv-login-foot strong {
+  color: #d8c39e;
+  font-weight: 500;
+}
+
+#loginScreen .cv-login-foot small {
+  color: rgba(245,239,225,.46);
+}
+
+@media (max-width: 700px) {
+  #loginScreen .cv-login-panel {
+    width: calc(100% - 28px);
+    max-width: 420px;
+    margin: max(18vh, 105px) auto 22px;
+    padding: 28px 22px 22px;
+    border-radius: 21px;
+  }
+
+  #loginScreen .cv-login-panel::before {
+    inset: 7px;
+    border-radius: 15px;
+  }
+
+  #loginScreen .cv-login-logo-wrap {
+    margin-bottom: 17px;
+  }
+
+  #loginScreen .cv-login-logo {
+    max-width: 120px;
+    max-height: 75px;
+  }
+
+  #loginScreen .cv-login-box h2 {
+    font-size: 31px;
+  }
+
+  #loginScreen .cv-login-sub {
+    margin-bottom: 23px;
+    font-size: 12px;
+  }
+
+  #loginScreen .cv-login-foot {
+    margin-top: 22px;
+    font-size: 8px;
+  }
+}
+
+@media (max-height: 700px) and (min-width: 701px) {
+  #loginScreen .cv-login-panel {
+    margin-top: 22px;
+    padding-top: 22px;
+    padding-bottom: 22px;
+  }
+
+  #loginScreen .cv-login-logo-wrap {
+    margin-bottom: 10px;
+  }
+
+  #loginScreen .cv-login-sub {
+    margin-bottom: 15px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #loginScreen .cv-login-btn {
+    transition: none;
+  }
+}
+</style>
+
+
+<style>
+/* CV_OBSIDIAN_COMMAND_CENTER_V1 */
+
+/* The login screen remains visually independent. */
+.cv-app {
+  --cv-bg: #0e1114;
+  --cv-surface: #181d21;
+  --cv-surface-raised: #20262a;
+  --cv-border: rgba(225,230,230,.11);
+  --cv-gold: #cdb68b;
+  --cv-text: #f0eee8;
+  --cv-muted: #a3a9a9;
+
+  --ink: #f0eee8;
+  --coal: #0e1114;
+  --stone: #171c20;
+  --paper: #1b2024;
+  --line: rgba(225,230,230,.12);
+  --wine: #cdb68b;
+  --wine2: #e2cda5;
+  --muted: #a3a9a9;
+
+  background:
+    radial-gradient(ellipse at 12% 0%,
+      rgba(119,133,135,.11), transparent 42%),
+    linear-gradient(150deg, #111619, #0c1013 70%);
+  color: var(--cv-text);
+  min-height: 100vh;
+  color-scheme: dark;
+}
+
+/* Main workspace */
+.cv-app .cv-main {
+  background: transparent;
+  color: var(--cv-text);
+  min-height: 100vh;
+}
+
+/* Sidebar */
+.cv-app .cv-side {
+  background:
+    radial-gradient(circle at 80% 0%,
+      rgba(194,170,127,.08), transparent 35%),
+    linear-gradient(180deg, #151a1e, #0c1013);
+  border-left: 1px solid rgba(231,219,196,.13);
+  box-shadow: -12px 0 45px rgba(0,0,0,.15);
+  scrollbar-color: #424a4c transparent;
+}
+
+.cv-app .cv-side-brand {
+  padding-bottom: 26px;
+  border-bottom: 1px solid rgba(225,230,230,.12);
+}
+
+.cv-app .cv-side .cv-wordmark b {
+  color: #f5f0e5;
+  font-size: 20px;
+  letter-spacing: 3px;
+}
+
+.cv-app .cv-side .cv-wordmark small {
+  color: var(--cv-gold);
+}
+
+.cv-app .cv-side-meta {
+  color: rgba(236,232,221,.45);
+  letter-spacing: 1.8px;
+}
+
+.cv-app .cv-nav-group {
+  margin-top: 24px;
+}
+
+.cv-app .cv-nav-label {
+  color: rgba(231,220,200,.48);
+  font-size: 9px;
+  letter-spacing: 1.7px;
+}
+
+.cv-app .cv-nav {
+  gap: 5px;
+}
+
+.cv-app .cv-nav button {
+  min-height: 45px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: rgba(239,241,238,.69);
+  background: transparent;
+  font-size: 12px;
+  transition:
+    background .2s ease,
+    color .2s ease,
+    border-color .2s ease;
+}
+
+.cv-app .cv-nav button:hover {
+  background: rgba(255,255,255,.065);
+  color: #fff;
+}
+
+.cv-app .cv-nav button.active,
+.cv-app .cv-nav button[aria-current="page"] {
+  color: #f6ead3;
+  background: linear-gradient(
+    100deg,
+    rgba(199,172,126,.18),
+    rgba(199,172,126,.055)
+  );
+  border-color: rgba(210,186,146,.22);
+}
+
+.cv-app .cv-nav button.active::before {
+  background: var(--cv-gold);
+  width: 3px;
+  border-radius: 3px;
+}
+
+.cv-app .cv-nav-no {
+  color: #c8b28a;
+}
+
+/* Top header */
+.cv-app .cv-top {
+  min-height: 80px;
+  height: auto;
+  padding: 13px 22px;
+  margin-bottom: 24px;
+  border: 1px solid var(--cv-border);
+  border-radius: 16px;
+  background: linear-gradient(
+    135deg,
+    rgba(35,42,46,.9),
+    rgba(20,25,29,.84)
+  );
+  box-shadow: 0 12px 35px rgba(0,0,0,.14);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+}
+
+.cv-app .cv-top-kicker {
+  color: var(--cv-gold);
+  font-size: 9px;
+  letter-spacing: 2px;
+}
+
+.cv-app #pageTitle {
+  color: #f6f3ec;
+  letter-spacing: -.5px;
+}
+
+.cv-app .cv-user-copy strong {
+  color: #f5f2ea;
+}
+
+.cv-app .cv-user-copy span {
+  color: var(--cv-gold);
+}
+
+.cv-app .cv-avatar {
+  background: linear-gradient(145deg, #d6c19a, #927a54);
+  color: #111619;
+  border-radius: 12px;
+}
+
+.cv-app .cv-logout-button {
+  border-radius: 10px;
+  border-color: rgba(235,228,212,.18);
+  color: #eee8db;
+  background: rgba(255,255,255,.035);
+}
+
+/* Command Center hero */
+.cv-app .cv-hero {
+  min-height: 310px;
+  padding: clamp(25px, 3vw, 44px);
+  border: 1px solid rgba(214,192,154,.24);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 8% 10%,
+      rgba(198,170,121,.14), transparent 38%),
+    radial-gradient(circle at 90% 90%,
+      rgba(104,132,138,.15), transparent 40%),
+    linear-gradient(135deg, #232a2d, #12181c);
+  box-shadow: 0 24px 55px rgba(0,0,0,.18);
+  color: #f3f0e9;
+}
+
+.cv-app .cv-hero::before {
+  color: rgba(225,208,176,.045);
+}
+
+.cv-app .cv-hero-kicker {
+  color: var(--cv-gold);
+}
+
+.cv-app .cv-hero h1,
+.cv-app .cv-hero h2,
+.cv-app .cv-hero strong,
+.cv-app .cv-hero-side strong {
+  color: #f7f3e9;
+}
+
+.cv-app .cv-hero-side {
+  border-right-color: rgba(230,222,206,.16);
+}
+
+.cv-app .cv-hero-side small {
+  color: #b4b5b1;
+}
+
+.cv-app .cv-live-line {
+  border-color: rgba(230,222,206,.12);
+}
+
+/* KPI cards */
+.cv-app .cv-kpi {
+  min-height: 175px;
+  border: 1px solid var(--cv-border);
+  border-radius: 16px;
+  background:
+    linear-gradient(150deg, #252c30, #191f23);
+  color: #f4f1ea;
+  box-shadow: 0 10px 28px rgba(0,0,0,.12);
+}
+
+.cv-app .cv-kpi:hover {
+  transform: translateY(-3px);
+  border-color: rgba(205,182,139,.34);
+  box-shadow: 0 18px 38px rgba(0,0,0,.2);
+}
+
+.cv-app .cv-kpi strong,
+.cv-app .cv-kpi b {
+  color: #f6f2e9;
+}
+
+.cv-app .cv-kpi small,
+.cv-app .cv-kpi span {
+  color: #b5b8b5;
+}
+
+/* Main content panels */
+.cv-app .cv-panel,
+.cv-app .cv-mini {
+  border: 1px solid var(--cv-border);
+  border-radius: 16px;
+  background:
+    linear-gradient(155deg, #20272b, #171d21);
+  color: #eeeae1;
+  box-shadow: 0 12px 32px rgba(0,0,0,.11);
+}
+
+.cv-app .cv-panel-head {
+  border-bottom-color: rgba(234,231,221,.12);
+}
+
+.cv-app .cv-panel-head h3,
+.cv-app .cv-mini h3 {
+  color: #f5f1e8;
+}
+
+.cv-app .cv-mini > p,
+.cv-app .cv-pulse span,
+.cv-app .cv-agent small {
+  color: #aeb5b3;
+}
+
+.cv-app .cv-pulse,
+.cv-app .cv-agent {
+  border-color: rgba(234,231,221,.1);
+}
+
+.cv-app .cv-pulse strong,
+.cv-app .cv-agent strong {
+  color: #f2eee6;
+}
+
+.cv-app .cv-agent-icon {
+  border-radius: 10px;
+  background: #30383b;
+  color: #e6d1a8;
+}
+
+.cv-app .cv-ai-panel {
+  background:
+    radial-gradient(circle at 90% 0%,
+      rgba(199,170,120,.13), transparent 45%),
+    linear-gradient(145deg, #272a2b, #111517);
+  border-color: rgba(208,181,135,.25);
+}
+
+/* Shared workspace controls */
+.cv-app input,
+.cv-app select,
+.cv-app textarea {
+  accent-color: #cdb68b;
+}
+
+.cv-app button:focus-visible,
+.cv-app a:focus-visible,
+.cv-app input:focus-visible,
+.cv-app select:focus-visible,
+.cv-app textarea:focus-visible {
+  outline: 2px solid #e4cda3;
+  outline-offset: 3px;
+}
+
+/* Mobile: preserve existing menu logic */
+@media (max-width: 760px) {
+  .cv-app .cv-main {
+    padding-left: 14px;
+    padding-right: 14px;
+    padding-bottom: max(28px, env(safe-area-inset-bottom));
+  }
+
+  .cv-app .cv-top {
+    min-height: 65px;
+    padding: 12px 14px;
+    border-radius: 13px;
+  }
+
+  .cv-app .cv-hero {
+    min-height: 0;
+    padding: 24px 19px;
+    border-radius: 15px;
+  }
+
+  .cv-app .cv-kpi,
+  .cv-app .cv-panel,
+  .cv-app .cv-mini {
+    border-radius: 13px;
+  }
+
+  .cv-app .cv-mobile-menu-btn {
+    border-radius: 11px;
+    background: #252d31;
+    color: #f0dfbc;
+    border: 1px solid rgba(205,182,139,.3);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cv-app .cv-nav button,
+  .cv-app .cv-kpi {
+    transition: none;
+  }
+
+  .cv-app .cv-kpi:hover {
+    transform: none;
+  }
+}
+</style>
+
+
+<style>
+/* CV_EXECUTIVE_REFINEMENT_V2 */
+
+/* Executive workspace */
+.cv-app .cv-main {
+  background:
+    radial-gradient(
+      ellipse at 35% -15%,
+      rgba(145,169,172,.10),
+      transparent 55%
+    ),
+    #0e1215;
+}
+
+.cv-app .cv-main::selection {
+  background: #bfa678;
+  color: #111619;
+}
+
+/* Premium navigation */
+.cv-app .cv-side {
+  padding: 30px 17px 28px;
+  background:
+    radial-gradient(
+      circle at 50% -8%,
+      rgba(209,183,134,.13),
+      transparent 32%
+    ),
+    linear-gradient(180deg,#1a2024,#0b0f12);
+}
+
+.cv-app .cv-side-brand {
+  padding: 8px 12px 27px;
+}
+
+.cv-app .cv-side .cv-wordmark b {
+  font-family: Georgia,serif;
+  font-weight: 400;
+  font-size: 22px;
+  letter-spacing: 3.2px;
+}
+
+.cv-app .cv-nav-group {
+  margin-top: 28px;
+}
+
+.cv-app .cv-nav-label {
+  margin-bottom: 7px;
+  color: #bca987;
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.cv-app .cv-nav button {
+  position: relative;
+  min-height: 47px;
+  padding: 11px 13px;
+  border-radius: 11px;
+  letter-spacing: .1px;
+}
+
+.cv-app .cv-nav button.active {
+  background:
+    linear-gradient(
+      110deg,
+      rgba(214,188,142,.23),
+      rgba(214,188,142,.035)
+    );
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 8px 20px rgba(0,0,0,.11);
+}
+
+.cv-app .cv-nav button.active .cv-nav-name {
+  color: #f5e8ce;
+  font-weight: 650;
+}
+
+.cv-app .cv-nav-no {
+  color: #c5af87;
+  font-size: 10px;
+}
+
+.cv-app .cv-side .cv-push-card {
+  border-radius: 13px;
+  border-color: rgba(214,188,142,.2);
+}
+
+/* Hero */
+.cv-app #dashboard .cv-hero {
+  border-radius: 22px;
+  background:
+    radial-gradient(
+      ellipse at 0 0,
+      rgba(207,178,126,.19),
+      transparent 43%
+    ),
+    radial-gradient(
+      ellipse at 100% 100%,
+      rgba(93,135,149,.20),
+      transparent 46%
+    ),
+    linear-gradient(135deg,#2a3033,#111619);
+  box-shadow:
+    0 25px 65px rgba(0,0,0,.23),
+    inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+.cv-app #dashboard .cv-hero h1 {
+  color: #f8f4eb;
+}
+
+.cv-app #dashboard .cv-hero h1 em {
+  color: #e2c99c;
+}
+
+.cv-app #dashboard .cv-hero p {
+  color: #c4c7c3;
+  line-height: 1.9;
+}
+
+/* Quick-access cards: overrides old inline light backgrounds */
+.cv-app #cvQuickAccess {
+  margin-top: 30px !important;
+  margin-bottom: 32px !important;
+}
+
+.cv-app #cvQuickAccess h2 {
+  color: #f5f2ea;
+  font-weight: 500;
+  letter-spacing: -.5px;
+}
+
+.cv-app #cvQuickAccess > div:first-child > div > div {
+  color: #d7bd8c !important;
+}
+
+.cv-app #cvQuickAccess > div:first-child > span {
+  color: #b5b9b6 !important;
+}
+
+.cv-app #cvQuickAccess > div:nth-child(2) > a,
+.cv-app #cvQuickAccess > div:nth-child(2) > div {
+  position: relative;
+  overflow: hidden;
+  min-height: 185px;
+  box-sizing: border-box;
+  padding: 23px !important;
+  border: 1px solid rgba(222,207,178,.16) !important;
+  border-radius: 18px !important;
+  background:
+    radial-gradient(
+      circle at 100% 0,
+      rgba(208,181,137,.12),
+      transparent 46%
+    ),
+    linear-gradient(
+      145deg,#252c30,#171d21
+    ) !important;
+  color: #f4f1e9 !important;
+  box-shadow:
+    0 14px 32px rgba(0,0,0,.14),
+    inset 0 1px 0 rgba(255,255,255,.07);
+  transition:
+    transform .22s ease,
+    border-color .22s ease,
+    box-shadow .22s ease;
+}
+
+.cv-app #cvQuickAccess > div:nth-child(2) > a:hover {
+  transform: translateY(-4px);
+  border-color: rgba(221,191,142,.52) !important;
+  box-shadow: 0 22px 45px rgba(0,0,0,.24);
+}
+
+.cv-app #cvQuickAccess > div:nth-child(2) strong {
+  color: #fffaf0 !important;
+  font-size: 17px;
+}
+
+.cv-app #cvQuickAccess > div:nth-child(2) small {
+  color: #bdc3c1 !important;
+  font-size: 12px;
+}
+
+.cv-app #cvQuickAccess > div:nth-child(2) > * > span:last-child {
+  color: #d7bd8c !important;
+}
+
+/* Dashboard KPI typography */
+.cv-app #dashboard .cv-kpi {
+  border-radius: 18px;
+  background:
+    radial-gradient(
+      circle at 100% 0,
+      rgba(207,180,132,.10),
+      transparent 52%
+    ),
+    linear-gradient(150deg,#252d31,#151b1f);
+}
+
+.cv-app #dashboard .cv-kpi-value {
+  color: #fff9ed;
+  font-variant-numeric: tabular-nums;
+}
+
+.cv-app #dashboard .cv-kpi-title {
+  color: #e7e6df;
+}
+
+.cv-app #dashboard .cv-kpi-head,
+.cv-app #dashboard .cv-kpi-foot {
+  color: #b6bcb9;
+}
+
+.cv-app #dashboard .cv-kpi-no {
+  color: #ddc395;
+}
+
+/* Panels */
+.cv-app #dashboard .cv-panel,
+.cv-app #dashboard .cv-mini {
+  background:
+    linear-gradient(155deg,#222a2e,#151b1f);
+  border-color: rgba(224,214,195,.14);
+  box-shadow: 0 15px 36px rgba(0,0,0,.13);
+}
+
+.cv-app #dashboard .cv-panel-head small {
+  color: #d4b987;
+}
+
+.cv-app #dashboard .cv-pulse button {
+  color: #dfc597;
+}
+
+.cv-app #dashboard .cv-ai-panel {
+  background:
+    radial-gradient(
+      circle at 95% 0,
+      rgba(202,174,128,.16),
+      transparent 45%
+    ),
+    linear-gradient(145deg,#292e30,#101517);
+}
+
+/* Leads: fix prominent legacy white surfaces */
+.cv-app .cv-leads-kpi,
+.cv-app .cv-leads-shell,
+.cv-app .cv-leads-search,
+.cv-app .cv-lead-modal,
+.cv-app .cv-lead-modal-grid article {
+  background: #20272b;
+  border-color: rgba(225,220,208,.14);
+  color: #f0eee8;
+}
+
+.cv-app .cv-leads-kpi small,
+.cv-app .cv-lead-modal-grid p {
+  color: #b8bfbc;
+}
+
+.cv-app .cv-leads-toolbar select,
+.cv-app .cv-leads-toolbar button {
+  background: #262e32;
+  color: #f3f0e8;
+  border-color: rgba(225,220,208,.18);
+}
+
+.cv-app .cv-leads-search input {
+  background: transparent;
+  color: #f3f0e8;
+}
+
+.cv-app .cv-leads-search input::placeholder {
+  color: #aeb7b4;
+}
+
+.cv-app .cv-lead-modal-x {
+  background: #30383c;
+  color: #f5f1e9;
+  border-color: rgba(225,220,208,.18);
+}
+
+/* General modules */
+.cv-app .cv-module:not(.dark) {
+  background: #20272b;
+  border-color: rgba(225,220,208,.14);
+  color: #f3f0e8;
+}
+
+.cv-app .cv-module:not(.dark) strong,
+.cv-app .cv-module:not(.dark) h3 {
+  color: #f3f0e8;
+}
+
+/* Mobile refinements */
+@media (max-width: 760px) {
+  .cv-app #cvQuickAccess > div:nth-child(2) > a,
+  .cv-app #cvQuickAccess > div:nth-child(2) > div {
+    min-height: 155px;
+    padding: 18px !important;
+  }
+
+  .cv-app #dashboard .cv-hero {
+    border-radius: 16px;
+  }
+
+  .cv-app .cv-side {
+    box-shadow: -20px 0 55px rgba(0,0,0,.48);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cv-app #cvQuickAccess > div:nth-child(2) > a {
+    transition: none;
+  }
+
+  .cv-app #cvQuickAccess > div:nth-child(2) > a:hover {
+    transform: none;
+  }
+}
+</style>
+
+<style>
+
+/* CV_CHAMPAGNE_NOIR_DASHBOARD_V1_START */
+
+:root {
+  --cn-bg: #090a0a;
+  --cn-surface: #131414;
+  --cn-surface-2: #1a1b1a;
+  --cn-ivory: #f3efe7;
+  --cn-muted: #aaa69d;
+  --cn-champagne: #d8bd91;
+  --cn-line: rgba(216,189,145,.17);
+}
+
+.cv-app {
+  background:
+    radial-gradient(ellipse at 73% 0%,
+      rgba(216,189,145,.075), transparent 37%),
+    radial-gradient(ellipse at 15% 75%,
+      rgba(255,255,255,.025), transparent 42%),
+    var(--cn-bg) !important;
+  color: var(--cn-ivory) !important;
+}
+
+.cv-app .cv-main {
+  color: var(--cn-ivory) !important;
+}
+
+.cv-app .cv-side {
+  background:
+    linear-gradient(155deg,
+      rgba(29,29,27,.98),
+      rgba(9,10,10,.99)) !important;
+  border-left: 1px solid var(--cn-line) !important;
+  box-shadow: -16px 0 70px rgba(0,0,0,.25);
+}
+
+.cv-app .cv-top {
+  background: rgba(13,14,14,.88) !important;
+  border-bottom: 1px solid var(--cn-line) !important;
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+}
+
+.cv-app #dashboard .cv-hero {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 85% 15%,
+      rgba(216,189,145,.16), transparent 36%),
+    linear-gradient(120deg,
+      #20201d 0%, #101111 53%, #0b0c0c 100%) !important;
+  border: 1px solid rgba(216,189,145,.24) !important;
+  border-radius: 25px !important;
+  box-shadow:
+    0 25px 75px rgba(0,0,0,.27),
+    inset 0 1px rgba(255,255,255,.055) !important;
+}
+
+.cv-app #dashboard .cv-hero::after {
+  content: "";
+  position: absolute;
+  width: 280px;
+  height: 280px;
+  left: -110px;
+  top: -140px;
+  border-radius: 50%;
+  border: 1px solid rgba(216,189,145,.14);
+  box-shadow:
+    0 0 0 38px rgba(216,189,145,.025),
+    0 0 0 78px rgba(216,189,145,.018);
+  pointer-events: none;
+}
+
+.cv-app #dashboard .cv-hero h1,
+.cv-app #dashboard .cv-hero h2,
+.cv-app #dashboard .cv-hero strong {
+  color: var(--cn-ivory) !important;
+}
+
+.cv-app #dashboard .cv-hero p,
+.cv-app #dashboard .cv-hero small {
+  color: #c4beb3 !important;
+}
+
+/* Studio / Marketing / AI / Sales */
+
+.cv-app #cvQuickAccess {
+  gap: 14px !important;
+}
+
+.cv-app #cvQuickAccess > * {
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(145deg,
+      rgba(38,38,35,.98),
+      rgba(17,18,18,.99)) !important;
+  border: 1px solid rgba(216,189,145,.22) !important;
+  border-radius: 21px !important;
+  box-shadow:
+    0 16px 38px rgba(0,0,0,.2),
+    inset 0 1px rgba(255,255,255,.065) !important;
+  color: var(--cn-ivory) !important;
+  transition:
+    transform .25s ease,
+    border-color .25s ease,
+    box-shadow .25s ease !important;
+}
+
+.cv-app #cvQuickAccess > *::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 85% 0%,
+    rgba(216,189,145,.105),
+    transparent 54%
+  );
+  pointer-events: none;
+}
+
+.cv-app #cvQuickAccess > *:hover {
+  transform: translateY(-4px);
+  border-color: rgba(216,189,145,.53) !important;
+  box-shadow:
+    0 24px 50px rgba(0,0,0,.32),
+    0 0 25px rgba(216,189,145,.045) !important;
+}
+
+.cv-app #cvQuickAccess > * *,
+.cv-app #cvQuickAccess > * h3,
+.cv-app #cvQuickAccess > * strong {
+  color: var(--cn-ivory) !important;
+}
+
+.cv-app #cvQuickAccess > * p,
+.cv-app #cvQuickAccess > * small {
+  color: #bdb6aa !important;
+}
+
+/* Business metrics */
+
+.cv-app #dashboard .cv-kpis > *,
+.cv-app #dashboard .cv-grid .cv-panel,
+.cv-app #dashboard .cv-lower .cv-mini {
+  background:
+    linear-gradient(155deg,
+      rgba(28,29,28,.97),
+      rgba(15,16,16,.99)) !important;
+  border: 1px solid rgba(216,189,145,.17) !important;
+  border-radius: 20px !important;
+  color: var(--cn-ivory) !important;
+  box-shadow:
+    0 12px 34px rgba(0,0,0,.16),
+    inset 0 1px rgba(255,255,255,.045) !important;
+}
+
+.cv-app #dashboard .cv-kpis > * {
+  transition: border-color .2s, transform .2s;
+}
+
+.cv-app #dashboard .cv-kpis > *:hover {
+  border-color: rgba(216,189,145,.45) !important;
+  transform: translateY(-2px);
+}
+
+.cv-app #dashboard .cv-kpis strong,
+.cv-app #dashboard .cv-kpis .value,
+.cv-app #dashboard .cv-kpis .num {
+  color: var(--cn-ivory) !important;
+}
+
+.cv-app #dashboard .cv-kpis small,
+.cv-app #dashboard .cv-kpis .label {
+  color: var(--cn-muted) !important;
+}
+
+.cv-app #dashboard .cv-panel h2,
+.cv-app #dashboard .cv-panel h3,
+.cv-app #dashboard .cv-mini h3 {
+  color: var(--cn-ivory) !important;
+}
+
+.cv-app #dashboard .cv-panel p,
+.cv-app #dashboard .cv-mini p {
+  color: #b9b4aa !important;
+}
+
+/* Champagne navigation accents */
+
+.cv-app .cv-side button.active,
+.cv-app .cv-side [aria-current="page"] {
+  background:
+    linear-gradient(90deg,
+      rgba(216,189,145,.18),
+      rgba(216,189,145,.045)) !important;
+  border-color: rgba(216,189,145,.35) !important;
+  color: #f3e5ce !important;
+}
+
+.cv-app .cv-side button:hover {
+  background: rgba(216,189,145,.075) !important;
+}
+
+.cv-app button:focus-visible,
+.cv-app a:focus-visible {
+  outline: 2px solid var(--cn-champagne);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cv-app #cvQuickAccess > *,
+  .cv-app #dashboard .cv-kpis > * {
+    transition: none !important;
+  }
+}
+
+/* CV_CHAMPAGNE_NOIR_DASHBOARD_V1_END */
+
+</style>
+
+
+
+
+
+<style id="cvNativeStudioStyles">
+.cv-native-studio {
+  color:#f3efe7;
+  padding-bottom:40px;
+}
+
+.cv-native-studio-header {
+  padding:30px;
+  margin-bottom:22px;
+  border:1px solid rgba(216,189,145,.22);
+  border-radius:22px;
+  background:linear-gradient(130deg,#29251f,#111211);
+}
+
+.cv-native-studio-header span {
+  color:#d8bd91;
+  font-size:10px;
+  letter-spacing:2px;
+}
+
+.cv-native-studio-header h1 {
+  margin:10px 0;
+  color:#f3efe7;
+  font-size:32px;
+}
+
+.cv-native-studio-header p {
+  color:#bcb5aa;
+  margin:0;
+}
+
+.cv-native-studio-content {
+  min-width:0;
+}
+
+
+:root{
+  --ink:#0c0c0b;
+  --coal:#090909;
+  --stone:#f2f0e9;
+  --paper:#fbfaf6;
+  --line:#d9d6ce;
+  --wine:#6f1d2c;
+  --muted:#74716a;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--stone);color:var(--ink)}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.cv-native-studio .layout{display:flex;min-height:100vh}
+.sidebar{
+ width:265px;background:var(--coal);color:white;
+ padding:30px 20px;flex-shrink:0
+}
+.brand{font:400 24px Georgia,serif;letter-spacing:2px}
+.brand small{display:block;font:10px Arial,sans-serif;color:#d49ba5;letter-spacing:2px;margin-top:10px}
+.nav{margin-top:45px;display:grid;gap:10px}
+.nav a{color:#bbb;text-decoration:none;padding:14px;border-right:2px solid transparent}
+.nav a.active{color:white;background:#1b1b1b;border-color:var(--wine)}
+.cv-native-studio .main{flex:1;padding:35px;min-width:0}
+.cv-native-studio .content{max-width:1250px;margin:auto}
+.kicker{font:10px Georgia,serif;color:var(--wine);letter-spacing:2px}
+h1{font:400 clamp(30px,4vw,44px) Georgia,serif;margin:12px 0}
+h2{font:400 24px Georgia,serif}
+p{color:var(--muted);line-height:1.7}
+.cv-native-studio .header{display:flex;justify-content:space-between;align-items:center;gap:20px}
+.cv-native-studio .primary{border:0;background:var(--coal);color:white;padding:15px 23px}
+.cv-native-studio .primary:hover{background:var(--wine)}
+.cv-native-studio .hero{
+ background:linear-gradient(120deg,#fbfaf6,#e5e1d8);
+ border:1px solid var(--line);
+ padding:32px;margin:25px 0
+}
+.cv-native-studio .hero h2{font-size:31px}
+.cv-native-studio .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.cv-native-studio .stat,.cv-native-studio .panel,.cv-native-studio .project{
+ background:white;border:1px solid var(--line);padding:23px
+}
+.cv-native-studio .stat strong{display:block;font:400 30px Georgia,serif;margin-top:14px}
+.cv-native-studio .stat span{color:var(--muted);font-size:12px}
+.cv-native-studio .section{margin-top:35px}
+.section-head{display:flex;justify-content:space-between;align-items:center}
+.cv-native-studio .projects{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.cv-native-studio .project h3{font:400 23px Georgia,serif;margin:10px 0}
+.status{font-size:11px;color:var(--wine)}
+.cv-native-studio .project button{
+ margin-top:12px;background:transparent;border:1px solid var(--line);
+ padding:10px 14px
+}
+.cv-native-studio .project button:hover{border-color:var(--wine)}
+.cv-native-studio .empty{padding:38px;text-align:center;background:#fff;border:1px dashed var(--line)}
+.cv-native-studio .form{display:none;margin:20px 0}
+.cv-native-studio .form.visible{display:block}
+.cv-native-studio .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+label{display:block;font-size:12px;margin:12px 0 7px}
+input,select{
+ width:100%;padding:14px;border:1px solid var(--line);
+ background:var(--paper);color:var(--ink)
+}
+.form-actions{margin-top:20px}
+.note{font-size:11px;color:var(--muted);margin-top:22px}
+@media(max-width:850px){
+ .cv-native-studio .layout{display:block}
+ .sidebar{width:100%;padding:20px}
+ .nav{margin-top:15px;display:flex;overflow:auto}
+ .cv-native-studio .main{padding:18px}
+ .cv-native-studio .header{align-items:flex-start;flex-direction:column}
+ .cv-native-studio .stats,.cv-native-studio .projects,.cv-native-studio .form-grid{grid-template-columns:1fr}
+}
+
+/* CASA VERONA CREATIVE OS — PREMIUM THEME V1 */
+:root{
+  --ink:#f4f0e8;
+  --coal:#080b11;
+  --stone:#090c12;
+  --paper:#141a25;
+  --line:#2a303c;
+  --wine:#c9aa79;
+  --muted:#919baa;
+  color-scheme:dark;
+}
+html{scroll-behavior:smooth}
+body{
+  color:var(--ink);
+  background:
+    radial-gradient(ellipse at 75% 0%,rgba(71,83,112,.20),transparent 38%),
+    radial-gradient(ellipse at 12% 70%,rgba(145,113,66,.07),transparent 40%),
+    #090c12;
+}
+.sidebar{
+  width:275px;
+  background:linear-gradient(180deg,#0c1018,#080a0f);
+  border-left:1px solid rgba(201,170,121,.13);
+  padding:40px 22px;
+  position:sticky;
+  top:0;
+  height:100vh;
+}
+.brand{
+  font-size:24px;
+  color:#f6f0e4;
+  letter-spacing:3px;
+}
+.brand small{
+  color:#bda17a;
+  letter-spacing:2.5px;
+  font-size:9px;
+}
+.nav{gap:8px;margin-top:60px}
+.nav a{
+  color:#9299a7;
+  border:1px solid transparent;
+  border-radius:12px;
+  padding:15px 16px;
+  transition:.25s ease;
+}
+.nav a:hover{
+  background:#171d28;
+  color:#fff;
+}
+.nav a.active{
+  color:#f0d5a7;
+  background:linear-gradient(90deg,rgba(201,170,121,.12),rgba(201,170,121,.025));
+  border-color:rgba(201,170,121,.19);
+  box-shadow:inset 3px 0 0 #c9aa79;
+}
+.cv-native-studio .main{padding:54px clamp(20px,4vw,70px)}
+.cv-native-studio .content{max-width:1480px}
+.kicker{
+  font:600 10px Arial,sans-serif;
+  color:#c9aa79;
+  letter-spacing:3px;
+  text-transform:uppercase;
+}
+h1,h2,h3{color:#f7f3eb}
+h1{
+  font-size:clamp(34px,4vw,58px);
+  letter-spacing:-1px;
+  line-height:1.15;
+}
+h2{font-size:27px}
+p{color:#9da6b4}
+.cv-native-studio .header{padding:10px 0 20px}
+.cv-native-studio .primary{
+  color:#15120c;
+  font-weight:700;
+  border:1px solid #ddc294;
+  border-radius:12px;
+  background:linear-gradient(135deg,#f0d8ad,#b99762);
+  box-shadow:0 10px 32px rgba(178,137,75,.13);
+  transition:transform .2s,box-shadow .2s,filter .2s;
+}
+.cv-native-studio .primary:hover{
+  background:linear-gradient(135deg,#f7e5c4,#cba66e);
+  box-shadow:0 14px 40px rgba(178,137,75,.25);
+  transform:translateY(-2px);
+}
+.cv-native-studio .hero{
+  position:relative;
+  overflow:hidden;
+  min-height:235px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding:42px;
+  margin:28px 0;
+  border:1px solid rgba(201,170,121,.23);
+  border-radius:22px;
+  background:
+    radial-gradient(circle at 80% 35%,rgba(201,170,121,.15),transparent 28%),
+    radial-gradient(circle at 20% 100%,rgba(73,99,148,.16),transparent 42%),
+    linear-gradient(125deg,#181e2a,#0c1018 72%);
+  box-shadow:0 25px 65px rgba(0,0,0,.22);
+}
+.cv-native-studio .hero:after{
+  content:"AI / CREATIVE INTELLIGENCE";
+  position:absolute;
+  bottom:20px;
+  left:26px;
+  color:rgba(201,170,121,.33);
+  font:10px Arial,sans-serif;
+  letter-spacing:3px;
+  pointer-events:none;
+}
+.cv-native-studio .hero h2{
+  font-size:clamp(30px,3.5vw,43px);
+  margin:16px 0 8px;
+}
+.cv-native-studio .hero p{max-width:650px}
+.cv-native-studio .stats{gap:18px}
+.cv-native-studio .stat,.cv-native-studio .panel,.cv-native-studio .project{
+  background:linear-gradient(150deg,rgba(27,34,47,.96),rgba(14,19,28,.98));
+  border:1px solid rgba(149,162,184,.15);
+  border-radius:18px;
+  box-shadow:0 16px 40px rgba(0,0,0,.13);
+}
+.cv-native-studio .stat{
+  padding:27px;
+  position:relative;
+  overflow:hidden;
+}
+.cv-native-studio .stat:before{
+  content:"";
+  position:absolute;
+  top:0;right:0;
+  width:65px;height:2px;
+  background:linear-gradient(90deg,transparent,#c9aa79);
+}
+.cv-native-studio .stat strong{
+  font-family:Arial,sans-serif;
+  font-weight:300;
+  font-size:40px;
+  color:#f3e2c5;
+}
+.cv-native-studio .stat span{color:#9da6b4}
+.cv-native-studio .section{margin-top:45px}
+.section-head{margin-bottom:18px}
+.cv-native-studio .projects{gap:20px}
+.cv-native-studio .project{
+  padding:26px;
+  transition:border-color .2s,transform .2s,box-shadow .2s;
+}
+.cv-native-studio .project:hover{
+  border-color:rgba(201,170,121,.35);
+  transform:translateY(-3px);
+  box-shadow:0 24px 55px rgba(0,0,0,.22);
+}
+.cv-native-studio .project h3{font-size:25px}
+.status{color:#d8bc8e}
+.cv-native-studio .project button{
+  background:#1c2533;
+  color:#f1ede6;
+  border:1px solid #354052;
+  border-radius:11px;
+  transition:.2s;
+}
+.cv-native-studio .project button:hover{
+  background:#293447;
+  border-color:#c9aa79;
+}
+.cv-native-studio .project button:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
+.cv-native-studio .project .cv-creative-result{
+  background:linear-gradient(145deg,#111823,#1a202b);
+  border:1px solid rgba(201,170,121,.28)!important;
+  border-radius:16px!important;
+  padding:22px!important;
+  color:#e9e8e4;
+  line-height:1.8;
+}
+.cv-native-studio .empty{
+  background:#121824;
+  color:#a7afbb;
+  border:1px dashed #394253;
+  border-radius:16px;
+}
+.cv-native-studio .form{margin:26px 0}
+.cv-native-studio .form-grid{gap:20px}
+label{color:#b8c0ce;font-weight:600}
+input,select,textarea{
+  background:#0e1520!important;
+  color:#f2eee6!important;
+  border:1px solid #354052!important;
+  border-radius:12px!important;
+  outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+input:focus,select:focus,textarea:focus{
+  border-color:#c9aa79!important;
+  box-shadow:0 0 0 3px rgba(201,170,121,.12);
+}
+input::placeholder,textarea::placeholder{color:#788395}
+#cvMediaUpload>div{
+  background:#101722!important;
+  border-color:#485366!important;
+}
+#cvMediaUpload p,#cvMediaStatus{color:#aeb6c3!important}
+#cvBackToDashboard{
+  background:#151b26!important;
+  color:#ead5b1!important;
+  border:1px solid #64543e!important;
+  box-shadow:0 10px 32px rgba(0,0,0,.3)!important;
+}
+.note{color:#8993a3}
+@media(max-width:850px){
+  .sidebar{
+    width:100%;
+    height:auto;
+    position:relative;
+    padding:20px;
+  }
+  .nav{margin-top:18px}
+  .cv-native-studio .main{padding:25px 16px}
+  .cv-native-studio .hero{padding:28px 22px;min-height:220px}
+  .cv-native-studio .stats,.cv-native-studio .projects,.cv-native-studio .form-grid{grid-template-columns:1fr}
+  #cvBackToDashboard{
+    position:static!important;
+    display:inline-flex!important;
+    margin:12px!important;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  *,*:before,*:after{
+    animation-duration:.01ms!important;
+    transition-duration:.01ms!important;
+  }
+}
+
+
+</style>
 </head>
 <body>
 
@@ -826,7 +2732,7 @@ body.cv-role-factory-owner #cvFactoryOwnerNav button{
     </main>
     <footer class="cv-login-foot">
   <span>CASA VERONA · 2026</span>
-  <strong>זכיתם לעבוד בחברה הטובה בשוק!!!</strong>
+  <strong>DESIGNED TO LEAD · BUILT TO LAST</strong>
   <small>PRIVATE OPERATING SYSTEM</small>
 </footer>
   </div>
@@ -843,6 +2749,8 @@ body.cv-role-factory-owner #cvFactoryOwnerNav button{
 <aside class="cv-side">
 
 <!-- CASA VERONA — FACTORY OWNER NAV -->
+
+
 <div id="cvFactoryOwnerNav" style="display:none;">
 
   <div class="cv-side-brand">
@@ -860,17 +2768,17 @@ body.cv-role-factory-owner #cvFactoryOwnerNav button{
 
       <button data-page="factory-home">
         <span class="cv-nav-no">00</span>
-        <span class="cv-nav-name">ראשי</span>
+        <span class="cv-nav-name">מרכז המפעל</span>
       </button>
 
       <button data-page="factory-approvals">
         <span class="cv-nav-no">01</span>
-        <span class="cv-nav-name">אישור הזמנות</span>
+        <span class="cv-nav-name">אישורי הזמנות</span>
       </button>
 
       <button data-page="production">
         <span class="cv-nav-no">02</span>
-        <span class="cv-nav-name">רצפת הייצור</span>
+        <span class="cv-nav-name">ייצור</span>
       </button>
 
       <button data-page="deliveries">
@@ -880,7 +2788,7 @@ body.cv-role-factory-owner #cvFactoryOwnerNav button{
 
       <button data-page="ai-production">
         <span class="cv-nav-no">04</span>
-        <span class="cv-nav-name">Production AI</span>
+        <span class="cv-nav-name">מנהל ייצור AI</span>
       </button>
 
     </nav>
@@ -930,30 +2838,36 @@ body.cv-role-factory-owner #cvFactoryOwnerNav button{
   >🔔 שלח פוש ניסיון</button>
 </div>
 
-<div class="cv-nav-group"><span class="cv-nav-label">COMMAND</span><nav class="cv-nav">
-    <button class="active" data-page="dashboard"><span class="cv-nav-no">01</span><span class="cv-nav-name">Command Center</span></button>
+<div class="cv-nav-group"><span class="cv-nav-label">ניהול ראשי</span><nav class="cv-nav">
+    <button class="active" data-page="dashboard"><span class="cv-nav-no">01</span><span class="cv-nav-name">מרכז השליטה</span></button>
     <button data-page="leads"><span class="cv-nav-no">02</span><span class="cv-nav-name">לידים</span></button>
     <button data-page="sales"><span class="cv-nav-no">03</span><span class="cv-nav-name">מכירות</span></button>
-    <button data-page="followups"><span class="cv-nav-no">04</span><span class="cv-nav-name">Follow-Up Center</span></button>
+    <button data-page="followups"><span class="cv-nav-no">04</span><span class="cv-nav-name">מרכז המעקבים</span></button>
     <button data-page="customers"><span class="cv-nav-no">05</span><span class="cv-nav-name">לקוחות</span></button>
   </nav></div>
-  <div class="cv-nav-group"><span class="cv-nav-label">OPERATIONS</span><nav class="cv-nav">
+  <div class="cv-nav-group"><span class="cv-nav-label">תפעול והזמנות</span><nav class="cv-nav">
     <button data-page="orders"><span class="cv-nav-no">06</span><span class="cv-nav-name">הזמנות</span></button>
     <button data-page="production"><span class="cv-nav-no">07</span><span class="cv-nav-name">ייצור</span></button>
     <button data-page="deliveries"><span class="cv-nav-no">08</span><span class="cv-nav-name">אספקות</span></button>
-    <button data-page="catalog"><span class="cv-nav-no">09</span><span class="cv-nav-name">קטלוג</span></button>
+    <button data-page="catalog"><span class="cv-nav-no">09</span><span class="cv-nav-name">קטלוג מוצרים</span></button>
   </nav></div>
-  <div class="cv-nav-group"><span class="cv-nav-label">CASA VERONA AI</span><nav class="cv-nav">
-    <button data-page="ai-sales-agent"><span class="cv-nav-no">10</span><span class="cv-nav-name">AI Sales Agent</span></button>
-    <button data-page="ai-sales-coach"><span class="cv-nav-no">11</span><span class="cv-nav-name">AI Sales Coach</span></button>
+  <div class="cv-nav-group"><span class="cv-nav-label">מחלקות הבינה המלאכותית</span><nav class="cv-nav">
+    <button data-page="ai-sales-agent"><span class="cv-nav-no">10</span><span class="cv-nav-name">סוכן מכירות AI</span></button>
+    <button data-page="ai-sales-coach"><span class="cv-nav-no">11</span><span class="cv-nav-name">מאמן מכירות AI</span></button>
     <button data-page="ai-marketing"><span class="cv-nav-no">12</span><span class="cv-nav-name">יועץ השיווק</span></button>
-    <button data-page="ai-creative"><span class="cv-nav-no">13</span><span class="cv-nav-name">Creative Director</span></button>
-    <button data-page="ai-customer"><span class="cv-nav-no">14</span><span class="cv-nav-name">Customer Success</span></button>
-    <button data-page="ai-production"><span class="cv-nav-no">15</span><span class="cv-nav-name">Production AI</span></button>
-    <button data-page="ai-product-development"><span class="cv-nav-no">17</span><span class="cv-nav-name">AI Product Development</span></button>
-      <button data-page="ai-ceo"><span class="cv-nav-no">16</span><span class="cv-nav-name">CEO Brain</span></button>
+    <button data-page="ai-creative"><span class="cv-nav-no">13</span><span class="cv-nav-name">מנהל הקריאייטיב</span></button>
+
+<button data-page="ai-production-studio">
+  <span class="cv-nav-no">✦</span>
+  <span class="cv-nav-name">סטודיו הפקות AI</span>
+</button>
+
+    <button data-page="ai-customer"><span class="cv-nav-no">14</span><span class="cv-nav-name">חוויית לקוח</span></button>
+    <button data-page="ai-production"><span class="cv-nav-no">15</span><span class="cv-nav-name">מנהל ייצור AI</span></button>
+    <button data-page="ai-product-development"><span class="cv-nav-no">17</span><span class="cv-nav-name">פיתוח מוצרים AI</span></button>
+      <button data-page="ai-ceo"><span class="cv-nav-no">16</span><span class="cv-nav-name">יועץ מנכ״ל AI</span></button>
   </nav></div>
-  <div class="cv-nav-group"><span class="cv-nav-label">INTELLIGENCE</span><nav class="cv-nav"><button data-page="reports"><span class="cv-nav-no">17</span><span class="cv-nav-name">דוחות ורווחיות</span></button></nav></div>
+  <div class="cv-nav-group"><span class="cv-nav-label">מודיעין עסקי</span><nav class="cv-nav"><button data-page="reports"><span class="cv-nav-no">17</span><span class="cv-nav-name">דוחות ורווחיות</span></button></nav></div>
 </aside>
 
 <main class="cv-main">
@@ -1171,10 +3085,191 @@ body.cv-role-factory-owner #cvFactoryOwnerNav button{
 
 </section>
 
+
+
+
+
+<!-- CV_NATIVE_STUDIO_START -->
+<section id="ai-production-studio"
+         class="page cv-native-studio">
+
+  <div class="cv-native-studio-header">
+    <span>CASA VERONA / CREATIVE DIVISION</span>
+    <h1>AI Production Studio</h1>
+    <p>מחלקת הקריאייטיב וההפקות של Casa Verona</p>
+  </div>
+
+  <div class="cv-native-studio-content">
+    
+<div class="content">
+ <header class="header">
+  <div>
+   <div class="kicker">CASA VERONA / CREATIVE AGENCY</div>
+   <h1>משרד הקריאייטיב וההפקות</h1>
+   <p>הצוות מתכנן. הסטודיו מפיק. אתה מקבל החלטות.</p>
+  </div>
+  <button class="primary" id="newProject">+ פרויקט חדש</button>
+ </header>
+
+ <section class="hero" id="director">
+  <div class="kicker">AI CREATIVE DIRECTOR</div>
+  <h2>מנהל הקריאייטיב</h2>
+  <p>כאן יופיעו בהמשך רעיונות שה־AI ייזום לאחר מחקר מותגים, טרנדים וקמפיינים מובילים. כרגע המנהל עדיין לא מחובר למנוע AI.</p>
+ </section>
+
+ <section class="stats">
+  <div class="stat"><span>פרויקטים</span><strong id="projectCount">0</strong></div>
+  <div class="stat"><span>טיוטות</span><strong id="draftCount">0</strong></div>
+  <div class="stat"><span>ממתינים לאישור</span><strong id="approvalCount">0</strong></div>
+ </section>
+
+ <section class="panel form" id="projectForm">
+  <h2>פתיחת פרויקט הפקה</h2>
+  <div class="form-grid">
+   <div>
+    <label for="product">שם מוצר / דגם</label>
+    <input id="product" maxlength="100" placeholder="לדוגמה: Mon Cheri">
+   </div>
+   <div>
+    <label for="type">סוג הפקה</label>
+    <select id="type">
+     <option value="סרטון מתמונה">סרטון מתמונה</option>
+     <option value="עריכת סרטון">עריכת סרטון קיים</option>
+     <option value="פרסומת למותג">פרסומת למותג</option>
+     <option value="קרוסלה">קרוסלה</option>
+    </select>
+   </div>
+  </div>
+
+  
+<!-- CV_AUTO_PRODUCTION_PANEL_V1 -->
+<div id="cvAutoProductionPanel"
+     style="margin-top:26px;padding:24px;border:1px solid rgba(190,163,111,.35);border-radius:18px;background:rgba(20,22,26,.92);color:#f7f3eb">
+
+  <div style="font-size:11px;letter-spacing:2px;color:#d3b783;margin-bottom:10px">
+    CASA VERONA · AI PRODUCTION
+  </div>
+
+  <h3 style="margin:0 0 12px;font-size:23px">
+    הפקת פרסומת אוטומטית
+  </h3>
+
+  <p style="opacity:.75;line-height:1.7">
+    בחר 2–8 תמונות של מוצר.
+    מנוע ההפקה יהפוך אותן לסרטון אנכי עם תנועות מצלמה ומעברים.
+  </p>
+
+  <input id="cvProductionImages"
+         type="file"
+         accept="image/jpeg,image/png,image/webp"
+         multiple
+         style="display:block;margin:18px 0;max-width:100%">
+
+  <button id="cvStartAutoProduction"
+          type="button"
+          style="padding:14px 24px;border:0;border-radius:10px;background:#c9ab78;color:#181818;font-weight:700;cursor:pointer">
+    🎬 הפק פרסומת
+  </button>
+
+  <p id="cvProductionStatus"
+     role="status"
+     aria-live="polite"
+     style="margin-top:16px;color:#e1cfaa"></p>
+
+  <div id="cvProductionResult" style="margin-top:20px"></div>
+
+  <p style="font-size:12px;opacity:.55;margin-top:18px">
+    גרסת הפקה ראשונית · תמונות בלבד · ללא פרסום אוטומטי
+  </p>
+</div>
+
+<div id="cvMediaUpload" style="margin-top:22px">
+    <label for="cvMediaFile">חומרי גלם להפקה</label>
+
+    <div style="margin-top:10px;padding:24px;border:1px dashed #9c8b80;border-radius:18px;background:#fbfaf6;text-align:center">
+      <div style="font-size:30px">🎬</div>
+      <p style="font-weight:700">העלאת תמונה או סרטון</p>
+      <p style="font-size:13px;color:#666">בחר קובץ מהמכשיר שלך</p>
+
+      <input
+        type="file"
+          multiple
+        id="cvMediaFile"
+        accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm"
+        style="width:100%;max-width:350px"
+      >
+
+      <div id="cvMediaPreview" style="margin-top:18px"></div>
+      <p id="cvMediaStatus" style="font-size:13px;color:#666"></p>
+    </div>
+  </div>
+  <div class="form-actions">
+   <button class="primary" id="saveProject">יצירת טיוטה</button>
+  </div>
+  <p class="note">הפרויקט יישמר בדפדפן זה בלבד. לא תתחיל הפקת וידאו ולא תהיה הוצאה כספית.</p>
+ </section>
+
+ <section class="section" id="projects">
+  <div class="section-head"><h2>הפרויקטים שלי</h2></div>
+  <div class="projects" id="projectList"></div>
+ </section>
+
+ <section class="section" id="approvals">
+  <div class="section-head"><h2>מרכז אישורים</h2></div>
+  <div class="panel">
+   <p>כאן יוצגו בהמשך תוצרים אמיתיים לאישור. יצירת טיוטה אינה שולחת דבר לפרסום.</p>
+  </div>
+ </section>
+
+ <p class="note">סביבת פיתוח מקומית · ללא חיבור למנוע וידאו, לשרת או לפרסום</p>
+</div>
+
+  </div>
+
+</section>
+<!-- CV_NATIVE_STUDIO_END -->
+
 <section id="dashboard" class="page active">
   <div class="cv-hero">
     <div class="cv-hero-copy"><span class="cv-hero-kicker">CASA VERONA · EXECUTIVE COMMAND CENTER</span><h1 id="cvWelcomeTitle">ברוכים <em>הבאים.</em></h1><p>כל Casa Verona במסך אחד — מכירות, Follow-Ups, הזמנות, ייצור, אספקות ו־AI.</p></div>
     <div class="cv-hero-side"><small>TODAY · CASA VERONA</small><strong><span id="cvDashboardDay">—</span> · <span id="cvDashboardDate">—</span></strong><div class="cv-live-line"><span><i class="cv-live-dot"></i>מערכת</span><b>ONLINE</b></div></div>
+  </div>
+
+  <!-- CASA VERONA OS — QUICK ACCESS -->
+  <div id="cvQuickAccess" dir="rtl" style="margin:22px 0 26px">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px">
+      <div>
+        <div style="font-size:11px;letter-spacing:2px;color:#986c70;font-weight:700">CASA VERONA · WORKSPACE</div>
+        <h2 style="margin:6px 0;font-size:23px">סביבת העבודה שלך</h2>
+      </div>
+      <span style="font-size:12px;color:#777">גישה מהירה</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px">
+      <a href="/marketing/video-studio" style="text-decoration:none;color:#f8f5ef;background:linear-gradient(135deg,#241e25,#482e39);border:1px solid #80636a;border-radius:18px;padding:20px;display:block">
+        <span style="font-size:26px">🎬</span>
+        <strong style="display:block;margin:12px 0 5px;font-size:17px">סטודיו הפקות</strong>
+        <small style="color:#d4c6c8">וידאו וקריאייטיב</small>
+        <span style="display:block;margin-top:18px;color:#d9b68a;font-size:13px">כניסה לסטודיו ←</span>
+      </a>
+      <div style="background:#f7f2e9;border:1px solid #e7dcd0;border-radius:18px;padding:20px">
+        <span style="font-size:26px">📣</span>
+        <strong style="display:block;margin:12px 0 5px;font-size:17px">מפקדת השיווק</strong>
+        <small>אסטרטגיה, קמפיינים וצמיחה</small>
+        <span style="display:block;margin-top:18px;color:#907e75;font-size:12px">חיבור ישיר בקרוב</span>
+      </div>
+      <div style="background:#f7f2e9;border:1px solid #e7dcd0;border-radius:18px;padding:20px">
+        <span style="font-size:26px">🎯</span>
+        <strong style="display:block;margin:12px 0 5px;font-size:17px">מאמן המכירות</strong>
+        <small>שיחות, תרגול והמרות</small>
+        <span style="display:block;margin-top:18px;color:#907e75;font-size:12px">בפיתוח</span>
+      </div>
+      <div style="background:#f7f2e9;border:1px solid #e7dcd0;border-radius:18px;padding:20px">
+        <span style="font-size:26px">💡</span>
+        <strong style="display:block;margin:12px 0 5px;font-size:17px">פיתוח וחדשנות</strong>
+        <small>מוצרים, דגמים ורעיונות</small>
+        <span style="display:block;margin-top:18px;color:#907e75;font-size:12px">בפיתוח</span>
+      </div>
+    </div>
   </div>
   <div class="cv-kpis">
     <article class="cv-kpi"><div class="cv-kpi-head"><span class="cv-kpi-no">01</span><span>NEW LEADS</span></div><div id="cvKpiLeads" class="cv-kpi-value">—</div><div class="cv-kpi-title">לידים חדשים</div><div class="cv-kpi-foot">SALES PIPELINE</div></article>
@@ -25378,6 +27473,829 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 </script>
+
+<script>
+/* CV_CINEMATIC_DEPTH_V2 */
+(function () {
+  const screen = document.getElementById("loginScreen");
+  if (!screen) return;
+
+  const art = screen.querySelector(".cv-login-art");
+  const panel = screen.querySelector(".cv-login-panel");
+  if (!art || !panel) return;
+
+  const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const desktop = window.matchMedia("(min-width: 701px) and (pointer: fine)");
+
+  let frame = 0;
+  let px = 0;
+  let py = 0;
+
+  screen.addEventListener("pointermove", function (event) {
+    if (!desktop.matches || motion.matches) return;
+
+    px = (event.clientX / window.innerWidth - 0.5) * 2;
+    py = (event.clientY / window.innerHeight - 0.5) * 2;
+
+    if (frame) return;
+
+    frame = requestAnimationFrame(function () {
+      art.style.setProperty("--cv-x", (-px * 14).toFixed(1) + "px");
+      art.style.setProperty("--cv-y", (-py * 9).toFixed(1) + "px");
+      panel.style.setProperty("--cv-ry", (-px * 2.2).toFixed(2) + "deg");
+      panel.style.setProperty("--cv-rx", (py * 1.5).toFixed(2) + "deg");
+      frame = 0;
+    });
+  }, { passive: true });
+
+  screen.addEventListener("pointerleave", function () {
+    art.style.removeProperty("--cv-x");
+    art.style.removeProperty("--cv-y");
+    panel.style.removeProperty("--cv-ry");
+    panel.style.removeProperty("--cv-rx");
+  });
+})();
+</script>
+
+
+
+
+
+
+<script>
+if (typeof CV_PAGE_META !== "undefined") {
+  CV_PAGE_META["ai-production-studio"] =
+    ["AI Production Studio"];
+}
+</script>
+<script id="cvNativeStudioScripts">
+
+const STORAGE_KEY="cv_creative_studio_drafts_v1";
+let projects=[];
+try{
+ const stored=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");
+ if(Array.isArray(stored))projects=stored;
+}catch(error){
+ console.warn("Unable to read local drafts",error);
+}
+
+
+const CV_STUDIO_MEDIA_DB_V1 = "cv_studio_media_v1";
+
+function cvOpenMediaDB(){
+ return new Promise((resolve,reject)=>{
+  const request=indexedDB.open(CV_STUDIO_MEDIA_DB_V1,1);
+  request.onupgradeneeded=()=>{
+   const db=request.result;
+   if(!db.objectStoreNames.contains("files"))db.createObjectStore("files");
+  };
+  request.onsuccess=()=>resolve(request.result);
+  request.onerror=()=>reject(request.error);
+ });
+}
+
+async function cvSaveMedia(id,file){
+ const db=await cvOpenMediaDB();
+ try{
+  await new Promise((resolve,reject)=>{
+   const tx=db.transaction("files","readwrite");
+   tx.objectStore("files").put(file,id);
+   tx.oncomplete=resolve;
+   tx.onerror=()=>reject(tx.error);
+   tx.onabort=()=>reject(tx.error);
+  });
+ }finally{db.close();}
+}
+
+async function cvGetMedia(id){
+ const db=await cvOpenMediaDB();
+ try{
+  return await new Promise((resolve,reject)=>{
+   const tx=db.transaction("files","readonly");
+   const request=tx.objectStore("files").get(id);
+   request.onsuccess=()=>resolve(request.result);
+   request.onerror=()=>reject(request.error);
+  });
+ }finally{db.close();}
+}
+
+async function cvAttachMedia(card,project){
+ try{
+  const file=await cvGetMedia(project.id);
+  if(!card.isConnected)return;
+  if(!file){
+   const msg=document.createElement("p");
+   msg.textContent="לא נמצא קובץ מדיה שמור לפרויקט הזה";
+   msg.style.cssText="font-size:12px;color:#9b5960;margin-top:10px";
+   card.appendChild(msg);
+   return;
+  }
+  const url=URL.createObjectURL(file);
+  const media=document.createElement(file.type.startsWith("video/")?"video":"img");
+  media.src=url;
+  media.style.cssText="width:100%;max-height:240px;object-fit:contain;border-radius:12px;margin-top:12px";
+  if(media.tagName==="VIDEO"){media.controls=true;media.playsInline=true;}
+  media.addEventListener("error",()=>URL.revokeObjectURL(url),{once:true});
+  card.appendChild(media);
+ }catch(error){
+  console.warn("Media preview unavailable",error);
+ }
+}
+
+const form=document.getElementById("projectForm");
+document.getElementById("newProject").addEventListener("click",()=>{
+ form.classList.toggle("visible");
+ if(form.classList.contains("visible")){
+  document.getElementById("product").focus();
+ }
+});
+
+document.getElementById("saveProject").addEventListener("click",async()=>{
+ const product=document.getElementById("product").value.trim();
+ const type=document.getElementById("type").value;
+ if(!product){alert("יש להזין שם מוצר");return;}
+ if(projects.length>=100){alert("הגעת למגבלת הטיוטות המקומית");return;}
+
+ const fileInput=document.getElementById("cvMediaFile");
+ const selectedFile=fileInput?.files?.[0]||null;
+ const projectId=Date.now()+"-"+Math.random().toString(36).slice(2);
+ if(selectedFile){
+  try{await cvSaveMedia(projectId,selectedFile);}
+  catch(error){
+   console.error(error);
+   alert("שמירת הקובץ נכשלה. הפרויקט לא נוצר.");
+   return;
+  }
+ }
+
+ projects.unshift({
+  id:projectId,
+  product,type,status:"טיוטה",
+  createdAt:new Date().toISOString()
+ });
+
+ try{
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(projects));
+ }catch(error){
+  projects.shift();
+  alert("לא ניתן לשמור את הפרויקט בדפדפן");
+  return;
+ }
+ document.getElementById("product").value="";
+ form.classList.remove("visible");
+ render();
+});
+
+function render(){
+ const list=document.getElementById("projectList");
+ list.replaceChildren();
+ document.getElementById("projectCount").textContent=projects.length;
+ document.getElementById("draftCount").textContent=
+  projects.filter(p=>p.status==="טיוטה").length;
+ document.getElementById("approvalCount").textContent=0;
+
+ if(!projects.length){
+  const empty=document.createElement("div");
+  empty.className="empty";
+  empty.textContent="עדיין אין פרויקטים. פתח פרויקט ראשון כדי להתחיל.";
+  list.appendChild(empty);
+  return;
+ }
+
+ for(const project of projects){
+  const card=document.createElement("article");
+  card.className="project";
+  const status=document.createElement("div");
+  status.className="status";
+  status.textContent=project.status;
+  const title=document.createElement("h3");
+  title.textContent=project.product;
+  const detail=document.createElement("p");
+  detail.textContent=project.type;
+  card.append(status,title,detail);
+
+  const editButton=document.createElement("button");
+  editButton.textContent="✏️ עריכת פרויקט";
+  editButton.type="button";
+  editButton.style.cssText="margin-top:14px;padding:10px 16px;border-radius:10px;cursor:pointer";
+
+  editButton.addEventListener("click",()=>{
+   const existing=card.querySelector(".cv-project-editor");
+   if(existing){existing.remove();return;}
+
+   const editor=document.createElement("div");
+   editor.className="cv-project-editor";
+   editor.style.cssText="display:grid;gap:12px;margin-top:16px;padding:16px;border:1px solid #c5a46d;border-radius:14px";
+
+   const nameLabel=document.createElement("label");
+   nameLabel.textContent="שם הדגם";
+   const nameInput=document.createElement("input");
+   nameInput.value=project.product;
+
+   const styleLabel=document.createElement("label");
+   styleLabel.textContent="סגנון הפקה";
+   const styleSelect=document.createElement("select");
+
+   for(const style of ["יוקרתי","קולנועי","מינימליסטי","מכירתי"]){
+    const option=document.createElement("option");
+    option.value=style;
+    option.textContent=style;
+    styleSelect.appendChild(option);
+   }
+   styleSelect.value=project.style||"יוקרתי";
+
+   const promptLabel=document.createElement("label");
+   promptLabel.textContent="הוראות להפקת הסרטון";
+   const promptInput=document.createElement("textarea");
+   promptInput.rows=4;
+   promptInput.placeholder="לדוגמה: תנועת מצלמה איטית סביב הספה, תאורה טבעית ואווירה יוקרתית";
+   promptInput.value=project.prompt||"";
+
+   const saveButton=document.createElement("button");
+   saveButton.type="button";
+   saveButton.textContent="💾 שמירת שינויים";
+   saveButton.style.cssText="padding:12px;border-radius:10px;cursor:pointer";
+
+   saveButton.addEventListener("click",()=>{
+    const name=nameInput.value.trim();
+    if(!name){alert("יש להזין שם דגם");return;}
+
+    const previous={
+     product:project.product,
+     style:project.style,
+     prompt:project.prompt
+    };
+
+    project.product=name;
+    project.style=styleSelect.value;
+    project.prompt=promptInput.value;
+
+    try{
+     localStorage.setItem(STORAGE_KEY,JSON.stringify(projects));
+    }catch(error){
+     Object.assign(project,previous);
+     alert("שמירת השינויים נכשלה");
+     return;
+    }
+
+    render();
+   });
+
+   editor.append(
+    nameLabel,nameInput,
+    styleLabel,styleSelect,
+    promptLabel,promptInput,
+    saveButton
+   );
+
+   card.appendChild(editor);
+  });
+
+  card.appendChild(editButton);
+
+  const creativeButton=document.createElement("button");
+  creativeButton.type="button";
+  creativeButton.textContent="✨ מנהל הקריאייטיב";
+  creativeButton.style.cssText="margin-top:10px;padding:12px 16px;border-radius:10px;cursor:pointer;display:block;width:100%";
+
+  creativeButton.addEventListener("click",()=>{
+    const existing=card.querySelector(".cv-creative-result");
+    if(existing){existing.remove();return;}
+
+    const panel=document.createElement("div");
+    panel.className="cv-creative-result";
+    panel.style.cssText="margin-top:14px;padding:16px;border:1px solid #c5a46d;border-radius:14px";
+
+    const output=document.createElement("div");
+    output.style.whiteSpace="pre-wrap";
+
+    const status=document.createElement("div");
+    status.style.cssText="margin:10px 0;font-weight:bold";
+
+    const input=document.createElement("textarea");
+    input.placeholder="דבר עם מנהל הקריאייטיב... למשל: תציע פתיחה יותר יוקרתית";
+    input.rows=3;
+    input.style.cssText="width:100%;box-sizing:border-box;margin-top:12px;padding:10px;border-radius:10px";
+
+    const send=document.createElement("button");
+    send.type="button";
+    send.textContent="שלח למנהל הקריאייטיב";
+    send.style.cssText="margin-top:10px;padding:12px;border-radius:10px;cursor:pointer";
+
+    const approve=document.createElement("button");
+    approve.type="button";
+    approve.textContent="✓ אשר קונספט לתכנון הפקה";
+    approve.style.cssText="margin:10px 0 0 10px;padding:12px;border-radius:10px;cursor:pointer";
+
+    function save(){
+      localStorage.setItem(STORAGE_KEY,JSON.stringify(projects));
+    }
+
+    function refresh(){
+      output.textContent=project.creativeProposal||"עדיין אין הצעה. לחץ על שלח כדי לקבל שלושה רעיונות.";
+      status.textContent="סטטוס: "+(project.creativeStatus||"טרם נוצר קונספט");
+      approve.disabled=!project.creativeProposal||project.creativeStatus==="מאושר להפקה";
+    }
+
+    async function askAI(){
+      const followup=input.value.trim();
+      const previous=String(project.creativeProposal||"");
+
+      if(previous&&!followup){
+        alert("כתוב מה תרצה לשנות בהצעה.");
+        return;
+      }
+
+      const instructions=[
+        "אתה מנהל הקריאייטיב הראשי של Casa Verona.",
+        "המוצר: "+String(project.product||"לא צוין"),
+        "סוג הפרויקט: "+String(project.type||"לא צוין"),
+        "הסק אם מתאים סרטון השקה לאינסטגרם, קמפיין Meta או סטורי.",
+        "אם אין מידע מספיק, הצע את הסוג המומלץ וציין את ההנחה.",
+        "תכנן פרסומת יוקרתית עם זוויות צילום, מעברים נקיים,",
+        "קצב עריכה, אווירת מוזיקה מורשית והנעה לפעולה.",
+        "אל תמציא מאפייני מוצר או תטען שראית את תמונתו.",
+        "אל תטען שנוצר סרטון או שפורסם.",
+        previous
+          ?"הצעה קודמת:\n"+previous.slice(0,4500)
+          :"הצע שלושה קונספטים מקוריים ובחר את המומלץ.",
+        followup?"בקשת המשתמש:\n"+followup.slice(0,1500):"",
+        "ענה בעברית ברורה. אם התבקשת לשנות הצעה, החזר הצעה מעודכנת מלאה."
+      ].filter(Boolean).join("\n");
+
+      if(!confirm("לשלוח בקשת AI שעשויה להיות כרוכה בעלות, בכפוף לבקרת התקציב?")){
+        return;
+      }
+
+      send.disabled=true;
+      approve.disabled=true;
+      status.textContent="מנהל הקריאייטיב עובד על ההצעה...";
+
+      try{
+        const response=await fetch("/api/ai/marketing/consult",{
+          method:"POST",
+          credentials:"same-origin",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({messages:[{role:"user",content:instructions}]})
+        });
+
+        const data=await response.json();
+
+        if(!response.ok||!data.success||!data.answer){
+          const errors={
+            MARKETING_AI_DISABLED:"מנוע ה-AI כבוי בהגדרות.",
+            MARKETING_AI_PRICING_NOT_VERIFIED:"תמחור ה-AI עדיין לא אומת.",
+            MARKETING_AI_MONTHLY_BUDGET_REACHED:"התקציב החודשי נוצל.",
+            MARKETING_AI_RATE_LIMIT:"יותר מדי בקשות בדקה."
+          };
+          status.textContent=errors[data.error]||"בקשת AI נכשלה: "+(data.error||response.status);
+          return;
+        }
+
+        const oldProposal=project.creativeProposal;
+        const oldStatus=project.creativeStatus;
+        const oldHistory=project.creativeHistory;
+
+        project.creativeProposal=String(data.answer);
+        project.creativeStatus="ממתין לאישור";
+        project.creativeHistory=[
+          ...(Array.isArray(oldHistory)?oldHistory:[]),
+          {request:followup||"יצירת קונספט ראשוני",answer:project.creativeProposal}
+        ].slice(-10);
+
+        try{
+          save();
+        }catch(error){
+          project.creativeProposal=oldProposal;
+          project.creativeStatus=oldStatus;
+          project.creativeHistory=oldHistory;
+          status.textContent="התקבלה תשובת AI, אך לא ניתן לשמור אותה בדפדפן.";
+          output.textContent=String(data.answer);
+          return;
+        }
+
+        input.value="";
+        refresh();
+
+      }catch(error){
+        status.textContent="שגיאת חיבור. ההצעה הקודמת נשמרה.";
+      }finally{
+        send.disabled=false;
+        if(project.creativeProposal) refresh();
+      }
+    }
+
+    send.addEventListener("click",askAI);
+
+    approve.addEventListener("click",()=>{
+      const previous=project.creativeStatus;
+      project.creativeStatus="מאושר להפקה";
+      try{
+        save();
+        refresh();
+      }catch(error){
+        project.creativeStatus=previous;
+        alert("שמירת האישור נכשלה.");
+      }
+    });
+
+    panel.append(output,status,input,send,approve);
+    card.appendChild(panel);
+    refresh();
+  });
+
+  card.appendChild(creativeButton);
+
+  cvAttachMedia(card,project);
+  list.appendChild(card);
+ }
+}
+render();
+
+
+(function () {
+  const input = document.getElementById("cvMediaFile");
+  const preview = document.getElementById("cvMediaPreview");
+  const status = document.getElementById("cvMediaStatus");
+  if (!input || !preview || !status) return;
+
+  let currentUrl = null;
+
+  input.addEventListener("change", function () {
+    preview.replaceChildren();
+    status.textContent = "";
+
+    if (currentUrl) {
+      URL.revokeObjectURL(currentUrl);
+      currentUrl = null;
+    }
+
+    const file = input.files && input.files[0];
+    if (!file) return;
+
+    const allowed = [
+      "image/jpeg", "image/png", "image/webp",
+      "video/mp4", "video/quicktime", "video/webm"
+    ];
+
+    if (!allowed.includes(file.type)) {
+      status.textContent = "סוג הקובץ אינו נתמך";
+      input.value = "";
+      return;
+    }
+
+    const maxSize = 100 * 1024 * 1024;
+    if (file.size > maxSize) {
+      status.textContent = "הקובץ גדול מ־100MB";
+      input.value = "";
+      return;
+    }
+
+    currentUrl = URL.createObjectURL(file);
+
+    const element = document.createElement(
+      file.type.startsWith("image/") ? "img" : "video"
+    );
+
+    element.src = currentUrl;
+    element.style.maxWidth = "100%";
+    element.style.maxHeight = "320px";
+    element.style.borderRadius = "14px";
+
+    if (element.tagName === "VIDEO") {
+      element.controls = true;
+      element.playsInline = true;
+    }
+
+    preview.appendChild(element);
+    status.textContent = "נבחר: " + file.name;
+  });
+})();
+
+</script>
+
+
+<script id="CV_AUTO_PRODUCTION_CLIENT_V1">
+(function () {
+  "use strict";
+
+  const button = document.getElementById("cvStartAutoProduction");
+  const input = document.getElementById("cvProductionImages");
+  const status = document.getElementById("cvProductionStatus");
+  const result = document.getElementById("cvProductionResult");
+
+  if (!button || !input || !status || !result) return;
+
+  let busy = false;
+
+  button.addEventListener("click", async function () {
+    if (busy) return;
+
+    const files = Array.from(input.files || []);
+
+    if (files.length < 2 || files.length > 8) {
+      status.textContent = "יש לבחור בין 2 ל־8 תמונות.";
+      return;
+    }
+
+    const allowed = [
+      "image/jpeg",
+      "image/png",
+      "image/webp"
+    ];
+
+    if (files.some(file =>
+      !allowed.includes(file.type) ||
+      file.size > 8 * 1024 * 1024
+    )) {
+      status.textContent =
+        "ניתן להעלות רק תמונות JPG, PNG או WebP עד 8MB לתמונה.";
+      return;
+    }
+
+    busy = true;
+    button.disabled = true;
+    button.textContent = "מפיקים פרסומת...";
+    status.textContent =
+      "🎬 התמונות נשלחות למנוע ההפקה. התהליך עשוי להימשך מספר דקות.";
+    result.replaceChildren();
+
+    try {
+      const form = new FormData();
+
+      for (const file of files) {
+        form.append("images", file, file.name);
+      }
+
+      const response = await fetch(
+        "/api/marketing/video/produce",
+        {
+          method: "POST",
+          credentials: "include",
+          cache: "no-store",
+          body: form
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        if (response.status === 401 || response.status === 403) {
+          throw new Error("אין הרשאת מנהל להפקת סרטונים.");
+        }
+
+        if (data.error === "PRODUCTION_BUSY") {
+          throw new Error("כבר מתבצעת הפקה. נסה שוב בעוד מספר דקות.");
+        }
+
+        throw new Error(
+          "ההפקה נכשלה: " + (data.error || response.status)
+        );
+      }
+
+      const videoId = data.productionId;
+
+      if (!/^cv-commercial-[a-f0-9-]{36}$/.test(videoId)) {
+        throw new Error("השרת החזיר מזהה סרטון לא תקין.");
+      }
+
+      const videoUrl =
+        "/api/marketing/video/export/" +
+        encodeURIComponent(videoId);
+
+      const video = document.createElement("video");
+      video.controls = true;
+      video.playsInline = true;
+      video.preload = "metadata";
+      video.style.cssText =
+        "display:block;width:100%;max-width:360px;" +
+        "aspect-ratio:9/16;border-radius:14px;background:#111";
+
+      video.src = videoUrl;
+
+      const download = document.createElement("a");
+      download.href = videoUrl;
+      download.download = "casa-verona-commercial.mp4";
+      download.textContent = "⬇️ הורדת הסרטון";
+      download.style.cssText =
+        "display:inline-block;margin-top:16px;" +
+        "color:#e5c88f;font-weight:700";
+
+      result.append(video, download);
+
+      status.textContent =
+        "✅ הפרסומת הופקה בהצלחה! " +
+        "משך הסרטון: " +
+        Number(data.duration || 0).toFixed(1) +
+        " שניות.";
+
+    } catch (error) {
+      console.error("Casa Verona production error:", error);
+      status.textContent =
+        "❌ " + (error.message || "אירעה שגיאה בהפקה.");
+
+    } finally {
+      busy = false;
+      button.disabled = false;
+      button.textContent = "🎬 הפק פרסומת";
+    }
+  });
+})();
+</script>
+
+
+<!-- CV_SALES_BOT_MASTER_UI_V1 -->
+<div id="cvSalesBotMasterPanel" style="
+  position:fixed;
+  bottom:24px;
+  left:24px;
+  z-index:900;
+  width:min(340px,calc(100vw - 48px));
+  background:#17191c;
+  color:#f4f0e8;
+  border:1px solid #a99064;
+  border-radius:18px;
+  padding:18px;
+  box-shadow:0 14px 40px rgba(0,0,0,.25);
+  direction:rtl;
+  font-family:inherit;
+">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+    <div>
+      <strong style="font-size:16px">🤖 AI Sales Bot</strong>
+      <div style="font-size:12px;color:#c5b9a7;margin-top:4px">
+        WhatsApp Master Control
+      </div>
+    </div>
+    <span id="cvSalesBotState" style="
+      background:#393939;
+      border-radius:30px;
+      padding:5px 10px;
+      font-size:12px;
+    ">טוען...</span>
+  </div>
+
+  <p id="cvSalesBotDescription" style="
+    font-size:13px;
+    line-height:1.7;
+    color:#c5b9a7;
+    margin:14px 0;
+  ">בודק את מצב הבוט בשרת...</p>
+
+  <button id="cvSalesBotToggle" type="button" disabled style="
+    width:100%;
+    padding:12px;
+    border-radius:10px;
+    border:1px solid #b69b6e;
+    background:#b69b6e;
+    color:#17191c;
+    font-weight:700;
+    cursor:pointer;
+  ">טוען...</button>
+
+  <div id="cvSalesBotFeedback"
+       role="status"
+       aria-live="polite"
+       style="font-size:12px;margin-top:10px;color:#c5b9a7"></div>
+</div>
+
+<script id="cvSalesBotMasterClientV1">
+(function () {
+  "use strict";
+
+  const panel = document.getElementById("cvSalesBotMasterPanel");
+  const stateLabel = document.getElementById("cvSalesBotState");
+  const description = document.getElementById("cvSalesBotDescription");
+  const button = document.getElementById("cvSalesBotToggle");
+  const feedback = document.getElementById("cvSalesBotFeedback");
+
+  if (!panel || !stateLabel || !description || !button || !feedback) {
+    return;
+  }
+
+  let enabled = null;
+  let busy = false;
+
+  function render() {
+    const known = typeof enabled === "boolean";
+
+    button.disabled = busy || !known;
+
+    stateLabel.textContent = !known
+      ? "לא זמין"
+      : enabled ? "פעיל" : "כבוי";
+
+    stateLabel.style.background = !known
+      ? "#393939"
+      : enabled ? "#244b37" : "#633536";
+
+    description.textContent = !known
+      ? "לא ניתן לקרוא את מצב הבוט."
+      : enabled
+        ? "בוט המכירות מוגדר כפעיל במערכת Casa Verona OS."
+        : "בוט המכירות מוגדר ככבוי במערכת Casa Verona OS.";
+
+    button.textContent = busy
+      ? "מעדכן..."
+      : !known
+        ? "המצב לא זמין"
+        : enabled
+          ? "⏻ כבה בוט מכירות"
+          : "⏻ הפעל בוט מכירות";
+
+    button.style.background = enabled
+      ? "#663438"
+      : "#b69b6e";
+
+    button.style.color = enabled
+      ? "#ffffff"
+      : "#17191c";
+  }
+
+  async function loadStatus() {
+    try {
+      const response = await fetch(
+        "/api/admin/sales-bot/status",
+        {
+          credentials: "include",
+          cache: "no-store"
+        }
+      );
+
+      if (response.status === 401 || response.status === 403) {
+        panel.hidden = true;
+        return;
+      }
+
+      if (!response.ok) throw new Error("STATUS_REQUEST_FAILED");
+
+      const data = await response.json();
+
+      if (!data.success || typeof data.enabled !== "boolean") {
+        throw new Error("INVALID_STATUS");
+      }
+
+      enabled = data.enabled;
+      feedback.textContent = "";
+    } catch (error) {
+      enabled = null;
+      feedback.textContent = "לא ניתן להתחבר לבקרת הבוט.";
+    }
+
+    render();
+  }
+
+  button.addEventListener("click", async function () {
+    if (busy || typeof enabled !== "boolean") return;
+
+    const next = !enabled;
+
+    const approved = window.confirm(
+      next
+        ? "להפעיל את בוט המכירות?"
+        : "לכבות את בוט המכירות האוטומטי?"
+    );
+
+    if (!approved) return;
+
+    busy = true;
+    render();
+
+    try {
+      const response = await fetch(
+        "/api/admin/sales-bot/toggle",
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ enabled: next })
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "TOGGLE_FAILED");
+      }
+
+      enabled = data.enabled;
+      feedback.textContent = "המצב עודכן במערכת Casa Verona OS.";
+    } catch (error) {
+      feedback.textContent =
+        "העדכון נכשל. בודק את המצב מחדש...";
+      await loadStatus();
+    } finally {
+      busy = false;
+      render();
+    }
+  });
+
+  loadStatus();
+})();
+</script>
+
 </body>
 </html>
 

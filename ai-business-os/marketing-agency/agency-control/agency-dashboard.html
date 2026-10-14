@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Casa Verona | מרכז הפיקוד השיווקי</title>
+<style>
+:root {
+  font-family: Arial, sans-serif;
+  color-scheme: dark;
+  background: #101318;
+  color: #f5f1ea;
+}
+* { box-sizing: border-box; }
+body { margin: 0; padding: 28px 18px; }
+main { max-width: 1200px; margin: auto; }
+header { margin-bottom: 28px; }
+.eyebrow { color: #c9aa79; font-size: 12px; letter-spacing: 2px; }
+h1 { font-size: clamp(28px, 5vw, 44px); margin: 12px 0; }
+h2 { font-size: 20px; }
+p { color: #adb0b7; line-height: 1.6; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 16px;
+}
+.card {
+  background: #1c2129;
+  border: 1px solid #353b45;
+  border-radius: 16px;
+  padding: 22px;
+}
+.card strong { display: block; margin-bottom: 10px; }
+.card p { font-size: 14px; margin-bottom: 0; }
+.metrics { margin: 24px 0 34px; }
+.metric-label { font-size: 13px; color: #aeb0b5; }
+.metric-value { font-size: 27px; margin-top: 10px; }
+section { margin-top: 30px; }
+.gold { color: #c9aa79; }
+.status { color: #9bc6aa; }
+.office { min-height: 145px; cursor: pointer; } .office:hover, .office:focus-visible { border-color: #c9aa79; outline-offset: 3px; }
+.office-icon { font-size: 25px; margin-bottom: 14px; }
+.note { font-size: 13px; }
+</style>
+</head>
+<body>
+<main>
+<header>
+  <div class="eyebrow">CASA VERONA OS</div>
+  <h1>מרכז הפיקוד השיווקי</h1>
+  <p>מרכז הפיקוד של סוכנות השיווק החכמה</p>
+  <p class="status">● סביבת פיתוח — אין פרסום או הוצאות אוטומטיות</p>
+</header>
+
+<div class="grid metrics">
+  <div class="card">
+    <div class="metric-label">תקציב פרסום</div>
+    <div class="metric-value">טרם הוגדר</div>
+  </div>
+  <div class="card">
+    <div class="metric-label">לידים מקמפיינים</div>
+    <div class="metric-value">אין נתונים</div>
+  </div>
+  <div class="card">
+    <div class="metric-label">עלות לליד</div>
+    <div class="metric-value">אין נתונים</div>
+  </div>
+  <div class="card">
+    <div class="metric-label">עסקאות מקמפיינים</div>
+    <div class="metric-value">אין נתונים</div>
+  </div>
+</div>
+
+<section class="card">
+  <div class="gold">מנהל השיווק AI</div>
+  <h2>משרד מנהל השיווק</h2>
+  <p>כאן יוצגו בהמשך סיכומי פעילות, משימות, המלצות והחלטות לאישור.</p>
+  <p class="note">המשרד עדיין לא מחובר לנתונים חיים.</p>
+</section>
+
+<section>
+  <h2>משרדי הסוכנות</h2>
+  <div class="grid" id="offices"></div>
+  <div class="card" id="officeWorkspace" hidden aria-live="polite" style="margin-top:18px">
+    <h2 id="officeTitle"></h2>
+    <p id="officeDescription"></p>
+    <p class="note">אזור העבודה בפיתוח. עדיין אין חיבור לנתונים חיים.</p>
+  </div>
+</section>
+
+<section class="card">
+  <h2>מרכז אישורים</h2>
+  <p>קמפיינים, קריאייטיבים ושינויים בתקציב ימתינו כאן לאישורך.</p>
+  <p class="note">אין כרגע בקשות אישור מחוברות.</p>
+</section>
+</main>
+
+<script>
+const offices = [
+  ["🔎", "מחלקת מחקר שוק ומתחרים", "מחקר שוק, מחירים וטרנדים"],
+  ["💎", "מחלקת אסטרטגיה ומיתוג", "בידול, מסרים וזהות המותג"],
+  ["🎬", "סטודיו קריאייטיב", "סרטונים, קרוסלות ותוכן פרסומי"],
+  ["📣", "מחלקת קמפיינים", "תכנון קמפיינים, קהלים ותקציבים"],
+  ["📱", "מחלקת רשתות חברתיות", "תוכן ונוכחות ברשתות"],
+  ["📊", "מחלקת ניתוח ביצועים", "לידים, המרות ורווחיות"],
+  ["👥", "מחלקת מודיעין מכירות", "תובנות ממערכת המכירות"],
+  ["⚙️", "הגדרות וניהול הסוכנות", "יעדים, אסטרטגיה והרשאות"]
+];
+
+const container = document.getElementById("offices");
+
+for (const [symbol, name, description] of offices) {
+  const card = document.createElement("article");
+  card.className = "card office";
+
+  const icon = document.createElement("div");
+  icon.className = "office-icon";
+  icon.textContent = symbol;
+
+  const heading = document.createElement("strong");
+  heading.textContent = name;
+
+  const detail = document.createElement("p");
+  detail.textContent = description;
+
+  card.append(icon, heading, detail);
+  card.tabIndex = 0;
+  card.setAttribute("role", "button");
+  card.setAttribute("aria-label", "פתח " + name);
+  const openOffice = () => {
+    document.getElementById("officeTitle").textContent = name;
+    document.getElementById("officeDescription").textContent = description;
+    const workspace = document.getElementById("officeWorkspace");
+    workspace.hidden = false;
+    workspace.scrollIntoView({behavior: "smooth", block: "nearest"});
+  };
+  card.addEventListener("click", openOffice);
+  card.addEventListener("keydown", event => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      openOffice();
+    }
+  });
+  container.appendChild(card);
+}
+</script>
+</body>
+</html>

@@ -5240,6 +5240,28 @@ async function createQuoteReadyNotification(
 }
 
 
+
+// CV_SALES_BOT_SEND_GUARDS_V1
+
+
+// CV_SALES_BOT_SUPABASE_SEND_GUARDS_V1
+async function cvSalesBotEnabled() {
+  try {
+    const control = require(
+      "./ai-business-os/sales-bot-control/supabase-control"
+    );
+
+    return await control.isEnabled(requireSupabase());
+  } catch (error) {
+    console.error(
+      "SALES BOT STATE CHECK FAILED — BLOCKING AUTO SEND:",
+      error.message
+    );
+    return false;
+  }
+}
+
+
 const server =
   http.createServer(
     async (req, res) => {
@@ -5598,6 +5620,265 @@ if (req.method === "GET" && url.pathname === "/sw.js") {
   return;
 }
 
+
+
+
+// CV_VIDEO_EXPORT_ROUTE_V1
+if (
+  req.method === "GET" &&
+  url.pathname.startsWith("/api/marketing/video/export/")
+) {
+  const auth = await requireAuth(
+    req,
+    res,
+    [USER_ROLES.ADMIN]
+  );
+
+  if (!auth) return;
+
+  const videoId = url.pathname.split("/").pop();
+
+  if (
+    !/^cv-commercial-[a-f0-9-]{36}$/.test(videoId)
+  ) {
+    sendJSON(res, 400, {
+      success: false,
+      error: "INVALID_VIDEO_ID"
+    });
+    return;
+  }
+
+  const videoPath = path.join(
+    __dirname,
+    "ai-business-os",
+    "marketing-agency",
+    "video-engine",
+    "exports",
+    videoId + ".mp4"
+  );
+
+  let stat;
+
+  try {
+    stat = await fs.promises.stat(videoPath);
+  } catch {
+    sendJSON(res, 404, {
+      success: false,
+      error: "VIDEO_NOT_FOUND"
+    });
+    return;
+  }
+
+  if (!stat.isFile()) {
+    sendJSON(res, 404, {
+      success: false,
+      error: "VIDEO_NOT_FOUND"
+    });
+    return;
+  }
+
+  res.writeHead(200, {
+    "Content-Type": "video/mp4",
+    "Content-Length": stat.size,
+    "Content-Disposition": 'inline; filename="casa-verona-commercial.mp4"',
+    "Cache-Control": "private, no-store",
+    "X-Content-Type-Options": "nosniff",
+    "Accept-Ranges": "none"
+  });
+
+  const stream = fs.createReadStream(videoPath);
+  stream.on("error", error => {
+    console.error("VIDEO EXPORT STREAM ERROR:", error.message);
+    res.destroy(error);
+  });
+  stream.pipe(res);
+  return;
+}
+
+
+// CV_SALES_BOT_SUPABASE_API_V2
+// CV_SALES_BOT_MASTER_API_V1
+if (
+  req.method === "GET" &&
+  url.pathname === "/api/admin/sales-bot/status"
+) {
+  const auth = await requireAuth(
+    req, res, [USER_ROLES.ADMIN]
+  );
+  if (!auth) return;
+
+  try {
+    const control = require(
+      "./ai-business-os/sales-bot-control/supabase-control"
+    );
+
+    sendJSON(res, 200, {
+      success: true,
+      ...await control.readState(requireSupabase())
+    });
+  } catch (error) {
+    console.error("SALES BOT STATUS ERROR:", error);
+    sendJSON(res, 500, {
+      success: false,
+      error: "BOT_STATE_UNAVAILABLE"
+    });
+  }
+  return;
+}
+
+if (
+  req.method === "POST" &&
+  url.pathname === "/api/admin/sales-bot/toggle"
+) {
+  const auth = await requireAuth(
+    req, res, [USER_ROLES.ADMIN]
+  );
+  if (!auth) return;
+
+  // Same-origin browser requests only.
+  const origin = req.headers.origin;
+
+  if (!origin) {
+    sendJSON(res, 403, {
+      success: false,
+      error: "ORIGIN_REQUIRED"
+    });
+    return;
+  }
+
+  let allowedOrigin = false;
+
+  try {
+    const parsedOrigin = new URL(origin);
+    allowedOrigin =
+      parsedOrigin.host === req.headers.host &&
+      ["http:", "https:"].includes(parsedOrigin.protocol);
+  } catch {}
+
+  if (!allowedOrigin) {
+    sendJSON(res, 403, {
+      success: false,
+      error: "ORIGIN_NOT_ALLOWED"
+    });
+    return;
+  }
+
+  try {
+    const chunks = [];
+    let size = 0;
+
+    for await (const chunk of req) {
+      size += chunk.length;
+
+      if (size > 1024) {
+        sendJSON(res, 413, {
+          success: false,
+          error: "REQUEST_TOO_LARGE"
+        });
+        return;
+      }
+
+      chunks.push(chunk);
+    }
+
+    const payload = JSON.parse(
+      Buffer.concat(chunks).toString("utf8")
+    );
+
+    if (
+      !payload ||
+      typeof payload.enabled !== "boolean"
+    ) {
+      sendJSON(res, 400, {
+        success: false,
+        error: "INVALID_ENABLED_VALUE"
+      });
+      return;
+    }
+
+    const control = require(
+      "./ai-business-os/sales-bot-control/supabase-control"
+    );
+
+    const state = await control.setState(
+        requireSupabase(),
+        payload.enabled
+      );
+
+    sendJSON(res, 200, {
+      success: true,
+      ...state
+    });
+
+  } catch (error) {
+    console.error("SALES BOT TOGGLE ERROR:", error);
+
+    sendJSON(res, 500, {
+      success: false,
+      error: "BOT_TOGGLE_FAILED"
+    });
+  }
+
+  return;
+}
+
+// CV_AUTO_VIDEO_PRODUCTION_ROUTE_V1
+if (
+  req.method === "POST" &&
+  url.pathname === "/api/marketing/video/produce"
+) {
+  const auth = await requireAuth(
+    req,
+    res,
+    [USER_ROLES.ADMIN]
+  );
+
+  if (!auth) return;
+
+  const { handleProductionUpload } = require(
+    "./ai-business-os/marketing-agency/video-engine/production-upload"
+  );
+
+  await handleProductionUpload(req, res);
+  return;
+}
+
+// CASA VERONA — PROTECTED VIDEO STUDIO
+if (
+  req.method === "GET" &&
+  url.pathname === "/marketing/video-studio"
+) {
+  const auth = await requireAuth(req, res, [USER_ROLES.ADMIN]);
+  if (!auth) return;
+
+  const studioPath = path.join(
+    __dirname,
+    "ai-business-os",
+    "marketing-agency",
+    "creative-studio",
+    "creative-studio.html"
+  );
+
+  fs.readFile(studioPath, (error, data) => {
+    if (error) {
+      res.writeHead(404, {
+        "Content-Type": "text/plain; charset=utf-8"
+      });
+      res.end("Video Studio not found");
+      return;
+    }
+
+    res.writeHead(200, {
+      "Content-Type": "text/html; charset=utf-8",
+      "Cache-Control": "no-store",
+      "X-Content-Type-Options": "nosniff"
+    });
+    res.end(data);
+  });
+
+  return;
+}
+
 // CASA VERONA OS DASHBOARD
 // -----------------------------------------------
 
@@ -5743,6 +6024,29 @@ if (
       "./ai-business-os/marketing-agency/marketing-intelligence"
     );
 
+    // Fail closed until model pricing is officially verified.
+    const { PRICING } = require(
+      "./ai-business-os/marketing-agency/marketing-pricing"
+    );
+
+    if (!PRICING.verified) {
+      sendMarketingResponse(503, {
+        success: false,
+        error: "MARKETING_AI_PRICING_NOT_VERIFIED"
+      });
+      return;
+    }
+
+    // Validate input before reserving budget.
+    const { normalizeMessages } = require(
+      "./ai-business-os/marketing-agency/marketing-intelligence"
+    );
+    const cleanMessages = normalizeMessages(input.messages);
+
+    if (cleanMessages.at(-1).role !== "user") {
+      throw new Error("LAST_MESSAGE_MUST_BE_USER");
+    }
+
     // Shared daily quota stored atomically in Supabase.
     const quotaDb = requireSupabase();
 
@@ -5773,11 +6077,87 @@ if (
       return;
     }
 
-    const result = await consultMarketingAI(input.messages);
+    const {
+      calculateMaximumReservation,
+      calculateMarketingCost
+    } = require(
+      "./ai-business-os/marketing-agency/marketing-pricing"
+    );
 
-    if (!result.success) {
-      sendMarketingResponse(503, result);
+    const {
+      reserveMarketingBudget,
+      finalizeMarketingBudget,
+      markMarketingBudgetForReview
+    } = require(
+      "./ai-business-os/marketing-agency/marketing-budget"
+    );
+
+    // Conservative reservation. Never assume cached-token discounts.
+    const reservationUsd = calculateMaximumReservation(25000, 1200);
+
+    const reservation = await reserveMarketingBudget(
+      quotaDb,
+      reservationUsd
+    );
+
+    if (!reservation.allowed) {
+      sendMarketingResponse(429, {
+        success: false,
+        error: "MARKETING_AI_MONTHLY_BUDGET_REACHED"
+      });
       return;
+    }
+
+    let result;
+
+    try {
+      result = await consultMarketingAI(cleanMessages);
+
+      if (!result.success) {
+        await finalizeMarketingBudget(
+          quotaDb, reservation.requestId, 0, false
+        );
+        sendMarketingResponse(503, result);
+        return;
+      }
+
+      // Never finalize an AI request without complete usage data.
+      const usage = result.usage;
+
+      if (
+        !usage ||
+        ![usage.input_tokens, usage.output_tokens,
+          usage.cached_input_tokens].every(
+          value => Number.isSafeInteger(value) && value >= 0
+        ) ||
+        usage.cached_input_tokens > usage.input_tokens
+      ) {
+        throw new Error("MARKETING_AI_USAGE_UNAVAILABLE");
+      }
+
+      const actualUsd = calculateMarketingCost(usage);
+
+      if (actualUsd > reservation.reservedUsd) {
+        throw new Error("MARKETING_AI_RESERVATION_EXCEEDED");
+      }
+
+      await finalizeMarketingBudget(
+        quotaDb, reservation.requestId, actualUsd, true
+      );
+
+    } catch (error) {
+      // Preserve the reservation when billing is uncertain.
+      try {
+        await markMarketingBudgetForReview(
+          quotaDb, reservation.requestId
+        );
+      } catch (reviewError) {
+        console.error(
+          "MARKETING BUDGET REVIEW ERROR:",
+          reviewError.message
+        );
+      }
+      throw error;
     }
 
     sendMarketingResponse(200, result);
@@ -5885,6 +6265,245 @@ if (
       success: false,
       error: "PRODUCT_CONCEPT_FAILED"
     }));
+  }
+
+  return;
+}
+
+
+
+
+// CASA VERONA FUTURE CREATIVE STUDIO ROUTE V1
+if (
+  req.method === "GET" &&
+  url.pathname === "/creative-studio"
+) {
+  if (!(await requireAuth(req, res, [USER_ROLES.ADMIN]))) {
+    return;
+  }
+
+  const studioPath = require("path").join(
+    __dirname,
+    "ai-business-os",
+    "marketing-agency",
+    "creative-studio",
+    "future-lab-preview.html"
+  );
+
+  require("fs").readFile(studioPath, "utf8", (error, html) => {
+    if (error) {
+      res.writeHead(500, {
+        "Content-Type": "text/plain; charset=utf-8"
+      });
+      res.end("Creative Studio unavailable");
+      return;
+    }
+
+    res.writeHead(200, {
+      "Content-Type": "text/html; charset=utf-8",
+      "Cache-Control": "no-store"
+    });
+    res.end(html);
+  });
+
+  return;
+}
+
+// CASA VERONA CREATIVE DIRECTOR API V1
+// ADMIN ONLY — INSTRUCTION MANAGEMENT, NO PAID AI
+if (
+  req.method === "POST" &&
+  (
+    url.pathname === "/api/creative/director/project" ||
+    url.pathname === "/api/creative/director/instruction"
+  )
+) {
+  const auth = await requireAuth(req, res, [USER_ROLES.ADMIN]);
+  if (!auth) return;
+
+  const reply = (status, payload) => {
+    res.writeHead(status, {
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "no-store"
+    });
+    res.end(JSON.stringify(payload));
+  };
+
+  try {
+    let raw = "";
+    let bytes = 0;
+
+    for await (const chunk of req) {
+      bytes += chunk.length;
+
+      if (bytes > 16000) {
+        reply(413, {
+          success: false,
+          error: "REQUEST_TOO_LARGE"
+        });
+        return;
+      }
+
+      raw += chunk.toString("utf8");
+    }
+
+    let input;
+
+    try {
+      input = JSON.parse(raw || "{}");
+    } catch {
+      reply(400, {
+        success: false,
+        error: "INVALID_JSON"
+      });
+      return;
+    }
+
+    if (
+      !input ||
+      typeof input !== "object" ||
+      Array.isArray(input)
+    ) {
+      reply(400, {
+        success: false,
+        error: "INVALID_INPUT"
+      });
+      return;
+    }
+
+    const {
+      createCreativeProject,
+      addCreativeInstruction,
+      getCreativeDirection
+    } = require(
+      "./ai-business-os/marketing-agency/creative-studio/creative-director"
+    );
+
+    if (url.pathname === "/api/creative/director/project") {
+      const project = createCreativeProject(input);
+
+      reply(200, {
+        success: true,
+        project,
+        direction: getCreativeDirection(project)
+      });
+    } else {
+      const { project, message } = input;
+
+      const updated = addCreativeInstruction(project, message);
+
+      reply(200, {
+        success: true,
+        project: updated,
+        direction: getCreativeDirection(updated)
+      });
+    }
+
+  } catch (error) {
+    const validationErrors = [
+      "INVALID_IMAGE_COUNT",
+      "INVALID_PROJECT",
+      "INVALID_INSTRUCTION"
+    ];
+
+    const isValidationError =
+      validationErrors.includes(error.message);
+
+    if (!isValidationError) {
+      console.error(
+        "CREATIVE DIRECTOR ERROR:",
+        error.message
+      );
+    }
+
+    reply(isValidationError ? 400 : 500, {
+      success: false,
+      error: isValidationError
+        ? error.message
+        : "CREATIVE_DIRECTOR_FAILED"
+    });
+  }
+
+  return;
+}
+
+// CASA VERONA CREATIVE BRIEF API V1
+// ADMIN ONLY — NO PAID AI CALLS
+if (
+  req.method === "POST" &&
+  url.pathname === "/api/creative/brief"
+) {
+  const auth = await requireAuth(req, res, [USER_ROLES.ADMIN]);
+  if (!auth) return;
+
+  const sendCreativeResponse = (status, payload) => {
+    res.writeHead(status, {
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "no-store"
+    });
+    res.end(JSON.stringify(payload));
+  };
+
+  try {
+    let raw = "";
+    let bytes = 0;
+
+    for await (const chunk of req) {
+      bytes += chunk.length;
+
+      if (bytes > 10000) {
+        sendCreativeResponse(413, {
+          success: false,
+          error: "CREATIVE_REQUEST_TOO_LARGE"
+        });
+        return;
+      }
+
+      raw += chunk.toString("utf8");
+    }
+
+    let input;
+
+    try {
+      input = JSON.parse(raw || "{}");
+    } catch {
+      sendCreativeResponse(400, {
+        success: false,
+        error: "INVALID_JSON"
+      });
+      return;
+    }
+
+    const {
+      createCreativeBrief
+    } = require(
+      "./ai-business-os/marketing-agency/creative-studio/creative-brief-engine"
+    );
+
+    const brief = createCreativeBrief(input);
+
+    sendCreativeResponse(200, brief);
+
+  } catch (error) {
+    const validationErrors = [
+      "INVALID_CREATIVE_INPUT",
+      "INVALID_CREATIVE_FORMAT",
+      "INVALID_CREATIVE_STYLE",
+      "INVALID_IMAGE_COUNT"
+    ];
+
+    const isValidationError = validationErrors.includes(error.message);
+
+    if (!isValidationError) {
+      console.error("CREATIVE BRIEF ERROR:", error.message);
+    }
+
+    sendCreativeResponse(isValidationError ? 400 : 500, {
+      success: false,
+      error: isValidationError
+        ? error.message
+        : "CREATIVE_BRIEF_FAILED"
+    });
   }
 
   return;
@@ -11842,11 +12461,18 @@ await saveCallbackRequest(
           // Send only the customer-facing
           // reply. Internal analysis never
           // goes to the customer.
-          const whatsappResponse =
-  await sendWhatsAppMessage(
-    from,
-    result.reply
-  );
+          
+// CV_SALES_BOT_SAFE_WEBHOOK_V2
+if (!(await cvSalesBotEnabled())) {
+  console.log("🤖 META AI REPLY BLOCKED — BOT OFF");
+  res.writeHead(200, {"Content-Type": "text/plain"});
+  res.end("EVENT_RECEIVED");
+  return;
+}
+
+const whatsappResponse =
+  await sendWhatsAppMessage(from, result.reply);
+
 
 const outgoingMessageId =
   whatsappResponse?.messages?.[0]?.id || null;
@@ -13495,12 +14121,23 @@ await saveMessage({
           }
 
           // Send exactly one customer-facing reply.
-          const whatsappResponse =
-            await sendHeyyTextMessage(
-              channelId,
-              phone,
-              reply
-            );
+          
+if (!(await cvSalesBotEnabled())) {
+  console.log("🤖 HEYY AI REPLY BLOCKED — BOT OFF");
+  sendJSON(res, 200, {
+    success: true,
+    received: true,
+    analyzed: true,
+    sent: false,
+    blocked: true,
+    reason: "SALES_BOT_DISABLED"
+  });
+  return;
+}
+
+const whatsappResponse =
+  await sendHeyyTextMessage(channelId, phone, reply);
+
 
           // Heyy response ID will be mapped after the first controlled test.
           const outgoingMessageId = null;
@@ -13532,7 +14169,10 @@ await saveMessage({
             !catalogAlreadySent
           ) {
             try {
-              await sendHeyyCatalog(
+              if (!(await cvSalesBotEnabled())) {
+                  throw new Error("SALES_BOT_DISABLED");
+                }
+await sendHeyyCatalog(
                 channelId,
                 phone
               );

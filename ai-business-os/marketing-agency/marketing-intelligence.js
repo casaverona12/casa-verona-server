@@ -1,6 +1,7 @@
 "use strict";
 
 const OpenAI = require("openai");
+const { MODEL } = require("./marketing-pricing");
 
 const SYSTEM_PROMPT = `
 You are the Chief Marketing Officer (CMO) and senior
@@ -98,12 +99,23 @@ async function consultMarketingAI(messages) {
     };
   }
 
+  // Bound the full UTF-8 request content before sending it.
+  // This includes the system prompt and conversation history.
+  const fullInput = SYSTEM_PROMPT +
+    cleanMessages.map(message => message.content).join("");
+
+  const inputBytes = Buffer.byteLength(fullInput, "utf8");
+
+  if (inputBytes > 20000) {
+    throw new Error("MARKETING_AI_INPUT_BYTES_EXCEEDED");
+  }
+
   const client = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
   });
 
   const response = await client.responses.create({
-    model: "gpt-5.1",
+    model: MODEL,
     store: false,
     max_output_tokens: 1200,
     input: [
@@ -120,10 +132,10 @@ async function consultMarketingAI(messages) {
     answer: response.output_text || "",
     model: response.model,
     usage: {
-      input_tokens: response.usage?.input_tokens ?? 0,
-      output_tokens: response.usage?.output_tokens ?? 0,
+      input_tokens: response.usage?.input_tokens ?? null,
+      output_tokens: response.usage?.output_tokens ?? null,
       cached_input_tokens:
-        response.usage?.input_tokens_details?.cached_tokens ?? 0
+        response.usage?.input_tokens_details?.cached_tokens ?? null
     }
   };
 }

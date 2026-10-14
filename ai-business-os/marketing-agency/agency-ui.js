@@ -128,7 +128,13 @@
           el("strong", "", agent[1]),
           el("span", "", "כניסה לסביבת העבודה של המחלקה.")
         );
-        card.addEventListener("click", () => showAgent(agent[1], department));
+        card.addEventListener("click", () => {
+          if (agent[0] === "creative-studio") {
+            window.location.assign("/marketing/video-studio");
+            return;
+          }
+          showAgent(agent[1], department);
+        });
         content.append(card);
       });
     }

@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Casa Verona | סטודיו הקריאייטיב</title>
+<style>
+:root{
+ --gold:#dfc297;
+ --text:#f6f1e9;
+ --muted:#8e9bad;
+ --glass:rgba(20,27,40,.72);
+}
+*{box-sizing:border-box}
+body{
+ margin:0;
+ min-height:100vh;
+ color:var(--text);
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+ background:#060911;
+ overflow-x:hidden;
+}
+body:before{
+ content:"";
+ position:fixed;
+ inset:0;
+ pointer-events:none;
+ background:
+ radial-gradient(ellipse at 54% 38%,rgba(57,82,127,.22),transparent 40%),
+ radial-gradient(ellipse at 86% 10%,rgba(194,147,80,.10),transparent 28%),
+ linear-gradient(125deg,#070b13,#101622 50%,#05070d);
+}
+.shell{
+ position:relative;
+ display:grid;
+ grid-template-columns:86px minmax(0,1fr);
+ min-height:100vh;
+}
+.rail{
+ position:sticky;
+ top:0;
+ height:100vh;
+ background:rgba(9,13,22,.9);
+ border-left:1px solid rgba(255,255,255,.09);
+ display:flex;
+ align-items:center;
+ flex-direction:column;
+ padding:30px 12px;
+ gap:22px;
+ backdrop-filter:blur(24px);
+}
+.logo{
+ width:46px;height:46px;
+ display:grid;place-items:center;
+ border:1px solid rgba(223,194,151,.45);
+ border-radius:15px;
+ color:var(--gold);
+ font:24px Georgia,serif;
+}
+.rail button{
+ width:50px;height:50px;
+ background:transparent;
+ border:1px solid transparent;
+ border-radius:15px;
+ color:#9da8b8;
+ font-size:22px;
+ cursor:pointer;
+}
+.rail button.active,.rail button:hover{
+ background:rgba(223,194,151,.11);
+ color:var(--gold);
+ border-color:rgba(223,194,151,.24);
+}
+main{padding:30px clamp(16px,3vw,55px);min-width:0}
+.top{
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ gap:15px;
+ margin-bottom:28px;
+}
+.eyebrow{
+ color:var(--gold);
+ letter-spacing:3px;
+ font-size:10px;
+}
+h1{
+ font:400 clamp(30px,4vw,54px) Georgia,serif;
+ margin:8px 0;
+ letter-spacing:-1px;
+}
+.subtitle{color:var(--muted);font-size:13px}
+.pill{
+ border:1px solid rgba(223,194,151,.28);
+ background:rgba(223,194,151,.06);
+ color:#e5cda9;
+ padding:12px 17px;
+ border-radius:30px;
+ font-size:11px;
+ white-space:nowrap;
+}
+.workspace{
+ display:grid;
+ grid-template-columns:minmax(0,1.8fr) minmax(300px,.8fr);
+ gap:20px;
+}
+.stage{
+ position:relative;
+ min-height:560px;
+ border-radius:26px;
+ overflow:hidden;
+ border:1px solid rgba(223,194,151,.2);
+ background:
+ radial-gradient(ellipse at 50% 70%,rgba(181,142,94,.18),transparent 35%),
+ radial-gradient(ellipse at 50% 30%,rgba(66,91,133,.23),transparent 55%),
+ #0c111c;
+ box-shadow:0 35px 90px rgba(0,0,0,.35);
+}
+.stage:before{
+ content:"";
+ position:absolute;
+ inset:0;
+ background:
+ linear-gradient(transparent 96%,rgba(223,194,151,.07) 97%),
+ linear-gradient(90deg,transparent 96%,rgba(223,194,151,.07) 97%);
+ background-size:55px 55px;
+ transform:perspective(400px) rotateX(55deg) scale(1.7);
+ transform-origin:center 80%;
+ opacity:.55;
+}
+.halo{
+ position:absolute;
+ width:310px;height:310px;
+ border:1px solid rgba(223,194,151,.28);
+ border-radius:50%;
+ left:50%;top:46%;
+ transform:translate(-50%,-50%) rotateX(65deg);
+ box-shadow:0 0 55px rgba(223,194,151,.11);
+ animation:glow 5s ease-in-out infinite alternate;
+}
+.halo.two{
+ width:420px;height:420px;
+ border-color:rgba(114,150,205,.16);
+ animation-delay:-2s;
+}
+@keyframes glow{
+ from{opacity:.35;filter:blur(0)}
+ to{opacity:.85;filter:blur(2px)}
+}
+.stage-label{
+ position:absolute;
+ top:28px;right:30px;
+ z-index:2;
+}
+.stage-label strong{
+ display:block;
+ font:28px Georgia,serif;
+ margin-top:8px;
+}
+.stage-center{
+ position:absolute;
+ inset:20% 8% 15%;
+ display:grid;
+ place-items:center;
+ text-align:center;
+ z-index:1;
+}
+.orb{
+ width:min(38vw,250px);
+ aspect-ratio:1;
+ border-radius:50%;
+ background:
+ radial-gradient(circle at 30% 25%,rgba(255,243,215,.9),transparent 9%),
+ radial-gradient(circle at 34% 30%,#e7c69d,#6b728c 35%,#161e31 65%,#090e1b);
+ box-shadow:
+ inset -30px -35px 55px rgba(0,0,0,.65),
+ 0 0 90px rgba(198,159,108,.18);
+ animation:float 6s ease-in-out infinite;
+}
+@keyframes float{
+ 0%,100%{transform:translateY(0)}
+ 50%{transform:translateY(-18px)}
+}
+.stage-bottom{
+ position:absolute;
+ bottom:26px;right:28px;left:28px;
+ display:flex;justify-content:space-between;
+ align-items:center;gap:12px;
+ z-index:2;
+}
+.mono{
+ color:#9aabbf;
+ font:10px monospace;
+ letter-spacing:1px;
+}
+.controls{display:flex;gap:8px}
+.controls span{
+ padding:10px 13px;
+ border:1px solid rgba(255,255,255,.13);
+ border-radius:10px;
+ background:rgba(14,20,31,.7);
+ color:#d5deea;
+ font-size:11px;
+}
+.panel{
+ background:var(--glass);
+ border:1px solid rgba(255,255,255,.1);
+ border-radius:24px;
+ backdrop-filter:blur(24px);
+ padding:25px;
+ box-shadow:0 20px 60px rgba(0,0,0,.2);
+}
+.panel-head{
+ display:flex;align-items:center;
+ justify-content:space-between;gap:12px;
+}
+.panel h2{font:25px Georgia,serif;margin:10px 0}
+.ai-symbol{
+ width:52px;height:52px;
+ border-radius:17px;
+ display:grid;place-items:center;
+ font-size:26px;
+ color:var(--gold);
+ border:1px solid rgba(223,194,151,.28);
+ background:radial-gradient(circle,rgba(223,194,151,.18),transparent);
+}
+.divider{height:1px;background:rgba(255,255,255,.1);margin:22px 0}
+.ai-message{
+ padding:18px;
+ background:rgba(8,13,23,.6);
+ border:1px solid rgba(223,194,151,.16);
+ border-radius:16px;
+ color:#b9c3d1;
+ line-height:1.9;
+ font-size:13px;
+}
+.ai-message b{color:#f4e2c6}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.chips span{
+ border:1px solid rgba(223,194,151,.2);
+ border-radius:30px;
+ padding:9px 12px;
+ color:#dfcaa9;
+ font-size:11px;
+}
+.action{
+ display:block;width:100%;
+ padding:15px;
+ margin-top:22px;
+ border-radius:13px;
+ border:1px solid #e6c99e;
+ background:linear-gradient(120deg,#f3dfbd,#b8996d);
+ color:#15120f;
+ font-weight:700;
+ cursor:pointer;
+}
+.bottom{
+ display:grid;
+ grid-template-columns:repeat(3,1fr);
+ gap:20px;
+ margin-top:20px;
+}
+.module{
+ border:1px solid rgba(255,255,255,.1);
+ border-radius:20px;
+ background:rgba(17,24,37,.7);
+ padding:22px;
+}
+.module small{color:var(--gold);letter-spacing:2px}
+.module h3{font:21px Georgia,serif;margin:12px 0}
+.module p{color:var(--muted);font-size:12px;line-height:1.8}
+@media(max-width:1050px){
+ .workspace{grid-template-columns:1fr}
+ .stage{min-height:490px}
+}
+@media(max-width:650px){
+ .shell{grid-template-columns:1fr}
+ .rail{height:auto;position:relative;flex-direction:row;padding:12px;justify-content:center}
+ .rail button{width:42px;height:42px}
+ main{padding:20px 14px}
+ .top{align-items:flex-start;flex-direction:column}
+ .stage{min-height:410px}
+ .stage-label strong{font-size:21px}
+ .orb{width:170px}
+ .bottom{grid-template-columns:1fr}
+ .stage-bottom{flex-wrap:wrap}
+}
+@media(prefers-reduced-motion:reduce){
+ *,*:before,*:after{animation:none!important;transition:none!important}
+}
+</style>
+
+<style>
+/* CV_FUTURE_LUXURY_VISUAL_V1 */
+:root {
+  --cv-lux-gold: #d9b77c;
+  --cv-lux-border: rgba(225,190,132,.19);
+  --cv-lux-glass: rgba(20,25,35,.76);
+}
+
+body {
+  background:
+    radial-gradient(ellipse at 75% 5%, rgba(181,137,72,.14), transparent 38%),
+    radial-gradient(ellipse at 12% 72%, rgba(68,91,132,.14), transparent 42%),
+    linear-gradient(145deg,#070a10 0%,#101620 48%,#080b11 100%) !important;
+  background-attachment: fixed !important;
+}
+
+body::before {
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:0;
+  opacity:.22;
+  background-image:
+    linear-gradient(rgba(218,183,124,.08) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(218,183,124,.08) 1px,transparent 1px);
+  background-size:48px 48px;
+  mask-image:linear-gradient(to bottom,black,transparent 85%);
+}
+
+body > * {
+  position:relative;
+  z-index:1;
+}
+
+button,
+input,
+textarea,
+select {
+  transition:
+    border-color .25s ease,
+    background-color .25s ease,
+    box-shadow .25s ease,
+    transform .25s ease;
+}
+
+button:not(:disabled):hover {
+  transform:translateY(-2px);
+  box-shadow:0 9px 28px rgba(0,0,0,.22);
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline:2px solid var(--cv-lux-gold);
+  outline-offset:3px;
+}
+
+input,
+textarea,
+select {
+  border-color:var(--cv-lux-border);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color:rgba(217,183,124,.65);
+  box-shadow:0 0 0 3px rgba(217,183,124,.08);
+}
+
+.rail {
+  background:
+    linear-gradient(180deg,rgba(20,24,32,.96),rgba(9,12,19,.96)) !important;
+  border-color:var(--cv-lux-border) !important;
+  box-shadow:12px 0 48px rgba(0,0,0,.18);
+}
+
+.rail button {
+  border-radius:12px;
+}
+
+#cvCreativeResult,
+#cvCreativeThumbnails,
+#cvDirectorMessages {
+  border-color:var(--cv-lux-border);
+}
+
+#cvCreativeResult {
+  background:
+    radial-gradient(circle at top right,rgba(217,183,124,.07),transparent 55%),
+    rgba(13,18,26,.52);
+  border-radius:20px;
+}
+
+#cvDirectorMessages {
+  background:
+    linear-gradient(155deg,rgba(18,24,34,.82),rgba(8,12,19,.86));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  #cvCreativeResult,
+  #cvDirectorMessages {
+    animation:cvLuxuryReveal .55s ease both;
+  }
+
+  @keyframes cvLuxuryReveal {
+    from { opacity:.6; transform:translateY(8px); }
+    to { opacity:1; transform:translateY(0); }
+  }
+}
+
+@media (max-width:768px) {
+  body::before { background-size:32px 32px; }
+}
+</style>
+
+</head>
+<body>
+<div class="shell">
+
+ <aside class="rail" aria-label="ניווט">
+  <div class="logo">V</div>
+  <button class="active" data-section="home" title="מסך הבית">⌂</button>
+  <button data-section="projects" title="הפרויקטים שלי">▤</button>
+  <button data-section="director" title="מנהל הקריאייטיב">✧</button>
+  <button data-section="production" title="תהליך ההפקה">◈</button>
+ </aside>
+ <main>
+  <div class="top">
+   <div>
+    <div class="eyebrow">CASA VERONA / CREATIVE INTELLIGENCE</div>
+    <h1>סטודיו הקריאייטיב</h1>
+    <div class="subtitle">מעבדת ההפקות והקריאייטיב של Casa Verona</div>
+   </div>
+   <div class="pill">✧ גרסת תצוגה · ללא חיבור לשרת</div>
+  </div>
+  <div class="workspace">
+   <section class="stage">
+    <div class="stage-label">
+     <div class="eyebrow">01 / במת ההפקה</div>
+     <strong>כאן הרעיונות הופכים למציאות.</strong>
+    </div>
+    <div class="halo"></div>
+    <div class="halo two"></div>
+    <div class="stage-center">
+     
+<div class="product-showcase">
+  <div class="product-light"></div>
+  <div class="product-placeholder" id="productPlaceholder">
+    <div class="product-icon">▱</div>
+    <strong>במת המוצר שלך</strong>
+    <span>בחר תמונת רהיט כדי להציג אותה כאן</span>
+    <label class="upload-stage">
+      + בחירת תמונה
+      <input type="file" id="stageImageInput"
+             accept="image/jpeg,image/png,image/webp" hidden>
+    </label>
+  </div>
+  <img id="stageProductImage" alt="תצוגת הרהיט" hidden>
+</div>
+
+    </div>
+    <div class="stage-bottom">
+     <div class="mono">תצוגת מוצר / סביבת הפקה</div>
+     <div class="controls">
+      <span>תצוגת מוצר</span>
+      <span>תאורת סטודיו</span>
+     </div>
+    </div>
+   </section>
+   <section class="panel">
+    <div class="panel-head">
+     <div>
+      <div class="eyebrow">AI / מנהל הקריאייטיב</div>
+      <h2>מנהל הקריאייטיב</h2>
+     </div>
+     <div class="ai-symbol">✧</div>
+    </div>
+    <div class="divider"></div>
+    <div class="ai-message">
+     <b>מנהל הקריאייטיב של Casa Verona</b>
+     <p>הסטודיו מוכן לתכנון הפקה חדשה. כאן יופיעו בעתיד רעיונות, תסריטים והמלצות מבוססות AI.</p>
+     <div class="mono">תצוגה בלבד · AI אינו מחובר</div>
+    </div>
+    <div class="chips">
+     <span>BRAND FILM</span>
+     <span>META ADS</span>
+     <span>INSTAGRAM REELS</span>
+     <span>STORIES</span>
+    </div>
+    <button class="action" type="button" onclick="document.getElementById('previewNotice').hidden=false">
+     ✧ פתיחת אזור הפרויקטים
+    </button>
+    <p id="previewNotice" class="subtitle" hidden>זוהי תצוגת עיצוב בלבד. לא מתבצעת יצירת וידאו או בקשת AI.</p>
+   </section>
+  </div>
+
+
+<!-- CV_CREATIVE_WORKSPACE_V1 -->
+<section id="cvCreativeWorkspace" class="cv-workspace">
+  <div class="cv-workspace-heading">
+    <div>
+      <div class="eyebrow">CREATIVE PRODUCTION / 01</div>
+      <h2>מעבדת עיצוב והפקות</h2>
+      <p>העלה תמונות, בחר סגנון והכן תוכנית קריאייטיב.</p>
+    </div>
+    <span class="cv-workspace-tag">CREATIVE ENGINE V1</span>
+  </div>
+
+  <div class="cv-workspace-grid">
+    <div class="cv-workspace-field">
+      <label for="cvFormat">סוג הפקה</label>
+      <select id="cvFormat">
+        <option value="story">סטורי · 9:16</option>
+        <option value="carousel">קרוסלה · 4:5</option>
+        <option value="post">פוסט · 4:5</option>
+        <option value="reel">רילס · 9:16</option>
+      </select>
+    </div>
+
+    <div class="cv-workspace-field">
+      <label for="cvStyle">סגנון עיצוב</label>
+      <select id="cvStyle">
+        <option value="luxury">יוקרתי</option>
+        <option value="minimal">מינימליסטי</option>
+        <option value="cinematic">קולנועי</option>
+        <option value="architectural">אדריכלי</option>
+        <option value="sales">מכירתי</option>
+      </select>
+    </div>
+  </div>
+
+  <label class="cv-upload-area" for="cvCreativeImages">
+    <span class="cv-upload-icon">＋</span>
+    <strong>העלאת תמונות להפקה</strong>
+    <span>בחר עד 10 תמונות JPG, PNG או WebP</span>
+  </label>
+
+  <input id="cvCreativeImages" type="file"
+    accept="image/jpeg,image/png,image/webp"
+    multiple hidden>
+
+  <div id="cvImageCount" class="cv-workspace-count">
+    לא נבחרו תמונות
+  </div>
+
+  <div id="cvCreativeThumbnails" class="cv-thumbnails"></div>
+
+  <button type="button" id="cvGenerateBrief"
+    class="cv-generate-brief">
+    ✧ הכנת תוכנית קריאייטיב
+  </button>
+
+  
+<!-- CV_CREATIVE_DIRECTOR_CHAT_V1 -->
+<div class="cv-director-chat">
+  <div class="cv-director-heading">
+    <div>
+      <strong>✧ AI Creative Director</strong>
+      <p>תן הוראות לעיצוב התמונות ולקריאייטיב השיווקי</p>
+    </div>
+    <span>CREATIVE CHAT</span>
+  </div>
+
+  <div id="cvDirectorMessages" class="cv-director-messages"
+       aria-live="polite">
+    <div class="cv-director-system">
+      ברירת המחדל: בחירת רקעים מתאימים לכל תמונה,
+      תוך שמירה על שפה יוקרתית ואחידה.
+      אפשר לכתוב הוראות אחרות בכל רגע.
+    </div>
+  </div>
+
+  <form id="cvDirectorForm" class="cv-director-form">
+    <textarea id="cvDirectorInput" rows="3" maxlength="2000"
+      placeholder="לדוגמה: תעצב את כל התמונות באותו רקע ותכין קריאייטיב מכירתי חזק מתחת לקרוסלה..."
+      required></textarea>
+    <button id="cvDirectorSend" type="submit">
+      שליחת הנחיה ←
+    </button>
+  </form>
+
+  <div id="cvDirectorStatus" class="cv-director-status"
+       role="status"></div>
+</div>
+
+<div id="cvCreativeResult" class="cv-creative-result"
+    aria-live="polite"></div>
+</section>
+
+<style>
+.cv-workspace{
+  margin:28px 0;
+  padding:28px;
+  border:1px solid rgba(215,185,126,.22);
+  border-radius:24px;
+  background:linear-gradient(135deg,#151c28,#0c111a);
+  color:#f5f0e8;
+  direction:rtl;
+}
+.cv-workspace-heading{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
+  margin-bottom:25px;
+}
+.cv-workspace-heading h2{
+  font-size:27px;
+  margin:8px 0;
+}
+.cv-workspace-heading p{
+  color:#9ca5b2;
+}
+.cv-workspace-tag{
+  color:#d7b97e;
+  font-size:11px;
+  letter-spacing:1px;
+}
+.cv-workspace-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:16px;
+  margin-bottom:20px;
+}
+.cv-workspace-field label{
+  display:block;
+  margin-bottom:10px;
+  color:#c9ced6;
+}
+.cv-workspace-field select{
+  width:100%;
+  padding:14px;
+  border-radius:12px;
+  border:1px solid #354050;
+  background:#111824;
+  color:white;
+}
+.cv-upload-area{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+  padding:34px;
+  border:1px dashed #8d7955;
+  border-radius:18px;
+  background:rgba(215,185,126,.04);
+  cursor:pointer;
+  text-align:center;
+}
+.cv-upload-icon{
+  font-size:32px;
+  color:#d7b97e;
+}
+.cv-upload-area span:last-child,
+.cv-workspace-count{
+  color:#a6afbb;
+  font-size:13px;
+}
+.cv-workspace-count{
+  margin:15px 0;
+}
+.cv-thumbnails{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(105px,1fr));
+  gap:12px;
+  margin:16px 0;
+}
+.cv-thumb{
+  border:1px solid #354050;
+  border-radius:12px;
+  overflow:hidden;
+  background:#101722;
+}
+.cv-thumb img{
+  display:block;
+  width:100%;
+  aspect-ratio:4/5;
+  object-fit:cover;
+}
+.cv-thumb span{
+  display:block;
+  padding:8px;
+  text-align:center;
+  font-size:12px;
+}
+.cv-generate-brief{
+  width:100%;
+  padding:16px;
+  border:0;
+  border-radius:13px;
+  background:linear-gradient(120deg,#b69a67,#e0c894);
+  color:#161616;
+  font-weight:800;
+  cursor:pointer;
+}
+.cv-creative-result{
+  margin-top:20px;
+}
+.cv-result-card{
+  border:1px solid #354050;
+  border-radius:12px;
+  padding:14px;
+  margin:9px 0;
+  background:#111824;
+}
+@media(max-width:650px){
+  .cv-workspace{padding:18px}
+  .cv-workspace-grid{grid-template-columns:1fr}
+  .cv-workspace-heading{align-items:flex-start;flex-direction:column}
+}
+</style>
+
+<section class="projects-section" id="projectsSection" hidden>
+ <div class="projects-header">
+  <div>
+   <div class="eyebrow">CASA VERONA / PROJECTS</div>
+   <h2>הפרויקטים שלי</h2>
+   <p>כאן תוכל ליצור טיוטות חדשות ולבחור פרויקט לעבודה.</p>
+  </div>
+  <button class="new-project" id="createProjectBtn">+ פרויקט חדש</button>
+ </div>
+ <div id="previewProjects" class="preview-projects"></div>
+ <div class="preview-disclaimer">
+  הפרויקטים בגרסת התצוגה נשמרים בדפדפן זה בלבד,
+  בנפרד מהסטודיו המקורי.
+ </div>
+</section>
+
+  <div class="bottom">
+   <div class="module">
+    <small>01 / עיצוב</small>
+    <h3>מעבדת העיצוב</h3>
+    <p>מרחב לתכנון שפה חזותית, תאורה, זוויות מצלמה וזהות מוצר.</p>
+   </div>
+   <div class="module">
+    <small>02 / אסטרטגיה</small>
+    <h3>אסטרטגיית המותג</h3>
+    <p>התאמת קונספטים להשקות, רשתות חברתיות וקמפיינים.</p>
+   </div>
+   <div class="module">
+    <small>03 / הפקה</small>
+    <h3>תהליך ההפקה</h3>
+    <p>תכנון סצנות, אישורים ובקרת איכות לפני יצירת סרטונים.</p>
+   </div>
+  </div>
+ </main>
+</div>
+
+<style>
+.rail{width:100%;gap:16px}
+.rail button{
+ width:62px;height:auto;min-height:66px;
+ font-size:23px;position:relative;
+}
+.rail button:after{
+ content:attr(title);
+ display:block;font:10px Arial,sans-serif;
+ margin-top:5px;white-space:nowrap;
+}
+.product-showcase{
+ width:100%;height:100%;min-height:250px;
+ display:grid;place-items:center;position:relative;
+}
+.product-light{
+ position:absolute;width:75%;height:60%;
+ background:radial-gradient(ellipse,rgba(223,194,151,.19),transparent 70%);
+ filter:blur(18px);pointer-events:none;
+}
+.product-placeholder{
+ position:relative;display:grid;place-items:center;
+ gap:12px;text-align:center;color:#e8d7be;
+}
+.product-placeholder strong{font:25px Georgia,serif}
+.product-placeholder span{font-size:12px;color:#aab5c3}
+.product-icon{font-size:80px;line-height:1;color:#c5a77d}
+.upload-stage,.new-project{
+ display:inline-block;border:1px solid rgba(223,194,151,.45);
+ background:linear-gradient(120deg,#ead2ab,#bda078);
+ color:#16130f;border-radius:12px;padding:12px 18px;
+ cursor:pointer;font-weight:700;font-size:13px;
+}
+#stageProductImage{
+ position:relative;
+ width:100%;height:330px;object-fit:contain;
+ filter:drop-shadow(0 30px 35px rgba(0,0,0,.55));
+ animation:float 6s ease-in-out infinite;
+}
+#stageProductImage[hidden],#productPlaceholder[hidden],
+#projectsSection[hidden]{display:none!important}
+.projects-section{
+ margin-top:24px;padding:26px;
+ border:1px solid rgba(223,194,151,.17);
+ background:rgba(16,23,35,.85);
+ border-radius:24px;
+}
+.projects-header{
+ display:flex;justify-content:space-between;
+ align-items:center;gap:20px;
+}
+.projects-header h2{font:30px Georgia,serif;margin:12px 0}
+.projects-header p,.preview-disclaimer{
+ color:#94a2b5;font-size:12px;line-height:1.8;
+}
+.preview-projects{
+ display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+ gap:14px;margin-top:24px;
+}
+.preview-project{
+ padding:20px;border-radius:17px;
+ background:#182132;border:1px solid rgba(255,255,255,.1);
+}
+.preview-project strong{display:block;font-size:16px}
+.preview-project span{
+ display:block;color:#aebacc;font-size:12px;margin-top:10px;
+}
+.preview-project button{
+ margin-top:14px;padding:10px 14px;
+ border-radius:9px;border:1px solid rgba(223,194,151,.35);
+ background:transparent;color:#e5cda9;cursor:pointer;
+}
+.preview-disclaimer{margin-top:20px}
+@media(max-width:650px){
+ .rail{overflow-x:auto;justify-content:flex-start}
+ .rail button{flex:0 0 70px}
+ .projects-header{flex-direction:column;align-items:stretch}
+ #stageProductImage{height:230px}
+}
+</style>
+<script>
+(() => {
+ const KEY="cv_future_lab_preview_projects_v1";
+ let projects=[];
+ try{
+  const stored=JSON.parse(localStorage.getItem(KEY)||"[]");
+  if(Array.isArray(stored)) projects=stored;
+ }catch(e){projects=[]}
+
+ const section=document.getElementById("projectsSection");
+ const projectList=document.getElementById("previewProjects");
+ const buttons=[...document.querySelectorAll(".rail button[data-section]")];
+
+ function showSection(name){
+  buttons.forEach(btn=>btn.classList.toggle("active",btn.dataset.section===name));
+  section.hidden=name!=="projects";
+  if(name==="projects") section.scrollIntoView({behavior:"smooth",block:"start"});
+  else if(name==="director")
+   document.querySelector(".panel").scrollIntoView({behavior:"smooth"});
+  else if(name==="production")
+   document.querySelector(".bottom").scrollIntoView({behavior:"smooth"});
+  else window.scrollTo({top:0,behavior:"smooth"});
+ }
+
+ buttons.forEach(btn=>btn.addEventListener("click",()=>showSection(btn.dataset.section)));
+
+ function renderProjects(){
+  projectList.replaceChildren();
+  if(!projects.length){
+   const empty=document.createElement("p");
+   empty.textContent="עדיין אין פרויקטים בתצוגה. לחץ על פרויקט חדש כדי להתחיל.";
+   projectList.appendChild(empty);
+   return;
+  }
+  projects.forEach(project=>{
+   const card=document.createElement("div");
+   card.className="preview-project";
+   const name=document.createElement("strong");
+   name.textContent=project.name;
+   const status=document.createElement("span");
+   status.textContent="טיוטה · "+project.created;
+   const select=document.createElement("button");
+   select.textContent="בחירת פרויקט";
+   select.addEventListener("click",()=>{
+    document.querySelector(".stage-label strong").textContent=project.name;
+    showSection("home");
+   });
+   card.append(name,status,select);
+   projectList.appendChild(card);
+  });
+ }
+
+ document.getElementById("createProjectBtn").addEventListener("click",()=>{
+  const name=prompt("מה שם הדגם או הפרויקט החדש?");
+  if(!name||!name.trim()) return;
+  projects.unshift({
+   id:Date.now(),
+   name:name.trim().slice(0,100),
+   created:new Date().toLocaleDateString("he-IL")
+  });
+  try{localStorage.setItem(KEY,JSON.stringify(projects))}catch(e){
+   alert("לא ניתן לשמור את הטיוטה בדפדפן זה.");
+  }
+  renderProjects();
+ });
+
+ const input=document.getElementById("stageImageInput");
+ let currentImageURL=null;
+ input.addEventListener("change",()=>{
+  const file=input.files&&input.files[0];
+  if(!file)return;
+  if(!["image/jpeg","image/png","image/webp"].includes(file.type)){
+   alert("יש לבחור תמונת JPG, PNG או WebP.");
+   return;
+  }
+  if(file.size>15*1024*1024){
+   alert("יש לבחור תמונה בגודל עד 15MB.");
+   return;
+  }
+  if(currentImageURL)URL.revokeObjectURL(currentImageURL);
+  currentImageURL=URL.createObjectURL(file);
+  const img=document.getElementById("stageProductImage");
+  img.src=currentImageURL;
+  img.hidden=false;
+  document.getElementById("productPlaceholder").hidden=true;
+ });
+
+ const explore=document.querySelector(".action");
+ if(explore){
+  explore.onclick=null;
+  explore.addEventListener("click",()=>showSection("projects"));
+ }
+ renderProjects();
+})();
+</script>
+
+
+<script>
+(() => {
+  "use strict";
+  const marker = "CV_CREATIVE_WORKSPACE_V1";
+  const input = document.getElementById("cvCreativeImages");
+  const thumbs = document.getElementById("cvCreativeThumbnails");
+  const count = document.getElementById("cvImageCount");
+  const result = document.getElementById("cvCreativeResult");
+  const button = document.getElementById("cvGenerateBrief");
+
+  let images = [];
+  let urls = [];
+
+  input.addEventListener("change", () => {
+    urls.forEach(url => URL.revokeObjectURL(url));
+    urls = [];
+    images = [];
+    thumbs.replaceChildren();
+    result.replaceChildren();
+
+    const files = [...(input.files || [])];
+
+    if (files.length > 10) {
+      count.textContent = "ניתן לבחור עד 10 תמונות בלבד.";
+      input.value = "";
+      return;
+    }
+
+    for (const file of files) {
+      if (!["image/jpeg","image/png","image/webp"].includes(file.type)
+          || file.size > 15 * 1024 * 1024) {
+        count.textContent = "יש לבחור תמונות תקינות עד 15MB לתמונה.";
+        images = [];
+        input.value = "";
+        urls.forEach(url => URL.revokeObjectURL(url));
+        urls = [];
+        thumbs.replaceChildren();
+        return;
+      }
+
+      images.push(file);
+      const url = URL.createObjectURL(file);
+      urls.push(url);
+
+      const card = document.createElement("div");
+      card.className = "cv-thumb";
+
+      const img = document.createElement("img");
+      img.src = url;
+      img.alt = file.name;
+
+      const label = document.createElement("span");
+      label.textContent = "תמונה " + images.length;
+
+      card.append(img, label);
+      thumbs.appendChild(card);
+    }
+
+    count.textContent = images.length
+      ? images.length + " תמונות מוכנות להפקה"
+      : "לא נבחרו תמונות";
+  });
+
+
+  // CV_CREATIVE_BRIEF_API_INTEGRATION_V1
+  button.addEventListener("click", async () => {
+    result.replaceChildren();
+
+    if (!images.length) {
+      result.textContent = "יש להעלות תמונה אחת לפחות.";
+      return;
+    }
+
+    const format = document.getElementById("cvFormat").value;
+    const style = document.getElementById("cvStyle").value;
+
+    button.disabled = true;
+    button.textContent = "מכין תוכנית קריאייטיב...";
+
+    try {
+      const response = await fetch("/api/creative/brief", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          format,
+          style,
+          imageCount: images.length,
+          productName: "Casa Verona Furniture",
+          objective: "WhatsApp leads"
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          response.status === 401 || response.status === 403
+            ? "אין הרשאה להפעלת מנוע הקריאייטיב."
+            : "השרת לא הצליח להכין את תוכנית הקריאייטיב."
+        );
+      }
+
+      const brief = await response.json();
+
+      if (!brief.success || !Array.isArray(brief.slides)) {
+        throw new Error("התקבלה תשובה לא תקינה מהשרת.");
+      }
+
+      const heading = document.createElement("h3");
+      heading.textContent = "תוכנית ההפקה מוכנה";
+      result.appendChild(heading);
+
+      const description = document.createElement("p");
+      description.textContent =
+        brief.slides.length + " תמונות · " +
+        brief.dimensions.width + "×" +
+        brief.dimensions.height +
+        " · סגנון: " + brief.style;
+      result.appendChild(description);
+
+      brief.slides.forEach((slide, index) => {
+        const card = document.createElement("div");
+        card.className = "cv-result-card";
+        card.textContent =
+          "שקופית " + slide.position +
+          " — " + (images[index]?.name || "תמונה") +
+          " · ממתינה לקריאייטיב ולאישור";
+        result.appendChild(card);
+      });
+
+      const notice = document.createElement("p");
+      notice.textContent =
+        "תוכנית ההפקה נוצרה בשרת. עדיין לא בוצעו ניתוח תמונה, יצירת גרפיקה או הפעלת AI בתשלום.";
+      result.appendChild(notice);
+
+    } catch (error) {
+      result.textContent = error.message ||
+        "אירעה שגיאה בהכנת תוכנית הקריאייטיב.";
+    } finally {
+      button.disabled = false;
+      button.textContent = "✧ הכנת תוכנית קריאייטיב";
+    }
+  });
+
+  window.addEventListener("pagehide", () => {
+    urls.forEach(url => URL.revokeObjectURL(url));
+  });
+})();
+</script>
+
+
+<style>
+.cv-director-chat{
+  margin-top:24px;
+  padding:22px;
+  border:1px solid rgba(215,185,126,.25);
+  border-radius:20px;
+  background:linear-gradient(145deg,#171717,#24211d);
+  color:#f3eadb;
+}
+.cv-director-heading{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-bottom:18px;
+}
+.cv-director-heading strong{font-size:19px}
+.cv-director-heading p{
+  margin:6px 0 0;
+  color:#bdb2a1;
+  font-size:13px;
+}
+.cv-director-heading span{
+  font-size:10px;
+  letter-spacing:1.5px;
+  color:#d8bd86;
+}
+.cv-director-messages{
+  min-height:110px;
+  max-height:330px;
+  overflow:auto;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-bottom:16px;
+}
+.cv-director-system,.cv-director-user{
+  padding:13px 15px;
+  border-radius:13px;
+  font-size:13px;
+  line-height:1.8;
+  white-space:pre-wrap;
+}
+.cv-director-system{
+  background:rgba(255,255,255,.05);
+  color:#cfc6b7;
+}
+.cv-director-user{
+  background:rgba(215,185,126,.14);
+  border:1px solid rgba(215,185,126,.2);
+  align-self:flex-start;
+  max-width:90%;
+}
+.cv-director-form{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.cv-director-form textarea{
+  width:100%;
+  box-sizing:border-box;
+  resize:vertical;
+  border:1px solid rgba(215,185,126,.25);
+  border-radius:12px;
+  background:#101010;
+  color:#fff;
+  padding:14px;
+  font:inherit;
+}
+.cv-director-form button{
+  align-self:flex-start;
+  border:0;
+  border-radius:11px;
+  padding:12px 22px;
+  background:#d8bd86;
+  color:#171717;
+  font-weight:700;
+  cursor:pointer;
+}
+.cv-director-form button:disabled{
+  opacity:.55;
+  cursor:wait;
+}
+.cv-director-status{
+  margin-top:10px;
+  font-size:12px;
+  color:#d8bd86;
+}
+</style>
+
+
+<script>
+(() => {
+  "use strict";
+
+  const form = document.getElementById("cvDirectorForm");
+  const input = document.getElementById("cvDirectorInput");
+  const messages = document.getElementById("cvDirectorMessages");
+  const status = document.getElementById("cvDirectorStatus");
+  const send = document.getElementById("cvDirectorSend");
+  const imagesInput = document.getElementById("cvCreativeImages");
+
+  const storageKey = "cv_future_lab_director_chat_v1";
+  let project = null;
+
+  try {
+    const saved = JSON.parse(localStorage.getItem(storageKey) || "null");
+    if (
+      saved?.version === 1 &&
+      Array.isArray(saved.project?.direction?.instructions)
+    ) {
+      project = saved.project;
+    }
+  } catch {}
+
+  function renderMessages() {
+    messages.querySelectorAll(".cv-director-user")
+      .forEach(el => el.remove());
+
+    for (const item of project?.direction?.instructions || []) {
+      if (item.role !== "user") continue;
+      const bubble = document.createElement("div");
+      bubble.className = "cv-director-user";
+      bubble.textContent = item.content;
+      messages.appendChild(bubble);
+    }
+
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  renderMessages();
+
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const message = input.value.trim();
+    if (!message) return;
+
+    const imageCount = imagesInput.files.length;
+
+    if (imageCount < 1 || imageCount > 10) {
+      status.textContent =
+        "יש לבחור בין תמונה אחת ל־10 תמונות.";
+      return;
+    }
+
+    send.disabled = true;
+    status.textContent = "שומר הנחיה...";
+
+    try {
+      if (!project) {
+        const response = await fetch(
+          "/api/creative/director/project",
+          {
+            method: "POST",
+            credentials: "same-origin",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({
+              format: document.getElementById("cvFormat").value,
+              imageCount
+            })
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("לא ניתן ליצור פרויקט בשרת.");
+        }
+
+        const data = await response.json();
+        if (!data.success || !data.project) {
+          throw new Error("תשובת שרת לא תקינה.");
+        }
+
+        project = data.project;
+      }
+
+      const response = await fetch(
+        "/api/creative/director/instruction",
+        {
+          method: "POST",
+          credentials: "same-origin",
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({project, message})
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("לא ניתן לשמור את ההנחיה בשרת.");
+      }
+
+      const data = await response.json();
+      if (!data.success || !data.project) {
+        throw new Error("תשובת שרת לא תקינה.");
+      }
+
+      project = data.project;
+
+      try {
+        localStorage.setItem(storageKey, JSON.stringify({
+          version: 1,
+          project
+        }));
+      } catch {
+        status.textContent =
+          "ההנחיה התקבלה, אך לא נשמרה בדפדפן.";
+      }
+
+      renderMessages();
+      input.value = "";
+
+      if (!status.textContent.includes("לא נשמרה")) {
+        status.textContent =
+          "✓ ההנחיה נשמרה. הפקת AI עדיין לא פעילה.";
+      }
+
+    } catch (error) {
+      status.textContent =
+        error.message || "שגיאה בשמירת ההנחיה.";
+    } finally {
+      send.disabled = false;
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

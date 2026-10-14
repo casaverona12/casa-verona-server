@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Casa Verona | סטודיו הפקות AI</title>
+<style>
+:root{
+  --ink:#0c0c0b;
+  --coal:#090909;
+  --stone:#f2f0e9;
+  --paper:#fbfaf6;
+  --line:#d9d6ce;
+  --wine:#6f1d2c;
+  --muted:#74716a;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--stone);color:var(--ink)}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.layout{display:flex;min-height:100vh}
+.sidebar{
+ width:265px;background:var(--coal);color:white;
+ padding:30px 20px;flex-shrink:0
+}
+.brand{font:400 24px Georgia,serif;letter-spacing:2px}
+.brand small{display:block;font:10px Arial,sans-serif;color:#d49ba5;letter-spacing:2px;margin-top:10px}
+.nav{margin-top:45px;display:grid;gap:10px}
+.nav a{color:#bbb;text-decoration:none;padding:14px;border-right:2px solid transparent}
+.nav a.active{color:white;background:#1b1b1b;border-color:var(--wine)}
+.main{flex:1;padding:35px;min-width:0}
+.content{max-width:1250px;margin:auto}
+.kicker{font:10px Georgia,serif;color:var(--wine);letter-spacing:2px}
+h1{font:400 clamp(30px,4vw,44px) Georgia,serif;margin:12px 0}
+h2{font:400 24px Georgia,serif}
+p{color:var(--muted);line-height:1.7}
+.header{display:flex;justify-content:space-between;align-items:center;gap:20px}
+.primary{border:0;background:var(--coal);color:white;padding:15px 23px}
+.primary:hover{background:var(--wine)}
+.hero{
+ background:linear-gradient(120deg,#fbfaf6,#e5e1d8);
+ border:1px solid var(--line);
+ padding:32px;margin:25px 0
+}
+.hero h2{font-size:31px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.stat,.panel,.project{
+ background:white;border:1px solid var(--line);padding:23px
+}
+.stat strong{display:block;font:400 30px Georgia,serif;margin-top:14px}
+.stat span{color:var(--muted);font-size:12px}
+.section{margin-top:35px}
+.section-head{display:flex;justify-content:space-between;align-items:center}
+.projects{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.project h3{font:400 23px Georgia,serif;margin:10px 0}
+.status{font-size:11px;color:var(--wine)}
+.project button{
+ margin-top:12px;background:transparent;border:1px solid var(--line);
+ padding:10px 14px
+}
+.project button:hover{border-color:var(--wine)}
+.empty{padding:38px;text-align:center;background:#fff;border:1px dashed var(--line)}
+.form{display:none;margin:20px 0}
+.form.visible{display:block}
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+label{display:block;font-size:12px;margin:12px 0 7px}
+input,select{
+ width:100%;padding:14px;border:1px solid var(--line);
+ background:var(--paper);color:var(--ink)
+}
+.form-actions{margin-top:20px}
+.note{font-size:11px;color:var(--muted);margin-top:22px}
+@media(max-width:850px){
+ .layout{display:block}
+ .sidebar{width:100%;padding:20px}
+ .nav{margin-top:15px;display:flex;overflow:auto}
+ .main{padding:18px}
+ .header{align-items:flex-start;flex-direction:column}
+ .stats,.projects,.form-grid{grid-template-columns:1fr}
+}
+
+/* CASA VERONA CREATIVE OS — PREMIUM THEME V1 */
+:root{
+  --ink:#f4f0e8;
+  --coal:#080b11;
+  --stone:#090c12;
+  --paper:#141a25;
+  --line:#2a303c;
+  --wine:#c9aa79;
+  --muted:#919baa;
+  color-scheme:dark;
+}
+html{scroll-behavior:smooth}
+body{
+  color:var(--ink);
+  background:
+    radial-gradient(ellipse at 75% 0%,rgba(71,83,112,.20),transparent 38%),
+    radial-gradient(ellipse at 12% 70%,rgba(145,113,66,.07),transparent 40%),
+    #090c12;
+}
+.sidebar{
+  width:275px;
+  background:linear-gradient(180deg,#0c1018,#080a0f);
+  border-left:1px solid rgba(201,170,121,.13);
+  padding:40px 22px;
+  position:sticky;
+  top:0;
+  height:100vh;
+}
+.brand{
+  font-size:24px;
+  color:#f6f0e4;
+  letter-spacing:3px;
+}
+.brand small{
+  color:#bda17a;
+  letter-spacing:2.5px;
+  font-size:9px;
+}
+.nav{gap:8px;margin-top:60px}
+.nav a{
+  color:#9299a7;
+  border:1px solid transparent;
+  border-radius:12px;
+  padding:15px 16px;
+  transition:.25s ease;
+}
+.nav a:hover{
+  background:#171d28;
+  color:#fff;
+}
+.nav a.active{
+  color:#f0d5a7;
+  background:linear-gradient(90deg,rgba(201,170,121,.12),rgba(201,170,121,.025));
+  border-color:rgba(201,170,121,.19);
+  box-shadow:inset 3px 0 0 #c9aa79;
+}
+.main{padding:54px clamp(20px,4vw,70px)}
+.content{max-width:1480px}
+.kicker{
+  font:600 10px Arial,sans-serif;
+  color:#c9aa79;
+  letter-spacing:3px;
+  text-transform:uppercase;
+}
+h1,h2,h3{color:#f7f3eb}
+h1{
+  font-size:clamp(34px,4vw,58px);
+  letter-spacing:-1px;
+  line-height:1.15;
+}
+h2{font-size:27px}
+p{color:#9da6b4}
+.header{padding:10px 0 20px}
+.primary{
+  color:#15120c;
+  font-weight:700;
+  border:1px solid #ddc294;
+  border-radius:12px;
+  background:linear-gradient(135deg,#f0d8ad,#b99762);
+  box-shadow:0 10px 32px rgba(178,137,75,.13);
+  transition:transform .2s,box-shadow .2s,filter .2s;
+}
+.primary:hover{
+  background:linear-gradient(135deg,#f7e5c4,#cba66e);
+  box-shadow:0 14px 40px rgba(178,137,75,.25);
+  transform:translateY(-2px);
+}
+.hero{
+  position:relative;
+  overflow:hidden;
+  min-height:235px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding:42px;
+  margin:28px 0;
+  border:1px solid rgba(201,170,121,.23);
+  border-radius:22px;
+  background:
+    radial-gradient(circle at 80% 35%,rgba(201,170,121,.15),transparent 28%),
+    radial-gradient(circle at 20% 100%,rgba(73,99,148,.16),transparent 42%),
+    linear-gradient(125deg,#181e2a,#0c1018 72%);
+  box-shadow:0 25px 65px rgba(0,0,0,.22);
+}
+.hero:after{
+  content:"AI / CREATIVE INTELLIGENCE";
+  position:absolute;
+  bottom:20px;
+  left:26px;
+  color:rgba(201,170,121,.33);
+  font:10px Arial,sans-serif;
+  letter-spacing:3px;
+  pointer-events:none;
+}
+.hero h2{
+  font-size:clamp(30px,3.5vw,43px);
+  margin:16px 0 8px;
+}
+.hero p{max-width:650px}
+.stats{gap:18px}
+.stat,.panel,.project{
+  background:linear-gradient(150deg,rgba(27,34,47,.96),rgba(14,19,28,.98));
+  border:1px solid rgba(149,162,184,.15);
+  border-radius:18px;
+  box-shadow:0 16px 40px rgba(0,0,0,.13);
+}
+.stat{
+  padding:27px;
+  position:relative;
+  overflow:hidden;
+}
+.stat:before{
+  content:"";
+  position:absolute;
+  top:0;right:0;
+  width:65px;height:2px;
+  background:linear-gradient(90deg,transparent,#c9aa79);
+}
+.stat strong{
+  font-family:Arial,sans-serif;
+  font-weight:300;
+  font-size:40px;
+  color:#f3e2c5;
+}
+.stat span{color:#9da6b4}
+.section{margin-top:45px}
+.section-head{margin-bottom:18px}
+.projects{gap:20px}
+.project{
+  padding:26px;
+  transition:border-color .2s,transform .2s,box-shadow .2s;
+}
+.project:hover{
+  border-color:rgba(201,170,121,.35);
+  transform:translateY(-3px);
+  box-shadow:0 24px 55px rgba(0,0,0,.22);
+}
+.project h3{font-size:25px}
+.status{color:#d8bc8e}
+.project button{
+  background:#1c2533;
+  color:#f1ede6;
+  border:1px solid #354052;
+  border-radius:11px;
+  transition:.2s;
+}
+.project button:hover{
+  background:#293447;
+  border-color:#c9aa79;
+}
+.project button:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
+.project .cv-creative-result{
+  background:linear-gradient(145deg,#111823,#1a202b);
+  border:1px solid rgba(201,170,121,.28)!important;
+  border-radius:16px!important;
+  padding:22px!important;
+  color:#e9e8e4;
+  line-height:1.8;
+}
+.empty{
+  background:#121824;
+  color:#a7afbb;
+  border:1px dashed #394253;
+  border-radius:16px;
+}
+.form{margin:26px 0}
+.form-grid{gap:20px}
+label{color:#b8c0ce;font-weight:600}
+input,select,textarea{
+  background:#0e1520!important;
+  color:#f2eee6!important;
+  border:1px solid #354052!important;
+  border-radius:12px!important;
+  outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+input:focus,select:focus,textarea:focus{
+  border-color:#c9aa79!important;
+  box-shadow:0 0 0 3px rgba(201,170,121,.12);
+}
+input::placeholder,textarea::placeholder{color:#788395}
+#cvMediaUpload>div{
+  background:#101722!important;
+  border-color:#485366!important;
+}
+#cvMediaUpload p,#cvMediaStatus{color:#aeb6c3!important}
+#cvBackToDashboard{
+  background:#151b26!important;
+  color:#ead5b1!important;
+  border:1px solid #64543e!important;
+  box-shadow:0 10px 32px rgba(0,0,0,.3)!important;
+}
+.note{color:#8993a3}
+@media(max-width:850px){
+  .sidebar{
+    width:100%;
+    height:auto;
+    position:relative;
+    padding:20px;
+  }
+  .nav{margin-top:18px}
+  .main{padding:25px 16px}
+  .hero{padding:28px 22px;min-height:220px}
+  .stats,.projects,.form-grid{grid-template-columns:1fr}
+  #cvBackToDashboard{
+    position:static!important;
+    display:inline-flex!important;
+    margin:12px!important;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  *,*:before,*:after{
+    animation-duration:.01ms!important;
+    transition-duration:.01ms!important;
+  }
+}
+
+</style>
+</head>
+<body>
+<a id="cvBackToDashboard"
+   href="/dashboard"
+   style="
+     position:fixed;
+     top:14px;
+     left:14px;
+     z-index:99999;
+     display:flex;
+     align-items:center;
+     gap:8px;
+     padding:11px 16px;
+     border-radius:14px;
+     background:#251d25;
+     color:#f7efe3;
+     border:1px solid #b99b73;
+     box-shadow:0 8px 24px rgba(0,0,0,.18);
+     font:600 13px Arial,sans-serif;
+     text-decoration:none;
+   ">
+   חזרה למערכת הראשית ↗
+</a>
+
+<div class="layout">
+<aside class="sidebar">
+ <div class="brand">CASA VERONA<small>AI PRODUCTION STUDIO</small></div>
+ <nav class="nav">
+  <a class="active" href="#projects">פרויקטים והפקות</a>
+  <a href="#director">מנהל הקריאייטיב</a>
+  <a href="#approvals">מרכז אישורים</a>
+ </nav>
+</aside>
+<main class="main">
+<div class="content">
+ <header class="header">
+  <div>
+   <div class="kicker">CASA VERONA / CREATIVE AGENCY</div>
+   <h1>משרד הקריאייטיב וההפקות</h1>
+   <p>הצוות מתכנן. הסטודיו מפיק. אתה מקבל החלטות.</p>
+  </div>
+  <button class="primary" id="newProject">+ פרויקט חדש</button>
+ </header>
+
+ <section class="hero" id="director">
+  <div class="kicker">AI CREATIVE DIRECTOR</div>
+  <h2>מנהל הקריאייטיב</h2>
+  <p>כאן יופיעו בהמשך רעיונות שה־AI ייזום לאחר מחקר מותגים, טרנדים וקמפיינים מובילים. כרגע המנהל עדיין לא מחובר למנוע AI.</p>
+ </section>
+
+ <section class="stats">
+  <div class="stat"><span>פרויקטים</span><strong id="projectCount">0</strong></div>
+  <div class="stat"><span>טיוטות</span><strong id="draftCount">0</strong></div>
+  <div class="stat"><span>ממתינים לאישור</span><strong id="approvalCount">0</strong></div>
+ </section>
+
+ <section class="panel form" id="projectForm">
+  <h2>פתיחת פרויקט הפקה</h2>
+  <div class="form-grid">
+   <div>
+    <label for="product">שם מוצר / דגם</label>
+    <input id="product" maxlength="100" placeholder="לדוגמה: Mon Cheri">
+   </div>
+   <div>
+    <label for="type">סוג הפקה</label>
+    <select id="type">
+     <option value="סרטון מתמונה">סרטון מתמונה</option>
+     <option value="עריכת סרטון">עריכת סרטון קיים</option>
+     <option value="פרסומת למותג">פרסומת למותג</option>
+     <option value="קרוסלה">קרוסלה</option>
+    </select>
+   </div>
+  </div>
+
+  <div id="cvMediaUpload" style="margin-top:22px">
+    <label for="cvMediaFile">חומרי גלם להפקה</label>
+
+    <div style="margin-top:10px;padding:24px;border:1px dashed #9c8b80;border-radius:18px;background:#fbfaf6;text-align:center">
+      <div style="font-size:30px">🎬</div>
+      <p style="font-weight:700">העלאת תמונה או סרטון</p>
+      <p style="font-size:13px;color:#666">בחר קובץ מהמכשיר שלך</p>
+
+      <input
+        type="file"
+        id="cvMediaFile"
+        accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm"
+        style="width:100%;max-width:350px"
+      >
+
+      <div id="cvMediaPreview" style="margin-top:18px"></div>
+      <p id="cvMediaStatus" style="font-size:13px;color:#666"></p>
+    </div>
+  </div>
+  <div class="form-actions">
+   <button class="primary" id="saveProject">יצירת טיוטה</button>
+  </div>
+  <p class="note">הפרויקט יישמר בדפדפן זה בלבד. לא תתחיל הפקת וידאו ולא תהיה הוצאה כספית.</p>
+ </section>
+
+ <section class="section" id="projects">
+  <div class="section-head"><h2>הפרויקטים שלי</h2></div>
+  <div class="projects" id="projectList"></div>
+ </section>
+
+ <section class="section" id="approvals">
+  <div class="section-head"><h2>מרכז אישורים</h2></div>
+  <div class="panel">
+   <p>כאן יוצגו בהמשך תוצרים אמיתיים לאישור. יצירת טיוטה אינה שולחת דבר לפרסום.</p>
+  </div>
+ </section>
+
+ <p class="note">סביבת פיתוח מקומית · ללא חיבור למנוע וידאו, לשרת או לפרסום</p>
+</div>
+</main>
+</div>
+
+<script>
+const STORAGE_KEY="cv_creative_studio_drafts_v1";
+let projects=[];
+try{
+ const stored=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");
+ if(Array.isArray(stored))projects=stored;
+}catch(error){
+ console.warn("Unable to read local drafts",error);
+}
+
+
+const CV_STUDIO_MEDIA_DB_V1 = "cv_studio_media_v1";
+
+function cvOpenMediaDB(){
+ return new Promise((resolve,reject)=>{
+  const request=indexedDB.open(CV_STUDIO_MEDIA_DB_V1,1);
+  request.onupgradeneeded=()=>{
+   const db=request.result;
+   if(!db.objectStoreNames.contains("files"))db.createObjectStore("files");
+  };
+  request.onsuccess=()=>resolve(request.result);
+  request.onerror=()=>reject(request.error);
+ });
+}
+
+async function cvSaveMedia(id,file){
+ const db=await cvOpenMediaDB();
+ try{
+  await new Promise((resolve,reject)=>{
+   const tx=db.transaction("files","readwrite");
+   tx.objectStore("files").put(file,id);
+   tx.oncomplete=resolve;
+   tx.onerror=()=>reject(tx.error);
+   tx.onabort=()=>reject(tx.error);
+  });
+ }finally{db.close();}
+}
+
+async function cvGetMedia(id){
+ const db=await cvOpenMediaDB();
+ try{
+  return await new Promise((resolve,reject)=>{
+   const tx=db.transaction("files","readonly");
+   const request=tx.objectStore("files").get(id);
+   request.onsuccess=()=>resolve(request.result);
+   request.onerror=()=>reject(request.error);
+  });
+ }finally{db.close();}
+}
+
+async function cvAttachMedia(card,project){
+ try{
+  const file=await cvGetMedia(project.id);
+  if(!card.isConnected)return;
+  if(!file){
+   const msg=document.createElement("p");
+   msg.textContent="לא נמצא קובץ מדיה שמור לפרויקט הזה";
+   msg.style.cssText="font-size:12px;color:#9b5960;margin-top:10px";
+   card.appendChild(msg);
+   return;
+  }
+  const url=URL.createObjectURL(file);
+  const media=document.createElement(file.type.startsWith("video/")?"video":"img");
+  media.src=url;
+  media.style.cssText="width:100%;max-height:240px;object-fit:contain;border-radius:12px;margin-top:12px";
+  if(media.tagName==="VIDEO"){media.controls=true;media.playsInline=true;}
+  media.addEventListener("error",()=>URL.revokeObjectURL(url),{once:true});
+  card.appendChild(media);
+ }catch(error){
+  console.warn("Media preview unavailable",error);
+ }
+}
+
+const form=document.getElementById("projectForm");
+document.getElementById("newProject").addEventListener("click",()=>{
+ form.classList.toggle("visible");
+ if(form.classList.contains("visible")){
+  document.getElementById("product").focus();
+ }
+});
+
+document.getElementById("saveProject").addEventListener("click",async()=>{
+ const product=document.getElementById("product").value.trim();
+ const type=document.getElementById("type").value;
+ if(!product){alert("יש להזין שם מוצר");return;}
+ if(projects.length>=100){alert("הגעת למגבלת הטיוטות המקומית");return;}
+
+ const fileInput=document.getElementById("cvMediaFile");
+ const selectedFile=fileInput?.files?.[0]||null;
+ const projectId=Date.now()+"-"+Math.random().toString(36).slice(2);
+ if(selectedFile){
+  try{await cvSaveMedia(projectId,selectedFile);}
+  catch(error){
+   console.error(error);
+   alert("שמירת הקובץ נכשלה. הפרויקט לא נוצר.");
+   return;
+  }
+ }
+
+ projects.unshift({
+  id:projectId,
+  product,type,status:"טיוטה",
+  createdAt:new Date().toISOString()
+ });
+
+ try{
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(projects));
+ }catch(error){
+  projects.shift();
+  alert("לא ניתן לשמור את הפרויקט בדפדפן");
+  return;
+ }
+ document.getElementById("product").value="";
+ form.classList.remove("visible");
+ render();
+});
+
+function render(){
+ const list=document.getElementById("projectList");
+ list.replaceChildren();
+ document.getElementById("projectCount").textContent=projects.length;
+ document.getElementById("draftCount").textContent=
+  projects.filter(p=>p.status==="טיוטה").length;
+ document.getElementById("approvalCount").textContent=0;
+
+ if(!projects.length){
+  const empty=document.createElement("div");
+  empty.className="empty";
+  empty.textContent="עדיין אין פרויקטים. פתח פרויקט ראשון כדי להתחיל.";
+  list.appendChild(empty);
+  return;
+ }
+
+ for(const project of projects){
+  const card=document.createElement("article");
+  card.className="project";
+  const status=document.createElement("div");
+  status.className="status";
+  status.textContent=project.status;
+  const title=document.createElement("h3");
+  title.textContent=project.product;
+  const detail=document.createElement("p");
+  detail.textContent=project.type;
+  card.append(status,title,detail);
+
+  const editButton=document.createElement("button");
+  editButton.textContent="✏️ עריכת פרויקט";
+  editButton.type="button";
+  editButton.style.cssText="margin-top:14px;padding:10px 16px;border-radius:10px;cursor:pointer";
+
+  editButton.addEventListener("click",()=>{
+   const existing=card.querySelector(".cv-project-editor");
+   if(existing){existing.remove();return;}
+
+   const editor=document.createElement("div");
+   editor.className="cv-project-editor";
+   editor.style.cssText="display:grid;gap:12px;margin-top:16px;padding:16px;border:1px solid #c5a46d;border-radius:14px";
+
+   const nameLabel=document.createElement("label");
+   nameLabel.textContent="שם הדגם";
+   const nameInput=document.createElement("input");
+   nameInput.value=project.product;
+
+   const styleLabel=document.createElement("label");
+   styleLabel.textContent="סגנון הפקה";
+   const styleSelect=document.createElement("select");
+
+   for(const style of ["יוקרתי","קולנועי","מינימליסטי","מכירתי"]){
+    const option=document.createElement("option");
+    option.value=style;
+    option.textContent=style;
+    styleSelect.appendChild(option);
+   }
+   styleSelect.value=project.style||"יוקרתי";
+
+   const promptLabel=document.createElement("label");
+   promptLabel.textContent="הוראות להפקת הסרטון";
+   const promptInput=document.createElement("textarea");
+   promptInput.rows=4;
+   promptInput.placeholder="לדוגמה: תנועת מצלמה איטית סביב הספה, תאורה טבעית ואווירה יוקרתית";
+   promptInput.value=project.prompt||"";
+
+   const saveButton=document.createElement("button");
+   saveButton.type="button";
+   saveButton.textContent="💾 שמירת שינויים";
+   saveButton.style.cssText="padding:12px;border-radius:10px;cursor:pointer";
+
+   saveButton.addEventListener("click",()=>{
+    const name=nameInput.value.trim();
+    if(!name){alert("יש להזין שם דגם");return;}
+
+    const previous={
+     product:project.product,
+     style:project.style,
+     prompt:project.prompt
+    };
+
+    project.product=name;
+    project.style=styleSelect.value;
+    project.prompt=promptInput.value;
+
+    try{
+     localStorage.setItem(STORAGE_KEY,JSON.stringify(projects));
+    }catch(error){
+     Object.assign(project,previous);
+     alert("שמירת השינויים נכשלה");
+     return;
+    }
+
+    render();
+   });
+
+   editor.append(
+    nameLabel,nameInput,
+    styleLabel,styleSelect,
+    promptLabel,promptInput,
+    saveButton
+   );
+
+   card.appendChild(editor);
+  });
+
+  card.appendChild(editButton);
+
+  const creativeButton=document.createElement("button");
+  creativeButton.type="button";
+  creativeButton.textContent="✨ מנהל הקריאייטיב";
+  creativeButton.style.cssText="margin-top:10px;padding:12px 16px;border-radius:10px;cursor:pointer;display:block;width:100%";
+
+  creativeButton.addEventListener("click",()=>{
+    const existing=card.querySelector(".cv-creative-result");
+    if(existing){existing.remove();return;}
+
+    const panel=document.createElement("div");
+    panel.className="cv-creative-result";
+    panel.style.cssText="margin-top:14px;padding:16px;border:1px solid #c5a46d;border-radius:14px";
+
+    const output=document.createElement("div");
+    output.style.whiteSpace="pre-wrap";
+
+    const status=document.createElement("div");
+    status.style.cssText="margin:10px 0;font-weight:bold";
+
+    const input=document.createElement("textarea");
+    input.placeholder="דבר עם מנהל הקריאייטיב... למשל: תציע פתיחה יותר יוקרתית";
+    input.rows=3;
+    input.style.cssText="width:100%;box-sizing:border-box;margin-top:12px;padding:10px;border-radius:10px";
+
+    const send=document.createElement("button");
+    send.type="button";
+    send.textContent="שלח למנהל הקריאייטיב";
+    send.style.cssText="margin-top:10px;padding:12px;border-radius:10px;cursor:pointer";
+
+    const approve=document.createElement("button");
+    approve.type="button";
+    approve.textContent="✓ אשר קונספט לתכנון הפקה";
+    approve.style.cssText="margin:10px 0 0 10px;padding:12px;border-radius:10px;cursor:pointer";
+
+    function save(){
+      localStorage.setItem(STORAGE_KEY,JSON.stringify(projects));
+    }
+
+    function refresh(){
+      output.textContent=project.creativeProposal||"עדיין אין הצעה. לחץ על שלח כדי לקבל שלושה רעיונות.";
+      status.textContent="סטטוס: "+(project.creativeStatus||"טרם נוצר קונספט");
+      approve.disabled=!project.creativeProposal||project.creativeStatus==="מאושר להפקה";
+    }
+
+    async function askAI(){
+      const followup=input.value.trim();
+      const previous=String(project.creativeProposal||"");
+
+      if(previous&&!followup){
+        alert("כתוב מה תרצה לשנות בהצעה.");
+        return;
+      }
+
+      const instructions=[
+        "אתה מנהל הקריאייטיב הראשי של Casa Verona.",
+        "המוצר: "+String(project.product||"לא צוין"),
+        "סוג הפרויקט: "+String(project.type||"לא צוין"),
+        "הסק אם מתאים סרטון השקה לאינסטגרם, קמפיין Meta או סטורי.",
+        "אם אין מידע מספיק, הצע את הסוג המומלץ וציין את ההנחה.",
+        "תכנן פרסומת יוקרתית עם זוויות צילום, מעברים נקיים,",
+        "קצב עריכה, אווירת מוזיקה מורשית והנעה לפעולה.",
+        "אל תמציא מאפייני מוצר או תטען שראית את תמונתו.",
+        "אל תטען שנוצר סרטון או שפורסם.",
+        previous
+          ?"הצעה קודמת:\n"+previous.slice(0,4500)
+          :"הצע שלושה קונספטים מקוריים ובחר את המומלץ.",
+        followup?"בקשת המשתמש:\n"+followup.slice(0,1500):"",
+        "ענה בעברית ברורה. אם התבקשת לשנות הצעה, החזר הצעה מעודכנת מלאה."
+      ].filter(Boolean).join("\n");
+
+      if(!confirm("לשלוח בקשת AI שעשויה להיות כרוכה בעלות, בכפוף לבקרת התקציב?")){
+        return;
+      }
+
+      send.disabled=true;
+      approve.disabled=true;
+      status.textContent="מנהל הקריאייטיב עובד על ההצעה...";
+
+      try{
+        const response=await fetch("/api/ai/marketing/consult",{
+          method:"POST",
+          credentials:"same-origin",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({messages:[{role:"user",content:instructions}]})
+        });
+
+        const data=await response.json();
+
+        if(!response.ok||!data.success||!data.answer){
+          const errors={
+            MARKETING_AI_DISABLED:"מנוע ה-AI כבוי בהגדרות.",
+            MARKETING_AI_PRICING_NOT_VERIFIED:"תמחור ה-AI עדיין לא אומת.",
+            MARKETING_AI_MONTHLY_BUDGET_REACHED:"התקציב החודשי נוצל.",
+            MARKETING_AI_RATE_LIMIT:"יותר מדי בקשות בדקה."
+          };
+          status.textContent=errors[data.error]||"בקשת AI נכשלה: "+(data.error||response.status);
+          return;
+        }
+
+        const oldProposal=project.creativeProposal;
+        const oldStatus=project.creativeStatus;
+        const oldHistory=project.creativeHistory;
+
+        project.creativeProposal=String(data.answer);
+        project.creativeStatus="ממתין לאישור";
+        project.creativeHistory=[
+          ...(Array.isArray(oldHistory)?oldHistory:[]),
+          {request:followup||"יצירת קונספט ראשוני",answer:project.creativeProposal}
+        ].slice(-10);
+
+        try{
+          save();
+        }catch(error){
+          project.creativeProposal=oldProposal;
+          project.creativeStatus=oldStatus;
+          project.creativeHistory=oldHistory;
+          status.textContent="התקבלה תשובת AI, אך לא ניתן לשמור אותה בדפדפן.";
+          output.textContent=String(data.answer);
+          return;
+        }
+
+        input.value="";
+        refresh();
+
+      }catch(error){
+        status.textContent="שגיאת חיבור. ההצעה הקודמת נשמרה.";
+      }finally{
+        send.disabled=false;
+        if(project.creativeProposal) refresh();
+      }
+    }
+
+    send.addEventListener("click",askAI);
+
+    approve.addEventListener("click",()=>{
+      const previous=project.creativeStatus;
+      project.creativeStatus="מאושר להפקה";
+      try{
+        save();
+        refresh();
+      }catch(error){
+        project.creativeStatus=previous;
+        alert("שמירת האישור נכשלה.");
+      }
+    });
+
+    panel.append(output,status,input,send,approve);
+    card.appendChild(panel);
+    refresh();
+  });
+
+  card.appendChild(creativeButton);
+
+  cvAttachMedia(card,project);
+  list.appendChild(card);
+ }
+}
+render();
+</script>
+
+<script>
+(function () {
+  const input = document.getElementById("cvMediaFile");
+  const preview = document.getElementById("cvMediaPreview");
+  const status = document.getElementById("cvMediaStatus");
+  if (!input || !preview || !status) return;
+
+  let currentUrl = null;
+
+  input.addEventListener("change", function () {
+    preview.replaceChildren();
+    status.textContent = "";
+
+    if (currentUrl) {
+      URL.revokeObjectURL(currentUrl);
+      currentUrl = null;
+    }
+
+    const file = input.files && input.files[0];
+    if (!file) return;
+
+    const allowed = [
+      "image/jpeg", "image/png", "image/webp",
+      "video/mp4", "video/quicktime", "video/webm"
+    ];
+
+    if (!allowed.includes(file.type)) {
+      status.textContent = "סוג הקובץ אינו נתמך";
+      input.value = "";
+      return;
+    }
+
+    const maxSize = 100 * 1024 * 1024;
+    if (file.size > maxSize) {
+      status.textContent = "הקובץ גדול מ־100MB";
+      input.value = "";
+      return;
+    }
+
+    currentUrl = URL.createObjectURL(file);
+
+    const element = document.createElement(
+      file.type.startsWith("image/") ? "img" : "video"
+    );
+
+    element.src = currentUrl;
+    element.style.maxWidth = "100%";
+    element.style.maxHeight = "320px";
+    element.style.borderRadius = "14px";
+
+    if (element.tagName === "VIDEO") {
+      element.controls = true;
+      element.playsInline = true;
+    }
+
+    preview.appendChild(element);
+    status.textContent = "נבחר: " + file.name;
+  });
+})();
+</script>
+</body>
+</html>
