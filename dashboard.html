@@ -2825,6 +2825,58 @@ input::placeholder,textarea::placeholder{color:#788395}
 }
 </style>
 
+
+<style>
+/* CV_AD_STUDIO_PRIMARY_SCREEN_V1 */
+
+/* The advertising studio is the main workspace */
+#ai-production-studio .cv-native-studio-header {
+  display: none !important;
+}
+
+#ai-production-studio .content > header.header,
+#ai-production-studio #director,
+#ai-production-studio .stats,
+#ai-production-studio #projects,
+#ai-production-studio #approvals {
+  display: none !important;
+}
+
+/* Hide legacy project controls but preserve their DOM */
+#ai-production-studio #projectForm > h2,
+#ai-production-studio #projectForm > .form-grid,
+#ai-production-studio #projectForm > #cvMediaUpload,
+#ai-production-studio #projectForm > .form-actions,
+#ai-production-studio #projectForm > .note {
+  display: none !important;
+}
+
+#ai-production-studio #projectForm {
+  display: block !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+#ai-production-studio #cvUnifiedFilmStudio {
+  margin: 0 auto !important;
+  max-width: 900px !important;
+}
+
+#ai-production-studio .cv-native-studio-content {
+  padding-top: 12px !important;
+}
+
+@media (max-width: 600px) {
+  #ai-production-studio #cvUnifiedFilmStudio {
+    padding: 20px 16px !important;
+    border-radius: 20px !important;
+  }
+}
+</style>
+
 </head>
 <body>
 
@@ -3237,44 +3289,7 @@ input::placeholder,textarea::placeholder{color:#788395}
   <div class="stat"><span>ממתינים לאישור</span><strong id="approvalCount">0</strong></div>
  </section>
 
- <section class="panel form" id="projectForm">
-  <h2>פתיחת פרויקט הפקה</h2>
-  <div class="form-grid">
-   <div>
-    <label for="product">שם מוצר / דגם</label>
-    <input id="product" maxlength="100" placeholder="לדוגמה: Mon Cheri">
-   </div>
-   <div>
-    <label for="type">סוג הפקה</label>
-    <select id="type">
-     <option value="סרטון מתמונה">סרטון מתמונה</option>
-     <option value="עריכת סרטון">עריכת סרטון קיים</option>
-     <option value="פרסומת למותג">פרסומת למותג</option>
-     <option value="קרוסלה">קרוסלה</option>
-    </select>
-   </div>
-  </div>
-
-
-<!-- CV_CINEMATIC_UI_V1 -->
-<section data-cv-legacy-hidden="1" hidden style="display:none!important" style="margin:20px 0;padding:22px;border:1px solid #b99a73;border-radius:18px;background:#191a1e;color:#f7f2e9;direction:rtl">
- <div style="font-size:11px;letter-spacing:2px;color:#d7b98a">CASA VERONA · CINEMATIC STUDIO</div>
- <h3 style="margin:9px 0">🎬 הפקה קולנועית — 30 שניות</h3>
- <p style="line-height:1.6;opacity:.8">עריכת סרטוני גלם לפורמט רילס 9:16, עם חיתוכים וגימור צבע. גרסת V1 אינה בוחרת שוטים בעזרת AI ואינה מוסיפה מוזיקה.</p>
- <form id="cvCinematicForm" style="display:grid;gap:12px">
-  <label>בחר 2–6 סרטונים (MP4 / MOV, עד 35MB לקובץ)
-   <input id="cvCinematicFiles" type="file" accept="video/mp4,video/quicktime,.mp4,.mov" multiple required style="display:block;width:100%;margin-top:8px">
-  </label>
-  <button id="cvCinematicGo" type="submit" style="padding:14px;border:0;border-radius:10px;background:#c9ab78;color:#181818;font-weight:700">הפק סרטון Cinematic</button>
-  <p id="cvCinematicStatus" aria-live="polite" style="margin:0"></p>
-  <a id="cvCinematicDownload" download="casa-verona-cinematic.mp4" style="display:none;color:#e8c796">הורד את הסרטון המוכן</a>
-  <video id="cvCinematicPreview" controls playsinline style="display:none;max-width:100%;max-height:420px"></video>
- </form>
-</section>
-<!-- CV_CINEMATIC_UI_END -->
-
-
-<!-- CV_UNIFIED_FILM_STUDIO_V2_STYLE -->
+ <!-- CV_UNIFIED_FILM_STUDIO_V2_STYLE -->
 <style>
 #cvUnifiedFilmStudio {
   box-sizing:border-box;
@@ -3750,6 +3765,44 @@ input::placeholder,textarea::placeholder{color:#788395}
  });
 })();
 </script>
+
+
+<section class="panel form" id="projectForm">
+  <h2>פתיחת פרויקט הפקה</h2>
+  <div class="form-grid">
+   <div>
+    <label for="product">שם מוצר / דגם</label>
+    <input id="product" maxlength="100" placeholder="לדוגמה: Mon Cheri">
+   </div>
+   <div>
+    <label for="type">סוג הפקה</label>
+    <select id="type">
+     <option value="סרטון מתמונה">סרטון מתמונה</option>
+     <option value="עריכת סרטון">עריכת סרטון קיים</option>
+     <option value="פרסומת למותג">פרסומת למותג</option>
+     <option value="קרוסלה">קרוסלה</option>
+    </select>
+   </div>
+  </div>
+
+
+<!-- CV_CINEMATIC_UI_V1 -->
+<section data-cv-legacy-hidden="1" hidden style="display:none!important" style="margin:20px 0;padding:22px;border:1px solid #b99a73;border-radius:18px;background:#191a1e;color:#f7f2e9;direction:rtl">
+ <div style="font-size:11px;letter-spacing:2px;color:#d7b98a">CASA VERONA · CINEMATIC STUDIO</div>
+ <h3 style="margin:9px 0">🎬 הפקה קולנועית — 30 שניות</h3>
+ <p style="line-height:1.6;opacity:.8">עריכת סרטוני גלם לפורמט רילס 9:16, עם חיתוכים וגימור צבע. גרסת V1 אינה בוחרת שוטים בעזרת AI ואינה מוסיפה מוזיקה.</p>
+ <form id="cvCinematicForm" style="display:grid;gap:12px">
+  <label>בחר 2–6 סרטונים (MP4 / MOV, עד 35MB לקובץ)
+   <input id="cvCinematicFiles" type="file" accept="video/mp4,video/quicktime,.mp4,.mov" multiple required style="display:block;width:100%;margin-top:8px">
+  </label>
+  <button id="cvCinematicGo" type="submit" style="padding:14px;border:0;border-radius:10px;background:#c9ab78;color:#181818;font-weight:700">הפק סרטון Cinematic</button>
+  <p id="cvCinematicStatus" aria-live="polite" style="margin:0"></p>
+  <a id="cvCinematicDownload" download="casa-verona-cinematic.mp4" style="display:none;color:#e8c796">הורד את הסרטון המוכן</a>
+  <video id="cvCinematicPreview" controls playsinline style="display:none;max-width:100%;max-height:420px"></video>
+ </form>
+</section>
+<!-- CV_CINEMATIC_UI_END -->
+
 
 <!-- CV_CLIP_MONTAGE_UI_V1 -->
 <section style="display:none!important;margin:20px 0;padding:20px;border:1px solid #80636a;border-radius:18px;background:#211d22;color:#f7f2e9;direction:rtl">
