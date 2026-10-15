@@ -86,6 +86,9 @@ async function produceCommercial(options) {
   const clips = [];
 
   try {
+    // Ensure the output directory exists on Render.
+    fs.mkdirSync(EXPORTS, { recursive: true });
+
     for (let i = 0; i < images.length; i++) {
       const input = safePath(images[i], UPLOADS);
 
