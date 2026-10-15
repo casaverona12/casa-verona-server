@@ -5852,6 +5852,200 @@ if (
 }
 
 
+
+// CV_AI_FILM_DIRECTOR_GENERATE_V1
+if (
+  req.method === "POST" &&
+  url.pathname === "/api/marketing/film-director/generate"
+) {
+  const auth = await requireAuth(req, res, [USER_ROLES.ADMIN]);
+  if (!auth) return;
+
+  const reply = (status, payload) => {
+    res.writeHead(status, {
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "no-store"
+    });
+    res.end(JSON.stringify(payload));
+  };
+
+  if (process.env.MARKETING_AI_ENABLED !== "true") {
+    reply(503, { success: false, error: "DIRECTOR_AI_DISABLED" });
+    return;
+  }
+
+  const userId = String(auth.user?.id || auth.profile?.id || "");
+
+  if (!userId) {
+    reply(403, { success: false, error: "DIRECTOR_USER_ID_MISSING" });
+    return;
+  }
+
+  const now = Date.now();
+  const recent = (marketingAIRateLimits.get(userId) || [])
+    .filter(t => now - t < 60000);
+
+  if (recent.length >= 10) {
+    reply(429, { success: false, error: "DIRECTOR_RATE_LIMIT" });
+    return;
+  }
+
+  recent.push(now);
+  marketingAIRateLimits.set(userId, recent);
+
+  try {
+    let raw = "";
+    let bytes = 0;
+
+    for await (const chunk of req) {
+      bytes += chunk.length;
+
+      if (bytes > 12000) {
+        reply(413, { success: false, error: "DIRECTOR_REQUEST_TOO_LARGE" });
+        return;
+      }
+
+      raw += chunk.toString("utf8");
+    }
+
+    let input;
+
+    try {
+      input = JSON.parse(raw || "{}");
+    } catch {
+      reply(400, { success: false, error: "INVALID_JSON" });
+      return;
+    }
+
+    if (!input || typeof input !== "object" || Array.isArray(input)) {
+      reply(400, { success: false, error: "INVALID_DIRECTOR_REQUEST" });
+      return;
+    }
+
+    const { createDirectorBrief } = require(
+      "./ai-business-os/marketing-agency/film-director/director-core"
+    );
+
+    // Validate the creative brief before consuming quota.
+    createDirectorBrief(input);
+
+    const {
+      PRICING,
+      calculateMaximumReservation,
+      calculateMarketingCost
+    } = require(
+      "./ai-business-os/marketing-agency/marketing-pricing"
+    );
+
+    if (!PRICING.verified) {
+      reply(503, { success: false, error: "DIRECTOR_PRICING_UNVERIFIED" });
+      return;
+    }
+
+    const db = requireSupabase();
+
+    const { data: quotaRows, error: quotaError } =
+      await db.rpc("consume_marketing_ai_quota", { p_limit: 50 });
+
+    if (quotaError || !Array.isArray(quotaRows) || quotaRows.length !== 1) {
+      reply(503, { success: false, error: "DIRECTOR_QUOTA_UNAVAILABLE" });
+      return;
+    }
+
+    if (!quotaRows[0].allowed) {
+      reply(429, { success: false, error: "DIRECTOR_DAILY_LIMIT" });
+      return;
+    }
+
+    const {
+      reserveMarketingBudget,
+      finalizeMarketingBudget,
+      markMarketingBudgetForReview
+    } = require(
+      "./ai-business-os/marketing-agency/marketing-budget"
+    );
+
+    const reservationUsd = calculateMaximumReservation(25000, 1200);
+    const reservation = await reserveMarketingBudget(db, reservationUsd);
+
+    if (!reservation.allowed) {
+      reply(429, { success: false, error: "DIRECTOR_MONTHLY_BUDGET_REACHED" });
+      return;
+    }
+
+    try {
+      const { generateDirectorConcept } = require(
+        "./ai-business-os/marketing-agency/film-director/director-ai"
+      );
+
+      const result = await generateDirectorConcept(input);
+
+      if (!result.success) {
+        await finalizeMarketingBudget(
+          db, reservation.requestId, 0, false
+        );
+        reply(503, result);
+        return;
+      }
+
+      const usage = result.usage;
+
+      if (
+        !usage ||
+        ![
+          usage.input_tokens,
+          usage.output_tokens,
+          usage.cached_input_tokens
+        ].every(v => Number.isSafeInteger(v) && v >= 0) ||
+        usage.cached_input_tokens > usage.input_tokens
+      ) {
+        throw new Error("DIRECTOR_USAGE_UNAVAILABLE");
+      }
+
+      const actualUsd = calculateMarketingCost(usage);
+
+      if (actualUsd > reservation.reservedUsd) {
+        throw new Error("DIRECTOR_RESERVATION_EXCEEDED");
+      }
+
+      await finalizeMarketingBudget(
+        db, reservation.requestId, actualUsd, true
+      );
+
+      reply(200, result);
+
+    } catch (error) {
+      try {
+        await markMarketingBudgetForReview(
+          db, reservation.requestId
+        );
+      } catch (reviewError) {
+        console.error(
+          "DIRECTOR BUDGET REVIEW ERROR:",
+          reviewError.message
+        );
+      }
+
+      throw error;
+    }
+
+  } catch (error) {
+    const invalid = [
+      "INVALID_DIRECTOR_INSTRUCTION",
+      "INVALID_DIRECTOR_REQUEST"
+    ].includes(error.message);
+
+    console.error("DIRECTOR GENERATE ERROR:", error.message);
+
+    reply(invalid ? 400 : 502, {
+      success: false,
+      error: invalid ? "INVALID_DIRECTOR_REQUEST" : "DIRECTOR_AI_FAILED"
+    });
+  }
+
+  return;
+}
+
 // CV_AI_FILM_DIRECTOR_PLAN_V1
 if (
   req.method === "POST" &&

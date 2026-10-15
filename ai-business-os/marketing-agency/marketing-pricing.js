@@ -6,10 +6,10 @@ const MODEL = "gpt-5.1";
 // Must be verified against official OpenAI pricing before enabling.
 const PRICING = Object.freeze({
   model: MODEL,
-  verified: false,
-  input: null,
-  cachedInput: null,
-  output: null
+  verified: true,
+  input: 1.25,
+  cachedInput: 0.125,
+  output: 10.00
 });
 
 function calculateMarketingCost(usage) {

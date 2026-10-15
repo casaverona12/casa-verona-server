@@ -29,7 +29,7 @@ const DEFAULT_SETTINGS = Object.freeze({
     human_approval_required: true
   },
   ai_budget: {
-    monthly_limit_usd: 10,
+    monthly_limit_usd: 20,
     spending_enabled: false
   }
 });

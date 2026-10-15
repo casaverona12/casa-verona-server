@@ -3205,7 +3205,7 @@ input::placeholder,textarea::placeholder{color:#788395}
   </div>
 
   <div class="cv-native-studio-content">
-    
+
 <div class="content">
  <header class="header">
   <div>
@@ -3246,7 +3246,7 @@ input::placeholder,textarea::placeholder{color:#788395}
    </div>
   </div>
 
-  
+
 <!-- CV_CINEMATIC_UI_V1 -->
 <section data-cv-legacy-hidden="1" hidden style="display:none!important" style="margin:20px 0;padding:22px;border:1px solid #b99a73;border-radius:18px;background:#191a1e;color:#f7f2e9;direction:rtl">
  <div style="font-size:11px;letter-spacing:2px;color:#d7b98a">CASA VERONA · CINEMATIC STUDIO</div>
@@ -3395,6 +3395,15 @@ input::placeholder,textarea::placeholder{color:#788395}
     <h3>✦ הבמאי הדיגיטלי</h3>
     <p style="font-size:13px;color:#b9b1a8">אפשר לכתוב הנחיות להפקה. עריכה אוטומטית לפי הצ'אט תתווסף בהמשך.</p>
     <textarea id="cvUnifiedInstructions" rows="3" placeholder="למשל: פתיחה דרמטית, דגש על הספה וסיום יוקרתי" style="box-sizing:border-box;width:100%;padding:12px;border-radius:10px"></textarea>
+
+    <button id="cvDirectorAIButton" type="button"
+      style="margin-top:10px;width:100%;padding:15px;border:0;border-radius:12px;background:#c9ab78;color:#171717;font-weight:700">
+      🎬 הפק פרסומת חדשה עם AI
+    </button>
+    <p id="cvDirectorAIStatus" aria-live="polite"></p>
+    <div id="cvDirectorAIResult" dir="rtl"
+      style="display:none;margin-top:12px;padding:18px;border:1px solid #49413a;border-radius:14px;background:#10151e;white-space:pre-wrap;line-height:1.8"></div>
+
     <button id="cvDirectorPlanButton" type="button"
       style="margin-top:12px;width:100%;padding:14px;border:1px solid #c9ab78;border-radius:12px;background:#26201c;color:#e8c796;font-weight:700">
       ✦ בקש תוכנית מהבמאי
@@ -3406,6 +3415,78 @@ input::placeholder,textarea::placeholder{color:#788395}
   </div>
 </section>
 <!-- CV_UNIFIED_FILM_STUDIO_END -->
+
+
+<script id="cv-film-director-ai-client-v1">
+(function(){
+  const button = document.getElementById("cvDirectorAIButton");
+  const instructions = document.getElementById("cvUnifiedInstructions");
+  const status = document.getElementById("cvDirectorAIStatus");
+  const result = document.getElementById("cvDirectorAIResult");
+
+  if (!button || !status || !result) return;
+
+  button.addEventListener("click", async function(){
+    if (button.disabled) return;
+
+    const platformMap = {
+      "אינסטגרם": "instagram",
+      "פייסבוק": "facebook",
+      "טיקטוק": "tiktok",
+      "אתר": "all"
+    };
+
+    const instruction = instructions?.value.trim() || "";
+
+    const input = {
+      instruction: instruction ||
+        "פתח באופן עצמאי רעיון מקורי לפרסומת יוקרתית של Casa Verona. בחר קונספט, פתיחה, תסריט וסצנות.",
+      platform: platformMap[
+        document.getElementById("cvUnifiedPlatform")?.value
+      ] || "instagram",
+      objective: document.getElementById("cvUnifiedGoal")?.value || "מכירות",
+      style: document.getElementById("cvUnifiedStyle")?.value || "יוקרתי וקולנועי"
+    };
+
+    button.disabled = true;
+    status.textContent = "🎬 הבמאי מפתח קונספט לפרסומת...";
+    result.style.display = "none";
+
+    try {
+      const response = await fetch(
+        "/api/marketing/film-director/generate",
+        {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(input)
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        if (data.error === "DIRECTOR_AI_DISABLED") {
+          throw new Error("מנוע ה-AI עדיין לא הופעל בשרת.");
+        }
+        if (data.error === "DIRECTOR_MONTHLY_BUDGET_REACHED") {
+          throw new Error("הגענו לתקרת תקציב ה-AI החודשית.");
+        }
+        throw new Error(data.error || "DIRECTOR_REQUEST_FAILED");
+      }
+
+      result.textContent = data.concept || "לא התקבל קונספט.";
+      result.style.display = "block";
+      status.textContent = "✅ הבמאי הכין קונספט ותוכנית הפקה. טרם נוצר סרטון.";
+
+    } catch (error) {
+      status.textContent = "❌ " + error.message;
+    } finally {
+      button.disabled = false;
+    }
+  });
+})();
+</script>
 
 <script id="cv-film-director-plan-client-v1">
 (function(){
