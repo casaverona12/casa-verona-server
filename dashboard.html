@@ -2816,6 +2816,15 @@ input::placeholder,textarea::placeholder{color:#788395}
    hideLogin() after a successful authentication. */
 #loginScreen.cv-login-hidden { display: none !important; }
 </style>
+
+<style>
+/* CV_CREATIVE_STUDIO_SINGLE_ACTION_V1 */
+#cvDirectorAIButton,
+#cvDirectorPlanButton {
+  display: none !important;
+}
+</style>
+
 </head>
 <body>
 
@@ -3354,68 +3363,97 @@ input::placeholder,textarea::placeholder{color:#788395}
 <!-- CV_UNIFIED_FILM_STUDIO_V2_STYLE_END -->
 
 <!-- CV_UNIFIED_FILM_STUDIO_V1 -->
-<section id="cvUnifiedFilmStudio" dir="rtl" style="margin:20px 0;padding:20px;background:#15171c;color:#f6f0e7;border:1px solid #5a4b3b;border-radius:20px">
-  <div style="font-size:11px;letter-spacing:2px;color:#c9ab78">CASA VERONA · AI FILM STUDIO</div>
-  <h2 style="margin:10px 0">סטודיו הפקות</h2>
-  <div style="background:#08090c;border-radius:16px;padding:12px;margin:18px 0">
-    <video id="cvUnifiedPreview" controls playsinline style="width:100%;max-height:520px;display:none"></video>
-    <div id="cvUnifiedPlaceholder" style="min-height:260px;display:grid;place-items:center;text-align:center;color:#bba888">
-      🎬 הסרטון שלך יוצג כאן
+<section id="cvUnifiedFilmStudio" dir="rtl" style="margin:20px 0;padding:24px;background:linear-gradient(145deg,#181b20,#101216);color:#f6f0e7;border:1px solid #625344;border-radius:24px">
+
+  <div style="font-size:11px;letter-spacing:2px;color:#c9ab78">CASA VERONA · AI ADVERTISING STUDIO</div>
+  <h2 style="margin:10px 0 6px;font-size:29px">סטודיו הפרסום</h2>
+  <p style="color:#b9b4ae;margin:0 0 24px">המוצר שלך. המטרה שלך. הפרסומת שלנו.</p>
+
+  <div id="cvUnifiedForm" style="display:grid;gap:18px">
+
+    <div style="padding:20px;border:1px dashed #8b775c;border-radius:18px;background:#1d2025">
+      <div style="font-size:12px;color:#c9ab78;margin-bottom:8px">01 / המוצר</div>
+      <label>העלאת תמונות או סרטונים
+        <input id="cvUnifiedFiles" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,.jpg,.jpeg,.png,.webp,.mp4,.mov" multiple>
+      </label>
+      <p style="font-size:12px;color:#a9a6a3;margin:8px 0 0">אפשר להעלות תמונות מוצר או חומרי וידאו קיימים.</p>
     </div>
-    <a id="cvUnifiedDownload" download="casa-verona-film.mp4" style="display:none;color:#e8c796;margin-top:12px">הורדת הסרטון</a>
-  </div>
-  <div id="cvUnifiedForm" style="display:grid;gap:14px">
-    <label>מה מפיקים?
-      <select id="cvUnifiedType" style="display:block;width:100%;padding:12px">
-        <option>פרסומת למוצר</option><option>סרטון מותג</option><option>רילס</option>
+
+    <div style="font-size:12px;color:#c9ab78">02 / הגדרות הפרסומת</div>
+
+    <label>מה נרצה להפיק?
+      <select id="cvUnifiedType">
+        <option value="video">סרטון פרסומי</option>
+        <option value="image">תמונה לקמפיין ממומן — בקרוב</option>
+        <option value="carousel">קרוסלה — בקרוב</option>
       </select>
     </label>
-    <label>לאן הסרטון מיועד?
-      <select id="cvUnifiedPlatform" style="display:block;width:100%;padding:12px">
-        <option>אינסטגרם</option><option>פייסבוק</option><option>טיקטוק</option><option>אתר</option>
+
+    <label>איפה נפרסם?
+      <select id="cvUnifiedPlatform">
+        <option>אינסטגרם</option>
+        <option>פייסבוק</option>
+        <option>טיקטוק</option>
+        <option>אתר</option>
       </select>
     </label>
-    <label>מה המטרה?
-      <select id="cvUnifiedGoal" style="display:block;width:100%;padding:12px">
-        <option>מכירות</option><option>חשיפה</option><option>השקת מוצר</option>
+
+    <label>מה מטרת הקמפיין?
+      <select id="cvUnifiedGoal">
+        <option>לידים לוואטסאפ</option>
+        <option>מכירות</option>
+        <option>חשיפה</option>
+        <option>השקת מוצר</option>
       </select>
     </label>
+
     <label>איזה סגנון?
-      <select id="cvUnifiedStyle" style="display:block;width:100%;padding:12px">
-        <option>יוקרתי וקולנועי</option><option>רגשי</option><option>מכירתי וקצבי</option>
+      <select id="cvUnifiedStyle">
+        <option>יוקרתי וקולנועי</option>
+        <option>רגשי</option>
+        <option>מכירתי וקצבי</option>
       </select>
     </label>
-    <label>העלאת תמונות או סרטונים
-      <input id="cvUnifiedFiles" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,.jpg,.jpeg,.png,.webp,.mp4,.mov" multiple style="display:block;width:100%;margin-top:8px">
+
+    <label>מה חשוב לך בפרסומת?
+      <textarea id="cvUnifiedInstructions" rows="3" placeholder="למשל: להדגיש את הספה, ליצור אווירה יוקרתית ולהניע לפנייה בוואטסאפ" style="box-sizing:border-box;width:100%;padding:14px;border-radius:12px"></textarea>
     </label>
-    <button id="cvUnifiedGo" type="button" style="padding:15px;background:#c9ab78;color:#171717;border:0;border-radius:12px;font-weight:bold">🎬 הפק את הסרטון שלי</button>
-    <p id="cvUnifiedStatus" aria-live="polite"></p>
-  </div>
-  <div style="border-top:1px solid #464047;margin-top:20px;padding-top:18px">
-    <h3>✦ הבמאי הדיגיטלי</h3>
-    <p style="font-size:13px;color:#b9b1a8">אפשר לכתוב הנחיות להפקה. עריכה אוטומטית לפי הצ'אט תתווסף בהמשך.</p>
-    <textarea id="cvUnifiedInstructions" rows="3" placeholder="למשל: פתיחה דרמטית, דגש על הספה וסיום יוקרתי" style="box-sizing:border-box;width:100%;padding:12px;border-radius:10px"></textarea>
 
-    <button id="cvDirectorAIButton" type="button"
-      style="margin-top:10px;width:100%;padding:15px;border:0;border-radius:12px;background:#c9ab78;color:#171717;font-weight:700">
-      🎬 הפק פרסומת חדשה עם AI
+    <button id="cvUnifiedGo" type="button" style="padding:17px;background:#c9ab78;color:#171717;border:0;border-radius:14px;font-size:17px;font-weight:800">
+      🎬 הפק פרסומת
     </button>
+    <p id="cvUnifiedStatus" aria-live="polite" style="margin:0"></p>
+  </div>
+
+  <div style="margin-top:28px;padding-top:22px;border-top:1px solid #45413d">
+    <div style="font-size:12px;color:#c9ab78">03 / התוצאה שלך</div>
+    <h3 style="margin:8px 0 14px">הפרסומת המוכנה</h3>
+
+    <div style="background:#08090c;border-radius:16px;padding:12px">
+      <video id="cvUnifiedPreview" controls playsinline style="width:100%;max-height:520px;display:none"></video>
+      <div id="cvUnifiedPlaceholder" style="min-height:220px;display:grid;place-items:center;text-align:center;color:#bba888">
+        הפרסומת שלך תופיע כאן לאחר ההפקה
+      </div>
+      <a id="cvUnifiedDownload" download="casa-verona-film.mp4" style="display:none;color:#e8c796;margin-top:12px">↓ הורדת הפרסומת</a>
+    </div>
+
+    <div id="cvAdCopyPanel" style="display:none;margin-top:16px;padding:18px;background:#1c2026;border:1px solid #49433d;border-radius:16px">
+      <h3 style="margin:0 0 10px">הטקסט לפרסום</h3>
+      <p id="cvAdCopyText" style="white-space:pre-wrap;line-height:1.8"></p>
+      <button id="cvAdCopyCopy" type="button" style="padding:10px 16px;border:1px solid #c9ab78;border-radius:10px;background:transparent;color:#e8c796">העתק טקסט</button>
+    </div>
+  </div>
+
+  <div id="cvDirectorLegacyControls" hidden style="display:none!important">
+    <button id="cvDirectorAIButton" type="button">AI Director</button>
     <p id="cvDirectorAIStatus" aria-live="polite"></p>
-    <div id="cvDirectorAIResult" dir="rtl"
-      style="display:none;margin-top:12px;padding:18px;border:1px solid #49413a;border-radius:14px;background:#10151e;white-space:pre-wrap;line-height:1.8"></div>
-
-    <button id="cvDirectorPlanButton" type="button"
-      style="margin-top:12px;width:100%;padding:14px;border:1px solid #c9ab78;border-radius:12px;background:#26201c;color:#e8c796;font-weight:700">
-      ✦ בקש תוכנית מהבמאי
-    </button>
+    <div id="cvDirectorAIResult" style="display:none"></div>
+    <button id="cvDirectorPlanButton" type="button">Director Plan</button>
     <p id="cvDirectorPlanStatus" aria-live="polite"></p>
-    <div id="cvDirectorPlanResult" dir="rtl"
-      style="display:none;margin-top:12px;padding:16px;border:1px solid #49413a;border-radius:14px;background:#10151e;white-space:pre-wrap;line-height:1.8"></div>
-
+    <div id="cvDirectorPlanResult" style="display:none"></div>
   </div>
-</section>
-<!-- CV_UNIFIED_FILM_STUDIO_END -->
 
+</section>
 
 <script id="cv-film-director-ai-client-v1">
 (function(){
@@ -3583,6 +3621,16 @@ input::placeholder,textarea::placeholder{color:#788395}
  btn.addEventListener('click',async function(){
   const files=[...document.getElementById('cvUnifiedFiles').files];
   const status=document.getElementById('cvUnifiedStatus');
+
+   const outputType =
+     document.getElementById('cvUnifiedType')?.value || 'video';
+
+   if (outputType !== 'video') {
+     status.textContent =
+       'הפקת תמונות וקרוסלות עדיין אינה פעילה. כרגע ניתן להפיק סרטון.';
+     return;
+   }
+
   const video=document.getElementById('cvUnifiedPreview');
   const link=document.getElementById('cvUnifiedDownload');
 
@@ -3650,6 +3698,50 @@ input::placeholder,textarea::placeholder{color:#788395}
    document.getElementById('cvUnifiedPlaceholder').style.display='none';
    link.style.display='inline-block';
    status.textContent='✅ הסרטון מוכן!';
+
+    const goal = document.getElementById('cvUnifiedGoal')?.value || 'מכירות';
+    const platform = document.getElementById('cvUnifiedPlatform')?.value || 'אינסטגרם';
+    const panel = document.getElementById('cvAdCopyPanel');
+    const copyText = document.getElementById('cvAdCopyText');
+    const copyButton = document.getElementById('cvAdCopyCopy');
+
+    const headlines = {
+      'לידים לוואטסאפ': 'הבית שתמיד חלמתם עליו מתחיל כאן.',
+      'מכירות': 'העיצוב שמשנה את כל הבית.',
+      'חשיפה': 'יש עיצוב. ויש Casa Verona.',
+      'השקת מוצר': 'הכירו את הדבר הבא בעיצוב הבית.'
+    };
+
+    const headline = headlines[goal] || headlines['מכירות'];
+
+    const adCopy = [
+      headline,
+      '',
+      'ב-Casa Verona אנחנו מאמינים שריהוט הוא הרבה יותר מפריט בבית.',
+      'עיצוב מוקפד, התאמה אישית וחוויית קנייה שמתחילה בפרטים הקטנים.',
+      '',
+      goal === 'השקת מוצר'
+        ? 'רוצים להכיר את הדגם החדש?'
+        : 'מחפשים את הרהיט הבא לבית שלכם?',
+      '',
+      'שלחו לנו הודעה בוואטסאפ ונשמח לעזור לכם לבחור.',
+      '',
+      'מיועד לפרסום ב' + platform
+    ].join('\\n');
+
+    if (panel && copyText && copyButton) {
+      copyText.textContent = adCopy;
+      panel.style.display = 'block';
+
+      copyButton.onclick = async () => {
+        try {
+          await navigator.clipboard.writeText(adCopy);
+          copyButton.textContent = '✓ הטקסט הועתק';
+        } catch {
+          copyButton.textContent = 'לא ניתן להעתיק אוטומטית';
+        }
+      };
+    }
   }catch(error){
    status.textContent='שגיאה: '+error.message;
   }finally{
